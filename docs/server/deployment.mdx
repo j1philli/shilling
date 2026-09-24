@@ -5,8 +5,8 @@ order: 5
 
 # Server Deployment
 
-Coolify builds the signaling server from the private Git repository using the
-root `Dockerfile`. The production application tracks `master`, exposes port
+Coolify builds the signaling server from the public Git repository using the
+root `Dockerfile`. The production application tracks `main`, exposes port
 `8081`, and checks `GET /api/config` for health. TeamCity validates and packages
 the server but does not push an image or call a deployment webhook. A separate
 Docker registry is not required for this flow.

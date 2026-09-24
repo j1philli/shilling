@@ -575,7 +575,7 @@ object WebDeploy : BuildType({
                 fi
 
                 case "${'$'}DEPLOY_BRANCH" in
-                    refs/heads/master|master)
+                    refs/heads/main|main)
                         ;;
                     *)
                         echo "Skipping Cloudflare Pages deploy for branch ${'$'}DEPLOY_BRANCH"
@@ -610,7 +610,7 @@ object WebDeploy : BuildType({
 
                 npx wrangler pages deploy web-app-dist/ \
                     --project-name="${'$'}CLOUDFLARE_PAGES_PROJECT" \
-                    --branch=master
+                    --branch=main
             """.trimIndent()
         }
     }
