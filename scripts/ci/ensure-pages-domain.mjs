@@ -26,7 +26,9 @@ async function request(method, endpoint, body) {
   const payload = await response.json();
   if (!response.ok || !payload.success) {
     const messages = payload.errors?.map((error) => error.message).join('; ') || 'unknown error';
-    throw new Error(`Cloudflare API ${method} ${new URL(endpoint).pathname} failed (${response.status}): ${messages}`);
+    const error = new Error(`Cloudflare API ${method} ${new URL(endpoint).pathname} failed (${response.status}): ${messages}`);
+    error.status = response.status;
+    throw error;
   }
   return payload.result;
 }
@@ -41,22 +43,28 @@ if (!configured.zone_tag) {
 }
 
 const dnsEndpoint = `https://api.cloudflare.com/client/v4/zones/${encodeURIComponent(configured.zone_tag)}/dns_records`;
-const records = await request('GET', `${dnsEndpoint}?name.exact=${encodeURIComponent(domain)}`);
-const current = records.find((entry) => entry.name === domain);
 const target = `${project}.pages.dev`;
 
-if (current) {
-  if (current.type !== 'CNAME' || current.content.replace(/\.$/, '') !== target || !current.proxied) {
-    throw new Error(`Existing DNS record for ${domain} does not match proxied CNAME ${target}`);
+try {
+  const records = await request('GET', `${dnsEndpoint}?name.exact=${encodeURIComponent(domain)}`);
+  const current = records.find((entry) => entry.name === domain);
+
+  if (current) {
+    if (current.type !== 'CNAME' || current.content.replace(/\.$/, '') !== target || !current.proxied) {
+      throw new Error(`Existing DNS record for ${domain} does not match proxied CNAME ${target}`);
+    }
+    console.log(`Cloudflare DNS record ${domain} already points to ${target}`);
+  } else {
+    await request('POST', dnsEndpoint, {
+      type: 'CNAME',
+      name: domain,
+      content: target,
+      proxied: true,
+      ttl: 1,
+    });
+    console.log(`Created proxied CNAME ${domain} -> ${target}`);
   }
-  console.log(`Cloudflare DNS record ${domain} already points to ${target}`);
-} else {
-  await request('POST', dnsEndpoint, {
-    type: 'CNAME',
-    name: domain,
-    content: target,
-    proxied: true,
-    ttl: 1,
-  });
-  console.log(`Created proxied CNAME ${domain} -> ${target}`);
+} catch (error) {
+  if (error.status !== 403) throw error;
+  console.warn(`TeamCity's Cloudflare token cannot manage DNS for ${domain}. Add a proxied CNAME to ${target} in the shilling.finance zone, or grant this token DNS Read and Edit for that zone.`);
 }
