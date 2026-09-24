@@ -13,6 +13,8 @@ project {
     buildType(CI)
 
     // --- Phase 2: Platform builds (tags + manual) ---
+    // The settings VCS root must include refs/tags/*; these trigger filters use
+    // the resulting logical names (v*), not the fully qualified Git refs.
     buildType(AndroidBuild)
     buildType(ServerBuild)
     buildType(WebDeploy)
@@ -107,7 +109,7 @@ object AndroidBuild : BuildType({
 
     triggers {
         vcs {
-            branchFilter = "+:refs/tags/v*"
+            branchFilter = "+:v*"
         }
     }
 
@@ -205,7 +207,7 @@ object IosBuild : BuildType({
 
     triggers {
         vcs {
-            branchFilter = "+:refs/tags/v*"
+            branchFilter = "+:v*"
         }
     }
 
@@ -316,7 +318,7 @@ object DesktopLinux : BuildType({
 
     triggers {
         vcs {
-            branchFilter = "+:refs/tags/v*"
+            branchFilter = "+:v*"
         }
     }
 
@@ -381,7 +383,7 @@ object DesktopMacOS : BuildType({
 
     triggers {
         vcs {
-            branchFilter = "+:refs/tags/v*"
+            branchFilter = "+:v*"
         }
     }
 
@@ -460,7 +462,7 @@ object DesktopWindows : BuildType({
 
     triggers {
         vcs {
-            branchFilter = "+:refs/tags/v*"
+            branchFilter = "+:v*"
         }
     }
 
@@ -555,6 +557,13 @@ object WebDeploy : BuildType({
                 #!/bin/bash
                 set -euo pipefail
 
+                # Pages rejects any individual asset above 25 MiB.
+                WASM_SIZE=$(wc -c < web-app-dist/web-app.wasm)
+                if [ "${'$'}WASM_SIZE" -gt 26214400 ]; then
+                    echo "ERROR: web-app.wasm is ${'$'}WASM_SIZE bytes; Cloudflare Pages allows at most 25 MiB per asset"
+                    exit 1
+                fi
+
                 DEPLOY_BRANCH="${'$'}{BUILD_VCS_BRANCH:-}"
                 if [ -z "${'$'}DEPLOY_BRANCH" ]; then
                     DEPLOY_BRANCH="$(git branch --show-current 2>/dev/null || true)"
@@ -627,7 +636,7 @@ object ServerBuild : BuildType({
 
     triggers {
         vcs {
-            branchFilter = "+:refs/tags/v*"
+            branchFilter = "+:v*"
         }
     }
 

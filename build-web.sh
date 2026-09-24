@@ -2,6 +2,15 @@
 set -e
 
 SHILLING_DB_NAME="${SHILLING_DB_NAME:-shilling}"
+SHILLING_WASM_VARIANT="${SHILLING_WASM_VARIANT:-Release}"
+
+case "$SHILLING_WASM_VARIANT" in
+    Debug|Release) ;;
+    *)
+        echo "ERROR: SHILLING_WASM_VARIANT must be Debug or Release" >&2
+        exit 2
+        ;;
+esac
 
 APP_LOGO_ASSET="app/shared-ui/src/commonMain/kotlin/finance/shilling/shared/ui/AppLogoAsset.kt"
 APP_LOGO_SOURCE="app/shared-ui/src/commonMain/composeResources/drawable/app_logo.png"
@@ -25,12 +34,13 @@ EOF
     } > "$APP_LOGO_ASSET"
 fi
 
-echo "Building web-app (wasmJs debug package)..."
-./kotlin task :web-app:buildWasmJsAppWasmJsDebug
+echo "Building web-app (wasmJs $SHILLING_WASM_VARIANT package)..."
+./kotlin task ":web-app:buildWasmJsAppWasmJs$SHILLING_WASM_VARIANT"
 
 DIST=web-app-dist
-PKG_DIR=build/tasks/_web-app_buildWasmJsAppWasmJsDebug
+PKG_DIR="build/tasks/_web-app_buildWasmJsAppWasmJs$SHILLING_WASM_VARIANT"
 
+rm -rf "$DIST"
 mkdir -p "$DIST"
 # Kotlin Toolchain packages wasm + skiko + import helpers into PKG_DIR.
 # Keep our custom index.html (Tauri logging, error overlay, favicons).
@@ -53,7 +63,8 @@ elif [ -f "node_modules/@js-joda/core/dist/js-joda.esm.js" ]; then
     echo "Copying @js-joda/core from node_modules..."
     cp node_modules/@js-joda/core/dist/js-joda.esm.js "$DIST/"
 else
-    echo "WARNING: @js-joda/core not found. Run 'npm install' first."
+    echo "ERROR: @js-joda/core not found. Run 'npm ci' first." >&2
+    exit 1
 fi
 
 # Copy sql.js for SQLDelight web-worker-driver
@@ -62,7 +73,8 @@ if [ -f "node_modules/sql.js/dist/sql-wasm.js" ]; then
     cp node_modules/sql.js/dist/sql-wasm.js "$DIST/"
     cp node_modules/sql.js/dist/sql-wasm.wasm "$DIST/"
 else
-    echo "WARNING: sql.js not found. Run 'npm install' first."
+    echo "ERROR: sql.js not found. Run 'npm ci' first." >&2
+    exit 1
 fi
 
 # Copy SQLDelight web worker (custom version that works without a bundler)

@@ -253,7 +253,8 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
   `just apply-icons dev` before builds that consume app icons.
 - **Tauri build**: Run `./build-web.sh` to build wasmJs artifacts into `web-app-dist/`,
   then `cargo tauri dev` to launch the desktop app. The `tauri.conf.json` points
-  `frontendDist` to `../web-app-dist`.
+  `frontendDist` to `../web-app-dist`. Direct builds use the optimized Release
+  package; `just desktop` and `just web` use the Debug package for development.
 - **Store5 is experimental**: Uses `@ExperimentalStoreApi`. The library is at
   `5.1.0-alpha07`. Monitor for breaking API changes.
 - **Dev vs production database**: `just desktop`/`just build-web` inject
