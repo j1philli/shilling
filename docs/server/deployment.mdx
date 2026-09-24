@@ -23,10 +23,9 @@ domain to `http://api.shilling.finance` and disable Force HTTPS. Cloudflare
 serves HTTPS to visitors and connects to Coolify over HTTP. Do not attach a
 public hostname until the server starts in Supabase auth mode.
 
-The `unraid` tunnel has a `*.shilling.finance` route to
-`http://192.168.1.88:80`. The DNS zone also needs a proxied CNAME from `*`
-to `2ab5323d-b22b-4a76-af26-43430c12e1dd.cfargotunnel.com`. That wildcard
-record covers `api.shilling.finance`; a separate `api` record is unnecessary.
+The `unraid` tunnel routes `api.shilling.finance` to
+`http://192.168.1.88:80`. The DNS zone has a proxied `api` record that points
+to the tunnel. A wildcard route or DNS record is not needed for this server.
 The Coolify proxy returns 200 for this host over HTTP when the application
 domain uses the HTTP scheme; an HTTPS scheme caused an origin redirect.
 
