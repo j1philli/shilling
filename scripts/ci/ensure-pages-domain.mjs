@@ -12,9 +12,9 @@ for (const [name, value] of Object.entries({
   if (!value) throw new Error(`${name} is required to configure the Pages domain`);
 }
 
-const endpoint = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/pages/projects/${encodeURIComponent(project)}/domains`;
+const pagesEndpoint = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/pages/projects/${encodeURIComponent(project)}/domains`;
 
-async function request(method, body) {
+async function request(method, endpoint, body) {
   const response = await fetch(endpoint, {
     method,
     headers: {
@@ -26,12 +26,37 @@ async function request(method, body) {
   const payload = await response.json();
   if (!response.ok || !payload.success) {
     const messages = payload.errors?.map((error) => error.message).join('; ') || 'unknown error';
-    throw new Error(`Cloudflare Pages domain ${method} failed (${response.status}): ${messages}`);
+    throw new Error(`Cloudflare API ${method} ${new URL(endpoint).pathname} failed (${response.status}): ${messages}`);
   }
   return payload.result;
 }
 
-const domains = await request('GET');
+const domains = await request('GET', pagesEndpoint);
 const existing = domains.find((entry) => entry.name === domain);
-const configured = existing || (await request('POST', { name: domain }));
+const configured = existing || (await request('POST', pagesEndpoint, { name: domain }));
 console.log(`Cloudflare Pages domain ${configured.name}: ${configured.status}`);
+
+if (!configured.zone_tag) {
+  throw new Error(`Cloudflare did not return a zone ID for ${domain}; add its CNAME to ${project}.pages.dev in the zone DNS settings`);
+}
+
+const dnsEndpoint = `https://api.cloudflare.com/client/v4/zones/${encodeURIComponent(configured.zone_tag)}/dns_records`;
+const records = await request('GET', `${dnsEndpoint}?name.exact=${encodeURIComponent(domain)}`);
+const current = records.find((entry) => entry.name === domain);
+const target = `${project}.pages.dev`;
+
+if (current) {
+  if (current.type !== 'CNAME' || current.content.replace(/\.$/, '') !== target || !current.proxied) {
+    throw new Error(`Existing DNS record for ${domain} does not match proxied CNAME ${target}`);
+  }
+  console.log(`Cloudflare DNS record ${domain} already points to ${target}`);
+} else {
+  await request('POST', dnsEndpoint, {
+    type: 'CNAME',
+    name: domain,
+    content: target,
+    proxied: true,
+    ttl: 1,
+  });
+  console.log(`Created proxied CNAME ${domain} -> ${target}`);
+}
