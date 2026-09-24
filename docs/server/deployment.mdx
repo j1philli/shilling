@@ -18,9 +18,15 @@ Coolify, then enable automatic deployment for the production branch.
 ## Production configuration
 
 The public hostname is `https://api.shilling.finance`. Route it through the
-Cloudflare tunnel or Cloudflare DNS to Coolify's proxy, then attach that hostname
-to the production application. Do not attach a public hostname until the server
-starts in Supabase auth mode.
+Cloudflare tunnel to Coolify's proxy. In Coolify, set the production application
+domain to `http://api.shilling.finance` and disable Force HTTPS. Cloudflare
+serves HTTPS to visitors and connects to Coolify over HTTP. Do not attach a
+public hostname until the server starts in Supabase auth mode.
+
+The `unraid` tunnel has a `*.shilling.finance` route to
+`http://192.168.1.88:80`. Its `api` DNS record must point to the tunnel.
+The Coolify proxy returns 200 for this host over HTTP when the application
+domain uses the HTTP scheme; an HTTPS scheme caused an origin redirect.
 
 Set these Coolify application variables for runtime only:
 
