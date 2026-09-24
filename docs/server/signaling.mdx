@@ -1,0 +1,61 @@
+---
+title: WebRTC Signaling
+order: 2
+---
+
+# WebRTC Signaling
+
+The signaling service coordinates WebRTC peer connections between devices in the same household. It is control-plane only: it relays signaling messages needed to establish peer connections, but it does not carry application data.
+
+## Endpoint
+
+```
+WebSocket: /ws/signal
+```
+
+## Join Authorization
+
+In self-hosted mode (`authMode = NONE`), joins are accepted without hosted auth checks.
+
+In hosted mode (`authMode = SUPABASE`):
+
+1. the client authenticates first
+2. the client fetches `GET /api/household`
+3. the client sends `Join(deviceId, householdId, accessToken)`
+4. the server verifies the Supabase access token
+5. the server looks up the caller's authoritative `user_profiles.household_id`
+6. the join is accepted only when the requested household matches the hosted metadata
+
+This prevents hosted clients from joining arbitrary households by supplying a different `householdId`.
+
+## How It Works
+
+1. A device connects to the WebSocket and sends a `Join` message with its `deviceId` and `householdId`
+2. The server registers the device and responds with a `PeerList` of other connected devices in the household
+3. Existing peers receive a `PeerList` notification with the new device's ID
+4. Devices exchange WebRTC offers, answers, and ICE candidates through the server relay
+5. Once a direct peer connection is established, sync data flows over WebRTC data channels
+
+## Message Types
+
+| Message | Direction | Purpose |
+|---------|-----------|---------|
+| `Join` | Client → Server | Register device in household |
+| `PeerList` | Server → Client | List of connected peer device IDs |
+| `Offer` | Relayed | WebRTC SDP offer |
+| `Answer` | Relayed | WebRTC SDP answer |
+| `IceCandidate` | Relayed | ICE candidate for NAT traversal |
+
+Allowed signaling traffic is limited to:
+
+- `Join`
+- `PeerList`
+- `Offer`
+- `Answer`
+- `IceCandidate`
+
+The server only relays signaling-plane messages needed to establish WebRTC peers. User data does not traverse the signaling WebSocket.
+
+## Disconnection
+
+When a device's WebSocket closes, it is unregistered from the household. Remaining peers discover the disconnection through their own WebRTC connection timeouts.

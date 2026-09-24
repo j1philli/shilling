@@ -1,0 +1,61 @@
+product:
+  type: kmp/lib
+  platforms: [ jvm, android, wasmJs, iosArm64, iosSimulatorArm64 ]
+
+repositories:
+  - id: google-maven-central-mirror
+    url: https://maven-central.storage-download.googleapis.com/maven2
+  - id: maven-central-canonical
+    url: https://repo.maven.apache.org/maven2
+  - id: google-canonical
+    url: https://dl.google.com/dl/android/maven2
+
+aliases:
+  - nonJvm: [android, wasmJs, iosArm64, iosSimulatorArm64]
+
+dependencies:
+  - ../../core
+  - $libs.coroutines.core
+  - $libs.datetime
+  - $libs.sqldelight.runtime
+  - $libs.sqldelight.coroutines
+  - $libs.sqldelight.async.extensions
+  - $libs.koin.core
+  - $libs.store5
+  - $libs.ktor.client.core
+  - $libs.ktor.client.websockets
+  - $libs.ktor.client.content.negotiation
+  - $libs.ktor.serialization.kotlinx.json
+  - $libs.multiplatform.settings
+  - $libs.supabase.auth
+  - $libs.kermit
+  - $libs.kotlin.test
+
+dependencies@nonJvm:
+  - $libs.ktor.client.webrtc
+
+dependencies@android:
+  - $libs.kotlin.test.junit
+
+dependencies@jvm:
+  - $libs.kotlin.test.junit
+  - $libs.sqldelight.sqlite.driver
+  - $libs.ktor.client.mock
+
+plugins:
+  sqldelight-plugin:
+    enabled: true
+    packageName: "finance.shilling.shared.db"
+    databaseName: "ShillingDatabase"
+
+settings:
+  kotlin:
+    version: "2.4.20"
+    serialization: json
+    # Opt into Kotlin/Native klib incremental compilation (Kotlin 2.4.20 Beta).
+    # Companion flag: gradle.properties kotlin.incremental.native=true
+    compileIncrementally: true
+  android:
+    compileSdk: 36
+    minSdk: 28
+    namespace: finance.shilling.shared

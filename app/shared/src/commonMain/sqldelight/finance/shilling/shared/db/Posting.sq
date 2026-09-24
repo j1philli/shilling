@@ -1,0 +1,73 @@
+CREATE TABLE postings(
+    id TEXT NOT NULL PRIMARY KEY,
+    schedule_id TEXT,
+    type TEXT NOT NULL,
+    account_id TEXT NOT NULL,
+    date INTEGER NOT NULL,
+    amount REAL NOT NULL,
+    pair_id TEXT,
+    title TEXT,
+    category_id TEXT,
+    FOREIGN KEY(schedule_id) REFERENCES schedules(id)
+);
+
+CREATE INDEX postings_date_idx ON postings(date);
+
+selectAll:
+SELECT * FROM postings ORDER BY date DESC;
+
+selectById:
+SELECT * FROM postings WHERE id = ?;
+
+selectBetween:
+SELECT * FROM postings
+WHERE date >= ? AND date < ?
+ORDER BY date ASC;
+
+selectWithDetails:
+SELECT p.id, p.schedule_id, p.type, p.account_id, p.date, p.amount, p.pair_id, p.title, p.category_id,
+       s.title AS schedule_title,
+       a.name AS account_name,
+       COALESCE(c2.name, c1.name) AS cat_name,
+       COALESCE(c2.color, c1.color) AS cat_color
+FROM postings p
+LEFT JOIN schedules s ON p.schedule_id = s.id
+LEFT JOIN accounts a ON p.account_id = a.id
+LEFT JOIN categories c1 ON s.category_id = c1.id
+LEFT JOIN categories c2 ON p.category_id = c2.id
+WHERE p.date >= ? AND p.date < ?
+ORDER BY p.date DESC;
+
+selectRecentWithDetails:
+SELECT p.id, p.schedule_id, p.type, p.account_id, p.date, p.amount, p.pair_id, p.title, p.category_id,
+       s.title AS schedule_title,
+       a.name AS account_name,
+       COALESCE(c2.name, c1.name) AS cat_name,
+       COALESCE(c2.color, c1.color) AS cat_color
+FROM postings p
+LEFT JOIN schedules s ON p.schedule_id = s.id
+LEFT JOIN accounts a ON p.account_id = a.id
+LEFT JOIN categories c1 ON s.category_id = c1.id
+LEFT JOIN categories c2 ON p.category_id = c2.id
+ORDER BY p.date DESC
+LIMIT ?;
+
+upsert:
+INSERT OR REPLACE INTO postings(id, schedule_id, type, account_id, date, amount, pair_id, title, category_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+insertIgnore:
+INSERT OR IGNORE INTO postings(id, schedule_id, type, account_id, date, amount, pair_id, title, category_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM postings WHERE id = ?;
+
+deleteByScheduleId:
+DELETE FROM postings WHERE schedule_id = ?;
+
+deleteByAccountId:
+DELETE FROM postings WHERE account_id = ?;
+
+deleteAll:
+DELETE FROM postings;

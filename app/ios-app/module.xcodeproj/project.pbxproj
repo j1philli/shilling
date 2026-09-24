@@ -1,0 +1,451 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 70;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		WDGT0001A000000000000001 /* ShillingControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = WDGT0002A000000000000001 /* ShillingControl.swift */; };
+		WDGT0007A000000000000001 /* src/OpenReceiptCameraIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = WDGT0008A000000000000001 /* src/OpenReceiptCameraIntent.swift */; };
+		WDGT0011A000000000000001 /* ShillingWidgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = WDGT0005A000000000000001 /* ShillingWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		WDGT0041A000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD3B790531DB80B01BAE4587 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WDGT0050A000000000000001;
+			remoteInfo = ShillingWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		WDGT0010A000000000000001 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				WDGT0011A000000000000001 /* ShillingWidgetExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		BD3B738C5F3272AB34E1ADA3 /* ios-app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ios-app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD3B7F7CD9F8EEB320F1FD75 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.info; name = Info.plist; path = src/Info.plist; sourceTree = "<group>"; };
+		WDGT0002A000000000000001 /* ShillingControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShillingControl.swift; sourceTree = "<group>"; };
+		WDGT0003A000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.info; path = Info.plist; sourceTree = "<group>"; };
+		WDGT0004A000000000000001 /* ShillingWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShillingWidgetExtension.entitlements; sourceTree = "<group>"; };
+		WDGT0005A000000000000001 /* ShillingWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShillingWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		WDGT0006A000000000000001 /* ShillingApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = ShillingApp.entitlements; path = src/ShillingApp.entitlements; sourceTree = "<group>"; };
+		WDGT0008A000000000000001 /* src/OpenReceiptCameraIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = src/OpenReceiptCameraIntent.swift; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BD3B747FCAAAEA948044D9D6 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = BD3B7AE7C19AE41CCD298CAA /* app */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		BD3B7127317A7138A2494C2C /* PBXFileSystemSynchronizedRootGroup */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BD3B747FCAAAEA948044D9D6 /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = src;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BD3B76976AC4C73C010FC249 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WDGT0020A000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BD3B73928CD320510B4D5F2D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD3B738C5F3272AB34E1ADA3 /* ios-app.app */,
+				WDGT0005A000000000000001 /* ShillingWidgetExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BD3B7B7BD7C24DD30E737BEF = {
+			isa = PBXGroup;
+			children = (
+				BD3B73928CD320510B4D5F2D /* Products */,
+				BD3B7F7CD9F8EEB320F1FD75 /* Info.plist */,
+				WDGT0006A000000000000001 /* ShillingApp.entitlements */,
+				WDGT0008A000000000000001 /* src/OpenReceiptCameraIntent.swift */,
+				BD3B7127317A7138A2494C2C /* PBXFileSystemSynchronizedRootGroup */,
+				WDGT0030A000000000000001 /* ShillingWidgetExtension */,
+			);
+			sourceTree = "<group>";
+		};
+		WDGT0030A000000000000001 /* ShillingWidgetExtension */ = {
+			isa = PBXGroup;
+			children = (
+				WDGT0002A000000000000001 /* ShillingControl.swift */,
+				WDGT0003A000000000000001 /* Info.plist */,
+				WDGT0004A000000000000001 /* ShillingWidgetExtension.entitlements */,
+			);
+			path = ShillingWidgetExtension;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BD3B7AE7C19AE41CCD298CAA /* app */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BD3B773167451EDA9A08A4C0 /* Build configuration list for PBXNativeTarget "app" */;
+			buildPhases = (
+				BD3B7E001122FAB905832584 /* Prepare WebRTC Framework */,
+				BD3B7D432122FAB905832584 /* Build Kotlin */,
+				BD3B7046166126A52CF25FBF /* Sources */,
+				BD3B76976AC4C73C010FC249 /* Frameworks */,
+				BD3B7B83C9DF8DCABF025B01 /* Resources */,
+				WDGT0010A000000000000001 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				WDGT0040A000000000000001 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				BD3B7127317A7138A2494C2C /* PBXFileSystemSynchronizedRootGroup */,
+			);
+			name = app;
+			productName = app;
+			productReference = BD3B738C5F3272AB34E1ADA3 /* ios-app.app */;
+			productType = "com.apple.product-type.application";
+		};
+		WDGT0050A000000000000001 /* ShillingWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = WDGT0060A000000000000001 /* Build configuration list for PBXNativeTarget "ShillingWidgetExtension" */;
+			buildPhases = (
+				WDGT0070A000000000000001 /* Sources */,
+				WDGT0020A000000000000001 /* Frameworks */,
+				WDGT0080A000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ShillingWidgetExtension;
+			productName = ShillingWidgetExtension;
+			productReference = WDGT0005A000000000000001 /* ShillingWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BD3B790531DB80B01BAE4587 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+			};
+			buildConfigurationList = BD3B76C051493AC6CD837549 /* Build configuration list for PBXProject "module" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				English,
+				en,
+			);
+			mainGroup = BD3B7B7BD7C24DD30E737BEF;
+			productRefGroup = BD3B73928CD320510B4D5F2D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BD3B7AE7C19AE41CCD298CAA /* app */,
+				WDGT0050A000000000000001 /* ShillingWidgetExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BD3B7B83C9DF8DCABF025B01 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WDGT0080A000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		BD3B7D432122FAB905832584 /* Build Kotlin */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build Kotlin";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# !KOTLIN INTEGRATION STEP!\n# This script is managed by the Kotlin Toolchain, do not edit manually!\n\"${KOTLIN_CLI_WRAPPER_PATH}\" tool xcode-integration\n";
+		};
+		BD3B7E001122FAB905832584 /* Prepare WebRTC Framework */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Prepare WebRTC Framework";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Extract the right WebRTC.xcframework slice for the current platform\nXCFW_DIR=\"${SRCROOT}/Frameworks/WebRTC.xcframework\"\nOUT_DIR=\"${TARGET_BUILD_DIR}/WebRTCFramework\"\nmkdir -p \"${OUT_DIR}\"\n\nif [ \"${PLATFORM_NAME}\" = \"iphoneos\" ]; then\n  SLICE_DIR=\"${XCFW_DIR}/ios-arm64\"\nelif [ \"${PLATFORM_NAME}\" = \"iphonesimulator\" ]; then\n  SLICE_DIR=\"${XCFW_DIR}/ios-arm64_x86_64-simulator\"\nelse\n  echo \"warning: Unknown platform ${PLATFORM_NAME}, skipping WebRTC framework copy\"\n  exit 0\nfi\n\nif [ -d \"${SLICE_DIR}/WebRTC.framework\" ]; then\n  # Copy for linking\n  rsync -av --delete \"${SLICE_DIR}/WebRTC.framework\" \"${OUT_DIR}/\"\n  # Embed in app bundle for runtime\n  EMBED_DIR=\"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\n  mkdir -p \"${EMBED_DIR}\"\n  rsync -av --delete \"${SLICE_DIR}/WebRTC.framework\" \"${EMBED_DIR}/\"\n  # Device installs require a code signature on embedded frameworks\n  if [ -n \"${EXPANDED_CODE_SIGN_IDENTITY}\" ] && [ \"${EXPANDED_CODE_SIGN_IDENTITY}\" != \"-\" ]; then\n    codesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY}\" --timestamp=none \"${EMBED_DIR}/WebRTC.framework\"\n  fi\nelse\n  echo \"error: WebRTC.framework not found at ${SLICE_DIR}\"\n  exit 1\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BD3B7046166126A52CF25FBF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WDGT0070A000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WDGT0007A000000000000001 /* src/OpenReceiptCameraIntent.swift in Sources */,
+				WDGT0001A000000000000001 /* ShillingControl.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		WDGT0040A000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = WDGT0050A000000000000001 /* ShillingWidgetExtension */;
+			targetProxy = WDGT0041A000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		BD3B7228A6F238AC70D6E417 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		BD3B75CCB7F4DEFF3EEFB4CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				AMPER_WRAPPER_PATH = ../../kotlin;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = src/ShillingApp.entitlements;
+				DEVELOPMENT_TEAM = 7QN6HR273V;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(TARGET_BUILD_DIR)/AmperFrameworks",
+					"$(TARGET_BUILD_DIR)/WebRTCFramework",
+				);
+				INFOPLIST_FILE = src/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"-lsqlite3",
+					"-framework",
+					WebRTC,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = finance.shilling.app;
+				PRODUCT_MODULE_NAME = app;
+				PRODUCT_NAME = "ios-app";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1 2";
+			};
+			name = Release;
+		};
+		BD3B79015119AC16CA7A3D49 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				AMPER_WRAPPER_PATH = ../../kotlin;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = src/ShillingApp.entitlements;
+				DEVELOPMENT_TEAM = 7QN6HR273V;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(TARGET_BUILD_DIR)/AmperFrameworks",
+					"$(TARGET_BUILD_DIR)/WebRTCFramework",
+				);
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INFOPLIST_FILE = src/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-lsqlite3",
+					"-framework",
+					WebRTC,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = finance.shilling.app;
+				PRODUCT_MODULE_NAME = app;
+				PRODUCT_NAME = "ios-app";
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1 2";
+			};
+			name = Debug;
+		};
+		BD3B7C7A512B728542C0BEB6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		WDGT0061A000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ShillingWidgetExtension/ShillingWidgetExtension.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7QN6HR273V;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShillingWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ShillingWidgetExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "finance.shilling.app.receipt-control";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1 2";
+			};
+			name = Debug;
+		};
+		WDGT0062A000000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ShillingWidgetExtension/ShillingWidgetExtension.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7QN6HR273V;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShillingWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ShillingWidgetExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "finance.shilling.app.receipt-control";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1 2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BD3B76C051493AC6CD837549 /* Build configuration list for PBXProject "module" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD3B7228A6F238AC70D6E417 /* Debug */,
+				BD3B7C7A512B728542C0BEB6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD3B773167451EDA9A08A4C0 /* Build configuration list for PBXNativeTarget "app" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BD3B79015119AC16CA7A3D49 /* Debug */,
+				BD3B75CCB7F4DEFF3EEFB4CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		WDGT0060A000000000000001 /* Build configuration list for PBXNativeTarget "ShillingWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				WDGT0061A000000000000001 /* Debug */,
+				WDGT0062A000000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BD3B790531DB80B01BAE4587 /* Project object */;
+}

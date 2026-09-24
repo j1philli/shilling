@@ -1,0 +1,6 @@
+{
+  "setup": [
+    "direnv allow"
+  ],
+  "teardown": []
+}

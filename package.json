@@ -1,0 +1,20 @@
+{
+  "name": "shilling",
+  "version": "0.1.0",
+  "description": "Kotlin Multiplatform household budgeting app",
+  "private": true,
+  "scripts": {
+    "test": "just test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "AGPL-3.0-only",
+  "type": "commonjs",
+  "dependencies": {
+    "@cashapp/sqldelight-sqljs-worker": "^2.4.0",
+    "@js-joda/core": "^6.1.0",
+    "sql.js": "^1.14.2",
+    "tauri-plugin-mcp": "^0.1.0",
+    "ws": "^8.21.3"
+  }
+}

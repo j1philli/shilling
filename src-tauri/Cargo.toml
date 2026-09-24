@@ -1,0 +1,14 @@
+[package]
+name = "shilling"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tauri = { version = "2", features = ["devtools"] }
+tauri-plugin-shell = "2"
+tauri-plugin-log = "2"
+tauri-plugin-mcp = { git = "https://github.com/P3GLEG/tauri-plugin-mcp", branch = "main" }
+log = "0.4"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }

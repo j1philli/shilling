@@ -1,0 +1,12 @@
+tasks:
+  generateSqlDelight:
+    action: !finance.shilling.build.generateSqlDelight
+      sqDir: ${module.rootDir}/src/commonMain/sqldelight
+      outputDir: ${taskOutputDir}
+      packageName: ${pluginSettings.packageName}
+      databaseName: ${pluginSettings.databaseName}
+
+generated:
+  sources:
+    - language: kotlin
+      directory: ${tasks.generateSqlDelight.action.outputDir}

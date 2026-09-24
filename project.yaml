@@ -1,0 +1,12 @@
+modules:
+  - app/android-app
+  - app/ios-app
+  - app/shared
+  - app/shared-ui
+  - app/web-app
+  - core
+  - server
+  - sqldelight-plugin
+
+plugins:
+  - ./sqldelight-plugin

@@ -1,0 +1,61 @@
+---
+title: ICE & TURN
+order: 4
+---
+
+# ICE & TURN Configuration
+
+The server provides a dynamic ICE server configuration endpoint so clients do not need to hardcode STUN or TURN servers.
+
+## Endpoint
+
+```
+GET /api/ice-servers
+```
+
+Returns a list of ICE server configurations with optional time-limited TURN credentials.
+
+## Response Format
+
+```json
+{
+  "iceServers": [
+    {
+      "urls": ["stun:stun.l.google.com:19302"]
+    },
+    {
+      "urls": ["turn:turn.example.com:3478"],
+      "username": "1709654400:shilling",
+      "credential": "base64-hmac-sha1",
+      "credentialType": "password"
+    }
+  ],
+  "ttlSeconds": 86400
+}
+```
+
+## STUN Only (Default)
+
+When no `SHILLING_TURN_SECRET` is configured, the endpoint returns only STUN servers. This is sufficient for many home and LAN setups.
+
+## Hosted TURN Gating
+
+TURN access is gated by auth mode:
+
+- self-hosted mode: TURN is returned whenever TURN is configured
+- hosted mode: TURN is returned only for requests with a valid authenticated bearer token
+
+STUN is always returned.
+
+## TURN Credentials
+
+When `SHILLING_TURN_SECRET` is set, the server generates time-limited TURN credentials using coturn's `use-auth-secret` HMAC-SHA1 mechanism:
+
+- **Username** — `{expiry-timestamp}:shilling`, where the expiry is the current time plus the configured TTL
+- **Credential** — Base64-encoded HMAC-SHA1 of the username using the shared secret
+
+These credentials expire after the TTL period, after which clients should request fresh ones.
+
+## Client Fallback
+
+If the server is unreachable, clients fall back to Google's public STUN server (`stun:stun.l.google.com:19302`). TURN is not available in this case, and the app does not add a non-WebRTC fallback transport.

@@ -1,0 +1,36 @@
+---
+title: Entity Sync Boundary
+order: 3
+---
+
+# Entity Sync Boundary
+
+Shilling does not expose a server-side entity sync API.
+
+## What The Server Does
+
+The server provides control-plane services only:
+
+- `GET /api/config`
+- `GET /api/household` in hosted mode
+- `GET /api/ice-servers`
+- WebSocket `/ws/signal`
+
+These endpoints help clients discover peers, authenticate hosted sessions, and obtain ICE/TURN configuration.
+
+## What The Server Does Not Do
+
+The server does not:
+
+- store accounts, categories, schedules, postings, or receipts
+- relay user data over WebSocket
+- offer REST backup, changelog, catch-up, or full-state recovery endpoints
+- act as a fallback sync transport when WebRTC is unavailable
+
+Those paths are intentionally excluded by the architecture invariants in `AGENTS.md`.
+
+## How Entity Data Moves
+
+Application data stays on-device and traverses only WebRTC P2P data channels. Local CRUD goes through Store5 and local persistence. Cross-device propagation happens after local writes through peer sync, not through the server.
+
+If a platform cannot support WebRTC P2P data channels for user data, sync must be disabled on that platform rather than replaced with a server fallback.

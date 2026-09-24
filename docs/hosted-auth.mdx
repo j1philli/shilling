@@ -1,0 +1,97 @@
+---
+title: Hosted Auth & Bootstrap
+order: 2
+---
+
+# Hosted Auth & Bootstrap
+
+This document replaces the older user-accounts PRD. It describes the architecture that is implemented today and the next work that is still planned.
+
+## Current State
+
+Hosted startup is implemented for desktop, web, iOS, and Android:
+
+1. Client fetches `GET /api/config`
+2. Client builds the correct auth service from that config
+3. Hosted mode restores or creates a Supabase session
+4. Client fetches `GET /api/household`
+5. Client opens signaling with the server-assigned `householdId`
+
+That order matters. Hosted clients no longer treat the Supabase user ID as the sync household ID.
+
+## Auth Modes
+
+| Mode | Server config | Client behavior | Household source |
+|---|---|---|---|
+| Self-hosted | `authMode = NONE` | No account flow, no hosted metadata | Locally persisted UUID |
+| Hosted | `authMode = SUPABASE` | Anonymous Supabase auth on first launch, session restore on later launches | `public.user_profiles.household_id` via `/api/household` |
+
+## Implemented Pieces
+
+- `GET /api/config` publishes hosted bootstrap config
+- `GET /api/household` returns the authenticated user's hosted household
+- hosted signaling join validation checks server-owned household membership
+- Supabase access-token verification uses JWKS for modern Supabase projects
+- legacy HS256 verification remains supported only for older Supabase setups that still expose a shared JWT secret
+- desktop and web dev flows use `just desktop`; server startup uses `just server` and loads repo-root `.env`
+
+## Supabase Requirements
+
+Hosted mode expects Supabase Auth plus a metadata table:
+
+```sql
+create extension if not exists pgcrypto;
+
+create table if not exists public.user_profiles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  tier text not null default 'anonymous',
+  household_id uuid not null default gen_random_uuid(),
+  email text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  backup_enabled boolean not null default false
+);
+```
+
+Each new `auth.users` row should also create a `public.user_profiles` row. Hosted bootstrap will fail by design if the authenticated user has no hosted household metadata.
+
+## Environment
+
+Copy the repo-root `.env.example` to `.env`, set `SHILLING_AUTH_MODE=supabase`, and uncomment and fill in the hosted variables.
+
+Key variables:
+
+- `SHILLING_AUTH_MODE=supabase`
+- `SHILLING_SUPABASE_URL`
+- `SHILLING_SUPABASE_ANON_KEY`
+- `SHILLING_SUPABASE_SERVICE_KEY`
+- `SHILLING_SUPABASE_JWT_SECRET` only for legacy HS256 Supabase projects
+
+For modern Supabase projects using asymmetric signing keys such as `ECC P-256`, leave `SHILLING_SUPABASE_JWT_SECRET` unset.
+
+## What Is Not Implemented Yet
+
+- dedicated sign-in and account-management screens outside the developer settings surface
+- tier/device metadata endpoints such as `/api/tier` or `/api/devices`
+- backup peer and hosted backup storage
+- hosted abuse controls beyond the current join authorization path
+- full Store5 boundary cleanup in sync and projection code
+
+## Testing
+
+Single-client hosted bootstrap is testable now:
+
+```sh
+just server
+just desktop
+```
+
+On first hosted launch you should see:
+
+- a new row in `auth.users`
+- a matching row in `public.user_profiles`
+- a generated `household_id`
+- successful `GET /api/household`
+- signaling join after auth and household lookup
+
+Two fresh anonymous users will get different households. To test shared hosted sync before account UI is finished, manually assign the same `household_id` to both users in Supabase and restart both clients.

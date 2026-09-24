@@ -1,0 +1,6 @@
+{
+    "scripts": {
+        "setup": "just build-all && entire enable --telemetry=false --agent claude-code",
+        "run": "just web"
+    }
+}

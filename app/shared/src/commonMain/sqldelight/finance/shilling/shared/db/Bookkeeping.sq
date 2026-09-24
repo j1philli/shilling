@@ -1,0 +1,24 @@
+CREATE TABLE bookkeeping(
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    PRIMARY KEY(entity_type, entity_id)
+);
+
+selectByEntity:
+SELECT * FROM bookkeeping WHERE entity_type = ? AND entity_id = ?;
+
+selectByType:
+SELECT * FROM bookkeeping WHERE entity_type = ?;
+
+upsert:
+INSERT OR REPLACE INTO bookkeeping(entity_type, entity_id, timestamp) VALUES (?, ?, ?);
+
+deleteByEntity:
+DELETE FROM bookkeeping WHERE entity_type = ? AND entity_id = ?;
+
+deleteByType:
+DELETE FROM bookkeeping WHERE entity_type = ?;
+
+deleteAll:
+DELETE FROM bookkeeping;

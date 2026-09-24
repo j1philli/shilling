@@ -1,0 +1,24 @@
+CREATE TABLE categories(
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    color TEXT
+);
+
+selectAll:
+SELECT * FROM categories ORDER BY name ASC;
+
+selectById:
+SELECT * FROM categories WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO categories(id, name, color)
+VALUES (?, ?, ?);
+
+deleteById:
+DELETE FROM categories WHERE id = ?;
+
+deleteAll:
+DELETE FROM categories;
+
+nullifyCategoryInSchedules:
+UPDATE schedules SET category_id = NULL WHERE category_id = ?;

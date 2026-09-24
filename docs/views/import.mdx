@@ -1,0 +1,26 @@
+---
+title: Import
+order: 8
+---
+
+# Import
+
+The Import view lets you bulk-import transactions from bank CSV exports.
+
+## Import Workflow
+
+1. **Select a CSV file** — use the file picker to choose your bank export
+2. **Configure headers** — toggle whether the first row contains column headers
+3. **Map columns** — assign which CSV columns correspond to date, description, and amount
+4. **Set date format** — choose from ISO (YYYY-MM-DD), US (MM/DD/YYYY), or EU (DD/MM/YYYY) formats, with slash or dash separators
+5. **Assign account and category** — select which account and category to apply to all imported transactions
+6. **Preview** — review the first several rows with validation indicators showing which rows will import successfully
+7. **Import** — submit to create postings in bulk
+
+## Validation
+
+Each row is validated during preview. Invalid rows (bad dates, missing amounts, unparseable fields) are flagged and skipped during import. The results show a count of successfully imported and skipped rows.
+
+## Use Case
+
+This is useful for catching up on transaction history when first setting up Shilling, or for periodic reconciliation with your bank's records.

@@ -1,0 +1,50 @@
+---
+title: Getting Started
+order: 1
+---
+
+# Getting Started
+
+Shilling is a household budgeting app built with Kotlin Multiplatform. It runs as a Tauri desktop app (via WebAssembly) and as a native iOS app, with optional peer-to-peer sync between devices.
+
+For a fresh clone, start with the [root README](../README.md). Local development defaults to self-hosted mode and does not need Supabase.
+
+## Core Workflow
+
+1. **Set up accounts** — add your bank and cash accounts with their current balances
+2. **Create categories** — label your spending (housing, groceries, subscriptions, etc.)
+3. **Add schedules** — define recurring expenses, income, and transfers
+4. **Track your week** — the Weekly view shows upcoming transactions in a Friday-to-Friday window
+5. **Post transactions** — mark scheduled items as settled when they clear your account
+6. **Review history** — browse and search past transactions, add one-off entries
+
+## Key Concepts
+
+- **Schedule** — a recurring or one-time planned transaction (expense, income, or transfer)
+- **Occurrence** — a projected instance of a schedule for a specific date (computed, not stored)
+- **Posting** — a recorded/settled transaction saved in the database
+- **Exception** — a per-date override or skip for a schedule
+- **Receipt** — an uploaded file (image, PDF) that can exist independently or be attached to a posting
+- **Friday window** — the default weekly view runs Friday to Friday
+
+## Data Storage
+
+All data is stored locally. The desktop app uses IndexedDB (via sql.js) in the browser runtime. The iOS app uses a native SQLite database. No account creation or cloud service is required to use Shilling.
+
+Sync between devices is optional and uses WebRTC for direct peer-to-peer communication, with a lightweight signaling server to help devices find each other.
+
+## Hosted vs Self-Hosted
+
+Shilling works in two broad modes:
+
+- Self-hosted: no hosted auth, locally generated household ID, optional signaling server
+- Hosted: Supabase-backed anonymous auth on first launch, server-assigned household ID, signaling enabled after hosted bootstrap completes
+
+For local self-hosted development:
+
+```sh
+just server
+just desktop
+```
+
+`just server` defaults to `SHILLING_AUTH_MODE=none` and loads a repo-root `.env` when present. To test hosted mode, copy `.env.example` to `.env`, set `SHILLING_AUTH_MODE=supabase`, and fill in the hosted variables. See [Hosted Auth & Bootstrap](./hosted-auth.mdx) for the required Supabase setup.

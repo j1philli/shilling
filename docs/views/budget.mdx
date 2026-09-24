@@ -1,0 +1,26 @@
+---
+title: Budget
+order: 5
+---
+
+# Budget
+
+The Budget view shows a monthly projection of your finances, broken down by category.
+
+## Monthly Overview
+
+Navigate between months using the arrow buttons or jump to a specific month with the date picker. The view displays a net change summary showing whether you're projected to have a surplus or deficit for the month.
+
+## Category Breakdown
+
+Each category is shown as an expandable section listing the schedules that contribute to it. For each schedule, you can see:
+
+- Number of occurrences in the month
+- Per-occurrence amount
+- Total amount for the month
+
+This makes it easy to identify where your money is going and spot categories that are over or under budget.
+
+## How It's Computed
+
+The budget is calculated by the `ComputeBudgetUseCase`, which projects all schedule occurrences for the selected month and groups them by category. Income schedules contribute positive amounts, expense schedules contribute negative amounts, and transfers are shown separately.

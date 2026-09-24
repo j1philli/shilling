@@ -1,0 +1,31 @@
+product:
+  type: kmp/lib
+  platforms: [ jvm, android, wasmJs, iosArm64, iosSimulatorArm64 ]
+
+repositories:
+  - id: google-maven-central-mirror
+    url: https://maven-central.storage-download.googleapis.com/maven2
+  - id: maven-central-canonical
+    url: https://repo.maven.apache.org/maven2
+  - id: google-canonical
+    url: https://dl.google.com/dl/android/maven2
+
+dependencies:
+  - $libs.coroutines.core
+  - $libs.kotlin.test
+
+dependencies@android:
+  - $libs.kotlin.test.junit
+
+dependencies@jvm:
+  - $libs.kotlin.test.junit
+
+settings:
+  kotlin:
+    version: "2.4.20"
+    serialization: json
+    compileIncrementally: true
+  android:
+    compileSdk: 36
+    minSdk: 28
+    namespace: finance.shilling.core

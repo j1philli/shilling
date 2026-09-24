@@ -1,0 +1,21 @@
+CREATE TABLE accounts(
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    balance REAL NOT NULL
+);
+
+selectAll:
+SELECT * FROM accounts;
+
+selectById:
+SELECT * FROM accounts WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO accounts(id, name, balance)
+VALUES (?, ?, ?);
+
+deleteById:
+DELETE FROM accounts WHERE id = ?;
+
+deleteAll:
+DELETE FROM accounts;

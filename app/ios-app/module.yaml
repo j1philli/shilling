@@ -1,0 +1,39 @@
+product:
+  type: ios/app
+  platforms: [iosArm64, iosSimulatorArm64]
+
+repositories:
+  - id: google-maven-central-mirror
+    url: https://maven-central.storage-download.googleapis.com/maven2
+  - id: maven-central-canonical
+    url: https://repo.maven.apache.org/maven2
+  - id: google-canonical
+    url: https://dl.google.com/dl/android/maven2
+
+dependencies:
+  - ../shared
+  - ../shared-ui
+  - $libs.coroutines.core
+  - $libs.datetime
+  - $libs.sqldelight.native.driver
+  - $libs.koin.core
+  - $libs.koin.compose
+  - $libs.filekit.core
+  - $libs.filekit.dialogs.compose
+  - $libs.compose.material3
+  - $libs.compose.ui
+  - $libs.compose.foundation
+  - $libs.compose.runtime
+  - $libs.ktor.client.darwin
+  - $libs.ktor.client.webrtc
+  - $libs.multiplatform.settings
+  - $libs.multiplatform.settings.no.arg
+  - $libs.kermit
+
+settings:
+  compose:
+    enabled: true
+    version: 1.12.0
+  kotlin:
+    version: "2.4.20"
+    compileIncrementally: true

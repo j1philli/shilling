@@ -1,0 +1,47 @@
+product:
+  type: kmp/lib
+  platforms: [android, wasmJs, iosArm64, iosSimulatorArm64]
+
+repositories:
+  - id: google-maven-central-mirror
+    url: https://maven-central.storage-download.googleapis.com/maven2
+  - id: maven-central-canonical
+    url: https://repo.maven.apache.org/maven2
+  - id: google-canonical
+    url: https://dl.google.com/dl/android/maven2
+
+dependencies:
+  - ../shared
+  - ../../core
+  - $libs.coroutines.core
+  - $libs.sqldelight.runtime
+  - $libs.datetime
+  - $libs.koin.core
+  - $libs.koin.compose
+  - $libs.ktor.client.core
+  - $libs.ktor.client.webrtc
+  - $libs.serialization.json
+  - $libs.filekit.core
+  - $libs.filekit.dialogs.compose
+  - $libs.multiplatform.settings
+  - $libs.kermit
+  - $libs.coil.compose
+  - $libs.compose.material3
+  - $libs.compose.ui
+  - $libs.compose.foundation
+  - $libs.compose.runtime
+  - $libs.compose.icons.filled
+  - $libs.compose.material3.adaptive
+
+settings:
+  compose:
+    enabled: true
+    version: 1.12.0
+  kotlin:
+    version: "2.4.20"
+    serialization: json
+    compileIncrementally: true
+  android:
+    compileSdk: 36
+    minSdk: 28
+    namespace: finance.shilling.shared.ui

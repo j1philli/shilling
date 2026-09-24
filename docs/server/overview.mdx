@@ -1,0 +1,50 @@
+---
+title: Server Overview
+order: 1
+---
+
+# Server
+
+The Shilling server is a lightweight Ktor application that enables multi-device sync. It provides four services:
+
+- **WebSocket signaling** for WebRTC peer discovery
+- **Hosted auth/config bootstrap** for Supabase-backed deployments
+- **Hosted household metadata** for server-assigned household lookup
+- **ICE server configuration** with TURN credential generation
+
+The server is optional. When running, it helps devices in the same household find each other, but it does not relay or store application data.
+
+## Running the Server
+
+```sh
+just server
+```
+
+This starts the server on port 8081 in self-hosted mode by default. If a repo-root `.env` file exists, the recipe exports it before launch and fails fast when hosted Supabase mode is incomplete.
+
+## Configuration
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `SHILLING_AUTH_MODE` | `none` | `none` for self-hosted signaling only, `supabase` for hosted auth/bootstrap |
+| `SHILLING_SUPABASE_URL` | _(empty)_ | Supabase project URL |
+| `SHILLING_SUPABASE_ANON_KEY` | _(empty)_ | Supabase publishable key served to clients from `/api/config` |
+| `SHILLING_SUPABASE_SERVICE_KEY` | _(empty)_ | Supabase server key used for hosted `user_profiles` lookups |
+| `SHILLING_SUPABASE_JWT_SECRET` | _(empty)_ | Legacy HS256 secret for old Supabase projects only |
+| `SHILLING_STUN_URLS` | `stun:stun.l.google.com:19302` | Comma-separated STUN server URLs |
+| `SHILLING_TURN_URLS` | _(empty)_ | Comma-separated TURN server URLs |
+| `SHILLING_TURN_SECRET` | _(empty)_ | coturn shared secret for credential generation |
+| `SHILLING_TURN_TTL` | `86400` | TURN credential validity in seconds (24h) |
+
+## Architecture
+
+The server is control-plane only. Hosted metadata lives in Supabase, and application data stays on-device and moves only over WebRTC P2P channels.
+
+Hosted mode currently exposes:
+
+- `GET /api/config`
+- `GET /api/household`
+- `GET /api/ice-servers`
+- WebSocket `/ws/signal`
+
+Modern Supabase projects use JWKS-backed access-token verification. `SHILLING_SUPABASE_JWT_SECRET` is only a compatibility fallback for older HS256 projects.

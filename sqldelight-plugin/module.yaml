@@ -1,0 +1,18 @@
+product: jvm/amper-plugin
+
+repositories:
+  - id: google-maven-central-mirror
+    url: https://maven-central.storage-download.googleapis.com/maven2
+  - id: maven-central-canonical
+    url: https://repo.maven.apache.org/maven2
+  - id: google-canonical
+    url: https://dl.google.com/dl/android/maven2
+
+dependencies:
+  - app.cash.sqldelight:gradle-plugin:2.4.0
+  - app.cash.sqldelight:core:2.4.0
+  - dev.lysine.sql-psi:environment:0.8.0
+  - app.cash.sqldelight:sqlite-3-38-dialect:2.4.0
+
+pluginInfo:
+  settingsClass: finance.shilling.build.SqlDelightSettings

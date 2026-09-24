@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shilling</title>
+    <link rel="icon" href="./favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+    <script type="importmap">
+    {
+        "imports": {
+            "@js-joda/core": "./js-joda.esm.js"
+        }
+    }
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            outline: none;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+<div id="error-display" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#1a1a2e; color:#e94560; font-family:monospace; padding:20px; overflow:auto; z-index:9999; white-space:pre-wrap;"></div>
+<script>
+    window.onerror = function(msg, src, line, col, err) {
+        var el = document.getElementById('error-display');
+        el.style.display = 'block';
+        el.textContent += 'ERROR: ' + msg + '\nSource: ' + src + ':' + line + ':' + col + '\n';
+        if (err && err.stack) el.textContent += err.stack + '\n\n';
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+        var el = document.getElementById('error-display');
+        el.style.display = 'block';
+        el.textContent += 'UNHANDLED REJECTION: ' + (e.reason ? (e.reason.message || e.reason) : 'unknown') + '\n';
+        if (e.reason && e.reason.stack) el.textContent += e.reason.stack + '\n\n';
+    });
+</script>
+<script>
+    // Forward console.log/warn/error to Tauri log plugin (prints to terminal)
+    (function() {
+        var origLog = console.log, origWarn = console.warn, origErr = console.error;
+        function tauriLog(level, origFn, args) {
+            origFn.apply(console, args);
+            if (window.__TAURI__ && window.__TAURI__.core) {
+                var msg = Array.prototype.map.call(args, function(a) {
+                    if (typeof a === 'string') return a;
+                    try { return JSON.stringify(a); } catch(e) { return String(a); }
+                }).join(' ');
+                window.__TAURI__.core.invoke('plugin:log|log', {
+                    level: level, message: msg, location: ''
+                }).catch(function(){});
+            }
+        }
+        console.log = function() { tauriLog(3, origLog, arguments); };
+        console.warn = function() { tauriLog(4, origWarn, arguments); };
+        console.error = function() { tauriLog(5, origErr, arguments); };
+    })();
+</script>
+<script type="module">
+    // Auto-focus canvas when ComposeViewport creates it
+    const observer = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+            for (const node of m.addedNodes) {
+                if (node.tagName === 'CANVAS') {
+                    node.setAttribute('tabindex', '0');
+                    node.focus();
+                    observer.disconnect();
+                }
+            }
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    import './web-app.mjs';
+</script>
+</body>
+</html>

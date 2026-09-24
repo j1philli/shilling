@@ -1,0 +1,48 @@
+CREATE TABLE receipts(
+    id TEXT NOT NULL PRIMARY KEY,
+    posting_id TEXT,
+    file_path TEXT NOT NULL,
+    original_name TEXT NOT NULL,
+    added_at INTEGER NOT NULL,
+    receipt_date INTEGER,
+    amount REAL,
+    notes TEXT,
+    FOREIGN KEY(posting_id) REFERENCES postings(id) ON DELETE SET NULL
+);
+
+selectById:
+SELECT * FROM receipts WHERE id = ?;
+
+selectAll:
+SELECT * FROM receipts ORDER BY added_at DESC;
+
+selectByPostingId:
+SELECT * FROM receipts WHERE posting_id = ? ORDER BY added_at ASC;
+
+selectAllWithPostings:
+SELECT r.id, r.posting_id, r.file_path, r.original_name, r.added_at, r.receipt_date, r.amount, r.notes,
+       COALESCE(p.title, s.title) AS posting_title,
+       p.date AS posting_date
+FROM receipts r
+LEFT JOIN postings p ON r.posting_id = p.id
+LEFT JOIN schedules s ON p.schedule_id = s.id
+ORDER BY r.added_at DESC;
+
+upsert:
+INSERT OR REPLACE INTO receipts(id, posting_id, file_path, original_name, added_at, receipt_date, amount, notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+attachToPosting:
+UPDATE receipts SET posting_id = ? WHERE id = ?;
+
+detachFromPosting:
+UPDATE receipts SET posting_id = NULL WHERE id = ?;
+
+updateMetadata:
+UPDATE receipts SET notes = ?, receipt_date = ?, amount = ? WHERE id = ?;
+
+deleteById:
+DELETE FROM receipts WHERE id = ?;
+
+deleteAll:
+DELETE FROM receipts;

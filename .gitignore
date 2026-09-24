@@ -1,0 +1,86 @@
+# macOS filesystem clutter
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE project files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Editor backups
+*~
+*.swp
+*.swo
+
+# Kotlin/Amper build outputs
+.gradle/
+.kotlinc/
+.kotlin/
+.amper/
+**/build/
+**/out/
+**/dist/
+**/generated/
+
+# Local configuration
+.env
+local.properties
+*.keystore
+*.jks
+
+# Logs and reports
+*.log
+*.hprof
+
+# macOS / Xcode derived data
+DerivedData/
+*.xcworkspace/xcuserdata/
+
+# iOS native frameworks (downloaded, not committed)
+app/ios-app/Frameworks/
+app/ios-app/Pods/
+app/ios-app/Podfile.lock
+
+# Tauri build artifacts
+src-tauri/target/
+src-tauri/gen/
+
+# wasmJs build output
+web-app-dist/
+
+# Generated icon pipeline outputs
+# Track only icon source masters and scripts; generated variants/platform assets stay local.
+icons/.generated/
+icons/dev/
+icons/beta/
+icons/ga/
+app/android-app/res/mipmap-anydpi-v26/ic_launcher.xml
+app/android-app/res/mipmap-*/ic_launcher.png
+app/android-app/res/mipmap-*/ic_launcher_background.png
+app/android-app/res/mipmap-*/ic_launcher_foreground.png
+app/android-app/res/mipmap-*/ic_launcher_monochrome.png
+src-tauri/icons/
+app/web-app/apple-touch-icon.png
+app/web-app/favicon.ico
+app/ios-app/src/Assets.xcassets/AppIcon.appiconset/Contents.json
+app/ios-app/src/Assets.xcassets/AppIcon.appiconset/*.png
+app/shared-ui/src/commonMain/kotlin/finance/shilling/shared/ui/AppLogoAsset.kt
+
+# Tool caches
+node_modules/
+.packager/
+
+# direnv
+.direnv/
+
+# SQLite database files (local dev data, never commit)
+*.db
+
+# Agent directories
+.claude/
+.entire/
+.context/
+.cache/

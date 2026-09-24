@@ -1,0 +1,28 @@
+product: jvm/app
+
+repositories:
+  - id: google-maven-central-mirror
+    url: https://maven-central.storage-download.googleapis.com/maven2
+  - id: maven-central-canonical
+    url: https://repo.maven.apache.org/maven2
+  - id: google-canonical
+    url: https://dl.google.com/dl/android/maven2
+
+dependencies:
+  - ../core
+  - $libs.coroutines.core
+  - $libs.datetime
+  - $libs.ktor.server.core
+  - $libs.ktor.server.netty
+  - $libs.ktor.server.websockets
+  - $libs.ktor.server.content.negotiation
+  - $libs.ktor.server.cors
+  - $libs.ktor.server.auth
+  - $libs.ktor.server.auth.jwt
+  - $libs.ktor.serialization.kotlinx.json
+  - $libs.kermit
+
+settings:
+  kotlin:
+    version: "2.4.20"
+    serialization: json

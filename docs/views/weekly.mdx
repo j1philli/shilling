@@ -1,0 +1,30 @@
+---
+title: Weekly View
+order: 1
+---
+
+# Weekly View
+
+The Weekly view is the main screen of Shilling. It shows all upcoming transactions in a Friday-to-Friday window, giving you a clear picture of what's coming this week.
+
+## How It Works
+
+The view computes occurrences from your schedules for the current Friday window and displays them grouped by date. Each row shows the transaction title, account, amount, and any attached receipt.
+
+You can navigate between weeks using the arrow buttons or jump to a specific date with the date picker.
+
+## Actions
+
+Each upcoming occurrence supports three actions:
+
+- **Post** — mark the transaction as settled. This creates a posting record in the database.
+- **Skip** — skip this occurrence. Creates a schedule exception so it won't appear again for this date.
+- **Override** — change the amount or account for this specific occurrence without modifying the underlying schedule.
+
+## Receipts
+
+You can attach a receipt directly from the Weekly view. Tap the receipt icon on any occurrence or posting to upload an image or file. Attached receipts show a preview thumbnail inline.
+
+## Layout
+
+On wider screens, the view uses a side-by-side layout with the transaction list on one side and details on the other. On narrower screens, it stacks vertically.

@@ -1,0 +1,50 @@
+---
+title: Schedules
+order: 6
+---
+
+# Schedules
+
+Schedules define your recurring and one-time transactions. They're the core building block of Shilling's budgeting system.
+
+## Schedule Types
+
+- **Expense** — money going out (rent, groceries, subscriptions)
+- **Income** — money coming in (paychecks, freelance payments)
+- **Transfer** — money moving between your accounts (savings contributions, credit card payments)
+
+The view is organized with tabs to filter by type.
+
+## Creating a Schedule
+
+The schedule form includes:
+
+- **Title** — a descriptive name
+- **Type** — expense, income, or transfer
+- **Account** — which account the money flows from (or to, for income)
+- **Category** — optional label for budgeting
+- **Amount** — the transaction amount
+- **Frequency** — how often it recurs
+- **Start date** — when the schedule begins
+- **End date** — optional, for schedules that stop after a certain date
+- **Counter-account** — for transfers, the destination account
+
+## Recurrence Options
+
+Shilling supports several recurrence patterns:
+
+- **One-time** — happens once on the start date
+- **Weekly** — repeats every week, with a day-of-week selector for choosing which days
+- **Biweekly** — repeats every two weeks
+- **Monthly by date** — repeats on the same calendar date each month (e.g., the 15th)
+- **Monthly by day** — repeats on the same weekday position each month (e.g., the 2nd Friday)
+- **Yearly** — repeats once a year on the same date
+
+## Exceptions
+
+You can add per-date exceptions to any schedule:
+
+- **Skip** — suppress the occurrence for a specific date
+- **Override** — change the amount or account for a specific date without modifying the schedule itself
+
+Exceptions are managed from the schedule editing form.

@@ -1,0 +1,23 @@
+CREATE TABLE receipt_files(
+    receipt_id TEXT NOT NULL PRIMARY KEY,
+    file_bytes BLOB NOT NULL,
+    size_bytes INTEGER NOT NULL,
+    mime_type TEXT,
+    FOREIGN KEY(receipt_id) REFERENCES receipts(id) ON DELETE CASCADE
+);
+
+selectByReceiptId:
+SELECT * FROM receipt_files WHERE receipt_id = ?;
+
+hasFile:
+SELECT COUNT(*) FROM receipt_files WHERE receipt_id = ?;
+
+upsert:
+INSERT OR REPLACE INTO receipt_files(receipt_id, file_bytes, size_bytes, mime_type)
+VALUES (?, ?, ?, ?);
+
+deleteByReceiptId:
+DELETE FROM receipt_files WHERE receipt_id = ?;
+
+deleteAll:
+DELETE FROM receipt_files;
