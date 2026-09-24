@@ -29,6 +29,7 @@ project {
         password("env.PLAY_SERVICE_ACCOUNT_JSON", "credentialsJSON:play-service-account", display = ParameterDisplay.HIDDEN)
         password("env.ASC_API_KEY", "credentialsJSON:asc-api-key", display = ParameterDisplay.HIDDEN)
         param("env.CLOUDFLARE_PAGES_PROJECT", "shilling-app")
+        param("env.CLOUDFLARE_PAGES_DOMAIN", "app.shilling.finance")
         param("env.AMPER_SHARED_CACHES_ROOT", "/opt/shilling-ci/amper-cache")
         param("env.AMPER_BOOTSTRAP_CACHE_DIR", "/opt/shilling-ci/amper-bootstrap")
         param("env.CI_RETRY_ATTEMPTS", "5")
@@ -611,6 +612,8 @@ object WebDeploy : BuildType({
                 npx wrangler pages deploy web-app-dist/ \
                     --project-name="${'$'}CLOUDFLARE_PAGES_PROJECT" \
                     --branch=main
+
+                node scripts/ci/ensure-pages-domain.mjs
             """.trimIndent()
         }
     }
