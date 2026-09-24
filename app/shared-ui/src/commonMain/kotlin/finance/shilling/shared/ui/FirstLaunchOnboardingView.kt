@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.composables.icons.materialicons.MaterialIcons
 import com.composables.icons.materialicons.filled.Chevron_right
-import finance.shilling.shared.data.DEFAULT_SERVER_URL
+import finance.shilling.shared.data.DEFAULT_SELF_HOSTED_SERVER_URL
 import finance.shilling.shared.data.auth.AuthService
 import kotlinx.coroutines.launch
 
@@ -58,7 +58,7 @@ private enum class PendingDestructiveAction {
 
 @Composable
 fun FirstLaunchOnboardingView(
-    initialSelfHostedUrl: String = DEFAULT_SERVER_URL,
+    initialSelfHostedUrl: String = DEFAULT_SELF_HOSTED_SERVER_URL,
     hasHeldLocalData: Boolean = false,
     welcomeNotice: String? = null,
     authService: AuthService? = null,

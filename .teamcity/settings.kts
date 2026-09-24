@@ -28,8 +28,6 @@ project {
         password("env.GITHUB_TOKEN", "credentialsJSON:github-token", display = ParameterDisplay.HIDDEN)
         password("env.PLAY_SERVICE_ACCOUNT_JSON", "credentialsJSON:play-service-account", display = ParameterDisplay.HIDDEN)
         password("env.ASC_API_KEY", "credentialsJSON:asc-api-key", display = ParameterDisplay.HIDDEN)
-        // Configure the private registry address in TeamCity for server deploys.
-        param("env.SHILLING_SERVER_IMAGE_REPO", "")
         param("env.CLOUDFLARE_PAGES_PROJECT", "shilling-app")
         param("env.AMPER_SHARED_CACHES_ROOT", "/opt/shilling-ci/amper-cache")
         param("env.AMPER_BOOTSTRAP_CACHE_DIR", "/opt/shilling-ci/amper-bootstrap")
@@ -623,12 +621,13 @@ object WebDeploy : BuildType({
 })
 
 // =============================================================================
-// Phase 2e: Server Build (Docker)
+// Phase 2e: Server package validation (deployment is handled by Coolify)
 // =============================================================================
 
 object ServerBuild : BuildType({
     name = "Server Build"
-    description = "Build server executable JAR and Docker image, push to local Coolify registry"
+    description = "Package the server executable JAR; Coolify builds and deploys from Git"
+    artifactRules = "build/tasks/_server_executableJarJvm/server-jvm-executable.jar"
 
     vcs {
         root(DslContext.settingsRoot)
@@ -654,41 +653,6 @@ object ServerBuild : BuildType({
         script {
             name = "Package server executable JAR"
             scriptContent = "bash scripts/ci/retry.sh ./kotlin package -m server -f executable-jar"
-        }
-        script {
-            name = "Build, push, and deploy server image"
-            scriptContent = """
-                #!/bin/bash
-                set -euo pipefail
-
-                : "${'$'}{SHILLING_SERVER_IMAGE_REPO:?SHILLING_SERVER_IMAGE_REPO is not set}"
-                : "${'$'}{SHILLING_REGISTRY_USERNAME:?SHILLING_REGISTRY_USERNAME is not set}"
-                : "${'$'}{SHILLING_REGISTRY_PASSWORD:?SHILLING_REGISTRY_PASSWORD is not set}"
-                : "${'$'}{COOLIFY_SERVER_DEPLOY_WEBHOOK:?COOLIFY_SERVER_DEPLOY_WEBHOOK is not set}"
-
-                JAR="build/tasks/_server_executableJarJvm/server-jvm-executable.jar"
-                if [ ! -f "${'$'}JAR" ]; then
-                    echo "ERROR: Server executable JAR not found at ${'$'}JAR"
-                    exit 1
-                fi
-
-                IMAGE_TAG="${'$'}{BUILD_NUMBER:?BUILD_NUMBER is not set}"
-                REGISTRY="${'$'}{SHILLING_SERVER_IMAGE_REPO%%/*}"
-
-                printf '%s' "${'$'}SHILLING_REGISTRY_PASSWORD" | docker login "${'$'}REGISTRY" \
-                    --username "${'$'}SHILLING_REGISTRY_USERNAME" \
-                    --password-stdin
-
-                docker build \
-                    -f server/Dockerfile \
-                    -t "${'$'}SHILLING_SERVER_IMAGE_REPO:${'$'}IMAGE_TAG" \
-                    -t "${'$'}SHILLING_SERVER_IMAGE_REPO:latest" \
-                    .
-                docker push "${'$'}SHILLING_SERVER_IMAGE_REPO:${'$'}IMAGE_TAG"
-                docker push "${'$'}SHILLING_SERVER_IMAGE_REPO:latest"
-
-                curl -fsS "${'$'}COOLIFY_SERVER_DEPLOY_WEBHOOK"
-            """.trimIndent()
         }
     }
 
