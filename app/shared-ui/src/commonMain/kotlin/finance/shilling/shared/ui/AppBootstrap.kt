@@ -24,6 +24,7 @@ import co.touchlab.kermit.Logger
 import com.russhwolf.settings.Settings
 import finance.shilling.core.auth.AuthMode
 import finance.shilling.shared.data.DEFAULT_SERVER_URL
+import finance.shilling.shared.data.DEFAULT_SELF_HOSTED_SERVER_URL
 import finance.shilling.shared.data.DeploymentSelection
 import finance.shilling.shared.data.IdGenerator
 import finance.shilling.shared.data.ReceiptFileStore
@@ -338,7 +339,8 @@ fun ShillingAppBootstrap(
         val welcomeAuth = welcomeAuthService
         ShillingTheme {
             FirstLaunchOnboardingView(
-                initialSelfHostedUrl = serverUrl,
+                initialSelfHostedUrl = services.settings.getStringOrNull(SETTINGS_KEY_SERVER_URL)
+                    ?: DEFAULT_SELF_HOSTED_SERVER_URL,
                 hasHeldLocalData = heldLocalData,
                 welcomeNotice = notice,
                 authService = welcomeAuth,

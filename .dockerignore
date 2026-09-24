@@ -1,0 +1,9 @@
+.git
+.cache
+.env
+.env.*
+build
+node_modules
+web-app-dist
+src-tauri/target
+sqldelight-plugin/libs

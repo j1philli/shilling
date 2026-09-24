@@ -57,7 +57,7 @@ ensure-plugin:
 # Build only the wasmJs web-app (dev database)
 build-web: deps ensure-plugin
     ./scripts/apply-icon-variant.sh "${SHILLING_ICON_VARIANT:-dev}"
-    SHILLING_DB_NAME=shilling-dev ./build-web.sh
+    SHILLING_DB_NAME=shilling-dev SHILLING_WASM_VARIANT=Debug ./build-web.sh
 
 # Build everything (all platforms, all modules)
 build-all: setup-webrtc ensure-plugin
@@ -217,7 +217,7 @@ web: build-web
         if [ -n "$CHANGED" ]; then
             echo "==> Source change detected, rebuilding..."
             touch "$MARKER"
-            if SHILLING_DB_NAME=shilling-dev ./build-web.sh; then
+            if SHILLING_DB_NAME=shilling-dev SHILLING_WASM_VARIANT=Debug ./build-web.sh; then
                 echo "==> Rebuild complete."
             else
                 echo "==> Rebuild failed!"

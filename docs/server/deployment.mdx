@@ -1,0 +1,48 @@
+---
+title: Server Deployment
+order: 5
+---
+
+# Server Deployment
+
+Coolify builds the signaling server from the public Git repository using the
+root `Dockerfile`. The production application tracks `main`, exposes port
+`8081`, and checks `GET /api/config` for health. TeamCity validates and packages
+the server but does not push an image or call a deployment webhook. A separate
+Docker registry is not required for this flow.
+
+The read-only deploy key provides Git access, but it does not install a GitHub
+webhook. Deploy manually in Coolify until a repository webhook can reach
+Coolify, then enable automatic deployment for the production branch.
+
+## Production configuration
+
+The public hostname is `https://api.shilling.finance`. Route it through the
+Cloudflare tunnel to Coolify's proxy. In Coolify, set the production application
+domain to `http://api.shilling.finance` and disable Force HTTPS. Cloudflare
+serves HTTPS to visitors and connects to Coolify over HTTP. Do not attach a
+public hostname until the server starts in Supabase auth mode.
+
+The `unraid` tunnel routes `api.shilling.finance` to
+`http://192.168.1.88:80`. The DNS zone has a proxied `api` record that points
+to the tunnel. A wildcard route or DNS record is not needed for this server.
+The Coolify proxy returns 200 for this host over HTTP when the application
+domain uses the HTTP scheme; an HTTPS scheme caused an origin redirect.
+
+Set these Coolify application variables for runtime only:
+
+| Application variable | Project shared variable |
+| --- | --- |
+| `SHILLING_AUTH_MODE` | `supabase` |
+| `SHILLING_SUPABASE_URL` | `{{project.supabase_project_url}}` |
+| `SHILLING_SUPABASE_ANON_KEY` | `{{project.supabase_publishable_key}}` |
+| `SHILLING_SUPABASE_SERVICE_KEY` | `{{project.supabase_secret_service_key}}` |
+
+The service key is used only on the server for `public.user_profiles` lookups.
+For the current Supabase project, the legacy `service_role` key works for that
+REST request; the newer `sb_secret` key returned `401 Invalid API key` when
+tested. Keep the service key out of Git and client builds.
+
+After deployment, confirm the Coolify container is healthy, its logs say
+`Auth mode: supabase`, and `GET /api/config` on the public hostname reports
+Supabase auth. The client default server URL is the same hostname.
