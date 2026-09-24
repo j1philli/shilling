@@ -11,6 +11,10 @@ root `Dockerfile`. The production application tracks `master`, exposes port
 the server but does not push an image or call a deployment webhook. A separate
 Docker registry is not required for this flow.
 
+The read-only deploy key provides Git access, but it does not install a GitHub
+webhook. Deploy manually in Coolify until a repository webhook can reach
+Coolify, then enable automatic deployment for the production branch.
+
 ## Production configuration
 
 The public hostname is `https://api.shilling.finance`. Route it through the
