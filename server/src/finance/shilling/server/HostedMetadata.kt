@@ -16,6 +16,7 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.time.Duration
 
 private val hostedMetadataLog = co.touchlab.kermit.Logger.withTag("HostedMetadata")
 
@@ -32,13 +33,16 @@ class SupabaseHouseholdMembershipLookup(
     supabaseUrl: String,
     private val serviceKey: String
 ) : HouseholdMembershipLookup {
-    private val httpClient = HttpClient.newHttpClient()
+    private val httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(3))
+        .build()
     private val profilesUrl = supabaseUrl.trimEnd('/') + "/rest/v1/user_profiles"
     private val json = Json { ignoreUnknownKeys = true }
 
     override suspend fun householdIdForUser(userId: String): String? = withContext(Dispatchers.IO) {
         val request = HttpRequest.newBuilder()
             .uri(URI.create("$profilesUrl?select=household_id&user_id=eq.$userId"))
+            .timeout(Duration.ofSeconds(5))
             .header("apikey", serviceKey)
             .header("Accept", "application/json")
             .GET()
