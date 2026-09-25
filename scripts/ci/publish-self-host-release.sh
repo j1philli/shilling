@@ -16,6 +16,23 @@ if [[ "$dry_run" != 0 && "$dry_run" != 1 ]]; then
     exit 1
 fi
 
+if [[ "$dry_run" == 0 ]]; then
+    : "${GHCR_TOKEN:?Set a TeamCity env.GHCR_TOKEN password parameter with a classic PAT scoped write:packages}"
+fi
+if [[ -n "${GHCR_TOKEN:-}" ]]; then
+    headers="$(mktemp)"
+    http_status="$(curl --silent --show-error --dump-header "$headers" --output /dev/null \
+        --write-out '%{http_code}' -H "Authorization: Bearer $GHCR_TOKEN" \
+        https://api.github.com/user)"
+    scopes="$(sed -n 's/^[Xx]-[Oo]auth-[Ss]copes: //p' "$headers" | tr -d ' \r')"
+    rm -f "$headers"
+    if [[ "$http_status" != 200 || ",$scopes," != *",write:packages,"* ]]; then
+        echo "TeamCity GHCR_TOKEN must be a classic PAT with write:packages scope" >&2
+        exit 1
+    fi
+    echo "TeamCity GHCR_TOKEN has write:packages scope"
+fi
+
 branch="${BUILD_VCS_BRANCH:-}"
 tag="${branch#refs/tags/}"
 if [[ "$dry_run" == 0 ]]; then
@@ -47,19 +64,6 @@ if [[ "$dry_run" == 0 ]]; then
         exit 0
     fi
 
-    # GHCR requires a classic PAT. Keep it separate from the token TeamCity
-    # already uses for commit statuses and GitHub release creation.
-    : "${GHCR_TOKEN:?Set a TeamCity env.GHCR_TOKEN password parameter with a classic PAT scoped write:packages}"
-    headers="$(mktemp)"
-    http_status="$(curl --silent --show-error --dump-header "$headers" --output /dev/null \
-        --write-out '%{http_code}' -H "Authorization: Bearer $GHCR_TOKEN" \
-        https://api.github.com/user)"
-    scopes="$(sed -n 's/^[Xx]-[Oo]auth-[Ss]copes: //p' "$headers" | tr -d ' \r')"
-    rm -f "$headers"
-    if [[ "$http_status" != 200 || ",$scopes," != *",write:packages,"* ]]; then
-        echo "TeamCity GHCR_TOKEN must be a classic PAT with write:packages scope" >&2
-        exit 1
-    fi
 else
     tag="dry-run"
 fi

@@ -50,6 +50,7 @@ src-tauri/gen/
 
 # wasmJs build output
 web-app-dist/
+desktop-artifacts/
 
 # Generated icon pipeline outputs
 # Track only icon source masters and scripts; generated variants/platform assets stay local.
