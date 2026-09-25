@@ -36,6 +36,10 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "shortDescription": "Household budgeting across your devices",
+    "longDescription": "Plan recurring income and expenses, track what cleared, and see what is coming up in a weekly view.",
+    "homepage": "https://github.com/j1philli/shilling",
+    "license": "AGPL-3.0-only",
     "icon": [
       "icons/icon.png",
       "icons/icon.icns",

@@ -13,6 +13,7 @@ cp app/shared-ui/src/commonMain/composeResources/drawable/app_logo.png "$context
 cp deploy/desktop/windows-cross.Dockerfile "$context/Dockerfile"
 
 output="$PWD/desktop-artifacts/windows"
+rm -rf "$output"
 mkdir -p "$output"
 docker buildx build --platform linux/amd64 --progress plain \
     --output "type=local,dest=$output" "$context"
