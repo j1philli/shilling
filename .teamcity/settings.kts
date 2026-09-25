@@ -12,12 +12,13 @@ project {
     // --- Phase 1: CI (every push) ---
     buildType(CI)
 
-    // --- Phase 2: Platform builds (tags + manual) ---
+    // --- Phase 2: release chain and manual platform builds ---
     // The settings VCS root must include refs/tags/*; these trigger filters use
     // the resulting logical names (v*), not the fully qualified Git refs.
     buildType(AndroidBuild)
     buildType(ServerBuild)
     buildType(WebDeploy)
+    buildType(SelfHostRelease)
     buildType(IosBuild)
     buildType(DesktopLinux)
     buildType(DesktopMacOS)
@@ -51,7 +52,7 @@ object CI : BuildType({
 
     triggers {
         vcs {
-            branchFilter = "+:*"
+            branchFilter = "+:*\n-:v*"
         }
     }
 
@@ -108,12 +109,6 @@ object AndroidBuild : BuildType({
 
     vcs {
         root(DslContext.settingsRoot)
-    }
-
-    triggers {
-        vcs {
-            branchFilter = "+:v*"
-        }
     }
 
     dependencies {
@@ -206,12 +201,6 @@ object IosBuild : BuildType({
 
     vcs {
         root(DslContext.settingsRoot)
-    }
-
-    triggers {
-        vcs {
-            branchFilter = "+:v*"
-        }
     }
 
     dependencies {
@@ -319,12 +308,6 @@ object DesktopLinux : BuildType({
         root(DslContext.settingsRoot)
     }
 
-    triggers {
-        vcs {
-            branchFilter = "+:v*"
-        }
-    }
-
     dependencies {
         snapshot(CI) {
             onDependencyFailure = FailureAction.FAIL_TO_START
@@ -382,12 +365,6 @@ object DesktopMacOS : BuildType({
 
     vcs {
         root(DslContext.settingsRoot)
-    }
-
-    triggers {
-        vcs {
-            branchFilter = "+:v*"
-        }
     }
 
     dependencies {
@@ -463,12 +440,6 @@ object DesktopWindows : BuildType({
         root(DslContext.settingsRoot)
     }
 
-    triggers {
-        vcs {
-            branchFilter = "+:v*"
-        }
-    }
-
     dependencies {
         snapshot(CI) {
             onDependencyFailure = FailureAction.FAIL_TO_START
@@ -533,7 +504,7 @@ object WebDeploy : BuildType({
 
     triggers {
         vcs {
-            branchFilter = "+:*"
+            branchFilter = "+:*\n-:v*"
         }
     }
 
@@ -634,22 +605,16 @@ object WebDeploy : BuildType({
 })
 
 // =============================================================================
-// Phase 2e: Server package validation (deployment is handled by Coolify)
+// Phase 2e: Server package (Coolify's hosted deployment remains source-based)
 // =============================================================================
 
 object ServerBuild : BuildType({
     name = "Server Build"
-    description = "Package the server executable JAR; Coolify builds and deploys from Git"
+    description = "Package the server executable JAR for the self-hosted release"
     artifactRules = "build/tasks/_server_executableJarJvm/server-jvm-executable.jar"
 
     vcs {
         root(DslContext.settingsRoot)
-    }
-
-    triggers {
-        vcs {
-            branchFilter = "+:v*"
-        }
     }
 
     dependencies {
@@ -666,6 +631,55 @@ object ServerBuild : BuildType({
         script {
             name = "Package server executable JAR"
             scriptContent = "bash scripts/ci/retry.sh ./kotlin package -m server -f executable-jar"
+        }
+    }
+
+    requirements {
+        equals("teamcity.agent.jvm.os.name", "Linux")
+    }
+})
+
+// =============================================================================
+// Phase 2f: Publish both self-hosted images from the tested TeamCity artifacts
+// =============================================================================
+
+object SelfHostRelease : BuildType({
+    name = "Self-hosted Release"
+    description = "Publish the web and server images together, then create the GitHub release"
+
+    vcs {
+        root(DslContext.settingsRoot)
+    }
+
+    triggers {
+        vcs {
+            branchFilter = "+:v*"
+        }
+    }
+
+    dependencies {
+        snapshot(ServerBuild) {
+            onDependencyFailure = FailureAction.FAIL_TO_START
+            reuseBuilds = ReuseBuilds.SUCCESSFUL
+        }
+        artifacts(ServerBuild) {
+            buildRule = sameChain()
+            artifactRules = "server-jvm-executable.jar => release-input/server"
+        }
+        snapshot(WebDeploy) {
+            onDependencyFailure = FailureAction.FAIL_TO_START
+            reuseBuilds = ReuseBuilds.SUCCESSFUL
+        }
+        artifacts(WebDeploy) {
+            buildRule = sameChain()
+            artifactRules = "web-app-dist.zip!** => web-app-dist"
+        }
+    }
+
+    steps {
+        script {
+            name = "Publish self-hosted release"
+            scriptContent = "bash scripts/ci/publish-self-host-release.sh"
         }
     }
 

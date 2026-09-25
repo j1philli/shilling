@@ -8,11 +8,12 @@ order: 5
 Coolify builds the signaling server from the public Git repository using the
 root `Dockerfile`. The production application tracks `main`, exposes port
 `8081`, and checks `GET /api/config` for health. TeamCity validates and packages
-the server but does not push an image or call a deployment webhook. A separate
-Docker registry is not required for this flow.
+the server, but the production Coolify deployment does not use that package or
+call a deployment webhook. A separate Docker registry is not required for this
+hosted flow.
 
-Tagged open-source releases also publish a server image and a companion web
-image to GitHub Container Registry. These are for the
+On release tags, TeamCity publishes a server image and a companion web image
+to GitHub Container Registry. These are for the
 [self-hosted Compose installation](../self-hosting.mdx); the production Coolify
 application can continue building from the public source repository.
 
