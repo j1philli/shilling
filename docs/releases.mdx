@@ -1,0 +1,70 @@
+---
+title: Releases and versioning
+---
+
+# Releases and versioning
+
+Shilling uses one product version for its web, desktop, mobile, and server
+targets. The current base version is in the root `VERSION` file.
+
+## Version numbers
+
+Use `MAJOR.MINOR.PATCH` for the public product version:
+
+- `MAJOR` remains `0` during the current beta period. Move to `1` when the
+  product and its data/sync compatibility promises are ready for a stable
+  release.
+- `MINOR` marks a feature release within a major version. The current minor
+  line is `0.1`.
+- `PATCH` increases for a released bug fix, including a fix for only one
+  target. For example, an Android-only code fix after `0.1.0` becomes
+  `0.1.1`; the release can contain only a new Android build.
+
+Previews use a suffix on the same three-part version, such as
+`v0.1.0-beta.1`, `v0.1.0-beta.2`, and `v0.1.0-rc.1`. Stable releases use
+`v0.1.0`. Git tags and published container images use the same release tag.
+Do not add a fourth numeric component. [Apple app versions](https://developer.apple.com/help/glossary/version-number/)
+use three numeric components, and four-part numbers are outside
+[SemVer](https://semver.org/spec/v2.0.0.html). Target-specific build numbers are
+separate from the public product version.
+
+Android `versionName`, iOS `CFBundleShortVersionString`, Tauri, Cargo, and npm
+all carry the base `MAJOR.MINOR.PATCH` value. Android `versionCode` and iOS
+`CFBundleVersion` are independent, increasing build identifiers used by their
+stores. Increase the relevant build identifier for each new store upload,
+including a rebuild of the same product version. A build identifier is not a
+target-specific product patch number.
+
+Run `just check-version` after changing `VERSION` and the platform manifests.
+The same check runs in TeamCity CI and in the GitHub image workflow. A release
+tag must match the base version at the tagged commit.
+
+## What publishes today
+
+| Event | Current result |
+| --- | --- |
+| Pull request | CI and test image builds; no images or release are published. |
+| Merge to `main` | TeamCity validates the app and deploys the hosted web app to Cloudflare Pages. Coolify tracks the public source repository for the hosted server; its deployment is separate. |
+| `vMAJOR.MINOR.PATCH[-stage.N]` tag | GitHub Actions publishes matching self-hosted web and server images to GHCR, then creates a GitHub release with the Compose files. |
+
+TeamCity does **not** build or publish the GHCR images. Its Android, iOS,
+desktop, and server package configurations are present, but they are not a
+working cross-platform tag release pipeline yet: the VCS root currently
+tracks `refs/heads/*`, and only a Linux agent is connected. A GitHub release
+currently confirms the self-hosted web and server package, not mobile or
+desktop artifacts. Every current release tag republishes both self-hosted
+images, even when the code change affects only one target.
+
+## Coordinated release target
+
+For a full release, freeze one tested commit, set its version, and tag that
+commit once. Build the web, server, Android, iOS, macOS, Windows, and Linux
+targets from the same tag. Publish a release only after the required target
+builds and signing checks succeed, and list exactly which targets are present.
+If a fix is target-only, advance `PATCH` and publish only that target while
+recording the shared source tag.
+
+Completing that pipeline requires macOS and Windows agents, working mobile
+signing and store uploads, and a release gate that replaces the current
+independent `main` deployments. Until then, do not treat a GitHub release as
+proof that every client shipped together.
