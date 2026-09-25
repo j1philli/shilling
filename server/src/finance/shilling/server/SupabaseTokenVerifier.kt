@@ -82,9 +82,13 @@ class SupabaseTokenVerifier(
                 .build()
                 .verify(token)
             val expiresAt = decoded.expiresAtAsInstant?.epochSecond ?: return null
+            val expectedIssuer = authConfig.supabaseUrl?.trimEnd('/')?.plus("/auth/v1") ?: return null
+            if (decoded.issuer != expectedIssuer) return null
+            if (decoded.getClaim("role").asString() != "authenticated") return null
+            val userId = decoded.subject?.takeIf { it.isNotBlank() } ?: return null
             VerifiedSupabaseUser(
-                userId = decoded.subject ?: return null,
-                issuer = decoded.issuer ?: "",
+                userId = userId,
+                issuer = expectedIssuer,
                 role = decoded.getClaim("role").asString(),
                 expiresAtEpochSeconds = expiresAt
             )
@@ -117,8 +121,11 @@ class SupabaseTokenVerifier(
 
             val exp = payload.jsonLong("exp") ?: return null
             if (Instant.now().epochSecond >= exp) return null
+            if (payload.jsonPrimitive("role") != "authenticated") return null
+            val audience = payload["aud"]
+            if (audience !is JsonPrimitive || audience.content != "authenticated") return null
 
-            val sub = payload.jsonPrimitive("sub") ?: return null
+            val sub = payload.jsonPrimitive("sub")?.takeIf { it.isNotBlank() } ?: return null
             VerifiedSupabaseUser(
                 userId = sub,
                 issuer = issuer,
@@ -221,9 +228,7 @@ class SupabaseTokenVerifier(
 
 fun createSupabaseTokenVerifier(authConfig: AuthConfig): SupabaseTokenVerifier? {
     if (authConfig.authMode != "supabase") return null
-    val hasLegacySecret = authConfig.supabaseJwtSecret != null
-    val hasModernConfig = authConfig.supabaseUrl != null
-    if (!hasLegacySecret && !hasModernConfig) return null
+    if (authConfig.supabaseUrl.isNullOrBlank()) return null
     return SupabaseTokenVerifier(authConfig)
 }
 

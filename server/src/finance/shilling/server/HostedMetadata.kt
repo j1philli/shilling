@@ -63,8 +63,8 @@ class SupabaseHouseholdMembershipLookup(
 
 fun createHouseholdMembershipLookup(authConfig: AuthConfig): HouseholdMembershipLookup? {
     if (authConfig.authMode != "supabase") return null
-    val supabaseUrl = authConfig.supabaseUrl ?: return null
-    val serviceKey = authConfig.supabaseServiceKey ?: return null
+    val supabaseUrl = authConfig.supabaseUrl?.takeIf { it.isNotBlank() } ?: return null
+    val serviceKey = authConfig.supabaseServiceKey?.takeIf { it.isNotBlank() } ?: return null
     return SupabaseHouseholdMembershipLookup(supabaseUrl, serviceKey)
 }
 

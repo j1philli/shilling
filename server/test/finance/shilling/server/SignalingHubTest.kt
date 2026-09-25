@@ -92,11 +92,30 @@ class SignalingHubTest {
         hub.register("house-1", "peer-a", FakeWebSocketSession())
         hub.register("house-1", "peer-b", target)
         target.clear()
-        hub.unregister("house-1", "peer-b")
+        hub.unregister("house-1", "peer-b", target)
 
         hub.relay("house-1", "peer-a", SignalingMessage.Answer("peer-a", "peer-b", "answer-sdp"))
 
         assertTrue(target.sentMessages().isEmpty())
+    }
+
+    @Test
+    fun clientCannotSpoofSenderOrPeerList() {
+        assertTrue(isValidClientSignal(SignalingMessage.Offer("peer-a", "peer-b", "sdp"), "peer-a"))
+        assertTrue(!isValidClientSignal(SignalingMessage.Offer("peer-b", "peer-a", "sdp"), "peer-a"))
+        assertTrue(!isValidClientSignal(SignalingMessage.PeerList(listOf("peer-b")), "peer-a"))
+    }
+
+    @Test
+    fun replacedSessionCannotUnregisterCurrentPeer() = runBlocking {
+        val hub = SignalingHub()
+        val old = FakeWebSocketSession()
+        val current = FakeWebSocketSession()
+        hub.register("house-1", "peer-a", old)
+        hub.register("house-1", "peer-a", current)
+        hub.unregister("house-1", "peer-a", old)
+        hub.relay("house-1", "peer-b", SignalingMessage.Offer("peer-b", "peer-a", "sdp"))
+        assertEquals(1, current.sentMessages().size)
     }
 
     private fun decode(text: String): SignalingMessage = json.decodeFromString(text)

@@ -44,8 +44,8 @@ class SignalingHub {
         }
     }
 
-    fun unregister(householdId: String, deviceId: String) {
-        households[householdId]?.remove(deviceId)
+    fun unregister(householdId: String, deviceId: String, session: WebSocketSession) {
+        households[householdId]?.remove(deviceId, session)
         val remaining = households[householdId]?.keys ?: emptySet()
         log.i { "[HUB] UNREGISTER (household peers=${remaining.size})" }
     }
@@ -126,6 +126,10 @@ fun Routing.signalingRoute(
                     }
                     when (msg) {
                         is SignalingMessage.Join -> {
+                            if (deviceId != null) {
+                                close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Already joined"))
+                                return@webSocket
+                            }
                             if (tokenVerifier != null) {
                                 when (val result = authorizeHostedJoin(
                                     tokenVerifier = tokenVerifier,
@@ -149,9 +153,13 @@ fun Routing.signalingRoute(
                             hub.register(msg.householdId, msg.deviceId, this)
                         }
                         else -> {
+                            if (deviceId == null || !isValidClientSignal(msg, deviceId)) {
+                                close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid signaling message"))
+                                return@webSocket
+                            }
                             log.i { "[WS] RELAY ${msg::class.simpleName}" }
                             householdId?.let { hid ->
-                                deviceId?.let { did -> hub.relay(hid, did, msg) }
+                                hub.relay(hid, deviceId, msg)
                             }
                         }
                     }
@@ -160,8 +168,15 @@ fun Routing.signalingRoute(
         } finally {
             log.i { "[WS] DISCONNECT" }
             if (householdId != null && deviceId != null) {
-                hub.unregister(householdId, deviceId)
+                hub.unregister(householdId, deviceId, this)
             }
         }
     }
+}
+
+internal fun isValidClientSignal(message: SignalingMessage, deviceId: String): Boolean = when (message) {
+    is SignalingMessage.Offer -> message.fromDeviceId == deviceId
+    is SignalingMessage.Answer -> message.fromDeviceId == deviceId
+    is SignalingMessage.IceCandidate -> message.fromDeviceId == deviceId
+    is SignalingMessage.Join, is SignalingMessage.PeerList -> false
 }
