@@ -52,8 +52,14 @@ fun main() {
     val signalingHub = SignalingHub()
     val turnConfig = createTurnConfig()
     val authConfig = readAuthConfig()
+    require(authConfig.authMode in setOf("none", "supabase")) { "Unsupported SHILLING_AUTH_MODE" }
     val householdLookup = createHouseholdMembershipLookup(authConfig)
     val tokenVerifier = createSupabaseTokenVerifier(authConfig)
+    if (authConfig.authMode == "supabase") {
+        require(tokenVerifier != null) { "Hosted auth requires SHILLING_SUPABASE_URL" }
+        require(householdLookup != null) { "Hosted auth requires Supabase URL and server key" }
+        require(!authConfig.supabaseAnonKey.isNullOrBlank()) { "Hosted auth requires a publishable key" }
+    }
 
     log.i { "Shilling server starting on http://localhost:8081" }
     log.i { "Auth mode: ${authConfig.authMode}" }

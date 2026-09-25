@@ -171,8 +171,6 @@ class SupabaseAuthService(
                 this.email = email
                 this.password = password
             }
-            runCatching { promoteCurrentProfileToFree() }
-                .onFailure { error -> log.w { "Profile tier update failed after anonymous upgrade: ${error.message}" } }
             cachePendingEmailConfirmation(email)
             _authState.value = _authState.value.copy(
                 email = email,
@@ -245,22 +243,6 @@ class SupabaseAuthService(
             isAnonymous = true,
             deviceId = deviceId
         )
-    }
-
-    private suspend fun promoteCurrentProfileToFree() {
-        val userId = _authState.value.userId ?: return
-        val token = refreshTokenIfNeeded() ?: _authState.value.accessToken ?: return
-        val response = httpClient.patch(profilesUrl) {
-            header("apikey", anonKey)
-            header("Authorization", "Bearer $token")
-            header("Prefer", "return=minimal")
-            parameter("user_id", "eq.$userId")
-            contentType(ContentType.Application.Json)
-            setBody(ProfileTierUpdateRequest(tier = "free"))
-        }
-        if (response.status.value !in 200..299) {
-            error("Supabase profile tier update failed with status ${response.status.value}")
-        }
     }
 
     private suspend fun fetchProfileTier(userId: String, token: String): UserTier? = runCatching {
@@ -337,10 +319,4 @@ internal fun resolveAuthenticatedState(
 private data class UserProfileTierRow(
     @SerialName("tier")
     val tier: String? = null
-)
-
-@Serializable
-private data class ProfileTierUpdateRequest(
-    @SerialName("tier")
-    val tier: String
 )

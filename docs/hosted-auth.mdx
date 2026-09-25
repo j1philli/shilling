@@ -55,6 +55,8 @@ create table if not exists public.user_profiles (
 
 Each new `auth.users` row should also create a `public.user_profiles` row. Hosted bootstrap will fail by design if the authenticated user has no hosted household metadata.
 
+The production schema is managed by `supabase/migrations/`. Its metadata policy grants authenticated clients read access to only their own `user_id` and `tier`. No client can update `user_profiles`, and `waitlist` is inaccessible through the public Data API. The server's secret key performs the household lookup. The Auth trigger updates a profile's tier when an anonymous account gains an email address.
+
 ## Environment
 
 Copy the repo-root `.env.example` to `.env`, set `SHILLING_AUTH_MODE=supabase`, and uncomment and fill in the hosted variables.
