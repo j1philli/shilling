@@ -6,7 +6,7 @@ ENV APPIMAGE_EXTRACT_AND_RUN=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential ca-certificates curl file libayatana-appindicator3-dev \
-    libdbus-1-dev libfuse2 libssl-dev libwebkit2gtk-4.1-dev libxdo-dev \
+    libdbus-1-dev libfuse2 libpipewire-0.3-dev libssl-dev libwebkit2gtk-4.1-dev libxdo-dev \
     librsvg2-dev nodejs npm patchelf pkg-config rpm wget xz-utils \
     && rm -rf /var/lib/apt/lists/*
 

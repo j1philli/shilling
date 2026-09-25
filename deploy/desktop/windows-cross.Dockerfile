@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN npm install --global @tauri-apps/cli@2.10.0 \
     && rustup target add x86_64-pc-windows-msvc \
-    && cargo install --locked cargo-xwin
+    && cargo install --locked cargo-xwin --version 0.23.1
 
 WORKDIR /workspace
 COPY src-tauri/ src-tauri/
