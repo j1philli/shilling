@@ -20,6 +20,7 @@ import com.composables.icons.materialicons.filled.Chevron_left
 @Composable
 fun BackNavigationScaffold(
     onBack: () -> Unit,
+    showBackButton: Boolean = true,
     topPadding: Dp = 0.dp,
     content: @Composable (PaddingValues) -> Unit
 ) {
@@ -30,11 +31,13 @@ fun BackNavigationScaffold(
                 TopAppBar(
                     title = {},
                     navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = MaterialIcons.Filled.Chevron_left,
-                                contentDescription = "Back"
-                            )
+                        if (showBackButton) {
+                            IconButton(onClick = onBack) {
+                                Icon(
+                                    imageVector = MaterialIcons.Filled.Chevron_left,
+                                    contentDescription = "Back"
+                                )
+                            }
                         }
                     }
                 )

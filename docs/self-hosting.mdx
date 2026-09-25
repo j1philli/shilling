@@ -1,0 +1,74 @@
+---
+title: Self-host Shilling
+---
+
+# Self-host Shilling
+
+The self-hosted release runs the Shilling web app and its signaling server with
+Docker Compose. It does not require a Supabase account. Budget data stays in
+each browser's local storage and moves between devices only over WebRTC peer
+data channels. The signaling server helps peers find each other; it has no
+budget database and does not store receipts or transactions.
+
+## Install
+
+You need Docker with Compose and a Linux amd64 or arm64 host. Download
+`compose.yaml` and `shilling.env.example` from the same
+[GitHub release](https://github.com/j1philli/shilling/releases). Then run:
+
+```sh
+cp shilling.env.example .env
+docker compose pull
+docker compose up -d
+```
+
+Open <http://localhost:8080> **on the Docker host**. The server URL is already
+filled in; select **Continue**. This web package opens in self-hosted mode and
+does not send you to the Shilling hosted sign-in flow.
+
+The Compose file publishes only the web service on `127.0.0.1:8080`. The
+signaling service is available only to the web container. Neither image needs a
+data volume, because the server does not hold household data.
+
+## Other devices and HTTPS
+
+For another device, put the web service behind a trusted HTTPS reverse proxy
+or use a private network with HTTPS. Point the proxy at `http://127.0.0.1:8080`
+on the Docker host. Keep its `/api/*` and `/ws/*` paths on the same origin as
+the web app, and preserve WebSocket upgrades. The proxy must send the
+`Cross-Origin-Opener-Policy: same-origin` and
+`Cross-Origin-Embedder-Policy: require-corp` headers served by the included
+Caddy configuration. Browsers require a secure context for the web features
+used by Shilling; `localhost` is allowed for local use.
+
+**Restrict access to the entire instance.** Self-hosted mode currently accepts
+the household ID claimed in a signaling `Join` message without verifying a
+user or household membership. Anyone who can reach an exposed instance and
+knows a household ID could join its signaling group. The server still never
+relays budget data, but a joined peer can request a direct WebRTC connection.
+Do not publish this unauthenticated mode openly on the internet. Use a VPN or
+trusted access layer that covers the web app, API, and WebSocket endpoint.
+
+WebRTC connectivity across different networks may also require a STUN/TURN
+service. The [ICE configuration guide](server/ice-config.mdx) explains the
+optional server settings. Shilling has no server relay or catch-up path for
+budget data if a peer connection cannot be established.
+
+## Update or roll back
+
+Edit `SHILLING_VERSION` in `.env` to a version listed in
+[releases](https://github.com/j1philli/shilling/releases), then run:
+
+```sh
+docker compose pull
+docker compose up -d
+```
+
+To roll back the containers, set the previous version and repeat those two
+commands. Back up each browser's budget data before changing versions. A
+container rollback does not reverse a browser database migration, and the
+server container is not a backup of your budget.
+
+The release publishes matching `ghcr.io/j1philli/shilling-server` and
+`ghcr.io/j1philli/shilling-web` images for Linux amd64 and arm64. You can also
+build from source using the [development guide](getting-started.mdx).

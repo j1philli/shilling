@@ -59,6 +59,7 @@ private enum class PendingDestructiveAction {
 @Composable
 fun FirstLaunchOnboardingView(
     initialSelfHostedUrl: String = DEFAULT_SELF_HOSTED_SERVER_URL,
+    selfHostedOnly: Boolean = false,
     hasHeldLocalData: Boolean = false,
     welcomeNotice: String? = null,
     authService: AuthService? = null,
@@ -76,7 +77,7 @@ fun FirstLaunchOnboardingView(
     topPadding: Dp = 0.dp
 ) {
     val scope = rememberCoroutineScope()
-    var route by remember { mutableStateOf(FirstLaunchRoute.LANDING) }
+    var route by remember { mutableStateOf(if (selfHostedOnly) FirstLaunchRoute.SELF_HOSTED else FirstLaunchRoute.LANDING) }
     var selfHostedUrl by remember { mutableStateOf(initialSelfHostedUrl) }
     var selfHostedError by remember { mutableStateOf<String?>(null) }
     var isValidatingSelfHosted by remember { mutableStateOf(false) }
@@ -210,6 +211,7 @@ fun FirstLaunchOnboardingView(
             FirstLaunchRoute.SELF_HOSTED -> {
                 BackNavigationScaffold(
                     onBack = { route = FirstLaunchRoute.LANDING },
+                    showBackButton = !selfHostedOnly,
                     topPadding = topPadding
                 ) { innerPadding ->
                     Box(

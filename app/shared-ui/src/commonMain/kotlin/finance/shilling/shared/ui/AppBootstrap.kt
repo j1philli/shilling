@@ -124,6 +124,8 @@ typealias PlatformSyncRuntimeFactory = @Composable (
 data class AppBootstrapScaffoldConfig(
     val onboardingTopPadding: Dp = 0.dp,
     val navRailTopPadding: Dp = 0.dp,
+    val selfHostedOnly: Boolean = false,
+    val defaultSelfHostedServerUrl: String = DEFAULT_SELF_HOSTED_SERVER_URL,
     val cameraButton: ReceiptPickerButton? = null,
     val photoButton: ReceiptPickerButton? = null,
     val externalNavRequest: StateFlow<ShelfDestination?> = MutableStateFlow(null),
@@ -153,7 +155,10 @@ fun ShillingAppBootstrap(
     }
     var settingsRevision by remember { mutableStateOf(0) }
     var serverUrl by remember {
-        mutableStateOf(services.settings.getStringOrNull(SETTINGS_KEY_SERVER_URL) ?: DEFAULT_SERVER_URL)
+        mutableStateOf(
+            services.settings.getStringOrNull(SETTINGS_KEY_SERVER_URL)
+                ?: if (scaffoldConfig.selfHostedOnly) scaffoldConfig.defaultSelfHostedServerUrl else DEFAULT_SERVER_URL
+        )
     }
     val savedSelection = remember(settingsRevision) { savedDeploymentSelection(services.settings) }
     val heldLocalData = remember(settingsRevision) { hasHeldLocalData(services.settings) }
@@ -226,7 +231,7 @@ fun ShillingAppBootstrap(
             welcomeAuthService = null
             startupIdentity = null
             onboardingComplete = false
-            serverUrl = DEFAULT_SERVER_URL
+            serverUrl = if (scaffoldConfig.selfHostedOnly) scaffoldConfig.defaultSelfHostedServerUrl else DEFAULT_SERVER_URL
             manualRetryStartedAt = null
             settingsRevision += 1
             hostedBootstrapStatusFlow.value = createPlaceholderStartupIdentity(
@@ -328,7 +333,7 @@ fun ShillingAppBootstrap(
     }
 
     LaunchedEffect(onboardingComplete, heldLocalData, serverUrl, authScope) {
-        if (onboardingComplete) return@LaunchedEffect
+        if (onboardingComplete || scaffoldConfig.selfHostedOnly) return@LaunchedEffect
         runCatching { ensureWelcomeAuthService() }
             .onFailure { error ->
                 log.w { "Welcome auth bootstrap not ready yet: ${error.message}" }
@@ -340,7 +345,8 @@ fun ShillingAppBootstrap(
         ShillingTheme {
             FirstLaunchOnboardingView(
                 initialSelfHostedUrl = services.settings.getStringOrNull(SETTINGS_KEY_SERVER_URL)
-                    ?: DEFAULT_SELF_HOSTED_SERVER_URL,
+                    ?: scaffoldConfig.defaultSelfHostedServerUrl,
+                selfHostedOnly = scaffoldConfig.selfHostedOnly,
                 hasHeldLocalData = heldLocalData,
                 welcomeNotice = notice,
                 authService = welcomeAuth,

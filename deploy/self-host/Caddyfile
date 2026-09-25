@@ -1,0 +1,23 @@
+:80 {
+	encode gzip zstd
+
+	header {
+		Cross-Origin-Opener-Policy "same-origin"
+		Cross-Origin-Embedder-Policy "require-corp"
+		Cross-Origin-Resource-Policy "same-origin"
+	}
+
+	handle /api/* {
+		reverse_proxy server:8081
+	}
+
+	handle /ws/* {
+		reverse_proxy server:8081
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

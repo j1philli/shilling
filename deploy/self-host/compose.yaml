@@ -1,0 +1,16 @@
+services:
+  server:
+    image: ghcr.io/j1philli/shilling-server:${SHILLING_VERSION:?Set SHILLING_VERSION in .env}
+    restart: unless-stopped
+    environment:
+      SHILLING_AUTH_MODE: none
+    expose:
+      - "8081"
+
+  web:
+    image: ghcr.io/j1philli/shilling-web:${SHILLING_VERSION:?Set SHILLING_VERSION in .env}
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "127.0.0.1:8080:80"

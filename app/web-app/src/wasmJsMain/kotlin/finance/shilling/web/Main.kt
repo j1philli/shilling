@@ -22,6 +22,7 @@ import app.cash.sqldelight.async.coroutines.await
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.driver.worker.WebWorkerDriver
 import com.russhwolf.settings.Settings
+import finance.shilling.shared.data.DEFAULT_SELF_HOSTED_SERVER_URL
 import finance.shilling.shared.data.auth.DeviceIdentity
 import finance.shilling.shared.data.store.ChangeNotifier
 import finance.shilling.shared.data.store.SyncStoreFacade
@@ -46,12 +47,17 @@ import org.w3c.dom.Worker
 
 private fun isTauriEnvironment(): Boolean = js("typeof window.__TAURI__ !== 'undefined'")
 
+private fun isSelfHostedDistribution(): Boolean = js("window.SHILLING_SELF_HOSTED_ONLY === true")
+
+private fun browserOrigin(): String = js("window.location.origin")
+
 private fun installTauriDragHandler(): JsAny? = js("(function(){document.addEventListener('mousedown',function(e){if(e.clientY<52&&e.button===0){e.preventDefault();e.stopPropagation();window.__TAURI__.window.getCurrentWindow().startDragging();}},true);})()")
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     if (isTauriEnvironment()) installTauriDragHandler()
     ComposeViewport(document.body!!) {
+        val selfHostedOnly = remember { isSelfHostedDistribution() }
         var db by remember { mutableStateOf<ShillingDatabase?>(null) }
 
         LaunchedEffect(Unit) {
@@ -96,7 +102,9 @@ fun main() {
             },
             scaffoldConfig = AppBootstrapScaffoldConfig(
                 onboardingTopPadding = tauriTopPadding,
-                navRailTopPadding = tauriTopPadding
+                navRailTopPadding = tauriTopPadding,
+                selfHostedOnly = selfHostedOnly,
+                defaultSelfHostedServerUrl = if (selfHostedOnly) browserOrigin() else DEFAULT_SELF_HOSTED_SERVER_URL
             )
         )
     }
