@@ -42,7 +42,7 @@ settings:
   kotlin:
     version: "2.4.20"
   android:
-    compileSdk: 37
+    compileSdk: 36
     minSdk: 28
     targetSdk: 35
     namespace: finance.shilling.android

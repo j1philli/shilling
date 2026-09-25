@@ -120,10 +120,6 @@ object AndroidBuild : BuildType({
 
     steps {
         script {
-            name = "Install Android SDK 37"
-            scriptContent = "bash scripts/ci/ensure-android-sdk.sh"
-        }
-        script {
             name = "Package Android APK and AAB"
             scriptContent = "bash scripts/ci/build-android.sh"
         }

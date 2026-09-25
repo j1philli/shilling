@@ -59,8 +59,8 @@ personal access token with `write:packages` scope for the image push. The VCS
 root must watch release tags as well as branches.
 
 Only a Linux agent is connected today. The manual `Android Build` job produces
-an installable debug APK and an unsigned release AAB. It installs Android SDK
-37 if needed and publishes both files as a TeamCity artifact. It does not sign
+an installable debug APK and an unsigned release AAB using Android SDK 36 and
+publishes both files as a TeamCity artifact. It does not sign
 or upload the AAB; a Play upload still needs a configured upload key and service
 account. The `iOS Build` job archives the app on macOS and publishes an unsigned
 app ZIP by default. Set `env.SHILLING_IOS_SIGNED=1` on a macOS build with Apple

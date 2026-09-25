@@ -207,7 +207,7 @@ fi
 
 # ---------- Android SDK ----------
 
-if [ ! -d "$ANDROID_HOME/platforms/android-36" ] || [ ! -d "$ANDROID_HOME/platforms/android-37" ]; then
+if [ ! -d "$ANDROID_HOME/platforms/android-36" ]; then
     echo "Installing Android SDK..."
     mkdir -p "$ANDROID_HOME"
 
@@ -224,9 +224,9 @@ if [ ! -d "$ANDROID_HOME/platforms/android-36" ] || [ ! -d "$ANDROID_HOME/platfo
     export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 
     yes | sdkmanager --licenses > /dev/null 2>&1 || true
-    sdkmanager "platforms;android-36" "platforms;android-37" "build-tools;36.0.0" "platform-tools"
+    sdkmanager "platforms;android-36" "build-tools;36.0.0" "platform-tools"
 else
-    echo "Android SDK (android-36 and android-37) already installed"
+    echo "Android SDK (android-36) already installed"
 fi
 
 persist_environment
