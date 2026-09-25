@@ -22,38 +22,37 @@ class SignalingHub {
     suspend fun register(householdId: String, deviceId: String, session: WebSocketSession) {
         val peers = households.getOrPut(householdId) { ConcurrentHashMap() }
         peers[deviceId] = session
-        log.i { "[HUB] REGISTER device=$deviceId household=$householdId (total=${peers.size} peers=${peers.keys})" }
+        log.i { "[HUB] REGISTER (household peers=${peers.size})" }
 
         val existingPeerIds = peers.keys.filter { it != deviceId }
         if (existingPeerIds.isNotEmpty()) {
-            log.i { "[HUB] Sending PeerList to $deviceId: $existingPeerIds" }
+            log.i { "[HUB] Sending PeerList (${existingPeerIds.size} existing peers)" }
             session.send(json.encodeToString<SignalingMessage>(
                 SignalingMessage.PeerList(existingPeerIds)
             ))
             existingPeerIds.forEach { peerId ->
-                log.i { "[HUB] Notifying $peerId about new peer $deviceId" }
                 try {
                     peers[peerId]?.send(json.encodeToString<SignalingMessage>(
                         SignalingMessage.PeerList(listOf(deviceId))
                     ))
                 } catch (e: Exception) {
-                    log.w { "[HUB] Failed to notify $peerId: ${e::class.simpleName}: ${e.message}" }
+                    log.w { "[HUB] Failed to notify peer: ${e::class.simpleName}" }
                 }
             }
         } else {
-            log.i { "[HUB] No existing peers in household $householdId — $deviceId is first" }
+            log.i { "[HUB] First peer in household" }
         }
     }
 
     fun unregister(householdId: String, deviceId: String) {
         households[householdId]?.remove(deviceId)
         val remaining = households[householdId]?.keys ?: emptySet()
-        log.i { "[HUB] UNREGISTER device=$deviceId household=$householdId (remaining=${remaining.size}: $remaining)" }
+        log.i { "[HUB] UNREGISTER (household peers=${remaining.size})" }
     }
 
     suspend fun relay(householdId: String, fromDeviceId: String, message: SignalingMessage) {
         val peers = households[householdId] ?: run {
-            log.w { "[HUB] Relay: no household $householdId found" }
+            log.w { "[HUB] Relay: household unavailable" }
             return
         }
 
@@ -66,10 +65,10 @@ class SignalingHub {
         }
 
         val msgType = when (message) {
-            is SignalingMessage.Offer -> "Offer(to=${message.toDeviceId}, sdpLen=${message.sdp.length})"
-            is SignalingMessage.Answer -> "Answer(to=${message.toDeviceId}, sdpLen=${message.sdp.length})"
-            is SignalingMessage.IceCandidate -> "IceCandidate(to=${message.toDeviceId}, ${message.candidate.take(50)})"
-            is SignalingMessage.PeerList -> "PeerList(${message.deviceIds})"
+            is SignalingMessage.Offer -> "Offer"
+            is SignalingMessage.Answer -> "Answer"
+            is SignalingMessage.IceCandidate -> "IceCandidate"
+            is SignalingMessage.PeerList -> "PeerList"
             is SignalingMessage.Join -> "Join"
         }
 
@@ -77,24 +76,24 @@ class SignalingHub {
             // Targeted relay to specific peer
             val targetSession = peers[toDeviceId]
             if (targetSession == null) {
-                log.w { "[HUB] RELAY $msgType from $fromDeviceId — target $toDeviceId not found" }
+                log.w { "[HUB] RELAY $msgType: target unavailable" }
                 return
             }
-            log.i { "[HUB] RELAY $msgType from $fromDeviceId to $toDeviceId" }
+            log.i { "[HUB] RELAY $msgType" }
             try {
                 targetSession.send(json.encodeToString(message))
             } catch (e: Exception) {
-                log.w { "[HUB] Relay send failed to $toDeviceId: ${e::class.simpleName}: ${e.message}" }
+                log.w { "[HUB] Relay send failed: ${e::class.simpleName}" }
             }
         } else {
             // Broadcast to all peers (PeerList, Join)
             val targets = peers.filter { it.key != fromDeviceId }
-            log.i { "[HUB] RELAY $msgType from $fromDeviceId to ${targets.keys}" }
+            log.i { "[HUB] RELAY $msgType (${targets.size} targets)" }
             targets.values.forEach { session ->
                 try {
                     session.send(json.encodeToString(message))
                 } catch (e: Exception) {
-                    log.w { "[HUB] Relay send failed: ${e::class.simpleName}: ${e.message}" }
+                    log.w { "[HUB] Relay send failed: ${e::class.simpleName}" }
                 }
             }
         }
@@ -114,7 +113,7 @@ fun Routing.signalingRoute(
     webSocket("/ws/signal") {
         var deviceId: String? = null
         var householdId: String? = null
-        log.i { "[WS] New WebSocket connection from ${call.request.local.remoteHost}" }
+        log.i { "[WS] New WebSocket connection" }
         try {
             for (frame in incoming) {
                 if (frame is Frame.Text) {
@@ -122,8 +121,7 @@ fun Routing.signalingRoute(
                     val msg = try {
                         json.decodeFromString<SignalingMessage>(text)
                     } catch (e: Exception) {
-                        log.w { "[WS] Failed to decode from device=$deviceId: ${e::class.simpleName}: ${e.message}" }
-                        log.d { "[WS] Raw frame: ${text.take(200)}" }
+                        log.w { "[WS] Failed to decode message: ${e::class.simpleName}" }
                         continue
                     }
                     when (msg) {
@@ -136,10 +134,10 @@ fun Routing.signalingRoute(
                                     requestedHouseholdId = msg.householdId
                                 )) {
                                     is JoinAuthorizationResult.Authorized -> {
-                                        log.i { "[WS] Hosted join authorized user=${result.userId} device=${msg.deviceId} household=${msg.householdId}" }
+                                        log.i { "[WS] Hosted join authorized" }
                                     }
                                     is JoinAuthorizationResult.Rejected -> {
-                                        log.w { "[WS] Join rejected for ${msg.deviceId}: ${result.reason}" }
+                                        log.w { "[WS] Join rejected: ${result.reason}" }
                                         close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, result.reason))
                                         return@webSocket
                                     }
@@ -147,11 +145,11 @@ fun Routing.signalingRoute(
                             }
                             deviceId = msg.deviceId
                             householdId = msg.householdId
-                            log.i { "[WS] JOIN device=$deviceId household=$householdId" }
+                            log.i { "[WS] JOIN" }
                             hub.register(msg.householdId, msg.deviceId, this)
                         }
                         else -> {
-                            log.i { "[WS] RELAY ${msg::class.simpleName} from $deviceId" }
+                            log.i { "[WS] RELAY ${msg::class.simpleName}" }
                             householdId?.let { hid ->
                                 deviceId?.let { did -> hub.relay(hid, did, msg) }
                             }
@@ -160,7 +158,7 @@ fun Routing.signalingRoute(
                 }
             }
         } finally {
-            log.i { "[WS] DISCONNECT device=$deviceId household=$householdId" }
+            log.i { "[WS] DISCONNECT" }
             if (householdId != null && deviceId != null) {
                 hub.unregister(householdId, deviceId)
             }

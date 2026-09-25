@@ -42,9 +42,27 @@ The server is control-plane only. Hosted metadata lives in Supabase, and applica
 
 Hosted mode currently exposes:
 
+- `GET /health` (lightweight liveness check)
 - `GET /api/config`
 - `GET /api/household`
 - `GET /api/ice-servers`
 - WebSocket `/ws/signal`
 
 Modern Supabase projects use JWKS-backed access-token verification. `SHILLING_SUPABASE_JWT_SECRET` is only a compatibility fallback for older HS256 projects.
+
+## Observability
+
+The server image includes a pinned OpenTelemetry Java agent. Enable it at runtime with `JAVA_TOOL_OPTIONS=-javaagent:/opt/opentelemetry-javaagent.jar`; the image also works without tracing when this variable is absent. For hosted Maple, set:
+
+| Variable | Value |
+| --- | --- |
+| `OTEL_SERVICE_NAME` | `shilling-signaling` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `https://ingest.maple.dev` (US) or `https://ingest.eu.maple.dev` (EU) |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` |
+| `OTEL_EXPORTER_OTLP_HEADERS` | `Authorization=Bearer <ingest key>` |
+| `OTEL_LOGS_EXPORTER` | `none` when container logs are collected separately |
+| `OTEL_RESOURCE_ATTRIBUTES` | `deployment.environment.name=production` or `staging` |
+
+In Coolify, store the ingest key as a secret shared variable and reference it from the application variable, for example `Authorization=Bearer {{team.Maple_API_key}}`. Do not commit or print the key. Configure the container health check on `GET /health` after deploying the image with that route. Monitor `https://api.shilling.finance/health` from outside the host as well, because the local health check cannot detect a DNS, proxy, or host outage.
+
+Signaling logs intentionally omit household and device IDs, IP addresses, raw signaling frames, SDP, and ICE candidates. Review any new logging before exporting container output.

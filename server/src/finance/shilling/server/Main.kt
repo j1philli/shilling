@@ -85,6 +85,7 @@ fun main() {
         }
 
         routing {
+            get("/health") { call.respondText("ok") }
             configRoute(authConfig)
             iceServerRoute(turnConfig, authEnabled = authEnabled, tokenVerifier = tokenVerifier)
             if (authEnabled) {
