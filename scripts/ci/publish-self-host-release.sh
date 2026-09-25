@@ -9,20 +9,6 @@ test -f web-app-dist/web-app.wasm
 command -v docker >/dev/null
 docker buildx version >/dev/null
 command -v gh >/dev/null
-: "${GITHUB_TOKEN:?Set TeamCity env.GITHUB_TOKEN to a classic PAT with write:packages and repo scopes}"
-
-# GHCR publishing from TeamCity requires a classic PAT. Verify its scopes in
-# dry runs too, before a release tag can leave one image only half published.
-headers="$(mktemp)"
-http_status="$(curl --silent --show-error --dump-header "$headers" --output /dev/null \
-    --write-out '%{http_code}' -H "Authorization: Bearer $GITHUB_TOKEN" \
-    https://api.github.com/user)"
-scopes="$(sed -n 's/^[Xx]-[Oo]auth-[Ss]copes: //p' "$headers" | tr -d ' \r')"
-rm -f "$headers"
-if [[ "$http_status" != 200 || ",$scopes," != *",write:packages,"* || ",$scopes," != *",repo,"* ]]; then
-    echo "TeamCity GitHub token must be a classic PAT with write:packages and repo scopes" >&2
-    exit 1
-fi
 
 dry_run="${SHILLING_RELEASE_DRY_RUN:-0}"
 if [[ "$dry_run" != 0 && "$dry_run" != 1 ]]; then
@@ -51,6 +37,7 @@ if [[ "$dry_run" == 0 ]]; then
         exit 1
     }
 
+    : "${GITHUB_TOKEN:?Set TeamCity env.GITHUB_TOKEN for GitHub release creation}"
     export GH_TOKEN="$GITHUB_TOKEN"
 
     # Existing tags/releases are immutable. In particular, do not republish
@@ -58,6 +45,20 @@ if [[ "$dry_run" == 0 ]]; then
     if gh release view "$tag" --repo j1philli/shilling >/dev/null 2>&1; then
         echo "GitHub release $tag already exists; skipping image publication"
         exit 0
+    fi
+
+    # GHCR requires a classic PAT. Keep it separate from the token TeamCity
+    # already uses for commit statuses and GitHub release creation.
+    : "${GHCR_TOKEN:?Set a TeamCity env.GHCR_TOKEN password parameter with a classic PAT scoped write:packages}"
+    headers="$(mktemp)"
+    http_status="$(curl --silent --show-error --dump-header "$headers" --output /dev/null \
+        --write-out '%{http_code}' -H "Authorization: Bearer $GHCR_TOKEN" \
+        https://api.github.com/user)"
+    scopes="$(sed -n 's/^[Xx]-[Oo]auth-[Ss]copes: //p' "$headers" | tr -d ' \r')"
+    rm -f "$headers"
+    if [[ "$http_status" != 200 || ",$scopes," != *",write:packages,"* ]]; then
+        echo "TeamCity GHCR_TOKEN must be a classic PAT with write:packages scope" >&2
+        exit 1
     fi
 else
     tag="dry-run"
@@ -85,7 +86,7 @@ if [[ "$dry_run" == 1 ]]; then
     exit 0
 fi
 
-printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io -u j1philli --password-stdin >/dev/null
+printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u j1philli --password-stdin >/dev/null
 
 for target in server web; do
     if [[ "$target" == server ]]; then
