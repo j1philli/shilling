@@ -27,7 +27,7 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/xwin-cache \
     --mount=type=cache,target=/workspace/src-tauri/target \
     tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc \
-      --bundles nsis --config '{"build":{"beforeBuildCommand":""}}' && \
+      --config '{"build":{"beforeBuildCommand":""},"bundle":{"targets":["nsis"]}}' && \
     mkdir -p /out && \
     cp target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe /out/
 

@@ -66,11 +66,11 @@ requires a Windows runner. Both jobs build inside Debian 12 containers, so the
 agent does not need a local Tauri installation. These artifacts stay in TeamCity;
 they are not automatically attached to GitHub releases. A GitHub release
 therefore confirms the self-hosted web and server images, not mobile or desktop
-artifacts. Every
-current self-hosted release publishes both images, even when the code change
-affects only one target. A manual `Self-hosted Release` build with
+artifacts. Every current self-hosted release publishes both images, even when
+the code change affects only one target. A manual `Self-hosted Release` build with
 `env.SHILLING_RELEASE_DRY_RUN=1` builds both images locally from the TeamCity
-artifacts without publishing them. Mobile and desktop package configurations
+artifacts without publishing them, and checks the GHCR token's package scope
+when that token is configured. Mobile and desktop package configurations
 remain available for manual runs; they do not auto-queue on tags until their
 runners and signing are ready.
 
@@ -83,7 +83,7 @@ builds and signing checks succeed, and list exactly which targets are present.
 If a fix is target-only, advance `PATCH` and publish only that target while
 recording the shared source tag.
 
-Completing that pipeline requires macOS and Windows agents, working mobile
-signing and store uploads, and a release gate that replaces the current
-independent `main` deployments. Until then, do not treat a GitHub release as
-proof that every client shipped together.
+Completing that pipeline requires a macOS agent, a Windows agent if MSI is a
+required target, working mobile signing and store uploads, and a release gate
+that replaces the current independent `main` deployments. Until then, a GitHub
+release does not prove that every client shipped together.
