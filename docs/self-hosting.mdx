@@ -41,6 +41,10 @@ the web app, and preserve WebSocket upgrades. The proxy must send the
 Caddy configuration. Browsers require a secure context for the web features
 used by Shilling; `localhost` is allowed for local use.
 
+The Android and desktop apps also require HTTPS when connecting to a server on
+another device. Localhost HTTP remains available for local development, and the
+Android emulator can use `http://10.0.2.2:8081` to reach the host machine.
+
 **Restrict access to the entire instance.** Self-hosted mode currently accepts
 the household ID claimed in a signaling `Join` message without verifying a
 user or household membership. Anyone who can reach an exposed instance and
