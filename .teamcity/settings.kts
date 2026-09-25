@@ -302,55 +302,27 @@ object IosBuild : BuildType({
 
 object DesktopLinux : BuildType({
     name = "Desktop Linux"
-    description = "Build Linux desktop app (x86_64 AppImage)"
+    description = "Build Linux desktop app (x86_64 AppImage, deb, and rpm)"
+    artifactRules = "desktop-artifacts/linux/** => desktop-linux.zip"
 
     vcs {
         root(DslContext.settingsRoot)
     }
 
     dependencies {
-        snapshot(CI) {
+        snapshot(WebDeploy) {
             onDependencyFailure = FailureAction.FAIL_TO_START
+        }
+        artifacts(WebDeploy) {
+            buildRule = sameChain()
+            artifactRules = "web-app-dist.zip!** => web-app-dist"
         }
     }
 
     steps {
         script {
-            name = "Install npm dependencies"
-            scriptContent = "npm install"
-        }
-        script {
-            name = "Build wasmJs artifacts"
-            scriptContent = "bash build-web.sh"
-        }
-        script {
-            name = "Build Tauri app"
-            scriptContent = """
-                #!/bin/bash
-                set -euo pipefail
-                cd src-tauri
-                cargo tauri build --bundles appimage
-            """.trimIndent()
-        }
-        script {
-            name = "Upload to GitHub Release"
-            scriptContent = """
-                #!/bin/bash
-                set -euo pipefail
-
-                TAG="${'$'}{BUILD_VCS_BRANCH##refs/tags/}"
-                echo "Uploading artifacts for tag: ${'$'}TAG"
-
-                # Find built artifacts
-                BUNDLE_DIR="src-tauri/target/release/bundle"
-
-                for f in "${'$'}BUNDLE_DIR"/appimage/*.AppImage; do
-                    if [ -f "${'$'}f" ]; then
-                        echo "Uploading: ${'$'}f"
-                        gh release upload "${'$'}TAG" "${'$'}f" --clobber || true
-                    fi
-                done
-            """.trimIndent()
+            name = "Package Linux desktop app"
+            scriptContent = "bash scripts/ci/build-desktop-linux.sh"
         }
     }
 

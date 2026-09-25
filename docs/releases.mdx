@@ -58,8 +58,13 @@ parameter, `env.GHCR_TOKEN`, on the parent Shilling project to a GitHub classic
 personal access token with `write:packages` scope for the image push. The VCS
 root must watch release tags as well as branches.
 
-Only a Linux agent is connected today. A GitHub release therefore confirms
-the self-hosted web and server images, not mobile or desktop artifacts. Every
+Only a Linux agent is connected today. The manual `Desktop Linux` job consumes
+the tested web bundle from the same TeamCity build chain and produces x86_64
+AppImage, Debian, and RPM artifacts. It builds inside Debian 12 so the agent
+does not need a local Tauri installation. These artifacts stay in TeamCity;
+they are not automatically attached to GitHub releases. A GitHub release
+therefore confirms the self-hosted web and server images, not mobile or desktop
+artifacts. Every
 current self-hosted release publishes both images, even when the code change
 affects only one target. A manual `Self-hosted Release` build with
 `env.SHILLING_RELEASE_DRY_RUN=1` builds both images locally from the TeamCity
