@@ -60,8 +60,10 @@ root must watch release tags as well as branches.
 
 Only a Linux agent is connected today. The manual `Desktop Linux` job consumes
 the tested web bundle from the same TeamCity build chain and produces x86_64
-AppImage, Debian, and RPM artifacts. It builds inside Debian 12 so the agent
-does not need a local Tauri installation. These artifacts stay in TeamCity;
+AppImage, Debian, and RPM artifacts. The manual `Desktop Windows` job uses that
+same bundle to cross-build an x86_64 NSIS installer on Linux. MSI packaging
+requires a Windows runner. Both jobs build inside Debian 12 containers, so the
+agent does not need a local Tauri installation. These artifacts stay in TeamCity;
 they are not automatically attached to GitHub releases. A GitHub release
 therefore confirms the self-hosted web and server images, not mobile or desktop
 artifacts. Every

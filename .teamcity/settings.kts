@@ -405,59 +405,33 @@ object DesktopMacOS : BuildType({
 })
 
 object DesktopWindows : BuildType({
-    name = "Desktop Windows"
-    description = "Build Windows desktop app (.msi + .exe)"
+    name = "Desktop Windows (Linux cross-build)"
+    description = "Cross-build the Windows x86_64 NSIS installer on the Linux agent"
+    artifactRules = "desktop-artifacts/windows/** => desktop-windows.zip"
 
     vcs {
         root(DslContext.settingsRoot)
     }
 
     dependencies {
-        snapshot(CI) {
+        snapshot(WebDeploy) {
             onDependencyFailure = FailureAction.FAIL_TO_START
+        }
+        artifacts(WebDeploy) {
+            buildRule = sameChain()
+            artifactRules = "web-app-dist.zip!** => web-app-dist"
         }
     }
 
     steps {
         script {
-            name = "Agent health check"
-            scriptContent = "powershell -ExecutionPolicy Bypass -File scripts/ci/check-windows-agent.ps1"
-        }
-        script {
-            name = "Install npm dependencies"
-            scriptContent = "npm install"
-        }
-        script {
-            name = "Build wasmJs artifacts"
-            scriptContent = "bash build-web.sh"
-        }
-        script {
-            name = "Build Tauri app"
-            scriptContent = """
-                cd src-tauri
-                cargo tauri build
-            """.trimIndent()
-        }
-        script {
-            name = "Upload to GitHub Release"
-            scriptContent = """
-                set TAG=%BUILD_VCS_BRANCH:refs/tags/=%
-                echo Uploading Windows artifacts for tag: %TAG%
-
-                for %%f in (src-tauri\target\release\bundle\msi\*.msi) do (
-                    echo Uploading: %%f
-                    gh release upload %TAG% "%%f" --clobber
-                )
-                for %%f in (src-tauri\target\release\bundle\nsis\*.exe) do (
-                    echo Uploading: %%f
-                    gh release upload %TAG% "%%f" --clobber
-                )
-            """.trimIndent()
+            name = "Package Windows desktop app"
+            scriptContent = "bash scripts/ci/build-desktop-windows.sh"
         }
     }
 
     requirements {
-        contains("teamcity.agent.jvm.os.name", "Windows")
+        equals("teamcity.agent.jvm.os.name", "Linux")
     }
 })
 
