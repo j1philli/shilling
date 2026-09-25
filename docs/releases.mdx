@@ -52,9 +52,11 @@ JAR and `Web Deploy` bundle from the same source revision. TeamCity can reuse a
 successful upstream build at that revision, so it does not need to compile the
 same target again just to package its image. The hosted Pages deployment uses
 the original web bundle; the release job prepares a copy for self-hosting.
-The release requires a Linux agent with Docker Buildx and `gh`, plus a TeamCity
-`env.GITHUB_TOKEN` classic personal access token with `write:packages` and
-`repo` permissions. The VCS root must watch `refs/tags/v*` as well as branches.
+The release requires a Linux agent with Docker Buildx and `gh`. TeamCity's
+existing `env.GITHUB_TOKEN` creates the GitHub release. Set a separate password
+parameter, `env.GHCR_TOKEN`, on the parent Shilling project to a GitHub classic
+personal access token with `write:packages` scope for the image push. The VCS
+root must watch release tags as well as branches.
 
 Only a Linux agent is connected today. A GitHub release therefore confirms
 the self-hosted web and server images, not mobile or desktop artifacts. Every
