@@ -51,23 +51,22 @@ src-tauri/gen/
 # wasmJs build output
 web-app-dist/
 desktop-artifacts/
+mobile-artifacts/
 
 # Generated icon pipeline outputs
-# Track only icon source masters and scripts; generated variants/platform assets stay local.
+# Generated variants stay local. Mobile launcher icons are tracked so clean CI
+# checkouts can build without running the optional icon-variant generator.
 icons/.generated/
 icons/dev/
 icons/beta/
 icons/ga/
 app/android-app/res/mipmap-anydpi-v26/ic_launcher.xml
-app/android-app/res/mipmap-*/ic_launcher.png
 app/android-app/res/mipmap-*/ic_launcher_background.png
 app/android-app/res/mipmap-*/ic_launcher_foreground.png
 app/android-app/res/mipmap-*/ic_launcher_monochrome.png
 src-tauri/icons/
 app/web-app/apple-touch-icon.png
 app/web-app/favicon.ico
-app/ios-app/src/Assets.xcassets/AppIcon.appiconset/Contents.json
-app/ios-app/src/Assets.xcassets/AppIcon.appiconset/*.png
 app/shared-ui/src/commonMain/kotlin/finance/shilling/shared/ui/AppLogoAsset.kt
 
 # Tool caches

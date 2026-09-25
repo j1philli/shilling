@@ -100,12 +100,13 @@ object CI : BuildType({
 })
 
 // =============================================================================
-// Phase 2a: Android Build + Play Store Internal Testing
+// Phase 2a: Android packages
 // =============================================================================
 
 object AndroidBuild : BuildType({
     name = "Android Build"
-    description = "Build AAB, sign, upload to Play Internal Testing"
+    description = "Build an installable debug APK and unsigned release AAB on Linux"
+    artifactRules = "mobile-artifacts/android/** => android.zip"
 
     vcs {
         root(DslContext.settingsRoot)
@@ -119,71 +120,13 @@ object AndroidBuild : BuildType({
 
     steps {
         script {
-            name = "Build Android AAB"
-            scriptContent = """
-                bash scripts/ci/retry.sh ./kotlin build -m android-app
-            """.trimIndent()
+            name = "Install Android SDK 37"
+            scriptContent = "bash scripts/ci/ensure-android-sdk.sh"
         }
         script {
-            name = "Sign AAB"
-            scriptContent = """
-                #!/bin/bash
-                set -euo pipefail
-
-                AAB=$(find build -name "*.aab" -type f | head -1)
-                if [ -z "${'$'}AAB" ]; then
-                    echo "ERROR: No AAB found"
-                    exit 1
-                fi
-                echo "Found AAB: ${'$'}AAB"
-
-                # Decode keystore from TeamCity parameter
-                echo "${'$'}PLAY_KEYSTORE_BASE64" | base64 -d > /tmp/upload-keystore.jks
-
-                jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-                    -keystore /tmp/upload-keystore.jks \
-                    -storepass "${'$'}PLAY_KEYSTORE_PASSWORD" \
-                    -keypass "${'$'}PLAY_KEY_PASSWORD" \
-                    "${'$'}AAB" "${'$'}PLAY_KEY_ALIAS"
-
-                rm -f /tmp/upload-keystore.jks
-                echo "Signed: ${'$'}AAB"
-            """.trimIndent()
+            name = "Package Android APK and AAB"
+            scriptContent = "bash scripts/ci/build-android.sh"
         }
-        script {
-            name = "Upload to Play Internal Testing"
-            scriptContent = """
-                #!/bin/bash
-                set -euo pipefail
-
-                AAB=$(find build -name "*.aab" -type f | head -1)
-
-                # Write service account JSON
-                echo "${'$'}PLAY_SERVICE_ACCOUNT_JSON" > /tmp/play-sa.json
-
-                # Use bundletool or Google Play API via curl
-                # For now, use Fastlane supply if available, else manual upload
-                if command -v fastlane &>/dev/null; then
-                    fastlane supply \
-                        --aab "${'$'}AAB" \
-                        --track internal \
-                        --package_name finance.shilling.android \
-                        --json_key /tmp/play-sa.json
-                else
-                    echo "Fastlane not found. Upload AAB manually or install Fastlane."
-                    echo "AAB path: ${'$'}AAB"
-                fi
-
-                rm -f /tmp/play-sa.json
-            """.trimIndent()
-        }
-    }
-
-    params {
-        password("env.PLAY_KEYSTORE_BASE64", "credentialsJSON:play-keystore-base64", display = ParameterDisplay.HIDDEN)
-        password("env.PLAY_KEYSTORE_PASSWORD", "credentialsJSON:play-keystore-password", display = ParameterDisplay.HIDDEN)
-        password("env.PLAY_KEY_PASSWORD", "credentialsJSON:play-key-password", display = ParameterDisplay.HIDDEN)
-        param("env.PLAY_KEY_ALIAS", "upload")
     }
 
     requirements {
@@ -192,12 +135,13 @@ object AndroidBuild : BuildType({
 })
 
 // =============================================================================
-// Phase 2b: iOS Build + TestFlight
+// Phase 2b: iOS app archive (macOS agent required)
 // =============================================================================
 
 object IosBuild : BuildType({
     name = "iOS Build"
-    description = "Build iOS app, archive, upload to TestFlight"
+    description = "Archive the iOS app on macOS; export an IPA when signing is configured"
+    artifactRules = "mobile-artifacts/ios/** => ios.zip"
 
     vcs {
         root(DslContext.settingsRoot)
@@ -211,84 +155,9 @@ object IosBuild : BuildType({
 
     steps {
         script {
-            name = "Agent health check"
-            scriptContent = "bash scripts/ci/check-macos-agent.sh"
+            name = "Archive iOS app"
+            scriptContent = "bash scripts/ci/build-ios.sh"
         }
-        script {
-            name = "Download WebRTC framework"
-            scriptContent = "bash setup-webrtc.sh"
-        }
-        script {
-            name = "Build Kotlin framework"
-            scriptContent = "bash scripts/ci/retry.sh ./kotlin build -m ios-app"
-        }
-        script {
-            name = "Archive and export IPA"
-            scriptContent = """
-                #!/bin/bash
-                set -euo pipefail
-
-                XCODEPROJ="app/ios-app/module.xcodeproj"
-                SCHEME="ios-app"
-                ARCHIVE_PATH="build/ios/Shilling.xcarchive"
-                EXPORT_PATH="build/ios/export"
-
-                xcodebuild archive \
-                    -project "${'$'}XCODEPROJ" \
-                    -scheme "${'$'}SCHEME" \
-                    -archivePath "${'$'}ARCHIVE_PATH" \
-                    -destination "generic/platform=iOS" \
-                    CODE_SIGN_STYLE=Manual \
-                    | xcpretty || true
-
-                # Create export options plist
-                cat > /tmp/ExportOptions.plist << 'PLIST'
-                <?xml version="1.0" encoding="UTF-8"?>
-                <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-                <plist version="1.0">
-                <dict>
-                    <key>method</key>
-                    <string>app-store-connect</string>
-                    <key>destination</key>
-                    <string>upload</string>
-                    <key>signingStyle</key>
-                    <string>manual</string>
-                    <key>teamID</key>
-                    <string>7QN6HR273V</string>
-                </dict>
-                </plist>
-                PLIST
-
-                xcodebuild -exportArchive \
-                    -archivePath "${'$'}ARCHIVE_PATH" \
-                    -exportOptionsPlist /tmp/ExportOptions.plist \
-                    -exportPath "${'$'}EXPORT_PATH"
-            """.trimIndent()
-        }
-        script {
-            name = "Upload to TestFlight"
-            scriptContent = """
-                #!/bin/bash
-                set -euo pipefail
-
-                IPA=$(find build/ios/export -name "*.ipa" -type f | head -1)
-                if [ -z "${'$'}IPA" ]; then
-                    echo "ERROR: No IPA found"
-                    exit 1
-                fi
-
-                xcrun altool --upload-app \
-                    --type ios \
-                    --file "${'$'}IPA" \
-                    --apiKey "${'$'}ASC_API_KEY_ID" \
-                    --apiIssuer "${'$'}ASC_API_ISSUER_ID"
-            """.trimIndent()
-        }
-    }
-
-    params {
-        param("env.ASC_API_KEY_ID", "")
-        param("env.ASC_API_ISSUER_ID", "")
     }
 
     requirements {
