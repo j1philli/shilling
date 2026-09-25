@@ -30,6 +30,7 @@ import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
 import java.security.spec.RSAPublicKeySpec
 import java.time.Instant
+import java.time.Duration
 import java.util.Base64
 
 private val authLog = co.touchlab.kermit.Logger.withTag("SupabaseAuth")
@@ -49,11 +50,14 @@ class SupabaseTokenVerifier(
     private val authConfig: AuthConfig
 ) : AccessTokenVerifier {
     private val json = Json { ignoreUnknownKeys = true }
-    private val httpClient = HttpClient.newHttpClient()
+    private val httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(3))
+        .build()
     private val cacheMutex = Mutex()
     private var jwksCache: CachedJwks? = null
 
     override suspend fun verifyUserToken(token: String): VerifiedSupabaseUser? {
+        if (token.length > 16_384) return null
         return if (authConfig.supabaseJwtSecret != null) {
             verifyLegacyHs256(token)
         } else {
@@ -147,6 +151,7 @@ class SupabaseTokenVerifier(
         val supabaseUrl = authConfig.supabaseUrl ?: error("Supabase URL required for JWKS verification")
         val request = HttpRequest.newBuilder()
             .uri(URI.create(supabaseUrl.trimEnd('/') + "/auth/v1/.well-known/jwks.json"))
+            .timeout(Duration.ofSeconds(5))
             .header("Accept", "application/json")
             .GET()
             .build()

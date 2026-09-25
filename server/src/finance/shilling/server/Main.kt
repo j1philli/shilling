@@ -77,6 +77,7 @@ fun main() {
         install(WebSockets) {
             pingPeriod = 15.seconds
             timeout = 15.seconds
+            maxFrameSize = 256L * 1024L
         }
         install(CORS) {
             anyHost()

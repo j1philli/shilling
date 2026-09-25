@@ -73,8 +73,13 @@ class FileTransferManager(
             log.w { "handleHeader: rejected ${header.receiptId} invalid totalSize=${header.totalSize}" }
             return
         }
-        // Don't overwrite an existing session — a duplicate FileRequest (via both P2P
-        // and signaling relay) can trigger a second header while chunks are arriving.
+        val expectedChunks = (header.totalSize + CHUNK_SIZE - 1) / CHUNK_SIZE
+        if (header.chunkCount != expectedChunks) {
+            log.w { "handleHeader: rejected ${header.receiptId} inconsistent chunkCount=${header.chunkCount}" }
+            return
+        }
+        // Don't overwrite an existing session if a peer retries a file request
+        // while chunks are arriving over the P2P data channel.
         if (header.receiptId in receiveSessions) {
             log.d { "handleHeader: session already exists for ${header.receiptId}, ignoring duplicate" }
             return
@@ -100,8 +105,16 @@ class FileTransferManager(
             }
             return false
         }
+        if (chunk.base64Data.length > MAX_SAFE_SERIALIZED_CHUNK_CHARS) return false
+        val decoded = runCatching { Base64.decode(chunk.base64Data) }.getOrNull() ?: return false
+        val expectedSize = if (chunk.index == session.chunkCount - 1) {
+            session.totalSize - chunk.index * CHUNK_SIZE
+        } else {
+            CHUNK_SIZE
+        }
+        if (decoded.size != expectedSize) return false
         val alreadyHadChunk = session.chunks[chunk.index] != null
-        session.chunks[chunk.index] = Base64.decode(chunk.base64Data)
+        session.chunks[chunk.index] = decoded
         if (!alreadyHadChunk) session.receivedCount += 1
         if (!alreadyHadChunk && (session.receivedCount % 10 == 0 || session.receivedCount == session.chunkCount)) {
             log.d {
@@ -127,6 +140,7 @@ class FileTransferManager(
         var offset = 0
         for (chunk in session.chunks) {
             val data = chunk ?: return false
+            if (data.size > bytes.size - offset) return false
             data.copyInto(bytes, offset)
             offset += data.size
         }

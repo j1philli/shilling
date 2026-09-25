@@ -34,6 +34,11 @@ class SupabaseTokenVerifierTest {
         assertNull(createSupabaseTokenVerifier(config.copy(supabaseUrl = null)))
     }
 
+    @Test
+    fun rejectsOversizedToken() = runBlocking {
+        assertNull(SupabaseTokenVerifier(config).verifyUserToken("x".repeat(16_385)))
+    }
+
     private fun token(
         role: String = "authenticated",
         issuer: String = "https://example.supabase.co/auth/v1"

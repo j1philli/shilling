@@ -1,6 +1,7 @@
 package finance.shilling.shared.data.sync
 
 import finance.shilling.shared.data.ReceiptFileStore
+import java.util.Base64
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.coroutines.Continuation
@@ -190,9 +191,9 @@ class FileTransferTest {
         val ftm = FileTransferManager(store)
 
         // Start a session but don't send all chunks
-        ftm.handleHeader(FileTransferMessage.FileHeader("r-partial", 100_000, 3))
-        ftm.handleChunk(FileTransferMessage.FileChunk("r-partial", 0, "AAAA"))
-        // Missing chunk 1 and 2
+        ftm.handleHeader(FileTransferMessage.FileHeader("r-partial", 100_000, 7))
+        ftm.handleChunk(FileTransferMessage.FileChunk("r-partial", 0, Base64.getEncoder().encodeToString(ByteArray(FileTransferManager.CHUNK_SIZE))))
+        // Remaining chunks are missing.
 
         val ok = ftm.finalizeTransfer("r-partial", "file.jpg")
         assertFalse(ok, "finalizeTransfer should fail with incomplete chunks")
@@ -210,6 +211,23 @@ class FileTransferTest {
         // After cancel, finalize should fail (session removed)
         val ok = ftm.finalizeTransfer("r-cancel", "file.jpg")
         assertFalse(ok, "finalizeTransfer should fail after cancel")
+    }
+
+    @Test
+    fun rejectsInconsistentHeaderAndMalformedChunks() = runBlockingTest {
+        val store = InMemoryFileStore()
+        val ftm = FileTransferManager(store)
+
+        ftm.handleHeader(FileTransferMessage.FileHeader("bad-header", 10, 2))
+        assertFalse(ftm.handleChunk(FileTransferMessage.FileChunk("bad-header", 0, "AAAA")))
+        assertFalse(ftm.finalizeTransfer("bad-header", "file.jpg"))
+
+        ftm.handleHeader(FileTransferMessage.FileHeader("valid-header", 10, 1))
+        assertFalse(ftm.handleChunk(FileTransferMessage.FileChunk("valid-header", 0, "%invalid")))
+        assertFalse(ftm.handleChunk(FileTransferMessage.FileChunk("valid-header", 0, "AAAA")))
+        assertFalse(ftm.handleChunk(FileTransferMessage.FileChunk("valid-header", 0, "A".repeat(40_000))))
+        assertFalse(ftm.finalizeTransfer("valid-header", "file.jpg"))
+        assertFalse(store.hasFile("valid-header"))
     }
 }
 
