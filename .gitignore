@@ -72,6 +72,7 @@ app/shared-ui/src/commonMain/kotlin/finance/shilling/shared/ui/AppLogoAsset.kt
 # Tool caches
 node_modules/
 .packager/
+supabase/.temp/
 
 # direnv
 .direnv/
