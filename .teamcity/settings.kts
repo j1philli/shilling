@@ -69,6 +69,10 @@ object CI : BuildType({
             scriptContent = "bash scripts/enforce-architecture.sh"
         }
         script {
+            name = "Product version guard"
+            scriptContent = "python3 scripts/ci/check-version.py"
+        }
+        script {
             name = "Run tests"
             scriptContent = "bash scripts/ci/run-jvm-tests.sh"
         }
@@ -530,6 +534,12 @@ object WebDeploy : BuildType({
     triggers {
         vcs {
             branchFilter = "+:*"
+        }
+    }
+
+    dependencies {
+        snapshot(CI) {
+            onDependencyFailure = FailureAction.FAIL_TO_START
         }
     }
 

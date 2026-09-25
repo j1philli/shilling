@@ -42,6 +42,9 @@ just guard-architecture  # WebRTC, signaling, and Store5 invariant checks
 
 The main modules are `app/shared` (data and sync), `app/shared-ui` (Compose UI), the platform apps under `app/`, `core` (shared protocol models), and `server` (signaling and hosted metadata). More details are in the [getting started guide](docs/getting-started.mdx) and [server docs](docs/server/overview.mdx).
 
+Release numbers and the current target publishing status are in the
+[release guide](docs/releases.mdx). Run `just check-version` before tagging.
+
 ## Contributing
 
 Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing sync, server, or data flow code.

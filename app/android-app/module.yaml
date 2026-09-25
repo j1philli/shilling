@@ -47,3 +47,5 @@ settings:
     targetSdk: 35
     namespace: finance.shilling.android
     applicationId: finance.shilling.android
+    versionName: "0.1.0"
+    versionCode: 1

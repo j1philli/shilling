@@ -6,6 +6,10 @@ set dotenv-load := false
 default:
     @just --list
 
+# Check that every distributable declares the shared product version.
+check-version:
+    python3 scripts/ci/check-version.py
+
 # ─── Icons ────────────────────────────────────────────────────────────
 
 # Apply icon variant to all platforms (dev/beta/ga)

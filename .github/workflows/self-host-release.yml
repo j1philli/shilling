@@ -11,7 +11,26 @@ permissions:
   contents: read
 
 jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check product version and release tag
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            python3 scripts/ci/check-version.py --tag "$GITHUB_REF_NAME"
+            git merge-base --is-ancestor HEAD origin/main || {
+              echo "Release tags must point to a commit on main" >&2
+              exit 1
+            }
+          else
+            python3 scripts/ci/check-version.py
+          fi
+
   server-image:
+    needs: version-check
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -47,6 +66,7 @@ jobs:
           build-args: VERSION=${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.sha }}
 
   web-image:
+    needs: version-check
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -103,6 +123,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          release_args=(--verify-tag --generate-notes --title "$GITHUB_REF_NAME")
+          release_args=(
+            --verify-tag
+            --generate-notes
+            --title "$GITHUB_REF_NAME"
+            --notes "Included: self-hosted web and signaling server images for Linux amd64/arm64, plus Compose files. Mobile and desktop builds are not published by this workflow."
+          )
           if [[ "$GITHUB_REF_NAME" == *-* ]]; then release_args+=(--prerelease); fi
           gh release create "$GITHUB_REF_NAME" release-assets/compose.yaml release-assets/shilling.env.example "${release_args[@]}"
