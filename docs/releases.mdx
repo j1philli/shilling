@@ -44,7 +44,7 @@ tag must match the base version at the tagged commit.
 | Event | Current result |
 | --- | --- |
 | Pull request | CI and test image builds; no images or release are published. |
-| Merge to `main` | TeamCity validates the app and deploys the hosted web app to Cloudflare Pages. Coolify tracks the public source repository for the hosted server; its deployment is separate. |
+| Merge to `main` | TeamCity validates the app, then deploys the hosted web app to Cloudflare Pages if CI passes. Coolify tracks the public source repository for the hosted server; its deployment is separate. |
 | `vMAJOR.MINOR.PATCH[-stage.N]` tag | GitHub Actions publishes matching self-hosted web and server images to GHCR, then creates a GitHub release with the Compose files. |
 
 TeamCity does **not** build or publish the GHCR images. Its Android, iOS,

@@ -537,6 +537,12 @@ object WebDeploy : BuildType({
         }
     }
 
+    dependencies {
+        snapshot(CI) {
+            onDependencyFailure = FailureAction.FAIL_TO_START
+        }
+    }
+
     steps {
         script {
             name = "Agent health check"

@@ -15,10 +15,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - name: Check product version and release tag
         run: |
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             python3 scripts/ci/check-version.py --tag "$GITHUB_REF_NAME"
+            git merge-base --is-ancestor HEAD origin/main || {
+              echo "Release tags must point to a commit on main" >&2
+              exit 1
+            }
           else
             python3 scripts/ci/check-version.py
           fi
