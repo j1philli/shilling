@@ -4,95 +4,91 @@ title: Releases and versioning
 
 # Releases and versioning
 
-Shilling uses one product version for its web, desktop, mobile, and server
-targets. The current base version is in the root `VERSION` file.
+Shilling uses one product version for web, desktop, mobile, and server. The
+root `VERSION` file is the source of truth.
 
 ## Version numbers
 
-Use `MAJOR.MINOR.PATCH` for the public product version:
+Use `MAJOR.MINOR.PATCH`. Major remains `0` during beta, minor is currently
+`1`, and patch increases for any published bug fix, including a fix for only
+one target. An Android-only fix after `0.1.0` is `0.1.1`, even if the other
+targets stay at `0.1.0`. Previews use tags such as `v0.1.1-beta.1`; stable
+releases use `v0.1.1`. There is no fourth public version component.
 
-- `MAJOR` remains `0` during the current beta period. Move to `1` when the
-  product and its data/sync compatibility promises are ready for a stable
-  release.
-- `MINOR` marks a feature release within a major version. The current minor
-  line is `0.1`.
-- `PATCH` increases for a released bug fix, including a fix for only one
-  target. For example, an Android-only code fix after `0.1.0` becomes
-  `0.1.1`; the release can contain only a new Android build.
+Android `versionCode` and iOS `CFBundleVersion` are separate, increasing store
+build numbers. Increase only the relevant build number for a store upload,
+including a rebuild at the same product version.
 
-Previews use a suffix on the same three-part version, such as
-`v0.1.0-beta.1`, `v0.1.0-beta.2`, and `v0.1.0-rc.1`. Stable releases use
-`v0.1.0`. Git tags and published container images use the same release tag.
-Do not add a fourth numeric component. [Apple app versions](https://developer.apple.com/help/glossary/version-number/)
-use three numeric components, and four-part numbers are outside
-[SemVer](https://semver.org/spec/v2.0.0.html). Target-specific build numbers are
-separate from the public product version.
+Run `just set-version 0.1.1` to update all product manifests. Add `--android`
+for a Play upload and `--ios` for an App Store Connect upload. For example,
+`just set-version 0.1.1 --android --ios` prepares a full mobile release;
+`just set-version 0.1.2 --android` prepares an Android-only patch. The command
+checks the manifests before and after the update. `just check-version` runs in
+TeamCity CI and before self-hosted image publishing. The tag must match the
+version at that commit.
 
-Android `versionName`, iOS `CFBundleShortVersionString`, Tauri, Cargo, and npm
-all carry the base `MAJOR.MINOR.PATCH` value. Android `versionCode` and iOS
-`CFBundleVersion` are independent, increasing build identifiers used by their
-stores. Increase the relevant build identifier for each new store upload,
-including a rebuild of the same product version. A build identifier is not a
-target-specific product patch number.
+## What TeamCity does
 
-Run `just check-version` after changing `VERSION` and the platform manifests.
-The same check runs in TeamCity CI and again before publishing a release. A
-release tag must match the base version at the tagged commit.
-
-## What publishes today
-
-| Event | Current result |
+| Event | Result |
 | --- | --- |
-| Pull request | TeamCity runs CI and builds the web bundle; no images or release are published. |
-| Merge to `main` | TeamCity validates the app, then deploys the hosted web app to Cloudflare Pages if CI passes. Coolify tracks the public source repository for the hosted server; its deployment is separate. |
-| `vMAJOR.MINOR.PATCH[-stage.N]` tag | TeamCity runs CI, packages the server JAR, builds the web bundle, then publishes both self-hosted images to GHCR from those artifacts and creates a GitHub release with Compose files. |
+| Push to any branch | `Build Linux-agent targets` runs CI, web, server, Android, Linux desktop, and Windows desktop at the same revision. Package files become TeamCity artifacts. |
+| Merge to `main` | The branch chain also deploys the hosted web app to Cloudflare Pages after CI passes. Coolify tracks the hosted server's source separately. |
+| Push a `vX.Y.Z` or preview tag | Nothing publishes automatically. Queue a build matrix on the tag, review the artifacts, and explicitly publish the selected targets. |
 
-The TeamCity `Self-hosted Release` configuration depends on the `Server Build`
-JAR and `Web Deploy` bundle from the same source revision. TeamCity can reuse a
-successful upstream build at that revision, so it does not need to compile the
-same target again just to package its image. The hosted Pages deployment uses
-the original web bundle; the release job prepares a copy for self-hosting.
-The release requires a Linux agent with Docker Buildx and `gh`. TeamCity's
-existing `env.GITHUB_TOKEN` creates the GitHub release. Set a separate password
-parameter, `env.GHCR_TOKEN`, on the parent Shilling project to a GitHub classic
-personal access token with `write:packages` scope for the image push. The VCS
-root must watch release tags as well as branches.
+The single Linux runner works through the branch matrix in a queue. The
+`Build all targets` composite also includes iOS and macOS desktop and can be
+queued on any branch or tag after the Mac agent is connected. Snapshot
+dependencies pin the jobs in a chain to one source revision. Failed jobs fail
+the composite. The macOS desktop job consumes the same tested web bundle as
+the Linux and Windows desktop jobs.
 
-Only a Linux agent is connected today. The manual `Android Build` job produces
-an installable debug APK and an unsigned release AAB. It installs Android SDK
-37.0 if needed and publishes both files as a TeamCity artifact. It does not sign
-or upload the AAB; a Play upload still needs a configured upload key and service
-account. The `iOS Build` job archives the app on macOS and publishes an unsigned
-app ZIP by default. Set `env.SHILLING_IOS_SIGNED=1` on a macOS build with Apple
-signing credentials installed to export an IPA. It does not upload to TestFlight.
-xtool.sh can build Swift Package based iOS apps on Linux, but Shilling's iOS app
-requires a Kotlin/Native framework, which cannot be linked for Apple targets on
-Linux. The manual `Desktop Linux` job consumes
-the tested web bundle from the same TeamCity build chain and produces x86_64
-AppImage, Debian, and RPM artifacts. The manual `Desktop Windows` job uses that
-same bundle to cross-build an x86_64 NSIS installer on Linux. MSI packaging
-requires a Windows runner. Both jobs build inside Debian 12 containers, so the
-agent does not need a local Tauri installation. These artifacts stay in TeamCity;
-they are not automatically attached to GitHub releases. A GitHub release
-therefore confirms the self-hosted web and server images, not mobile or desktop
-artifacts. Every current self-hosted release publishes both images, even when
-the code change affects only one target. A manual `Self-hosted Release` build with
-`env.SHILLING_RELEASE_DRY_RUN=1` builds both images locally from the TeamCity
-artifacts without publishing them, and checks the GHCR token's package scope
-when that token is configured. Mobile and desktop package configurations
-remain available for manual runs; they do not auto-queue on tags until their
-signing and store delivery are ready. iOS also needs a macOS TeamCity agent.
+Android produces a debug APK and an unsigned release AAB. iOS produces an
+unsigned app ZIP by default; setting `env.SHILLING_IOS_SIGNED=1` with Apple
+signing credentials installed exports an IPA. Linux desktop produces x86_64
+AppImage, Debian, and RPM packages. Windows desktop cross-builds an x86_64
+NSIS installer on Linux; MSI needs a Windows runner. macOS desktop produces
+an unsigned universal DMG for Apple Silicon and Intel. These packages stay in
+TeamCity until explicitly published.
+The workflows do not yet sign or upload to Play, TestFlight, or desktop stores.
 
-## Coordinated release target
+The manual `Self-hosted Release` job consumes the tested server JAR and web
+bundle from the same tag. It pushes images to GHCR and creates a GitHub
+release. Set `env.SHILLING_RELEASE_TARGETS` on that run to `server,web`
+(default), `server`, or `web`. A two-image release includes Compose files. A
+one-image release omits Compose files because the other image remains on its
+previous version. `env.SHILLING_RELEASE_DRY_RUN=1` builds the selected images
+without publishing. The job needs a Linux agent with Docker Buildx and `gh`,
+TeamCity `env.GITHUB_TOKEN` for the GitHub release, and a separate
+`env.GHCR_TOKEN` classic PAT with `write:packages` for the image push. The VCS
+root must watch tags as well as branches. Existing GitHub releases are not
+overwritten.
 
-For a full release, freeze one tested commit, set its version, and tag that
-commit once. Build the web, server, Android, iOS, macOS, Windows, and Linux
-targets from the same tag. Publish a release only after the required target
-builds and signing checks succeed, and list exactly which targets are present.
-If a fix is target-only, advance `PATCH` and publish only that target while
-recording the shared source tag.
+## Full release
 
-Completing that pipeline requires a macOS agent, a Windows agent if MSI is a
-required target, working mobile signing and store uploads, and a release gate
-that replaces the current independent `main` deployments. Until then, a GitHub
-release does not prove that every client shipped together.
+1. Run `just set-version X.Y.Z --android --ios`, review the manifest changes,
+   and merge them to `main`. Wait for its branch matrix to pass.
+2. Tag that tested `main` commit `vX.Y.Z` (or `vX.Y.Z-beta.1`) and push the tag.
+3. Queue `Build all targets` on the tag and inspect the artifacts. Until the
+   Mac agent is connected, queue `Build Linux-agent targets` and treat the
+   release as partial.
+4. Complete signing and store upload checks. Queue `Self-hosted Release` on
+   the same tag with `env.SHILLING_RELEASE_TARGETS=server,web` to publish both
+   images and the Compose files. Attach only ready client packages to the
+   GitHub release and list exactly which targets were shipped.
+
+## One-target patch
+
+Increase the shared patch number, passing only the store build-number flag
+for an affected mobile target. Merge, wait for the `main` matrix, and tag the
+tested commit. Queue the affected target job on that tag. For a server-only or
+web-only self-hosted image, run `Self-hosted Release` with the corresponding
+`env.SHILLING_RELEASE_TARGETS` value. For a client-only patch, publish the
+signed client package through its store or attach the installer to a GitHub
+release. Record the target shipped for that tag.
+
+The build matrix is coordinated, but delivery to every store is still manual.
+We need the Mac agent, Apple signing and notarization, Android upload signing,
+and store upload automation for one-click multi-target releases. Hosted Pages
+and Coolify deploy from `main` independently of release tags, so a tag does
+not move hosted web and server atomically. A GitHub release currently proves
+only the images it lists, not that every client shipped together.

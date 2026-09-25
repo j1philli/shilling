@@ -9,7 +9,7 @@ version = "2024.12"
 project {
     description = "Shilling — Kotlin Multiplatform household budgeting app"
 
-    // --- Phase 1: CI (every push) ---
+    // --- Phase 1: CI (run by the branch build chain) ---
     buildType(CI)
 
     // --- Phase 2: release chain and manual platform builds ---
@@ -23,6 +23,8 @@ project {
     buildType(DesktopLinux)
     buildType(DesktopMacOS)
     buildType(DesktopWindows)
+    buildType(LinuxTargets)
+    buildType(AllTargets)
 
     // --- Parameters (secrets configured in TeamCity UI) ---
     params {
@@ -39,7 +41,7 @@ project {
 }
 
 // =============================================================================
-// Phase 1: CI — Architecture guard + tests (every push, Linux agent)
+// Phase 1: CI — Architecture guard + tests (Linux agent)
 // =============================================================================
 
 object CI : BuildType({
@@ -48,12 +50,6 @@ object CI : BuildType({
 
     vcs {
         root(DslContext.settingsRoot)
-    }
-
-    triggers {
-        vcs {
-            branchFilter = "+:*\n-:v*"
-        }
     }
 
     steps {
@@ -202,15 +198,20 @@ object DesktopLinux : BuildType({
 
 object DesktopMacOS : BuildType({
     name = "Desktop macOS"
-    description = "Build macOS desktop app (.dmg) with notarization"
+    description = "Build an unsigned macOS desktop DMG from the tested web bundle"
+    artifactRules = "desktop-artifacts/macos/** => desktop-macos.zip"
 
     vcs {
         root(DslContext.settingsRoot)
     }
 
     dependencies {
-        snapshot(CI) {
+        snapshot(WebDeploy) {
             onDependencyFailure = FailureAction.FAIL_TO_START
+        }
+        artifacts(WebDeploy) {
+            buildRule = sameChain()
+            artifactRules = "web-app-dist.zip!** => web-app-dist"
         }
     }
 
@@ -220,51 +221,8 @@ object DesktopMacOS : BuildType({
             scriptContent = "bash scripts/ci/check-macos-agent.sh"
         }
         script {
-            name = "Install npm dependencies"
-            scriptContent = "npm install"
-        }
-        script {
-            name = "Build wasmJs artifacts"
-            scriptContent = "bash build-web.sh"
-        }
-        script {
-            name = "Build Tauri app (universal binary)"
-            scriptContent = """
-                #!/bin/bash
-                set -euo pipefail
-                cd src-tauri
-
-                # Build for both architectures if possible
-                if rustup target list --installed | grep -q "aarch64-apple-darwin"; then
-                    cargo tauri build --target aarch64-apple-darwin
-                fi
-                if rustup target list --installed | grep -q "x86_64-apple-darwin"; then
-                    cargo tauri build --target x86_64-apple-darwin
-                fi
-
-                # If universal binary target is available
-                if rustup target list --installed | grep -q "universal-apple-darwin"; then
-                    cargo tauri build --target universal-apple-darwin
-                fi
-            """.trimIndent()
-        }
-        script {
-            name = "Upload to GitHub Release"
-            scriptContent = """
-                #!/bin/bash
-                set -euo pipefail
-
-                TAG="${'$'}{BUILD_VCS_BRANCH##refs/tags/}"
-                echo "Uploading macOS artifacts for tag: ${'$'}TAG"
-
-                BUNDLE_DIR="src-tauri/target"
-
-                # Upload .dmg files from any target directory
-                find "${'$'}BUNDLE_DIR" -name "*.dmg" -type f | while read -r f; do
-                    echo "Uploading: ${'$'}f"
-                    gh release upload "${'$'}TAG" "${'$'}f" --clobber || true
-                done
-            """.trimIndent()
+            name = "Package macOS desktop app"
+            scriptContent = "bash scripts/ci/build-desktop-macos.sh"
         }
     }
 
@@ -315,12 +273,6 @@ object WebDeploy : BuildType({
 
     vcs {
         root(DslContext.settingsRoot)
-    }
-
-    triggers {
-        vcs {
-            branchFilter = "+:*\n-:v*"
-        }
     }
 
     dependencies {
@@ -455,21 +407,19 @@ object ServerBuild : BuildType({
 })
 
 // =============================================================================
-// Phase 2f: Publish both self-hosted images from the tested TeamCity artifacts
+// Phase 2f: Publish self-hosted images from tested TeamCity artifacts, manually
 // =============================================================================
 
 object SelfHostRelease : BuildType({
     name = "Self-hosted Release"
-    description = "Publish the web and server images together, then create the GitHub release"
+    description = "Manually publish selected self-hosted images from a tested release tag"
+
+    params {
+        param("env.SHILLING_RELEASE_TARGETS", "server,web")
+    }
 
     vcs {
         root(DslContext.settingsRoot)
-    }
-
-    triggers {
-        vcs {
-            branchFilter = "+:v*"
-        }
     }
 
     dependencies {
@@ -500,5 +450,46 @@ object SelfHostRelease : BuildType({
 
     requirements {
         equals("teamcity.agent.jvm.os.name", "Linux")
+    }
+})
+
+// Agentless orchestration jobs keep every package on one source revision.
+// The Linux matrix runs on every branch; neither job publishes a release.
+object LinuxTargets : BuildType({
+    name = "Build Linux-agent targets"
+    description = "Build Android, Linux desktop, Windows desktop, web, and server at one revision"
+    type = BuildTypeSettings.Type.COMPOSITE
+
+    vcs {
+        root(DslContext.settingsRoot)
+    }
+
+    triggers {
+        vcs {
+            branchFilter = "+:*\n-:v*"
+        }
+    }
+
+    dependencies {
+        snapshot(AndroidBuild) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        snapshot(DesktopLinux) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        snapshot(DesktopWindows) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        snapshot(ServerBuild) { onDependencyFailure = FailureAction.FAIL_TO_START }
+    }
+})
+
+object AllTargets : BuildType({
+    name = "Build all targets"
+    description = "Build every package at one revision when the macOS agent is connected"
+    type = BuildTypeSettings.Type.COMPOSITE
+
+    vcs {
+        root(DslContext.settingsRoot)
+    }
+
+    dependencies {
+        snapshot(LinuxTargets) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        snapshot(IosBuild) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        snapshot(DesktopMacOS) { onDependencyFailure = FailureAction.FAIL_TO_START }
     }
 })

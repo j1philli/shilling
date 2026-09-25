@@ -2,10 +2,19 @@
 set -euo pipefail
 
 # TeamCity downloads the web bundle and server JAR from builds in this chain.
-# This job only turns those tested artifacts into the two public images.
-test -f release-input/server/server-jvm-executable.jar
-test -f web-app-dist/index.html
-test -f web-app-dist/web-app.wasm
+# Publish only the selected targets from those tested artifacts.
+targets="${SHILLING_RELEASE_TARGETS:-server,web}"
+case "$targets" in
+    server|web|server,web) ;;
+    *) echo "SHILLING_RELEASE_TARGETS must be server, web, or server,web" >&2; exit 1 ;;
+esac
+if [[ ",$targets," == *,server,* ]]; then
+    test -f release-input/server/server-jvm-executable.jar
+fi
+if [[ ",$targets," == *,web,* ]]; then
+    test -f web-app-dist/index.html
+    test -f web-app-dist/web-app.wasm
+fi
 command -v docker >/dev/null
 docker buildx version >/dev/null
 command -v gh >/dev/null
@@ -68,8 +77,12 @@ else
     tag="dry-run"
 fi
 
-node scripts/ci/prepare-self-host-web.mjs
-cp deploy/self-host/server.Dockerfile release-input/server/Dockerfile
+if [[ ",$targets," == *,web,* ]]; then
+    node scripts/ci/prepare-self-host-web.mjs
+fi
+if [[ ",$targets," == *,server,* ]]; then
+    cp deploy/self-host/server.Dockerfile release-input/server/Dockerfile
+fi
 
 builder="shilling-release-${TEAMCITY_BUILD_ID:-$$}"
 docker_config="$(mktemp -d)"
@@ -82,17 +95,18 @@ trap cleanup EXIT
 docker buildx create --name "$builder" --driver docker-container --use >/dev/null
 
 if [[ "$dry_run" == 1 ]]; then
-    docker buildx build --builder "$builder" --platform linux/amd64 --load \
-        --build-arg "VERSION=$tag" -t "shilling-server:$tag" release-input/server
-    docker buildx build --builder "$builder" --platform linux/amd64 --load \
-        --build-arg "VERSION=$tag" -t "shilling-web:$tag" web-app-dist
-    echo "Dry run built both images from TeamCity artifacts; nothing was published"
+    for target in ${targets//,/ }; do
+        if [[ "$target" == server ]]; then context=release-input/server; else context=web-app-dist; fi
+        docker buildx build --builder "$builder" --platform linux/amd64 --load \
+            --build-arg "VERSION=$tag" -t "shilling-$target:$tag" "$context"
+    done
+    echo "Dry run built $targets image(s) from TeamCity artifacts; nothing was published"
     exit 0
 fi
 
 printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u j1philli --password-stdin >/dev/null
 
-for target in server web; do
+for target in ${targets//,/ }; do
     if [[ "$target" == server ]]; then
         context=release-input/server
     else
@@ -105,9 +119,13 @@ for target in server web; do
 done
 
 mkdir -p release-assets
-cp deploy/self-host/compose.yaml release-assets/compose.yaml
-printf 'SHILLING_VERSION=%s\n' "$tag" > release-assets/shilling.env.example
+assets=()
+if [[ "$targets" == server,web ]]; then
+    cp deploy/self-host/compose.yaml release-assets/compose.yaml
+    printf 'SHILLING_VERSION=%s\n' "$tag" > release-assets/shilling.env.example
+    assets=(release-assets/compose.yaml release-assets/shilling.env.example)
+fi
 release_args=(--repo j1philli/shilling --verify-tag --generate-notes --title "$tag" \
-    --notes "Included: self-hosted web and signaling server images for Linux amd64/arm64, plus Compose files. Mobile and desktop builds are separate.")
+    --notes "Included: self-hosted $targets image(s) for Linux amd64/arm64. Mobile and desktop builds are separate.")
 if [[ "$tag" == *-* ]]; then release_args+=(--prerelease); fi
-gh release create "$tag" release-assets/compose.yaml release-assets/shilling.env.example "${release_args[@]}"
+gh release create "$tag" "${assets[@]}" "${release_args[@]}"

@@ -53,13 +53,15 @@ fi
 
 # ---------- Rust ----------
 
-if ! command -v cargo &>/dev/null; then
-    echo "Installing Rust..."
+if ! command -v rustup &>/dev/null; then
+    echo "Installing rustup..."
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    source "$HOME/.cargo/env"
 else
-    echo "Rust already installed"
+    echo "rustup already installed"
 fi
+export PATH="$HOME/.cargo/bin:$PATH"
+rustup toolchain install stable --profile minimal
+rustup default stable
 
 # Add both macOS targets for universal builds
 rustup target add aarch64-apple-darwin 2>/dev/null || true
@@ -72,33 +74,6 @@ if ! command -v cargo-tauri &>/dev/null; then
     cargo install tauri-cli
 else
     echo "cargo-tauri already installed"
-fi
-
-# ---------- ImageMagick ----------
-
-if ! command -v magick &>/dev/null; then
-    echo "Installing ImageMagick..."
-    brew install imagemagick
-else
-    echo "ImageMagick already installed"
-fi
-
-# ---------- GitHub CLI ----------
-
-if ! command -v gh &>/dev/null; then
-    echo "Installing GitHub CLI..."
-    brew install gh
-else
-    echo "GitHub CLI already installed"
-fi
-
-# ---------- xcpretty (nicer xcodebuild output) ----------
-
-if ! command -v xcpretty &>/dev/null; then
-    echo "Installing xcpretty..."
-    gem install xcpretty 2>/dev/null || sudo gem install xcpretty
-else
-    echo "xcpretty already installed"
 fi
 
 # ---------- Done ----------

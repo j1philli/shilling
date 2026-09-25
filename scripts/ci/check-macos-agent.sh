@@ -2,6 +2,7 @@
 # Verifies a macOS CI agent has all required tools for Shilling builds.
 # Exit non-zero with clear messages for any missing/incompatible tool.
 set -euo pipefail
+export PATH="$HOME/.cargo/bin:$PATH"
 
 fail=0
 
@@ -24,8 +25,8 @@ check_java() {
     return
   fi
   local ver
-  ver=$(java -version 2>&1 | head -1 | sed 's/.*"\([0-9]*\).*/\1/')
-  if [ "$ver" -lt 21 ]; then
+  ver=$(java -version 2>&1 | sed -n '1s/^[^"]*"\([0-9][0-9]*\).*/\1/p')
+  if [ -z "$ver" ] || [ "$ver" -lt 21 ]; then
     echo "FAIL: JDK 21+ — found JDK $ver"
     fail=1
   else
@@ -68,8 +69,7 @@ check_xcode() {
 }
 
 check_signing() {
-  if ! security find-identity -v -p codesigning 2>/dev/null | grep -q "valid identities found" || \
-     security find-identity -v -p codesigning 2>/dev/null | grep -q "1)"; then
+  if security find-identity -v -p codesigning 2>/dev/null | grep -Eq '[1-9][0-9]* valid identities found'; then
     echo "  OK: Code signing — identity found in keychain"
   else
     echo "WARN: Code signing — no valid signing identity found in keychain"
@@ -95,8 +95,23 @@ check_node
 check "npm"           npm
 check "Rust/cargo"    cargo
 check "cargo-tauri"   cargo-tauri
-check "ImageMagick"   magick
-check "gh CLI"        gh
+if command -v rustup &>/dev/null; then
+  for target in aarch64-apple-darwin x86_64-apple-darwin; do
+    if rustup target list --installed | grep -qx "$target"; then
+      echo "  OK: Rust target — $target"
+    else
+      echo "FAIL: Rust target — $target is not installed"
+      fail=1
+    fi
+  done
+  if [[ "$(rustc --print sysroot)" != "$HOME/.rustup/"* ]]; then
+    echo "FAIL: Rust compiler is not using the rustup toolchain"
+    fail=1
+  fi
+else
+  echo "FAIL: Rust toolchain manager — rustup not found"
+  fail=1
+fi
 
 echo ""
 echo "--- Signing ---"

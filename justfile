@@ -10,6 +10,10 @@ default:
 check-version:
     python3 scripts/ci/check-version.py
 
+# Set the shared release version; pass --android and/or --ios for store uploads.
+set-version version *flags:
+    python3 scripts/ci/set-version.py {{version}} {{flags}}
+
 # ─── Icons ────────────────────────────────────────────────────────────
 
 # Apply icon variant to all platforms (dev/beta/ga)
