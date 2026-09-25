@@ -36,24 +36,34 @@ including a rebuild of the same product version. A build identifier is not a
 target-specific product patch number.
 
 Run `just check-version` after changing `VERSION` and the platform manifests.
-The same check runs in TeamCity CI and in the GitHub image workflow. A release
-tag must match the base version at the tagged commit.
+The same check runs in TeamCity CI and again before publishing a release. A
+release tag must match the base version at the tagged commit.
 
 ## What publishes today
 
 | Event | Current result |
 | --- | --- |
-| Pull request | CI and test image builds; no images or release are published. |
+| Pull request | TeamCity runs CI and builds the web bundle; no images or release are published. |
 | Merge to `main` | TeamCity validates the app, then deploys the hosted web app to Cloudflare Pages if CI passes. Coolify tracks the public source repository for the hosted server; its deployment is separate. |
-| `vMAJOR.MINOR.PATCH[-stage.N]` tag | GitHub Actions publishes matching self-hosted web and server images to GHCR, then creates a GitHub release with the Compose files. |
+| `vMAJOR.MINOR.PATCH[-stage.N]` tag | TeamCity runs CI, packages the server JAR, builds the web bundle, then publishes both self-hosted images to GHCR from those artifacts and creates a GitHub release with Compose files. |
 
-TeamCity does **not** build or publish the GHCR images. Its Android, iOS,
-desktop, and server package configurations are present, but they are not a
-working cross-platform tag release pipeline yet: the VCS root currently
-tracks `refs/heads/*`, and only a Linux agent is connected. A GitHub release
-currently confirms the self-hosted web and server package, not mobile or
-desktop artifacts. Every current release tag republishes both self-hosted
-images, even when the code change affects only one target.
+The TeamCity `Self-hosted Release` configuration depends on the `Server Build`
+JAR and `Web Deploy` bundle from the same source revision. TeamCity can reuse a
+successful upstream build at that revision, so it does not need to compile the
+same target again just to package its image. The hosted Pages deployment uses
+the original web bundle; the release job prepares a copy for self-hosting.
+The release requires a Linux agent with Docker Buildx and `gh`, plus a TeamCity
+`env.GITHUB_TOKEN` classic personal access token with `write:packages` and
+`repo` permissions. The VCS root must watch `refs/tags/v*` as well as branches.
+
+Only a Linux agent is connected today. A GitHub release therefore confirms
+the self-hosted web and server images, not mobile or desktop artifacts. Every
+current self-hosted release publishes both images, even when the code change
+affects only one target. A manual `Self-hosted Release` build with
+`env.SHILLING_RELEASE_DRY_RUN=1` builds both images locally from the TeamCity
+artifacts without publishing them. Mobile and desktop package configurations
+remain available for manual runs; they do not auto-queue on tags until their
+runners and signing are ready.
 
 ## Coordinated release target
 
