@@ -6,7 +6,11 @@ The app stores budget data on each device. Optional device sync uses WebRTC peer
 
 ## Current status
 
-This repository is under active development. The self-hosted path is the default for local development. There is no public hosted Shilling service configured in this source tree yet. See the [GA launch plan](plans/20260311-161413-ga-launch-plan.md) for known product work before a public release.
+This repository is under active development. The hosted web app is at
+[app.shilling.finance](https://app.shilling.finance). For your own installation,
+use the [self-hosted Docker Compose guide](docs/self-hosting.mdx). See the
+[GA launch plan](plans/20260311-161413-ga-launch-plan.md) for known product work
+before a stable release.
 
 ## Try it locally
 
