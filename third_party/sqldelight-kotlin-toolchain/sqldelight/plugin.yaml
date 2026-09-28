@@ -1,0 +1,30 @@
+tasks:
+  generate:
+    action: !io.github.j1philli.sqldelight.generateSqlDelight
+      sourceDir: ${module.rootDir}/${pluginSettings.sourceDir}
+      outputDir: ${taskOutputDir}
+      compilerClasspath:
+        dependencies:
+          # Keep in sync with the SQLDelight version in README.md and module.yaml.
+          - app.cash.sqldelight:compiler-env:2.4.0
+          - app.cash.sqldelight:gradle-plugin:2.4.0
+          # Pulls in every SQLite dialect from 3.18 to 3.38; `plugins.sqldelight.dialect` selects one.
+          # Other dialects are added by users through `plugins.sqldelight.compilerDependencies`.
+          - app.cash.sqldelight:sqlite-3-38-dialect:2.4.0
+      extraClasspath:
+        dependencies: ${pluginSettings.compilerDependencies}
+      moduleName: ${module.name}
+      packageName: ${pluginSettings.packageName}
+      databaseName: ${pluginSettings.databaseName}
+      dialect: ${pluginSettings.dialect}
+      generateAsync: ${pluginSettings.generateAsync}
+      deriveSchemaFromMigrations: ${pluginSettings.deriveSchemaFromMigrations}
+      verifyMigrations: ${pluginSettings.verifyMigrations}
+      treatNullAsUnknownForEquality: ${pluginSettings.treatNullAsUnknownForEquality}
+      expandSelectStar: ${pluginSettings.expandSelectStar}
+      codegenExcludedColumns: ${pluginSettings.codegenExcludedColumns}
+
+generated:
+  sources:
+    - language: kotlin
+      directory: ${tasks.generate.action.outputDir}

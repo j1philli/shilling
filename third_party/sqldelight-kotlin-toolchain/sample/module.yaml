@@ -1,0 +1,18 @@
+product: jvm/app
+
+dependencies:
+  - app.cash.sqldelight:runtime:2.4.0
+  - app.cash.sqldelight:sqlite-driver:2.4.0
+
+test-dependencies:
+  - org.jetbrains.kotlin:kotlin-test:2.4.20
+
+plugins:
+  sqldelight:
+    enabled: true
+    packageName: com.example.sample.db
+    databaseName: SampleDatabase
+
+settings:
+  jvm:
+    mainClass: com.example.sample.MainKt

@@ -1,0 +1,13 @@
+product: jvm/amper-plugin
+
+description: Generates SQLDelight database code from .sq/.sqm files.
+
+dependencies:
+  # Only needed to compile CodegenRunner. At build time the codegen runs in a forked JVM
+  # whose classpath is resolved from `plugins.sqldelight.version`/`dialect` (see plugin.yaml).
+  - app.cash.sqldelight:gradle-plugin:2.4.0: compile-only
+  - dev.lysine.sql-psi:environment:0.8.0: compile-only
+
+pluginInfo:
+  id: sqldelight
+  settingsClass: io.github.j1philli.sqldelight.SqlDelightSettings

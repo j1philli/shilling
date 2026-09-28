@@ -30,7 +30,7 @@ Set `SHILLING_DB_NAME` to override (e.g. `SHILLING_DB_NAME=shilling-staging ./bu
 ## Project Structure
 
 ```
-project.yaml          # Kotlin Toolchain root — core, app/*, server, sqldelight-plugin
+project.yaml          # Kotlin Toolchain root — core, app/*, server, SQLDelight plugin
 libs.versions.toml    # centralized dependency versions
 core/                 # protocol/models shared by server + clients (auth config, signaling envelopes)
 app/                  # client modules (JetBrains server-aware KMP layout)
@@ -111,13 +111,8 @@ server/               # Ktor JVM server for WebRTC signaling + hosted metadata
     HostedMetadata.kt   # hosted household lookup via Supabase user_profiles
     IceConfig.kt        # ICE server config endpoint + TURN credential generation
     SupabaseTokenVerifier.kt # JWKS / legacy HS256 verifier for hosted access tokens
-sqldelight-plugin/    # custom Kotlin Toolchain plugin for SQLDelight code generation
-  plugin.yaml         # Kotlin Toolchain plugin descriptor
-  module.yaml
-  libs/               # SQLDelight compiler JAR (compiler-env-2.1.0.jar)
-  src/
-    GenerateSqlDelight.kt # plugin entry point — forks JVM process to run codegen
-    CodegenRunner.kt      # loads SQLDelight compiler, processes .sq files
+third_party/sqldelight-kotlin-toolchain/ # SQLDelight codegen plugin (git subtree, don't edit here)
+  sqldelight/         # the plugin module registered in project.yaml
 ```
 
 ## Architecture
@@ -157,8 +152,10 @@ HMAC-SHA1 mechanism. When no TURN secret is configured (homelab), only STUN is r
 Clients fall back to Google's public STUN if the server is unreachable.
 
 **SQLDelight codegen**: Schema is defined in `.sq` files (one per table) under
-`app/shared/src/commonMain/sqldelight/`. A custom Kotlin Toolchain plugin (`sqldelight-plugin/`)
-runs SQLDelight code generation, producing `ShillingDatabase` and query classes.
+`app/shared/src/commonMain/sqldelight/`. The [sqldelight-kotlin-toolchain](https://github.com/j1philli/sqldelight-kotlin-toolchain)
+plugin, vendored at `third_party/sqldelight-kotlin-toolchain/` and configured under
+`plugins.sqldelight` in `app/shared/module.yaml`, runs SQLDelight code generation,
+producing `ShillingDatabase` and query classes.
 `Mappers.kt` contains extension functions to convert SQLDelight entities to domain
 models. `generateAsync = true` for wasmJs WebWorkerDriver compatibility.
 
@@ -221,8 +218,11 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
 ## Common Pitfalls
 
 - **SQLDelight codegen**: Schema changes in `.sq` files require running `./kotlin build`
-  to regenerate `ShillingDatabase` and query classes. The `sqldelight-plugin/`
+  to regenerate `ShillingDatabase` and query classes. The SQLDelight plugin
   handles codegen automatically during Kotlin Toolchain builds.
+- **SQLDelight plugin is vendored**: `third_party/sqldelight-kotlin-toolchain/` is a
+  `git subtree` of a separate public repo. Fix bugs upstream, then update with
+  `git subtree pull --prefix=third_party/sqldelight-kotlin-toolchain https://github.com/j1philli/sqldelight-kotlin-toolchain.git vX.Y.Z --squash`.
 - **`expenses` table is deprecated**: all new features use schedules + postings.
 - **`balance` on Account is stored, not computed**: not derived from postings.
   Must be kept in sync manually if adding auto-reconciliation.
