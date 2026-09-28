@@ -13,10 +13,6 @@ for target in aarch64-apple-darwin x86_64-apple-darwin; do
     fi
 done
 
-logo=app/shared-ui/src/commonMain/composeResources/drawable/app_logo.png
-test -f "$logo"
-cargo tauri icon "$logo" --output src-tauri/icons
-
 # The web bundle came from the Web Deploy build in this same TeamCity chain.
 cargo tauri build --bundles dmg --target universal-apple-darwin --no-sign \
     --config '{"build":{"beforeBuildCommand":""}}'

@@ -13,28 +13,16 @@ case "$SHILLING_WASM_VARIANT" in
 esac
 # Show Settings > Developer tools. The dev `just` recipes turn this on; production builds leave it off.
 SHILLING_DEV_TOOLS="${SHILLING_DEV_TOOLS:-false}"
+# Favicon variant from app/web-app/icons/. The dev `just` recipes use dev; production builds use ga.
+SHILLING_ICON_VARIANT="${SHILLING_ICON_VARIANT:-ga}"
 
-APP_LOGO_ASSET="app/shared-ui/src/commonMain/kotlin/finance/shilling/shared/ui/AppLogoAsset.kt"
-APP_LOGO_SOURCE="app/shared-ui/src/commonMain/composeResources/drawable/app_logo.png"
-
-if [ ! -f "$APP_LOGO_ASSET" ]; then
-    echo "Generating AppLogoAsset.kt from tracked app logo..."
-    {
-        cat <<'EOF'
-package finance.shilling.shared.ui
-
-internal object AppLogoAsset {
-    internal val base64Png: String = buildString {
-EOF
-        base64 < "$APP_LOGO_SOURCE" | tr -d '\n' | fold -w 76 | while read -r chunk; do
-            printf '        append("%s")\n' "$chunk"
-        done
-        cat <<'EOF'
-    }
-}
-EOF
-    } > "$APP_LOGO_ASSET"
-fi
+case "$SHILLING_ICON_VARIANT" in
+    dev|beta|ga) ;;
+    *)
+        echo "ERROR: SHILLING_ICON_VARIANT must be dev, beta, or ga" >&2
+        exit 2
+        ;;
+esac
 
 echo "Building web-app (wasmJs $SHILLING_WASM_VARIANT package)..."
 ./kotlin task ":web-app:buildWasmJsAppWasmJs$SHILLING_WASM_VARIANT"
@@ -58,6 +46,8 @@ cp "$PKG_DIR/skiko.mjs" "$DIST/"
 cp "$PKG_DIR/skiko.wasm" "$DIST/"
 # Needed by the generated web-app.mjs loader in some runtimes.
 cp "$PKG_DIR/import-map-loader.js" "$DIST/" 2>/dev/null || true
+# Compose Multiplatform resources (e.g. the onboarding logo), fetched at runtime.
+cp -R "$PKG_DIR/composeResources" "$DIST/"
 
 # Prefer toolchain-vendored js-joda when present; fall back to npm.
 if [ -f "$PKG_DIR/vendors/@js-joda/core/dist/js-joda.esm.js" ]; then
@@ -86,8 +76,8 @@ echo "Copying SQLDelight worker (DB_NAME=${SHILLING_DB_NAME})..."
 sed "s/const DB_NAME = \"shilling\"/const DB_NAME = \"${SHILLING_DB_NAME}\"/" \
     app/web-app/sqldelight.worker.js > "$DIST/sqldelight.worker.js"
 
-# Copy favicon and icons
-cp app/web-app/favicon.ico "$DIST/" 2>/dev/null || true
-cp app/web-app/apple-touch-icon.png "$DIST/" 2>/dev/null || true
+echo "Copying $SHILLING_ICON_VARIANT favicons..."
+cp "app/web-app/icons/$SHILLING_ICON_VARIANT/favicon.ico" "$DIST/"
+cp "app/web-app/icons/$SHILLING_ICON_VARIANT/apple-touch-icon.png" "$DIST/"
 
 echo "Done. Run 'cargo tauri dev' from the project root to launch, or 'just web' to serve."

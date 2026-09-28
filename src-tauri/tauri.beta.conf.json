@@ -1,0 +1,9 @@
+{
+  "bundle": {
+    "icon": [
+      "icons/beta/icon.png",
+      "icons/beta/icon.icns",
+      "icons/beta/icon.ico"
+    ]
+  }
+}

@@ -1,5 +1,6 @@
 package finance.shilling.shared.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,12 +39,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.composables.icons.materialicons.MaterialIcons
 import com.composables.icons.materialicons.filled.Chevron_right
 import finance.shilling.shared.data.DEFAULT_SELF_HOSTED_SERVER_URL
 import finance.shilling.shared.data.auth.AuthService
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
+import shared_ui.generated.resources.Res
+import shared_ui.generated.resources.app_logo
 
 private enum class FirstLaunchRoute {
     LANDING,
@@ -406,8 +409,6 @@ private fun OnboardingActionCard(
 
 @Composable
 private fun AppLogo() {
-    val appLogoDataUrl = remember { "data:image/png;base64,${AppLogoAsset.base64Png}" }
-
     Card(
         modifier = Modifier
             .size(96.dp)
@@ -415,8 +416,8 @@ private fun AppLogo() {
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        AsyncImage(
-            model = appLogoDataUrl,
+        Image(
+            painter = painterResource(Res.drawable.app_logo),
             contentDescription = "Shilling logo",
             modifier = Modifier
                 .fillMaxSize()

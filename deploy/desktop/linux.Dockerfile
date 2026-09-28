@@ -19,9 +19,6 @@ RUN npm install --global @tauri-apps/cli@2.10.0
 WORKDIR /workspace
 COPY src-tauri/ src-tauri/
 COPY web-app-dist/ web-app-dist/
-COPY app_logo.png app_logo.png
-
-RUN tauri icon app_logo.png --output src-tauri/icons
 
 WORKDIR /workspace/src-tauri
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
