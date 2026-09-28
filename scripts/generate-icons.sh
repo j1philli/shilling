@@ -1,22 +1,44 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Regenerate all gitignored icon variants from tracked source masters.
-# Requires: ImageMagick 7+ (`magick`), `cargo tauri icon`
+# Regenerate every committed platform icon from icons/source/base-1024.png.
+# Requires: ImageMagick 7+ (`magick`), `cargo tauri icon`, python3
 #
-# Run this when the base icon design changes or after a fresh clone.
-# Outputs stay local under icons/ and are copied into platform folders by
-# apply-icon-variant.sh.
+# Run this only when the source artwork changes, then commit the results.
+# Builds never run it; they pick a variant (dev/beta/ga) from the committed
+# outputs instead. Store betas (TestFlight, Play testing tracks) promote the same
+# binary to production, so iOS and Android have no beta icon:
+#   iOS      app/ios-app/src/Assets.xcassets/AppIcon{,-Dev}.appiconset
+#            (selected per Xcode configuration via ASSETCATALOG_COMPILER_APPICON_NAME)
+#   Android  app/android-app/res/mipmap-*            (GA; release builds)
+#            app/android-app/src/debug/res/mipmap-*  (dev; debug builds)
+#   Desktop  src-tauri/icons/{ga,beta,dev}/          (selected via tauri.<variant>.conf.json)
+#   Web      app/web-app/icons/{ga,beta,dev}/        (selected by build-web.sh)
+#   In-app   app/shared-ui/composeResources/drawable/app_logo.png (GA)
 
 cd "$(dirname "$0")/.."
 
-FONT="/System/Library/Fonts/Supplemental/Arial Bold.ttf"
-SRC=icons/source
-WORK=icons/.generated
+FONT="${ICON_FONT:-/System/Library/Fonts/Supplemental/Arial Bold.ttf}"
+if [ ! -f "$FONT" ]; then
+  echo "ERROR: font not found: $FONT (set ICON_FONT to a bold TTF)" >&2
+  exit 1
+fi
 
-# Start clean so reruns do not leave stale generated assets behind.
-rm -rf "$WORK" icons/dev icons/beta icons/ga
-mkdir -p "$WORK" icons/dev icons/beta icons/ga
+SRC=icons/source
+WORK=$(mktemp -d)
+trap 'rm -rf "$WORK"' EXIT
+
+IOS_ASSETS=app/ios-app/src/Assets.xcassets
+ANDROID_RES=app/android-app/res
+ANDROID_DEBUG_RES=app/android-app/src/debug/res
+TAURI_ICONS=src-tauri/icons
+WEB_ICONS=app/web-app/icons
+APP_LOGO=app/shared-ui/composeResources/drawable/app_logo.png
+
+# Omit PNG timestamp chunks so regenerating unchanged artwork is a no-op in git.
+magick() {
+  command magick -define png:exclude-chunks=date,time "$@"
+}
 
 make_dev_medallion() {
   local input="$1"
@@ -103,93 +125,87 @@ magick -size 400x400 xc:none \
 echo "==> Assembling master icons..."
 
 # ── GA: clean original ──
-cp "$SRC/base-1024.png" icons/ga/ga-light-1024.png
-magick "$SRC/base-1024.png" -modulate 55,90,100 icons/ga/ga-dark-1024.png
+cp "$SRC/base-1024.png" "$WORK/ga-light-1024.png"
+magick "$SRC/base-1024.png" -modulate 55,90,100 "$WORK/ga-dark-1024.png"
 
 # ── Dev: blueprint background + deliberate coin medallion ──
 make_dev_medallion "$SRC/base-1024.png" '#F5E56F' "$WORK/dev-medallion-light.png"
-magick "$SRC/base-1024.png" -modulate 70,90,100 /tmp/base-dev-dark.png
-make_dev_medallion /tmp/base-dev-dark.png '#E6D773' "$WORK/dev-medallion-dark.png"
+magick "$SRC/base-1024.png" -modulate 70,90,100 "$WORK/base-dev-dark.png"
+make_dev_medallion "$WORK/base-dev-dark.png" '#E6D773' "$WORK/dev-medallion-dark.png"
 magick "$WORK/blueprint-base-1024.png" \
   "$WORK/dev-medallion-light.png" \
   -gravity center -composite \
-  icons/dev/dev-light-1024.png
+  "$WORK/dev-light-1024.png"
 magick "$WORK/blueprint-dark-1024.png" \
   "$WORK/dev-medallion-dark.png" \
   -gravity center -composite \
-  icons/dev/dev-dark-1024.png
+  "$WORK/dev-dark-1024.png"
 
 # ── Beta: original icon + BETA ribbon ──
 magick "$SRC/base-1024.png" \
   "$WORK/ribbon-beta.png" \
   -gravity NorthEast -geometry +0+0 -composite \
-  icons/beta/beta-light-1024.png
-
-magick "$SRC/base-1024.png" -modulate 55,90,100 /tmp/base-dark.png
-magick /tmp/base-dark.png \
+  "$WORK/beta-light-1024.png"
+magick "$WORK/ga-dark-1024.png" \
   "$WORK/ribbon-beta.png" \
   -gravity NorthEast -geometry +0+0 -composite \
-  icons/beta/beta-dark-1024.png
+  "$WORK/beta-dark-1024.png"
 
-echo "==> Generating platform assets..."
+echo "==> Writing platform assets..."
 
-declare -A ANDROID_DENSITIES=(
-  [mipmap-mdpi]="48:108"
-  [mipmap-hdpi]="72:162"
-  [mipmap-xhdpi]="96:216"
-  [mipmap-xxhdpi]="144:324"
-  [mipmap-xxxhdpi]="192:432"
-)
+write_ios_iconset() {
+  local iconset="$1"
+  local light="$2"
+  local dark="$3"
 
-for variant in dev beta ga; do
-  light="icons/${variant}/${variant}-light-1024.png"
-  dark="icons/${variant}/${variant}-dark-1024.png"
+  rm -rf "$iconset"
+  mkdir -p "$iconset"
+  cp "$light" "$iconset/AppIcon.png"
+  cp "$dark"  "$iconset/AppIcon-dark.png"
+  cat > "$iconset/Contents.json" << 'EOF'
+{
+  "images" : [
+    {
+      "filename" : "AppIcon.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "AppIcon-dark.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "size" : "1024x1024"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+EOF
+}
 
-  # ── iOS: single 1024x1024 per appearance ──
-  ios="icons/${variant}/ios"
-  mkdir -p "$ios"
-  cp "$light" "${ios}/AppIcon-light-1024.png"
-  cp "$dark"  "${ios}/AppIcon-dark-1024.png"
+for variant in ga beta dev; do
+  light="$WORK/${variant}-light-1024.png"
+  dark="$WORK/${variant}-dark-1024.png"
 
-  # ── Android adaptive icons ──
-  for density in "${!ANDROID_DENSITIES[@]}"; do
-    IFS=: read -r launcher_size fg_size <<< "${ANDROID_DENSITIES[$density]}"
-    dir="icons/${variant}/android/${density}"
-    mkdir -p "$dir"
-    magick "$light" -resize ${launcher_size}x${launcher_size} "${dir}/ic_launcher.png"
-    inner=$((fg_size * 66 / 100))
-    fg_source="$light"
-    if [ "$variant" = "dev" ]; then
-      fg_source="$WORK/dev-medallion-light.png"
-      inner=$((fg_size * 50 / 100))
-    fi
-    magick "$fg_source" -resize ${inner}x${inner} \
-      -gravity center -background none -extent ${fg_size}x${fg_size} \
-      "${dir}/ic_launcher_foreground.png"
-    if [ "$variant" = "dev" ]; then
-      magick "$WORK/blueprint-clean-1024.png" -resize ${fg_size}x${fg_size} \
-        "${dir}/ic_launcher_background.png"
-    else
-      magick -size ${fg_size}x${fg_size} gradient:'#4DD8E0'-'#E8E060' -rotate 135 \
-        "${dir}/ic_launcher_background.png"
-    fi
-    magick "$fg_source" -resize ${inner}x${inner} -colorspace Gray \
-      -gravity center -background none -extent ${fg_size}x${fg_size} \
-      "${dir}/ic_launcher_monochrome.png"
-  done
-  mkdir -p "icons/${variant}/android/mipmap-anydpi-v26"
-  cat > "icons/${variant}/android/mipmap-anydpi-v26/ic_launcher.xml" << 'XMLEOF'
-<?xml version="1.0" encoding="utf-8"?>
-<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-  <background android:drawable="@mipmap/ic_launcher_background"/>
-  <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
-  <monochrome android:drawable="@mipmap/ic_launcher_monochrome"/>
-</adaptive-icon>
-XMLEOF
-
+  # ── iOS: single 1024x1024 per appearance (no beta, see header) ──
+  case "$variant" in
+    ga)  write_ios_iconset "$IOS_ASSETS/AppIcon.appiconset" "$light" "$dark" ;;
+    dev) write_ios_iconset "$IOS_ASSETS/AppIcon-Dev.appiconset" "$light" "$dark" ;;
+  esac
   # ── Tauri / Desktop ──
-  tdir="icons/${variant}/tauri"
+  tdir="$TAURI_ICONS/$variant"
+  rm -rf "$tdir"
   mkdir -p "$tdir"
+  masked="$WORK/${variant}-desktop-1024.png"
 
   if [ "$variant" = "dev" ]; then
     # Dev: padded squircle carrying the blueprint field and a smaller medallion.
@@ -197,28 +213,28 @@ XMLEOF
       "$WORK/desktop-mask-1024.png" \
       -alpha Off -compose CopyOpacity -composite \
       -depth 8 \
-      /tmp/masked-1024.png
-    magick /tmp/masked-1024.png \
+      "$masked"
+    magick "$masked" \
       \( "$WORK/dev-medallion-light.png" -resize 580x580 \) \
       -gravity center -composite \
-      /tmp/masked-1024.png
+      "$masked"
   else
-    # GA/Beta: keep their current artwork, but give desktop the same padded
-    # squircle footprint as dev.
+    # GA/Beta: keep their artwork, but give desktop the same padded squircle
+    # footprint as dev.
     magick "$light" \
       -resize 800x800 \
       -gravity center -background none -extent 1024x1024 \
       "$WORK/desktop-mask-1024.png" \
       -alpha Off -compose CopyOpacity -composite \
       -depth 8 \
-      /tmp/masked-1024.png
+      "$masked"
   fi
 
   # Tauri requires 8-bit RGBA PNG (color-type 6)
-  magick /tmp/masked-1024.png \
+  magick "$masked" \
     -resize 512x512 \
     -depth 8 -type TrueColorAlpha -define png:color-type=6 \
-    "${tdir}/icon.png"
+    "$tdir/icon.png"
 
   # Windows ICO (square is fine, OS applies its own shape)
   magick "$light" -depth 8 \
@@ -226,26 +242,86 @@ XMLEOF
     \( -clone 0 -resize 32x32 \) \
     \( -clone 0 -resize 48x48 \) \
     \( -clone 0 -resize 256x256 \) \
-    -delete 0 "${tdir}/icon.ico"
+    -delete 0 "$tdir/icon.ico"
 
   # macOS ICNS via Tauri's icon generator. iconutil was rejecting otherwise
   # valid iconsets on this machine, while `cargo tauri icon` produced a valid
   # .icns from the same masked 1024x1024 source.
-  TAURI_ICON_DIR=$(mktemp -d)
-  cargo tauri icon /tmp/masked-1024.png --output "$TAURI_ICON_DIR" >/dev/null
-  cp "$TAURI_ICON_DIR/icon.icns" "${tdir}/icon.icns"
-  rm -rf "$TAURI_ICON_DIR"
+  cargo tauri icon "$masked" --output "$WORK/tauri-$variant" >/dev/null 2>&1
+  # It writes chunks in hash-map order; sort them so reruns are byte-identical.
+  python3 - "$WORK/tauri-$variant/icon.icns" "$tdir/icon.icns" << 'PYEOF'
+import struct, sys
+data = open(sys.argv[1], "rb").read()
+chunks, i = [], 8
+while i < len(data):
+    size = struct.unpack(">I", data[i + 4:i + 8])[0]
+    chunks.append(data[i:i + size])
+    i += size
+body = b"".join(sorted(chunks, key=lambda c: c[:4]))
+open(sys.argv[2], "wb").write(b"icns" + struct.pack(">I", 8 + len(body)) + body)
+PYEOF
 
   # ── Web ──
-  wdir="icons/${variant}/web"
+  wdir="$WEB_ICONS/$variant"
+  rm -rf "$wdir"
   mkdir -p "$wdir"
   magick "$light" \
     \( -clone 0 -resize 16x16 \) \
     \( -clone 0 -resize 32x32 \) \
-    -delete 0 "${wdir}/favicon.ico"
-  magick "$light" -resize 180x180 "${wdir}/apple-touch-icon.png"
-  magick "$light" -resize 192x192 "${wdir}/icon-192.png"
-  magick "$light" -resize 512x512 "${wdir}/icon-512.png"
+    -delete 0 "$wdir/favicon.ico"
+  magick "$light" -resize 180x180 "$wdir/apple-touch-icon.png"
 done
 
-echo "==> Done! All icon variants generated locally in icons/ (gitignored)"
+# ── Android adaptive icons ──
+# GA goes in the main res dir; dev goes in the debug source set, which Android
+# merges over main for debug builds only.
+write_android_icons() {
+  local variant="$1"
+  local res="$2"
+  local light="$WORK/${variant}-light-1024.png"
+  local fg_source="$light"
+  local fg_percent=66
+  if [ "$variant" = "dev" ]; then
+    fg_source="$WORK/dev-medallion-light.png"
+    fg_percent=50
+  fi
+
+  for spec in mipmap-mdpi:48:108 mipmap-hdpi:72:162 mipmap-xhdpi:96:216 mipmap-xxhdpi:144:324 mipmap-xxxhdpi:192:432; do
+    IFS=: read -r density launcher_size fg_size <<< "$spec"
+    local dir="$res/$density"
+    local inner=$((fg_size * fg_percent / 100))
+    mkdir -p "$dir"
+    magick "$light" -resize ${launcher_size}x${launcher_size} "$dir/ic_launcher.png"
+    magick "$fg_source" -resize ${inner}x${inner} \
+      -gravity center -background none -extent ${fg_size}x${fg_size} \
+      "$dir/ic_launcher_foreground.png"
+    if [ "$variant" = "dev" ]; then
+      magick "$WORK/blueprint-clean-1024.png" -resize ${fg_size}x${fg_size} \
+        "$dir/ic_launcher_background.png"
+    else
+      magick -size ${fg_size}x${fg_size} gradient:'#4DD8E0'-'#E8E060' -rotate 135 \
+        "$dir/ic_launcher_background.png"
+    fi
+    magick "$fg_source" -resize ${inner}x${inner} -colorspace Gray \
+      -gravity center -background none -extent ${fg_size}x${fg_size} \
+      "$dir/ic_launcher_monochrome.png"
+  done
+  mkdir -p "$res/mipmap-anydpi-v26"
+  cat > "$res/mipmap-anydpi-v26/ic_launcher.xml" << 'XMLEOF'
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+  <background android:drawable="@mipmap/ic_launcher_background"/>
+  <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+  <monochrome android:drawable="@mipmap/ic_launcher_monochrome"/>
+</adaptive-icon>
+XMLEOF
+}
+
+write_android_icons ga "$ANDROID_RES"
+write_android_icons dev "$ANDROID_DEBUG_RES"
+
+# ── In-app logo (onboarding) ──
+mkdir -p "$(dirname "$APP_LOGO")"
+magick "$WORK/ga-light-1024.png" -resize 512x512 "$APP_LOGO"
+
+echo "==> Done. Review and commit the regenerated assets."

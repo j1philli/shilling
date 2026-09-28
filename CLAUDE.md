@@ -10,8 +10,7 @@ Uses [just](https://github.com/casey/just) as task runner and [direnv](https://d
 just desktop              # build wasmJs + launch Tauri desktop
 just ios                  # launch on iOS Simulator (auto-downloads WebRTC framework)
 just setup-webrtc         # download WebRTC.xcframework for iOS (idempotent)
-just generate-icons       # regenerate local icon outputs from icons/source (required after fresh clone)
-just apply-icons dev      # copy one generated variant into ignored platform asset dirs
+just generate-icons       # regenerate committed platform icons after icons/source changes
 just build-web            # build only wasmJs artifacts
 just build-all            # compile everything (all platforms)
 just guard-architecture   # fail on forbidden relay/server data-sync patterns
@@ -282,12 +281,23 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
 - **iOS Xcode project**: Kotlin Toolchain manages `app/ios-app/module.xcodeproj`. The
   `-lsqlite3` linker flag was manually added to `OTHER_LDFLAGS` — don't
   regenerate the project without re-adding it.
-- **Icon assets are source-only in git**: `icons/source/` plus the icon scripts
-  are tracked. Generated variants under `icons/{dev,beta,ga}/` and copied
-  platform assets (`app/android-app/res/mipmap-*`, `app/ios-app/.../AppIcon.appiconset`,
-  `src-tauri/icons/`, `app/web-app/favicon.ico`, `app/web-app/apple-touch-icon.png`)
-  are gitignored. On a fresh clone, run `just generate-icons` and
-  `just apply-icons dev` before builds that consume app icons.
+- **Icons are generated, then committed**: `icons/source/base-1024.png` is the
+  master. `just generate-icons` (ImageMagick + `cargo tauri`) rewrites every
+  platform asset; commit the results. Builds never generate or copy icons; they
+  pick a committed variant (`dev`/`beta`/`ga`):
+  - Beta is the early-release channel. On iOS (TestFlight) and Android (Play testing
+    tracks) the beta binary is promoted to production as-is, so it uses the GA icon;
+    only desktop and web ship a separate beta artifact with its own icon.
+  - iOS: `AppIcon` (GA) and `AppIcon-Dev` sets, chosen per Xcode configuration via
+    `ASSETCATALOG_COMPILER_APPICON_NAME` (Debug → Dev, Release → GA).
+  - Desktop: `src-tauri/icons/{ga,beta,dev}/`; `tauri.conf.json` uses GA,
+    `tauri.dev.conf.json` / `tauri.beta.conf.json` overlays switch via `--config`.
+  - Web: `app/web-app/icons/<variant>/` copied into `web-app-dist` by `build-web.sh`
+    (`SHILLING_ICON_VARIANT`, defaults to `ga`; `just` recipes use `dev`).
+  - Android: GA in `app/android-app/res/mipmap-*`; dev in `app/android-app/src/debug/res/`
+    (standard Android debug source set, merged over main for debug builds only).
+  - In-app logo: `app/shared-ui/composeResources/drawable/app_logo.png`
+    (Compose resource, `Res.drawable.app_logo`).
 - **Tauri build**: Run `./build-web.sh` to build wasmJs artifacts into `web-app-dist/`,
   then `cargo tauri dev` to launch the desktop app. The `tauri.conf.json` points
   `frontendDist` to `../web-app-dist`. Direct builds use the optimized Release

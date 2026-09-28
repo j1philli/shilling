@@ -9,7 +9,6 @@ docker buildx version >/dev/null
 context="$(mktemp -d)"
 trap 'rm -rf "$context"' EXIT
 cp -R src-tauri web-app-dist "$context/"
-cp app/shared-ui/src/commonMain/composeResources/drawable/app_logo.png "$context/app_logo.png"
 cp deploy/desktop/windows-cross.Dockerfile "$context/Dockerfile"
 
 output="$PWD/desktop-artifacts/windows"

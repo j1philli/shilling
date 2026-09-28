@@ -16,22 +16,18 @@ set-version version *flags:
 
 # ─── Icons ────────────────────────────────────────────────────────────
 
-# Apply icon variant to all platforms (dev/beta/ga)
-apply-icons variant='dev':
-    ./scripts/apply-icon-variant.sh {{variant}}
-
-# Regenerate all icon variants from source (requires ImageMagick)
+# Regenerate committed platform icons from icons/source (requires ImageMagick + cargo tauri)
 generate-icons:
     ./scripts/generate-icons.sh
 
 # ─── Setup ─────────────────────────────────────────────────────────
 
-# One-time setup after fresh clone (deps + icons + WebRTC framework)
-setup: deps generate-icons setup-webrtc
+# One-time setup after fresh clone (deps + WebRTC framework)
+setup: deps setup-webrtc
 
 # ─── Build ───────────────────────────────────────────────────────────
 
-# Workaround: Amper cache state around the SQLDelight plugin can become inconsistent.
+# Workaround: Kotlin Toolchain cache state around the SQLDelight plugin can become inconsistent.
 # We clear incremental state, then warm the plugin compile task. If warmup fails,
 # fall back to full clean once.
 [private]
@@ -58,8 +54,7 @@ ensure-plugin:
 
 # Build only the wasmJs web-app (dev database)
 build-web: deps ensure-plugin
-    ./scripts/apply-icon-variant.sh "${SHILLING_ICON_VARIANT:-dev}"
-    SHILLING_DB_NAME=shilling-dev SHILLING_WASM_VARIANT=Debug SHILLING_DEV_TOOLS=true ./build-web.sh
+    SHILLING_ICON_VARIANT="${SHILLING_ICON_VARIANT:-dev}" SHILLING_DB_NAME=shilling-dev SHILLING_WASM_VARIANT=Debug SHILLING_DEV_TOOLS=true ./build-web.sh
 
 # Build everything (all platforms, all modules)
 build-all: setup-webrtc ensure-plugin
@@ -143,7 +138,6 @@ clear-ios:
 android: ensure-plugin
     #!/usr/bin/env bash
     set -euo pipefail
-    ./scripts/apply-icon-variant.sh "${SHILLING_ICON_VARIANT:-dev}"
     AVD="${ANDROID_AVD:-Pixel_9_Pro_XL_API_35}"
     EMU="$HOME/Library/Android/sdk/emulator/emulator"
     ADB="$HOME/Library/Android/sdk/platform-tools/adb"
@@ -184,7 +178,14 @@ android: ensure-plugin
 
 # Launch desktop app (Tauri + wasmJs)
 desktop: build-web
-    cargo tauri dev
+    #!/usr/bin/env bash
+    set -euo pipefail
+    variant="${SHILLING_ICON_VARIANT:-dev}"
+    if [ "$variant" = ga ]; then
+        cargo tauri dev
+    else
+        cargo tauri dev --config "src-tauri/tauri.$variant.conf.json"
+    fi
 
 # Serve wasmJs app in browser with live reload (auto-rebuilds on source changes)
 web: build-web
@@ -219,7 +220,7 @@ web: build-web
         if [ -n "$CHANGED" ]; then
             echo "==> Source change detected, rebuilding..."
             touch "$MARKER"
-            if SHILLING_DB_NAME=shilling-dev SHILLING_WASM_VARIANT=Debug SHILLING_DEV_TOOLS=true ./build-web.sh; then
+            if SHILLING_ICON_VARIANT="${SHILLING_ICON_VARIANT:-dev}" SHILLING_DB_NAME=shilling-dev SHILLING_WASM_VARIANT=Debug SHILLING_DEV_TOOLS=true ./build-web.sh; then
                 echo "==> Rebuild complete."
             else
                 echo "==> Rebuild failed!"
@@ -375,7 +376,7 @@ ios-device:
     just setup-webrtc
     just ensure-plugin
 
-    echo "==> Building Kotlin framework with Amper (iosArm64)..."
+    echo "==> Building Kotlin framework with Kotlin Toolchain (iosArm64)..."
     ./kotlin build -m ios-app -p iosArm64
 
     echo "==> Building and signing with Xcode..."
@@ -527,7 +528,7 @@ homelab: build-web setup-webrtc ensure-plugin
 
     # Launch desktop in foreground
     echo "==> Starting desktop app..."
-    cargo tauri dev
+    cargo tauri dev --config src-tauri/tauri.dev.conf.json
 
 # Stream iOS simulator logs (run in a separate terminal)
 ios-logs:
@@ -561,7 +562,7 @@ deps:
 
 # ─── Utilities ──────────────────────────────────────────────────────
 
-# Show all Amper tasks for a module (e.g. just tasks web-app)
+# Show all Kotlin Toolchain tasks for a module (e.g. just tasks web-app)
 tasks module="":
     #!/usr/bin/env bash
     if [ -z "{{module}}" ]; then
@@ -570,6 +571,6 @@ tasks module="":
         ./kotlin show tasks 2>&1 | grep ":{{module}}:"
     fi
 
-# Show Amper modules
+# Show Kotlin Toolchain modules
 modules:
     ./kotlin show modules

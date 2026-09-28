@@ -53,9 +53,9 @@
     "homepage": "https://github.com/j1philli/shilling",
     "license": "AGPL-3.0-only",
     "icon": [
-      "icons/icon.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
+      "icons/ga/icon.png",
+      "icons/ga/icon.icns",
+      "icons/ga/icon.ico"
     ]
   }
 }
