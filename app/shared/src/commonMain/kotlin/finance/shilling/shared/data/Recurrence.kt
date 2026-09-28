@@ -78,7 +78,7 @@ fun generateOccurrences(
                 val amount = exception?.overrideAmount ?: schedule.amount
                 val accountId = exception?.overrideAccountId ?: schedule.accountId
                 val counterAccountId = exception?.overrideCounterAccountId ?: schedule.counterAccountId
-                val pairId = "${'$'}{schedule.id}_${'$'}cursor"
+                val pairId = "${schedule.id}_$cursor"
                 items += ScheduledTx(
                     scheduleId = schedule.id,
                     title = schedule.title,

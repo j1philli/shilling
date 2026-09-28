@@ -12,7 +12,9 @@ import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.EntityType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
 
@@ -36,6 +38,56 @@ class PostingRepository(
             postings.toPostingDetails(accounts, categories, schedules)
                 .sortedByDescending { it.posting.date }
         }
+
+    fun watchById(id: String): Flow<PostingWithDetails?> =
+        combine(
+            store.watchCached(PostingKey.ById(id)),
+            accountStore.watchCached(AccountKey.All),
+            categoryStore.watchCached(CategoryKey.All),
+            scheduleStore.watchCached(ScheduleKey.All)
+        ) { postings, accounts, categories, schedules ->
+            postings.toPostingDetails(accounts, categories, schedules).firstOrNull()
+        }
+
+    suspend fun getById(id: String): Posting? =
+        store.readLocalSourceOfTruth(PostingKey.ById(id)).firstOrNull()
+
+    /**
+     * The other leg of a transfer, if [posting] is one. Scheduled transfer legs share an
+     * id prefix (`_dr` / `_cr`); ad-hoc transfer legs share a pairId.
+     */
+    suspend fun getTransferPartner(posting: Posting): Posting? {
+        val partnerId = when {
+            posting.id.endsWith("_dr") -> posting.id.removeSuffix("_dr") + "_cr"
+            posting.id.endsWith("_cr") -> posting.id.removeSuffix("_cr") + "_dr"
+            else -> null
+        }
+        if (partnerId != null) return getById(partnerId)
+        if (posting.scheduleId != null) return null
+        val pairId = posting.pairId ?: return null
+        return getBetween(posting.date, posting.date.plus(1, DateTimeUnit.DAY))
+            .firstOrNull { it.pairId == pairId && it.id != posting.id }
+    }
+
+    /** Record an ad-hoc transfer as a linked debit/credit pair. */
+    suspend fun recordAdHocTransfer(
+        title: String,
+        amount: Double,
+        fromAccountId: String,
+        toAccountId: String,
+        categoryId: String?,
+        date: LocalDate
+    ) {
+        val pairId = idGenerator.newId()
+        val base = Posting(
+            id = "", scheduleId = null, type = ScheduleType.EXPENSE,
+            accountId = fromAccountId, date = date, amount = amount,
+            pairId = pairId, title = title,
+            categoryId = categoryId?.takeIf { it.isNotBlank() }
+        )
+        record(base.copy(id = idGenerator.newId()))
+        record(base.copy(id = idGenerator.newId(), type = ScheduleType.INCOME, accountId = toAccountId))
+    }
 
     suspend fun getBetween(start: LocalDate, end: LocalDate): List<Posting> =
         store.readLocalSourceOfTruth(PostingKey.Between(start, end))

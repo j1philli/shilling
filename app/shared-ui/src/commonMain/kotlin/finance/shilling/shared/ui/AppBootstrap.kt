@@ -2,6 +2,8 @@ package finance.shilling.shared.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.navigation.NavHostController
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -132,6 +134,10 @@ data class AppBootstrapScaffoldConfig(
     val pendingReceiptFile: PlatformFile? = null,
     val onPendingReceiptConsumed: () -> Unit = {},
     val preScaffoldContent: @Composable () -> Unit = {},
+    /** Show developer tools in Settings without the hidden unlock (debug builds). */
+    val developerToolsEnabled: Boolean = false,
+    /** Given the app's NavController once the main scaffold is shown (web: browser history). */
+    val navControllerHook: @Composable (NavHostController) -> Unit = {},
     val startupPendingContent: @Composable () -> Unit = { DefaultLoadingSurface() }
 )
 
@@ -143,6 +149,7 @@ fun ShillingAppBootstrap(
     logTag: String = "AppBootstrap"
 ) {
     val log = remember(logTag) { Logger.withTag(logTag) }
+    remember(services.settings) { DisplayPreferences.load(services.settings) }
     val syncExceptionHandler = remember(logTag) {
         CoroutineExceptionHandler { _, throwable ->
             log.e {
@@ -666,7 +673,9 @@ fun ShillingAppBootstrap(
                     photoButton = scaffoldConfig.photoButton,
                     externalNavRequest = scaffoldConfig.externalNavRequest,
                     pendingReceiptFile = scaffoldConfig.pendingReceiptFile,
-                    onPendingReceiptConsumed = scaffoldConfig.onPendingReceiptConsumed
+                    onPendingReceiptConsumed = scaffoldConfig.onPendingReceiptConsumed,
+                    developerToolsEnabled = scaffoldConfig.developerToolsEnabled,
+                    navControllerHook = scaffoldConfig.navControllerHook
                 )
             }
         }
@@ -677,7 +686,7 @@ fun ShillingAppBootstrap(
 private fun DefaultLoadingSurface() {
     Surface(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Loading...", style = MaterialTheme.typography.headlineMedium)
+            CircularProgressIndicator()
         }
     }
 }

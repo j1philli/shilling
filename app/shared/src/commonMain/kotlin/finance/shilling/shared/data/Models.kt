@@ -96,7 +96,9 @@ data class ScheduledTxWithAccount(
     val account: Account?,
     val counterAccount: Account?,
     val category: Category?,
-    val posted: Boolean
+    val posted: Boolean,
+    /** Stored posting backing this item when [posted]; the debit leg for transfers. */
+    val postingId: String? = null
 )
 
 @Serializable

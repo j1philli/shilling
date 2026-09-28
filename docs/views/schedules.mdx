@@ -5,46 +5,33 @@ order: 6
 
 # Schedules
 
-Schedules define your recurring and one-time transactions. They're the core building block of Shilling's budgeting system.
+Schedules are the bills, paychecks, and transfers you expect. Find them in **Plan → Schedules**; they drive Plan's Overview.
 
-## Schedule Types
+## Types
 
-- **Expense** — money going out (rent, groceries, subscriptions)
-- **Income** — money coming in (paychecks, freelance payments)
-- **Transfer** — money moving between your accounts (savings contributions, credit card payments)
+- **Expense**: money going out (rent, groceries, subscriptions)
+- **Income**: money coming in (paychecks, freelance payments)
+- **Transfer**: money moving between your accounts (savings, card payments)
 
-The view is organized with tabs to filter by type.
+Filter the list with **All / Expenses / Income / Transfers**. Tap **Add** to create a schedule, or tap one to edit it.
 
-## Creating a Schedule
+## Repeats
 
-The schedule form includes:
+- **Does not repeat**: once, on the chosen date
+- **Daily**: every *N* days
+- **Weekly**: every *N* weeks on the selected days
+- **Every 2 weeks**: on the start date's weekday
+- **Monthly on a date**: every *N* months on a day of the month, or the last day. Months without that day (for example the 31st) are skipped.
+- **Monthly on a weekday**: every *N* months on, for example, the second Tuesday
+- **Twice a month**: the 15th and the last day
+- **Yearly**: every *N* years on the start date
 
-- **Title** — a descriptive name
-- **Type** — expense, income, or transfer
-- **Account** — which account the money flows from (or to, for income)
-- **Category** — optional label for budgeting
-- **Amount** — the transaction amount
-- **Frequency** — how often it recurs
-- **Start date** — when the schedule begins
-- **End date** — optional, for schedules that stop after a certain date
-- **Counter-account** — for transfers, the destination account
+The editor shows the next date the schedule will occur, so you can check the pattern before saving. An optional **Ends on** date stops the schedule.
 
-## Recurrence Options
+## Per-date changes
 
-Shilling supports several recurrence patterns:
+To skip one occurrence or change its amount, use the **⋮** menu in Plan → Overview (By day). The schedule itself isn't changed.
 
-- **One-time** — happens once on the start date
-- **Weekly** — repeats every week, with a day-of-week selector for choosing which days
-- **Biweekly** — repeats every two weeks
-- **Monthly by date** — repeats on the same calendar date each month (e.g., the 15th)
-- **Monthly by day** — repeats on the same weekday position each month (e.g., the 2nd Friday)
-- **Yearly** — repeats once a year on the same date
+## Deleting
 
-## Exceptions
-
-You can add per-date exceptions to any schedule:
-
-- **Skip** — suppress the occurrence for a specific date
-- **Override** — change the amount or account for a specific date without modifying the schedule itself
-
-Exceptions are managed from the schedule editing form.
+Deleting a schedule also deletes transactions already recorded from it. You'll be asked to confirm.

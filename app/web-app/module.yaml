@@ -26,6 +26,7 @@ dependencies:
   - $libs.ktor.client.cio
   - $libs.ktor.client.webrtc
   - $libs.multiplatform.settings
+  - $libs.navigation.compose
   - $libs.multiplatform.settings.no.arg
   - $libs.kermit
 

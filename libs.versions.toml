@@ -60,6 +60,7 @@ kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil3" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version = "1.12.0-alpha03" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version = "1.12.0" }
+navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version = "1.1.0" }
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version = "1.12.0" }
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version = "1.12.0" }
 compose-icons-filled = { module = "com.composables:icons-material-icons-filled-cmp", version = "2.2.1" }

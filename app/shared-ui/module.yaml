@@ -32,6 +32,8 @@ dependencies:
   - $libs.compose.runtime
   - $libs.compose.icons.filled
   - $libs.compose.material3.adaptive
+  - $libs.navigation.compose
+  - $libs.navigationevent.compose
 
 settings:
   compose:
