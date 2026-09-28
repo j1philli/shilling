@@ -1,5 +1,6 @@
 package finance.shilling.android
 
+import android.content.pm.ApplicationInfo
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -111,6 +112,7 @@ class MainActivity : ComponentActivity() {
                 scaffoldConfig = AppBootstrapScaffoldConfig(
                     cameraButton = { onFile -> MobileCameraReceiptButton(onFile) },
                     photoButton = { onFile -> MobilePhotoLibraryReceiptButton(onFile) },
+                    developerToolsEnabled = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0,
                     startupPendingContent = {
                         ShillingTheme {
                             Surface(modifier = Modifier.fillMaxSize()) {}

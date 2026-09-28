@@ -2,518 +2,462 @@ package finance.shilling.shared.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import com.composables.icons.materialicons.MaterialIcons
-import com.composables.icons.materialicons.filled.Delete
-import com.composables.icons.materialicons.filled.Add
-import com.composables.icons.materialicons.filled.Arrow_back
-import com.composables.icons.materialicons.filled.Edit
-import com.composables.icons.materialicons.filled.Link
-import com.composables.icons.materialicons.filled.Link_off
-import com.composables.icons.materialicons.filled.Open_in_new
-import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import finance.shilling.shared.data.store.ReceiptRepository
-import finance.shilling.shared.data.store.PostingRepository
+import com.composables.icons.materialicons.MaterialIcons
+import com.composables.icons.materialicons.filled.Search
 import finance.shilling.shared.data.IdGenerator
+import finance.shilling.shared.data.PostingWithDetails
 import finance.shilling.shared.data.Receipt
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.ReceiptWithPosting
+import finance.shilling.shared.data.store.PostingRepository
+import finance.shilling.shared.data.store.ReceiptRepository
 import io.github.vinceglb.filekit.PlatformFile
-import io.github.vinceglb.filekit.name
-import io.github.vinceglb.filekit.readBytes
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.readBytes
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
-import kotlinx.datetime.Instant
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.koinInject
-import co.touchlab.kermit.Logger
 import kotlin.math.abs
-import kotlin.math.roundToLong
+import kotlin.time.Clock
 
 private enum class ReceiptFilter(val label: String) {
-    ALL("All"), UNATTACHED("Unattached"), ATTACHED("Attached")
-}
-
-private val openLog = Logger.withTag("ReceiptOpen")
-
-private data class ReceiptPreviewState(
-    val fileName: String,
-    val bytes: ByteArray
-)
-
-private fun formatTimestamp(epochMillis: Long): String {
-    val instant = Instant.fromEpochMilliseconds(epochMillis)
-    val dt = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-    return "${dt.year}-${dt.monthNumber.toString().padStart(2, '0')}-${dt.dayOfMonth.toString().padStart(2, '0')} " +
-        "${dt.hour.toString().padStart(2, '0')}:${dt.minute.toString().padStart(2, '0')}"
+    ALL("All"), UNATTACHED("Not attached"), ATTACHED("Attached")
 }
 
 @Composable
-fun ReceiptsScreen(
-    cameraButton: ReceiptPickerButton? = null,
-    photoButton: ReceiptPickerButton? = null,
-    autoOpenCamera: Boolean = false,
-    pendingReceiptFile: PlatformFile? = null,
-    onPendingReceiptConsumed: () -> Unit = {}
-) {
+fun ReceiptsScreen(onOpenReceipt: (String?) -> Unit) {
     val receiptRepo = koinInject<ReceiptRepository>()
-    val postingRepo = koinInject<PostingRepository>()
-    val fileStore = koinInject<ReceiptFileStore>()
-    val idGen = koinInject<IdGenerator>()
-    val scope = rememberCoroutineScope()
-    val receiptsWithPostings by receiptRepo.watchAll().collectAsState(initial = emptyList())
-    var filter by remember { mutableStateOf(ReceiptFilter.ALL) }
-    var showAddPage by remember { mutableStateOf(autoOpenCamera || pendingReceiptFile != null) }
-    var preview by remember { mutableStateOf<ReceiptPreviewState?>(null) }
+    val receipts by remember { receiptRepo.watchAll() }.collectAsState(initial = emptyList())
+    var filterName by rememberSaveable { mutableStateOf(ReceiptFilter.ALL.name) }
+    val filter = ReceiptFilter.valueOf(filterName)
+    var selectedKey by rememberSaveable { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(pendingReceiptFile) {
-        if (pendingReceiptFile != null) {
-            showAddPage = true
-        }
-    }
-
-    val filtered = remember(receiptsWithPostings, filter) {
+    val filtered = remember(receipts, filter) {
         when (filter) {
-            ReceiptFilter.ALL -> receiptsWithPostings
-            ReceiptFilter.UNATTACHED -> receiptsWithPostings.filter { it.receipt.postingId == null }
-            ReceiptFilter.ATTACHED -> receiptsWithPostings.filter { it.receipt.postingId != null }
-        }
+            ReceiptFilter.ALL -> receipts
+            ReceiptFilter.UNATTACHED -> receipts.filter { it.receipt.postingId == null }
+            ReceiptFilter.ATTACHED -> receipts.filter { it.receipt.postingId != null }
+        }.sortedByDescending { it.receipt.addedAt }
     }
 
-    if (showAddPage) {
-        Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                TooltipIconButton(onClick = { showAddPage = false }, tooltip = "Back to receipts") {
-                    Icon(MaterialIcons.Filled.Arrow_back, contentDescription = "Back")
-                }
-                Text("New receipt", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+    ListDetailLayout(
+        selectedKey = selectedKey,
+        onDismissDetail = { selectedKey = null },
+        list = { twoPane ->
+            val open: (String?) -> Unit = { id ->
+                if (twoPane) selectedKey = id ?: NEW_ITEM_KEY else onOpenReceipt(id)
             }
-            ShillingCard {
-                CompositionLocalProvider(LocalAutoLaunchCamera provides autoOpenCamera) {
-                    AddReceiptForm(
-                        cameraButton = cameraButton,
-                        photoButton = photoButton,
-                        initialFile = pendingReceiptFile,
-                        onInitialFileConsumed = onPendingReceiptConsumed,
-                        onSave = { name, notes, receiptDate, amount, bytes ->
-                            scope.launch {
-                                val receiptId = idGen.newId()
-                                fileStore.store(receiptId, name, bytes)
-                                val receipt = Receipt(
-                                    id = receiptId,
-                                    filePath = name,
-                                    originalName = name,
-                                    addedAt = Clock.System.now().toEpochMilliseconds(),
-                                    notes = notes.ifBlank { null },
-                                    receiptDate = receiptDate,
-                                    amount = amount
-                                )
-                                receiptRepo.save(receipt)
-                                showAddPage = false
+            ScreenScaffold(
+                title = "Receipts",
+                subtitle = receipts.count { it.receipt.postingId == null }.takeIf { it > 0 }?.let { "$it not attached" },
+                actions = { AddButton("Add", onClick = { open(null) }) }
+            ) { padding ->
+                LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = padding) {
+                    item(key = "filters") {
+                        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                            ReceiptFilter.entries.forEach { f ->
+                                FilterChip(selected = filter == f, onClick = { filterName = f.name }, label = { Text(f.label) })
                             }
                         }
-                    )
-                }
-            }
-        }
-    } else Column(modifier = Modifier.fillMaxSize()) {
-        SectionHeader("Receipts", "Upload and manage receipts. Attach to transactions when ready.")
-        Spacer(Modifier.height(16.dp))
-
-        Button(onClick = { showAddPage = true }) {
-            Icon(MaterialIcons.Filled.Add, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Add receipt")
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ReceiptFilter.entries.forEach { f ->
-                FilterChip(
-                    selected = filter == f,
-                    onClick = { filter = f },
-                    label = { Text(f.label) }
-                )
-            }
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        if (filtered.isEmpty()) {
-            Text(
-                when (filter) {
-                    ReceiptFilter.ALL -> "No receipts yet. Add one above."
-                    ReceiptFilter.UNATTACHED -> "No unattached receipts."
-                    ReceiptFilter.ATTACHED -> "No attached receipts."
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(filtered, key = { it.receipt.id }) { item ->
-                    ShillingCard {
-                        ReceiptRow(
-                            item = item,
-                            receiptRepo = receiptRepo,
-                            postingRepo = postingRepo,
-                            fileStore = fileStore,
-                            scope = scope,
-                            onOpenReceipt = { receipt ->
-                                scope.launch {
-                                    openLog.i { "Open requested: id=${receipt.id}, name=${receipt.originalName}" }
-                                    runCatching {
-                                        if (receipt.originalName.isPreviewableImageName()) {
-                                            val bytes = fileStore.read(receipt.id)
-                                            if (bytes != null) {
-                                                openLog.i { "Opening in-app preview: id=${receipt.id}, size=${bytes.size}B" }
-                                                preview = ReceiptPreviewState(receipt.originalName, bytes)
-                                            } else {
-                                                openLog.w { "Preview bytes missing, falling back to external open: id=${receipt.id}" }
-                                                fileStore.openExternally(receipt.id, receipt.originalName)
-                                            }
-                                        } else if (receipt.originalName.isHeifFamilyName()) {
-                                            openLog.i { "HEIC/HEIF not previewable in-app; opening externally: id=${receipt.id}" }
-                                            fileStore.openExternally(receipt.id, receipt.originalName)
-                                        } else {
-                                            openLog.i { "Non-image file, opening externally: id=${receipt.id}" }
-                                            fileStore.openExternally(receipt.id, receipt.originalName)
-                                        }
-                                    }
-                                    .onFailure { t ->
-                                        openLog.e(t) { "Open failed: id=${receipt.id}, name=${receipt.originalName}" }
-                                    }
-                                }
+                    }
+                    if (filtered.isEmpty()) {
+                        item(key = "empty") {
+                            when (filter) {
+                                ReceiptFilter.ALL -> EmptyState(
+                                    title = "No receipts yet",
+                                    message = "Keep receipts here and attach them to transactions when they post.",
+                                    actionLabel = "Add receipt",
+                                    onAction = { open(null) }
+                                )
+                                ReceiptFilter.UNATTACHED -> EmptyState(title = "All receipts are attached")
+                                ReceiptFilter.ATTACHED -> EmptyState(title = "No attached receipts")
                             }
-                        )
+                        }
+                    } else {
+                        items(filtered, key = { it.receipt.id }) { item ->
+                            EntityListItem(
+                                title = item.receipt.originalName,
+                                supporting = receiptSummary(item),
+                                trailing = item.receipt.amount?.let { amount ->
+                                    { Text(formatCurrency(amount), style = MaterialTheme.typography.bodyLarge) }
+                                },
+                                selected = twoPane && selectedKey == item.receipt.id,
+                                onClick = { open(item.receipt.id) }
+                            )
+                        }
                     }
                 }
             }
-        }
-    }
+        },
+        detail = { key ->
+            ReceiptEditor(
+                receiptId = key.takeUnless { it == NEW_ITEM_KEY },
+                navIcon = ScreenNavIcon.CLOSE,
+                onClose = { selectedKey = null },
+                onSaved = { selectedKey = null }
+            )
+        },
+        emptyDetail = { EmptyState(title = "No receipt selected", message = "Choose a receipt to view or attach it.") }
+    )
+}
 
-    preview?.let { current ->
-        ReceiptImagePreviewDialog(
-            fileName = current.fileName,
-            imageBytes = current.bytes,
-            onDismiss = { preview = null }
-        )
+private fun receiptSummary(item: ReceiptWithPosting): String = buildList {
+    add(item.receipt.receiptDate?.let { formatDate(LocalDate.fromEpochDays(it)) } ?: "Added ${formatDate(addedDate(item.receipt))}")
+    add(item.postingTitle?.let { "Attached to $it" } ?: "Not attached")
+}.joinToString(" · ")
+
+private fun addedDate(receipt: Receipt): LocalDate =
+    kotlin.time.Instant.fromEpochMilliseconds(receipt.addedAt)
+        .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
+
+@Composable
+fun ReceiptEditor(
+    receiptId: String?,
+    navIcon: ScreenNavIcon,
+    onClose: () -> Unit,
+    onSaved: () -> Unit,
+    initialFile: PlatformFile? = null,
+    onInitialFileConsumed: () -> Unit = {}
+) {
+    if (receiptId == null) {
+        NewReceiptForm(navIcon, onClose, onSaved, initialFile, onInitialFileConsumed)
+        return
+    }
+    val receiptRepo = koinInject<ReceiptRepository>()
+    val loadable = rememberLoadable(receiptId) {
+        receiptRepo.watchAll().map { list -> list.firstOrNull { it.receipt.id == receiptId } }
+    }
+    when (loadable) {
+        Loadable.Loading -> EditorPlaceholder("Receipt", navIcon, onClose, loading = true, missingMessage = "")
+        is Loadable.Ready -> loadable.value?.let { item ->
+            ExistingReceiptForm(item, navIcon, onClose, onSaved)
+        } ?: EditorPlaceholder("Receipt", navIcon, onClose, loading = false, missingMessage = "This receipt was deleted.")
     }
 }
 
 @Composable
-private fun AddReceiptForm(
-    cameraButton: ReceiptPickerButton? = null,
-    photoButton: ReceiptPickerButton? = null,
-    initialFile: PlatformFile? = null,
-    onInitialFileConsumed: () -> Unit = {},
-    onSave: (name: String, notes: String, receiptDate: Long?, amount: Double?, bytes: ByteArray) -> Unit
+private fun NewReceiptForm(
+    navIcon: ScreenNavIcon,
+    onClose: () -> Unit,
+    onSaved: () -> Unit,
+    initialFile: PlatformFile?,
+    onInitialFileConsumed: () -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var notes by remember { mutableStateOf("") }
-    var dateText by remember { mutableStateOf("") }
-    var amountText by remember { mutableStateOf("") }
-    var pickedFileName by remember { mutableStateOf<String?>(null) }
-    var pickedBytes by remember { mutableStateOf<ByteArray?>(null) }
+    val receiptRepo = koinInject<ReceiptRepository>()
+    val fileStore = koinInject<ReceiptFileStore>()
+    val idGen = koinInject<IdGenerator>()
+    val snackbar = LocalSnackbarController.current
+    val pickers = LocalReceiptPickers.current
     val scope = rememberCoroutineScope()
+
+    var fileName by remember { mutableStateOf<String?>(null) }
+    var bytes by remember { mutableStateOf<ByteArray?>(null) }
+    var name by rememberSaveable { mutableStateOf("") }
+    var receiptDate by rememberSaveable { mutableStateOf<Long?>(null) }
+    var amountText by rememberSaveable { mutableStateOf("") }
+    var notes by rememberSaveable { mutableStateOf("") }
+    var attachTo by remember { mutableStateOf<PostingWithDetails?>(null) }
+    var showAttach by remember { mutableStateOf(false) }
 
     val handleFile: (PlatformFile?) -> Unit = { file ->
         if (file != null) {
             scope.launch {
-                pickedBytes = file.readBytes()
-                pickedFileName = file.name
+                bytes = file.readBytes()
+                fileName = file.name
                 if (name.isBlank()) name = file.name
             }
         }
     }
-
     LaunchedEffect(initialFile) {
         if (initialFile != null) {
-            pickedBytes = initialFile.readBytes()
-            pickedFileName = initialFile.name
-            name = initialFile.name
+            handleFile(initialFile)
             onInitialFileConsumed()
         }
     }
-
     val fileLauncher = rememberFilePickerLauncher(type = FileKitType.File(), onResult = handleFile)
+    val amount = parseAmountInput(amountText)
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            cameraButton?.invoke(handleFile)
-            photoButton?.invoke(handleFile)
-            Button(onClick = { fileLauncher.launch() }) { Text("File") }
+    EditorScaffold(
+        title = "New receipt",
+        navIcon = navIcon,
+        onClose = onClose,
+        saveEnabled = bytes != null && name.isNotBlank() && (amountText.isBlank() || amount != null),
+        onSave = {
+            val data = bytes ?: return@EditorScaffold
+            scope.launch {
+                val id = idGen.newId()
+                val storedName = name.trim()
+                fileStore.store(id, storedName, data)
+                receiptRepo.save(
+                    Receipt(
+                        id = id,
+                        postingId = attachTo?.posting?.id,
+                        filePath = storedName,
+                        originalName = storedName,
+                        addedAt = Clock.System.now().toEpochMilliseconds(),
+                        notes = notes.trim().ifBlank { null },
+                        receiptDate = receiptDate,
+                        amount = amount
+                    )
+                )
+                snackbar.show("Receipt saved")
+                onSaved()
+            }
         }
-
-        pickedFileName?.let { fn ->
-            val sizeKb = (pickedBytes?.size ?: 0) / 1024
-            Text(
-                "Selected: $fn (${sizeKb}KB)",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
-            )
+    ) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            pickers.camera?.invoke(handleFile)
+            pickers.photo?.invoke(handleFile)
+            OutlinedButton(onClick = { fileLauncher.launch() }) { Text("Choose file") }
         }
-
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Receipt name") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+        Text(
+            fileName?.let { "$it · ${formatFileSize(bytes?.size ?: 0)}" } ?: "No file selected",
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (fileName != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
         )
-        OutlinedTextField(
-            value = notes,
-            onValueChange = { notes = it },
-            label = { Text("Notes") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+        TextInputField(value = name, onValueChange = { name = it }, label = "Name")
+        ReceiptMetadataFields(
+            receiptDate = receiptDate,
+            onDateChange = { receiptDate = it },
+            amountText = amountText,
+            onAmountChange = { amountText = it },
+            notes = notes,
+            onNotesChange = { notes = it }
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-                value = dateText,
-                onValueChange = { dateText = it },
-                label = { Text("Date (yyyy-mm-dd)") },
-                modifier = Modifier.weight(1f),
-                singleLine = true
-            )
-            OutlinedTextField(
-                value = amountText,
-                onValueChange = { amountText = it },
-                label = { Text("Amount") },
-                modifier = Modifier.width(120.dp),
-                singleLine = true
-            )
-        }
-        Button(
-            onClick = {
-                val receiptDate = try {
-                    LocalDate.parse(dateText).toEpochDays().toLong()
-                } catch (_: Exception) { null }
-                val amount = amountText.toDoubleOrNull()
-                onSave(name, notes, receiptDate, amount, pickedBytes ?: ByteArray(0))
-                name = ""
-                notes = ""
-                dateText = ""
-                amountText = ""
-                pickedFileName = null
-                pickedBytes = null
-            },
-            enabled = name.isNotBlank() && pickedBytes != null
-        ) { Text("Save") }
+        ListSectionHeader("Transaction")
+        AttachmentSummary(
+            label = attachTo?.let { "${it.title} · ${formatDate(it.posting.date)}" },
+            onAttach = { showAttach = true },
+            onDetach = { attachTo = null }
+        )
+    }
+
+    if (showAttach) {
+        AttachTransactionDialog(
+            receiptAmount = amount,
+            receiptDate = receiptDate?.let { LocalDate.fromEpochDays(it) },
+            onSelect = { attachTo = it; showAttach = false },
+            onDismiss = { showAttach = false }
+        )
     }
 }
 
 @Composable
-private fun ReceiptRow(
+private fun ExistingReceiptForm(
     item: ReceiptWithPosting,
-    receiptRepo: ReceiptRepository,
-    postingRepo: PostingRepository,
-    fileStore: ReceiptFileStore,
-    scope: kotlinx.coroutines.CoroutineScope,
-    onOpenReceipt: (Receipt) -> Unit
+    navIcon: ScreenNavIcon,
+    onClose: () -> Unit,
+    onSaved: () -> Unit
 ) {
     val receipt = item.receipt
+    val receiptRepo = koinInject<ReceiptRepository>()
+    val fileStore = koinInject<ReceiptFileStore>()
+    val snackbar = LocalSnackbarController.current
+    val scope = rememberCoroutineScope()
+    val openReceipt = rememberReceiptOpener()
+    var receiptDate by rememberSaveable(receipt.id) { mutableStateOf(receipt.receiptDate) }
+    var amountText by rememberSaveable(receipt.id) { mutableStateOf(receipt.amount?.let(::formatAmountInput).orEmpty()) }
+    var notes by rememberSaveable(receipt.id) { mutableStateOf(receipt.notes.orEmpty()) }
     var showAttach by remember { mutableStateOf(false) }
-    var showEdit by remember { mutableStateOf(false) }
+    val amount = parseAmountInput(amountText)
 
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)
-    ) {
-        Text(receipt.originalName, fontWeight = FontWeight.Bold)
-        val parts = mutableListOf("Added ${formatTimestamp(receipt.addedAt)}")
-        receipt.receiptDate?.let {
-            parts += "Date: ${LocalDate.fromEpochDays(it.toInt())}"
-        }
-        receipt.amount?.let { parts += formatCurrency(it) }
-        Text(parts.joinToString(" | "), style = MaterialTheme.typography.labelSmall)
-        receipt.notes?.let {
-            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        if (item.postingTitle != null) {
-            Text(
-                "Attached to: ${item.postingTitle} (${item.postingDate})",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-        } else {
-            Text("Unattached", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
-        }
-
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            TooltipIconButton(onClick = { onOpenReceipt(receipt) }, tooltip = "Open receipt") {
-                Icon(MaterialIcons.Filled.Open_in_new, contentDescription = "Open")
+    EditorScaffold(
+        title = receipt.originalName,
+        subtitle = "Added ${formatTimestamp(receipt.addedAt)}",
+        navIcon = navIcon,
+        onClose = onClose,
+        saveEnabled = amountText.isBlank() || amount != null,
+        onSave = {
+            scope.launch {
+                receiptRepo.updateMetadata(receipt.id, notes.trim().ifBlank { null }, receiptDate, amount)
+                snackbar.show("Receipt updated")
+                onSaved()
             }
-            TooltipIconButton(onClick = { showEdit = !showEdit }, tooltip = "Edit metadata") {
-                Icon(MaterialIcons.Filled.Edit, contentDescription = "Edit")
-            }
-            if (receipt.postingId != null) {
-                TooltipIconButton(onClick = {
-                    scope.launch { receiptRepo.detach(receipt.id) }
-                }, tooltip = "Detach from transaction") {
-                    Icon(MaterialIcons.Filled.Link_off, contentDescription = "Detach")
-                }
-            } else {
-                TooltipIconButton(onClick = { showAttach = !showAttach }, tooltip = "Attach to transaction") {
-                    Icon(MaterialIcons.Filled.Link, contentDescription = "Attach")
-                }
-            }
-            TooltipIconButton(onClick = {
+        },
+        delete = DeleteConfirmation(
+            title = "Delete receipt?",
+            message = "The file is removed from this device and your synced devices. This can't be undone.",
+            confirmLabel = "Delete receipt",
+            onConfirm = {
                 scope.launch {
                     fileStore.delete(receipt.id)
                     receiptRepo.delete(receipt.id)
+                    onSaved()
+                    snackbar.show("Receipt deleted")
                 }
-            }, tooltip = "Delete receipt") {
-                Icon(MaterialIcons.Filled.Delete, contentDescription = "Delete")
             }
-        }
-
-        if (showEdit) {
-            EditReceiptMetadata(
-                receipt = receipt,
-                onSave = { rNotes, receiptDate, amount ->
-                    scope.launch {
-                        receiptRepo.updateMetadata(receipt.id, rNotes, receiptDate, amount)
-                        showEdit = false
-                    }
-                },
-                onCancel = { showEdit = false }
-            )
-        }
-
-        if (showAttach) {
-            AttachToPosting(
-                postingRepo = postingRepo,
-                onAttach = { postingId ->
-                    scope.launch {
-                        receiptRepo.attach(receipt.id, postingId)
-                        showAttach = false
-                    }
-                },
-                onCancel = { showAttach = false }
-            )
-        }
-    }
-}
-
-@Composable
-private fun EditReceiptMetadata(
-    receipt: Receipt,
-    onSave: (notes: String?, receiptDate: Long?, amount: Double?) -> Unit,
-    onCancel: () -> Unit
-) {
-    var notes by remember(receipt.id) { mutableStateOf(receipt.notes ?: "") }
-    var dateText by remember(receipt.id) {
-        mutableStateOf(receipt.receiptDate?.let { LocalDate.fromEpochDays(it.toInt()).toString() } ?: "")
-    }
-    var amountText by remember(receipt.id) { mutableStateOf(receipt.amount?.toString() ?: "") }
-
-    Spacer(Modifier.height(8.dp))
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(
-            value = notes,
-            onValueChange = { notes = it },
-            label = { Text("Notes") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(
-                value = dateText,
-                onValueChange = { dateText = it },
-                label = { Text("Date (yyyy-mm-dd)") },
-                modifier = Modifier.weight(1f),
-                singleLine = true
-            )
-            OutlinedTextField(
-                value = amountText,
-                onValueChange = { amountText = it },
-                label = { Text("Amount") },
-                modifier = Modifier.width(120.dp),
-                singleLine = true
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = {
-                val receiptDate = try {
-                    LocalDate.parse(dateText).toEpochDays().toLong()
-                } catch (_: Exception) { null }
-                onSave(notes.ifBlank { null }, receiptDate, amountText.toDoubleOrNull())
-            }) { Text("Save") }
-            TextButton(onClick = onCancel) { Text("Cancel") }
-        }
+    ) {
+        OutlinedButton(onClick = { openReceipt(receipt) }) { Text("Open receipt") }
+        ReceiptMetadataFields(
+            receiptDate = receiptDate,
+            onDateChange = { receiptDate = it },
+            amountText = amountText,
+            onAmountChange = { amountText = it },
+            notes = notes,
+            onNotesChange = { notes = it }
+        )
+        ListSectionHeader("Transaction")
+        AttachmentSummary(
+            label = item.postingTitle?.let { title ->
+                val date = item.postingDate?.let { runCatching { formatDate(LocalDate.parse(it)) }.getOrDefault(it) }
+                listOfNotNull(title, date).joinToString(" · ")
+            },
+            onAttach = { showAttach = true },
+            onDetach = {
+                val previous = receipt.postingId ?: return@AttachmentSummary
+                scope.launch {
+                    receiptRepo.detach(receipt.id)
+                    snackbar.showUndo("Receipt detached") { receiptRepo.attach(receipt.id, previous) }
+                }
+            }
+        )
+    }
+
+    if (showAttach) {
+        AttachTransactionDialog(
+            receiptAmount = amount,
+            receiptDate = receiptDate?.let { LocalDate.fromEpochDays(it) },
+            onSelect = { posting ->
+                showAttach = false
+                scope.launch {
+                    receiptRepo.attach(receipt.id, posting.posting.id)
+                    snackbar.show("Attached to ${posting.title}")
+                }
+            },
+            onDismiss = { showAttach = false }
+        )
     }
 }
 
 @Composable
-private fun AttachToPosting(
-    postingRepo: PostingRepository,
-    onAttach: (String) -> Unit,
-    onCancel: () -> Unit
+private fun ReceiptMetadataFields(
+    receiptDate: Long?,
+    onDateChange: (Long?) -> Unit,
+    amountText: String,
+    onAmountChange: (String) -> Unit,
+    notes: String,
+    onNotesChange: (String) -> Unit
 ) {
-    var recentPostings by remember { mutableStateOf(emptyList<finance.shilling.shared.data.PostingWithDetails>()) }
-    LaunchedEffect(Unit) {
-        recentPostings = postingRepo.loadRecentPostings(20)
+    DateField(
+        value = receiptDate?.let { LocalDate.fromEpochDays(it) },
+        onValueChange = { onDateChange(it.toEpochDays()) },
+        label = "Receipt date",
+        placeholder = "Optional",
+        onClear = { onDateChange(null) }
+    )
+    AmountField(value = amountText, onValueChange = onAmountChange, supportingText = "Optional")
+    TextInputField(value = notes, onValueChange = onNotesChange, label = "Notes", singleLine = false)
+}
+
+@Composable
+private fun AttachmentSummary(label: String?, onAttach: () -> Unit, onDetach: () -> Unit) {
+    Text(
+        label ?: "Not attached to a transaction",
+        style = MaterialTheme.typography.bodyLarge,
+        color = if (label != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        OutlinedButton(onClick = onAttach) { Text(if (label == null) "Attach to transaction" else "Change") }
+        if (label != null) TextButton(onClick = onDetach) { Text("Detach") }
+    }
+}
+
+/** Searchable picker over the last six months of transactions; amount matches float to the top. */
+@Composable
+private fun AttachTransactionDialog(
+    receiptAmount: Double?,
+    receiptDate: LocalDate?,
+    onSelect: (PostingWithDetails) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val postingRepo = koinInject<PostingRepository>()
+    val end = remember { today().plus(1, DateTimeUnit.DAY) }
+    val start = remember { end.minus(6, DateTimeUnit.MONTH) }
+    val postings by remember { postingRepo.watchBetween(start, end) }.collectAsState(initial = emptyList())
+    var query by remember { mutableStateOf("") }
+    val results = remember(postings, query, receiptAmount, receiptDate) {
+        val q = query.trim().lowercase()
+        postings
+            .filter { !it.posting.id.endsWith("_cr") }
+            .filter { q.isEmpty() || it.title.lowercase().contains(q) || it.accountName?.lowercase()?.contains(q) == true }
+            .sortedWith(
+                compareBy<PostingWithDetails> {
+                    if (receiptAmount != null && abs(it.posting.amount - receiptAmount) < 0.005) 0 else 1
+                }.thenBy {
+                    receiptDate?.let { d -> abs(it.posting.date.toEpochDays() - d.toEpochDays()) } ?: 0
+                }.thenByDescending { it.posting.date }
+            )
+            .take(100)
     }
 
-    Spacer(Modifier.height(8.dp))
-    if (recentPostings.isEmpty()) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("No postings to attach to.", style = MaterialTheme.typography.bodySmall)
-            TextButton(onClick = onCancel) { Text("Cancel") }
-        }
-    } else {
-        Column {
-            Text("Select a transaction:", style = MaterialTheme.typography.labelMedium)
-            Spacer(Modifier.height(4.dp))
-            recentPostings.take(10).forEach { posting ->
-                TextButton(onClick = { onAttach(posting.posting.id) }) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Attach to transaction") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    placeholder = { Text("Search") },
+                    leadingIcon = { Icon(MaterialIcons.Filled.Search, contentDescription = null) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (results.isEmpty()) {
                     Text(
-                        "${posting.title} | ${posting.posting.date} | ${formatCurrency(posting.posting.amount)}",
-                        style = MaterialTheme.typography.bodySmall
+                        "No transactions in the last six months.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                } else {
+                    LazyColumn(modifier = Modifier.heightIn(max = 360.dp)) {
+                        items(results, key = { it.posting.id }) { posting ->
+                            EntityListItem(
+                                title = posting.title,
+                                supporting = listOfNotNull(formatDate(posting.posting.date), posting.accountName).joinToString(" · "),
+                                trailing = { AmountText(posting.posting.type, posting.posting.amount) },
+                                onClick = { onSelect(posting) }
+                            )
+                        }
+                    }
                 }
             }
-            TextButton(onClick = onCancel) { Text("Cancel") }
-        }
-    }
+        },
+        confirmButton = {},
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+    )
 }

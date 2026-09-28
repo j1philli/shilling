@@ -1,6 +1,6 @@
 package finance.shilling.app
 
-import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,15 +35,15 @@ fun MobileCameraReceiptButton(onFile: (PlatformFile?) -> Unit) {
         }
     }
 
-    Button(onClick = { cameraLauncher.launch() }) {
-        Text("Camera")
+    OutlinedButton(onClick = { cameraLauncher.launch() }) {
+        Text("Take photo")
     }
 }
 
 @Composable
 fun MobilePhotoLibraryReceiptButton(onFile: (PlatformFile?) -> Unit) {
     val photoLauncher = rememberFilePickerLauncher(type = FileKitType.Image, onResult = onFile)
-    Button(onClick = { photoLauncher.launch() }) {
-        Text("Photo Library")
+    OutlinedButton(onClick = { photoLauncher.launch() }) {
+        Text("Choose photo")
     }
 }

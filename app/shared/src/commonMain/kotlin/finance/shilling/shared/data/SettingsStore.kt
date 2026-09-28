@@ -29,3 +29,8 @@ const val SETTINGS_KEY_HELD_LOCAL_DATA = "shilling_held_local_data"
 const val SETTINGS_KEY_PENDING_RESTORE_USER_ID = "shilling_pending_restore_user_id"
 const val SETTINGS_KEY_WELCOME_NOTICE = "shilling_welcome_notice"
 const val SETTINGS_KEY_TAB_ORDER = "shilling_tab_order"
+
+// Display preferences
+const val SETTINGS_KEY_THEME_MODE = "shilling_theme_mode"
+const val SETTINGS_KEY_CURRENCY_SYMBOL = "shilling_currency_symbol"
+const val SETTINGS_KEY_WEEK_START = "shilling_week_start"

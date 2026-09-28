@@ -1,363 +1,160 @@
 package finance.shilling.shared.ui
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowWidthSizeClass
-import com.composables.icons.materialicons.MaterialIcons
-import com.composables.icons.materialicons.filled.Add
-import com.composables.icons.materialicons.filled.Arrow_back
-import com.composables.icons.materialicons.filled.Delete
 import finance.shilling.shared.data.Account
 import finance.shilling.shared.data.IdGenerator
 import finance.shilling.shared.data.store.AccountRepository
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-private const val NEW_ACCOUNT_KEY = "__new__"
-
 @Composable
-fun AccountsView() {
+fun AccountsView(
+    onOpenAccount: (String?) -> Unit,
+    title: String = "Accounts",
+    headerBottom: (@Composable () -> Unit)? = null
+) {
     val accountRepo = koinInject<AccountRepository>()
-    val scope = rememberCoroutineScope()
-    val accounts by accountRepo.watchAll().collectAsState(initial = emptyList())
-    var selectedKey by remember { mutableStateOf<String?>(null) }
+    val accounts by remember { accountRepo.watchAll() }.collectAsState(initial = emptyList())
+    val sorted = remember(accounts) { accounts.sortedBy { it.name.lowercase() } }
+    var selectedKey by rememberSaveable { mutableStateOf<String?>(null) }
 
-    @Suppress("DEPRECATION")
-    val isCompact = currentWindowAdaptiveInfo()
-        .windowSizeClass
-        .windowWidthSizeClass == WindowWidthSizeClass.COMPACT
-
-    val selectedAccount = accounts.firstOrNull { it.id == selectedKey }
-    val isCreating = selectedKey == NEW_ACCOUNT_KEY
-
-    LaunchedEffect(accounts, selectedKey) {
-        if (selectedKey != null && selectedKey != NEW_ACCOUNT_KEY && selectedAccount == null) {
-            selectedKey = null
-        }
-    }
-
-    if (isCompact) {
-        if (selectedKey == null) {
-            AccountsListPane(
-                accounts = accounts,
-                selectedAccountId = null,
-                onSelectAccount = { selectedKey = it.id },
-                onAddAccount = { selectedKey = NEW_ACCOUNT_KEY }
-            )
-        } else {
-            AccountsDetailHost(
-                title = when {
-                    isCreating -> "New account"
-                    selectedAccount != null -> selectedAccount.name
-                    else -> "Account"
-                },
-                showBack = true,
-                onBack = { selectedKey = null },
-                onDelete = selectedAccount?.let { account ->
-                    {
-                        scope.launch {
-                            accountRepo.delete(account.id)
-                            selectedKey = null
-                        }
-                    }
-                }
-            ) {
-                if (isCreating || selectedAccount != null) {
-                    AddAccountForm(
-                        editingAccount = selectedAccount,
-                        onSave = { account ->
-                            scope.launch {
-                                accountRepo.upsert(account)
-                                selectedKey = account.id
-                            }
-                        },
-                        onCancel = { selectedKey = null }
+    ListDetailLayout(
+        selectedKey = selectedKey,
+        onDismissDetail = { selectedKey = null },
+        list = { twoPane ->
+            val open: (String?) -> Unit = { id ->
+                if (twoPane) selectedKey = id ?: NEW_ITEM_KEY else onOpenAccount(id)
+            }
+            ScreenScaffold(
+                title = title,
+                headerBottom = headerBottom,
+                subtitle = if (accounts.isEmpty()) null else "Total ${formatCurrency(accounts.sumOf { it.balance })}",
+                actions = { AddButton("Add", onClick = { open(null) }) }
+            ) { padding ->
+                if (sorted.isEmpty()) {
+                    EmptyState(
+                        title = "No accounts yet",
+                        message = "Add the bank accounts and cash you budget with.",
+                        actionLabel = "Add account",
+                        onAction = { open(null) }
                     )
-                }
-            }
-        }
-    } else {
-        Row(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .widthIn(min = 280.dp, max = 360.dp)
-                    .weight(0.38f)
-                    .fillMaxHeight()
-            ) {
-                AccountsListPane(
-                    accounts = accounts,
-                    selectedAccountId = selectedAccount?.id,
-                    onSelectAccount = { selectedKey = it.id },
-                    onAddAccount = { selectedKey = NEW_ACCOUNT_KEY }
-                )
-            }
-            VerticalDivider()
-            Column(
-                modifier = Modifier
-                    .weight(0.62f)
-                    .fillMaxHeight()
-            ) {
-                when {
-                    isCreating || selectedAccount != null -> {
-                        AccountsDetailHost(
-                            title = if (isCreating) "New account" else selectedAccount!!.name,
-                            showBack = false,
-                            onBack = {},
-                            onDelete = selectedAccount?.let { account ->
-                                {
-                                    scope.launch {
-                                        accountRepo.delete(account.id)
-                                        selectedKey = null
-                                    }
-                                }
-                            }
-                        ) {
-                            AddAccountForm(
-                                editingAccount = selectedAccount,
-                                onSave = { account ->
-                                    scope.launch {
-                                        accountRepo.upsert(account)
-                                        selectedKey = account.id
-                                    }
+                } else {
+                    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = padding) {
+                        items(sorted, key = { it.id }) { account ->
+                            EntityListItem(
+                                title = account.name,
+                                trailing = {
+                                    Text(formatCurrency(account.balance), style = MaterialTheme.typography.bodyLarge)
                                 },
-                                onCancel = { selectedKey = null }
-                            )
-                        }
-                    }
-                    else -> AccountsEmptyDetail()
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun AccountsListPane(
-    accounts: List<Account>,
-    selectedAccountId: String?,
-    onSelectAccount: (Account) -> Unit,
-    onAddAccount: () -> Unit
-) {
-    val scroll = rememberScrollState()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(scroll)
-    ) {
-        SectionHeader("Accounts", "Manage your balances and fund your scheduled items.")
-        Spacer(modifier = Modifier.height(12.dp))
-        Button(onClick = onAddAccount) {
-            Icon(MaterialIcons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Add account")
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        ShillingDivider()
-        Spacer(modifier = Modifier.height(12.dp))
-        if (accounts.isEmpty()) {
-            Text(
-                "No accounts yet. Add one to get started.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        } else {
-            accounts.forEach { account ->
-                val selected = account.id == selectedAccountId
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .clickable { onSelectAccount(account) },
-                    shape = MaterialTheme.shapes.medium,
-                    color = if (selected) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceVariant
-                    },
-                    tonalElevation = if (selected) 2.dp else 0.dp
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(account.name, fontWeight = FontWeight.Medium)
-                            Text(
-                                formatCurrency(account.balance),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                selected = twoPane && selectedKey == account.id,
+                                onClick = { open(account.id) }
                             )
                         }
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun AccountsDetailHost(
-    title: String,
-    showBack: Boolean,
-    onBack: () -> Unit,
-    onDelete: (() -> Unit)?,
-    content: @Composable () -> Unit
-) {
-    val scroll = rememberScrollState()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(scroll)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            if (showBack) {
-                TooltipIconButton(onClick = onBack, tooltip = "Back") {
-                    Icon(MaterialIcons.Filled.Arrow_back, contentDescription = "Back")
-                }
-            }
-            Text(
-                title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.weight(1f)
+        },
+        detail = { key ->
+            AccountEditor(
+                accountId = key.takeUnless { it == NEW_ITEM_KEY },
+                navIcon = ScreenNavIcon.CLOSE,
+                onClose = { selectedKey = null },
+                onSaved = { selectedKey = null }
             )
-            if (onDelete != null) {
-                TooltipIconButton(onClick = onDelete, tooltip = "Delete account") {
-                    Icon(
-                        MaterialIcons.Filled.Delete,
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        ShillingCard {
-            content()
-        }
-    }
+        },
+        emptyDetail = { EmptyState(title = "No account selected", message = "Choose an account to edit it.") }
+    )
 }
 
 @Composable
-private fun AccountsEmptyDetail() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Select an account", style = MaterialTheme.typography.titleMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            "Choose one from the list, or add a new account.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-fun AddAccountForm(
-    editingAccount: Account? = null,
-    onSave: (Account) -> Unit,
-    onCancel: () -> Unit
+fun AccountEditor(
+    accountId: String?,
+    navIcon: ScreenNavIcon,
+    onClose: () -> Unit,
+    onSaved: () -> Unit
 ) {
+    val accountRepo = koinInject<AccountRepository>()
+    if (accountId == null) {
+        AccountForm(existing = null, navIcon = navIcon, onClose = onClose, onSaved = onSaved)
+        return
+    }
+    val loadable = rememberLoadable(accountId) {
+        accountRepo.watchAll().map { list -> list.firstOrNull { it.id == accountId } }
+    }
+    when (loadable) {
+        Loadable.Loading -> EditorPlaceholder("Account", navIcon, onClose, loading = true, missingMessage = "")
+        is Loadable.Ready -> loadable.value?.let { account ->
+            AccountForm(existing = account, navIcon = navIcon, onClose = onClose, onSaved = onSaved)
+        } ?: EditorPlaceholder("Account", navIcon, onClose, loading = false, missingMessage = "This account was deleted.")
+    }
+}
+
+@Composable
+private fun AccountForm(
+    existing: Account?,
+    navIcon: ScreenNavIcon,
+    onClose: () -> Unit,
+    onSaved: () -> Unit
+) {
+    val accountRepo = koinInject<AccountRepository>()
     val idGen = koinInject<IdGenerator>()
-    var name by remember { mutableStateOf(editingAccount?.name ?: "") }
-    var balanceText by remember { mutableStateOf(editingAccount?.balance?.toString() ?: "0") }
-    val balance = balanceText.toDoubleOrNull()
-    val enableSave = name.isNotBlank() && balance != null
-    val isEditing = editingAccount != null
-
-    LaunchedEffect(editingAccount?.id) {
-        editingAccount?.let { account ->
-            name = account.name
-            balanceText = account.balance.toString()
-        } ?: run {
-            name = ""
-            balanceText = "0"
-        }
+    val snackbar = LocalSnackbarController.current
+    val scope = rememberCoroutineScope()
+    var name by rememberSaveable(existing?.id) { mutableStateOf(existing?.name.orEmpty()) }
+    var balanceText by rememberSaveable(existing?.id) {
+        mutableStateOf(existing?.let { formatAmountInput(it.balance).let { v -> if (it.balance < 0) "-$v" else v } }.orEmpty())
     }
+    val balance = if (balanceText.isBlank()) 0.0 else parseAmountInput(balanceText)
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(if (isEditing) "Edit account" else "Add account", style = MaterialTheme.typography.titleMedium)
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Name") },
-            singleLine = true,
-            maxLines = 1
-        )
-        OutlinedTextField(
+    EditorScaffold(
+        title = existing?.name ?: "New account",
+        navIcon = navIcon,
+        onClose = onClose,
+        saveEnabled = name.isNotBlank() && balance != null,
+        onSave = {
+            scope.launch {
+                accountRepo.upsert(Account(id = existing?.id ?: idGen.newId(), name = name.trim(), balance = balance!!))
+                snackbar.show(if (existing == null) "Account added" else "Account updated")
+                onSaved()
+            }
+        },
+        delete = existing?.let { account ->
+            DeleteConfirmation(
+                title = "Delete ${account.name}?",
+                message = "All transactions recorded to this account will be deleted, and schedules that use it " +
+                    "will need a new account. This can't be undone.",
+                confirmLabel = "Delete account",
+                onConfirm = {
+                    scope.launch {
+                        accountRepo.delete(account.id)
+                        snackbar.show("${account.name} deleted")
+                        onSaved()
+                    }
+                }
+            )
+        }
+    ) {
+        TextInputField(value = name, onValueChange = { name = it }, label = "Name", placeholder = "e.g. Checking")
+        AmountField(
             value = balanceText,
             onValueChange = { balanceText = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(if (isEditing) "Balance" else "Starting balance") },
-            singleLine = true,
-            maxLines = 1
+            label = if (existing == null) "Starting balance" else "Current balance",
+            allowNegative = true,
+            supportingText = "Balances are entered manually and aren't changed by recorded transactions."
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(
-                onClick = {
-                    if (enableSave) {
-                        val id = editingAccount?.id ?: idGen.newId()
-                        onSave(Account(id = id, name = name.trim(), balance = balance!!))
-                        if (!isEditing) {
-                            name = ""
-                            balanceText = "0"
-                        }
-                    }
-                },
-                enabled = enableSave
-            ) { Text(if (isEditing) "Save changes" else "Save account") }
-            TextButton(onClick = onCancel) {
-                Text("Cancel")
-            }
-        }
     }
 }

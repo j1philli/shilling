@@ -11,6 +11,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import co.touchlab.kermit.Logger
+import finance.shilling.shared.data.Receipt
+import finance.shilling.shared.data.ReceiptFileStore
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -48,6 +57,42 @@ private fun imageDataUri(fileName: String, bytes: ByteArray): String {
     val mimeType = fileName.toImageMimeType()
     val encoded = Base64.Default.encode(bytes)
     return "data:$mimeType;base64,$encoded"
+}
+
+private val receiptOpenLog = Logger.withTag("ReceiptOpen")
+
+/**
+ * Returns a function that opens a receipt: images preview in-app, everything else
+ * (PDFs, HEIC, missing bytes) is handed to the platform's external viewer.
+ */
+@Composable
+fun rememberReceiptOpener(): (Receipt) -> Unit {
+    val fileStore = koinInject<ReceiptFileStore>()
+    val snackbar = LocalSnackbarController.current
+    val scope = rememberCoroutineScope()
+    var preview by remember { mutableStateOf<Pair<String, ByteArray>?>(null) }
+
+    preview?.let { (name, bytes) ->
+        ReceiptImagePreviewDialog(fileName = name, imageBytes = bytes, onDismiss = { preview = null })
+    }
+
+    return remember(fileStore, scope) {
+        { receipt ->
+            scope.launch {
+                runCatching {
+                    val bytes = if (receipt.originalName.isPreviewableImageName()) fileStore.read(receipt.id) else null
+                    if (bytes != null) {
+                        preview = receipt.originalName to bytes
+                    } else {
+                        fileStore.openExternally(receipt.id, receipt.originalName)
+                    }
+                }.onFailure { t ->
+                    receiptOpenLog.e(t) { "Open failed: id=${receipt.id}, name=${receipt.originalName}" }
+                    snackbar.show("Couldn't open ${receipt.originalName}")
+                }
+            }
+        }
+    }
 }
 
 @Composable

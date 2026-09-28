@@ -20,11 +20,17 @@ class ComputeWindowUseCase(
     private val scheduleRepository: ScheduleRepository,
     private val postingRepository: PostingRepository
 ) {
-    fun computeFridayWindow(anchor: LocalDate): Pair<LocalDate, LocalDate> {
-        val daysUntilFriday = (DayOfWeek.FRIDAY.ordinal - anchor.dayOfWeek.ordinal + 7) % 7
-        val firstFriday = anchor.plus(daysUntilFriday, DateTimeUnit.DAY)
-        val nextFriday = firstFriday.plus(7, DateTimeUnit.DAY)
-        return firstFriday to nextFriday
+    fun computeFridayWindow(anchor: LocalDate): Pair<LocalDate, LocalDate> =
+        computeWindow(anchor, DayOfWeek.FRIDAY)
+
+    /**
+     * Seven-day window beginning on the first [weekStart] on or after [anchor].
+     * End date is exclusive.
+     */
+    fun computeWindow(anchor: LocalDate, weekStart: DayOfWeek): Pair<LocalDate, LocalDate> {
+        val daysUntilStart = (weekStart.ordinal - anchor.dayOfWeek.ordinal + 7) % 7
+        val first = anchor.plus(daysUntilStart, DateTimeUnit.DAY)
+        return first to first.plus(7, DateTimeUnit.DAY)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -33,9 +39,12 @@ class ComputeWindowUseCase(
             flow { emit(loadWindow(start, end)) }
         }
 
-    fun watchWindowForComingFriday(): Flow<List<ScheduledTxWithAccount>> {
+    fun watchWindowForComingFriday(): Flow<List<ScheduledTxWithAccount>> =
+        watchUpcomingWindow(DayOfWeek.FRIDAY)
+
+    fun watchUpcomingWindow(weekStart: DayOfWeek): Flow<List<ScheduledTxWithAccount>> {
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-        val window = computeFridayWindow(today)
+        val window = computeWindow(today, weekStart)
         return watchWindow(window.first, window.second)
     }
 
@@ -144,7 +153,8 @@ class ComputeWindowUseCase(
                 account = accounts[posting.accountId],
                 counterAccount = counterAccountId?.let { accounts[it] },
                 category = tx.categoryId?.let { categories[it] },
-                posted = true
+                posted = true,
+                postingId = posting.id
             )
         }
         val postedTransfers = combineTransferPostings(transferPostings, scheduleMap, accounts, categories)
@@ -159,9 +169,14 @@ class ComputeWindowUseCase(
         categories: Map<String, Category>
     ): List<ScheduledTxWithAccount> {
         if (postings.isEmpty()) return emptyList()
+        // Key on schedule + date as well as pairId: older scheduled postings were written
+        // with a non-unique pairId, which would otherwise merge unrelated transfers.
         return postings.groupBy { posting ->
-            posting.pairId ?: "${posting.scheduleId ?: "posting"}_${posting.id}"
-        }.map { (pairId, entries) ->
+            val pair = posting.pairId ?: "${posting.scheduleId ?: "posting"}_${posting.id}"
+            "$pair|${posting.scheduleId}|${posting.date}"
+        }.map { (_, entries) ->
+            val pairId = entries.first().pairId
+                ?: "${entries.first().scheduleId ?: "posting"}_${entries.first().id}"
             val schedule = entries.firstNotNullOfOrNull { it.scheduleId?.let(schedules::get) }
             val date = entries.first().date
             val debit = entries.firstOrNull { it.type == ScheduleType.EXPENSE }
@@ -186,7 +201,8 @@ class ComputeWindowUseCase(
                 account = accounts[sourceAccountId.takeIf { it.isNotBlank() }],
                 counterAccount = destinationAccountId?.takeIf { it.isNotBlank() }?.let { accounts[it] },
                 category = tx.categoryId?.let { categories[it] },
-                posted = true
+                posted = true,
+                postingId = (debit ?: credit ?: entries.first()).id
             )
         }
     }

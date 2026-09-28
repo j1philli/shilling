@@ -169,6 +169,7 @@ fun MainViewController(): UIViewController {
             scaffoldConfig = AppBootstrapScaffoldConfig(
                 cameraButton = { onFile -> MobileCameraReceiptButton(onFile) },
                 photoButton = { onFile -> MobilePhotoLibraryReceiptButton(onFile) },
+                developerToolsEnabled = isDebugBuild(),
                 externalNavRequest = externalNavRequest,
                 pendingReceiptFile = pendingReceiptFile,
                 onPendingReceiptConsumed = { pendingReceiptFile = null },
@@ -255,3 +256,6 @@ private fun rememberIosSyncRuntime(
         )
     }
 }
+
+@OptIn(kotlin.experimental.ExperimentalNativeApi::class)
+private fun isDebugBuild(): Boolean = kotlin.native.Platform.isDebugBinary

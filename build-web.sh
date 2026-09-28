@@ -11,6 +11,8 @@ case "$SHILLING_WASM_VARIANT" in
         exit 2
         ;;
 esac
+# Show Settings > Developer tools. The dev `just` recipes turn this on; production builds leave it off.
+SHILLING_DEV_TOOLS="${SHILLING_DEV_TOOLS:-false}"
 
 APP_LOGO_ASSET="app/shared-ui/src/commonMain/kotlin/finance/shilling/shared/ui/AppLogoAsset.kt"
 APP_LOGO_SOURCE="app/shared-ui/src/commonMain/composeResources/drawable/app_logo.png"
@@ -44,7 +46,9 @@ rm -rf "$DIST"
 mkdir -p "$DIST"
 # Kotlin Toolchain packages wasm + skiko + import helpers into PKG_DIR.
 # Keep our custom index.html (Tauri logging, error overlay, favicons).
-cp app/web-app/index.html "$DIST/"
+echo "Writing index.html (dev tools: ${SHILLING_DEV_TOOLS})..."
+sed "s/<meta name=\"shilling-dev-tools\" content=\"false\">/<meta name=\"shilling-dev-tools\" content=\"${SHILLING_DEV_TOOLS}\">/" \
+    app/web-app/index.html > "$DIST/index.html"
 echo "Copying Wasm package artifacts to $DIST/..."
 cp "$PKG_DIR/web-app.mjs" "$DIST/"
 cp "$PKG_DIR/web-app.wasm" "$DIST/"

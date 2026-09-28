@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,7 +67,10 @@ import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.koinInject
 
 @Composable
-fun HomeView(onNavigate: (ShelfDestination) -> Unit) {
+fun HomeView(
+    onNavigate: (ShelfDestination) -> Unit,
+    onOpenPlan: (PlanRequest) -> Unit
+) {
     val accountRepo = koinInject<AccountRepository>()
     val categoryRepo = koinInject<CategoryRepository>()
     val postingRepo = koinInject<PostingRepository>()
@@ -75,19 +79,21 @@ fun HomeView(onNavigate: (ShelfDestination) -> Unit) {
     val windowUseCase = koinInject<ComputeWindowUseCase>()
     val budgetUseCase = koinInject<ComputeBudgetUseCase>()
 
-    val systemZone = remember { TimeZone.currentSystemDefault() }
-    val today = remember { Clock.System.now().toLocalDateTime(systemZone).date }
+    val today = remember { finance.shilling.shared.ui.today() }
+    val weekStart = DisplayPreferences.weekStart
     val monthStart = remember { today.startOfMonth() }
     val monthEnd = remember(monthStart) { monthStart.plus(1, DateTimeUnit.MONTH) }
     val historyStart = remember(today) { today.minus(1, DateTimeUnit.YEAR) }
     val historyEnd = remember(today) { today.plus(1, DateTimeUnit.DAY) }
 
-    val accounts by accountRepo.watchAll().collectAsState(initial = emptyList())
-    val categories by categoryRepo.watchAll().collectAsState(initial = emptyList())
-    val schedules by scheduleRepo.watchAll().collectAsState(initial = emptyList())
-    val receipts by receiptRepo.watchAll().collectAsState(initial = emptyList())
-    val upcoming by windowUseCase.watchWindowForComingFriday().collectAsState(initial = emptyList())
-    val recentPostings by postingRepo.watchBetween(historyStart, historyEnd).collectAsState(initial = emptyList())
+    val accounts by remember { accountRepo.watchAll() }.collectAsState(initial = emptyList())
+    val categories by remember { categoryRepo.watchAll() }.collectAsState(initial = emptyList())
+    val schedules by remember { scheduleRepo.watchAll() }.collectAsState(initial = emptyList())
+    val receipts by remember { receiptRepo.watchAll() }.collectAsState(initial = emptyList())
+    val upcoming by remember(weekStart) { windowUseCase.watchUpcomingWindow(weekStart) }
+        .collectAsState(initial = emptyList())
+    val recentPostings by remember(historyStart, historyEnd) { postingRepo.watchBetween(historyStart, historyEnd) }
+        .collectAsState(initial = emptyList())
     val summary by produceState(
         initialValue = BudgetSummary.empty(monthStart, monthEnd),
         monthStart
@@ -110,31 +116,28 @@ fun HomeView(onNavigate: (ShelfDestination) -> Unit) {
     val recentThree = remember(recentPostings) { recentPostings.take(3) }
 
     val netLabel = if (summary.netChange >= 0) "Surplus" else "Deficit"
-    val budgetAccent = if (summary.netChange >= 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
+    val budgetAccent = netColor(summary.netChange)
     val budgetCaption = if (summary.lines.isEmpty()) {
-        "No scheduled items"
+        "Nothing scheduled this month"
     } else {
-        "${summary.lines.size} items · ${summary.categoryTotals.size} categories"
+        "$netLabel · ${summary.lines.size} scheduled ${if (summary.lines.size == 1) "item" else "items"}"
     }
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val isWide = maxWidth >= 720.dp
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            HomeGreeting(today)
-
-            if (isWide) {
-                HomeBentoWideLayout(
+    ScreenScaffold(title = greetingFor(), subtitle = formatDateLong(today)) { padding ->
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val isWide = maxWidth >= 720.dp
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(padding),
+                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+            ) {
+                val tiles = HomeTiles(
                     totalBalance = totalBalance,
                     accountCount = accounts.size,
                     upcoming = upcoming,
                     unpostedCount = unpostedCount,
-                    netLabel = netLabel,
                     netChange = summary.netChange,
                     budgetAccent = budgetAccent,
                     budgetCaption = budgetCaption,
@@ -142,304 +145,246 @@ fun HomeView(onNavigate: (ShelfDestination) -> Unit) {
                     scheduleCount = schedules.size,
                     scheduleBreakdown = scheduleBreakdown,
                     unattachedReceipts = unattachedReceipts,
+                    receiptCount = receipts.size,
                     categoryCount = categories.size,
-                    topCategories = topCategories,
-                    onNavigate = onNavigate
+                    topCategories = topCategories
                 )
-            } else {
-                HomeBentoCompactLayout(
-                    totalBalance = totalBalance,
-                    accountCount = accounts.size,
-                    upcoming = upcoming,
-                    unpostedCount = unpostedCount,
-                    netLabel = netLabel,
-                    netChange = summary.netChange,
-                    budgetAccent = budgetAccent,
-                    budgetCaption = budgetCaption,
-                    recentThree = recentThree,
-                    scheduleCount = schedules.size,
-                    scheduleBreakdown = scheduleBreakdown,
-                    unattachedReceipts = unattachedReceipts,
-                    categoryCount = categories.size,
-                    topCategories = topCategories,
-                    onNavigate = onNavigate
-                )
+                if (isWide) {
+                    HomeBentoWideLayout(tiles, onNavigate, onOpenPlan)
+                } else {
+                    HomeBentoCompactLayout(tiles, onNavigate, onOpenPlan)
+                }
             }
         }
     }
 }
 
-@Composable
-private fun HomeBentoCompactLayout(
-    totalBalance: Double,
-    accountCount: Int,
-    upcoming: List<ScheduledTxWithAccount>,
-    unpostedCount: Int,
-    netLabel: String,
-    netChange: Double,
-    budgetAccent: Color,
-    budgetCaption: String,
-    recentThree: List<PostingWithDetails>,
-    scheduleCount: Int,
-    scheduleBreakdown: Map<ScheduleType, Int>,
-    unattachedReceipts: Int,
-    categoryCount: Int,
-    topCategories: List<CategoryTotal>,
-    onNavigate: (ShelfDestination) -> Unit
+private data class HomeTiles(
+    val totalBalance: Double,
+    val accountCount: Int,
+    val upcoming: List<ScheduledTxWithAccount>,
+    val unpostedCount: Int,
+    val netChange: Double,
+    val budgetAccent: Color,
+    val budgetCaption: String,
+    val recentThree: List<PostingWithDetails>,
+    val scheduleCount: Int,
+    val scheduleBreakdown: Map<ScheduleType, Int>,
+    val unattachedReceipts: Int,
+    val receiptCount: Int,
+    val categoryCount: Int,
+    val topCategories: List<CategoryTotal>
 ) {
+    // Shared copy so the compact and wide layouts always say the same thing.
+    val weeklyValue get() = if (upcoming.isEmpty()) "Clear" else "${upcoming.size} due"
+    val weeklyCaption get() = weeklyCaption(upcoming.size, unpostedCount)
+    val activityValue get() = if (recentThree.isEmpty()) "No activity yet" else "Recent activity"
+    val activityCaption get() = if (recentThree.isEmpty()) "Transactions appear here once recorded" else null
+    val scheduleValue get() = if (scheduleCount == 0) "None yet" else "$scheduleCount active"
+    val scheduleCaption get() = scheduleCaption(scheduleBreakdown)
+    val receiptsValue get() = when {
+        receiptCount == 0 -> "None yet"
+        unattachedReceipts == 0 -> "All attached"
+        else -> "$unattachedReceipts to attach"
+    }
+    val receiptsCaption get() = when {
+        receiptCount == 0 -> "Keep receipts with your transactions"
+        unattachedReceipts == 0 -> "Nothing waiting"
+        else -> "Link them to transactions"
+    }
+    val categoriesValue get() = if (categoryCount == 0) "None yet" else "$categoryCount total"
+    val categoriesCaption get() = if (topCategories.isEmpty()) "Label schedules and transactions" else "Largest this month"
+}
+
+@Composable
+private fun greetingFor(): String {
+    val hour = remember { kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour }
+    return when (hour) {
+        in 0..11 -> "Good morning"
+        in 12..16 -> "Good afternoon"
+        else -> "Good evening"
+    }
+}
+
+private fun formatDateLong(date: LocalDate): String =
+    "${date.dayOfWeek.fullLabel}, ${date.month.fullLabel} ${date.day}, ${date.year}"
+
+@Composable
+private fun HomeBentoCompactLayout(t: HomeTiles, onNavigate: (ShelfDestination) -> Unit, onOpenPlan: (PlanRequest) -> Unit) {
     HomeHeroTile(
-        balance = totalBalance,
-        accountCount = accountCount,
-        onClick = { onNavigate(ShelfDestination.ACCOUNTS) }
+        balance = t.totalBalance,
+        accountCount = t.accountCount,
+        onClick = { onOpenPlan(PlanRequest(PlanSection.ACCOUNTS)) }
     )
 
     Row(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 148.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
-        BentoTile(
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-            icon = MaterialIcons.Filled.Calendar_month,
-            label = "Weekly",
-            value = if (upcoming.isEmpty()) "Clear" else "${upcoming.size}",
-            caption = weeklyCaption(upcoming.size, unpostedCount),
-            accent = MaterialTheme.colorScheme.primary,
-            onClick = { onNavigate(ShelfDestination.WEEKLY) }
-        ) {
-            if (upcoming.isNotEmpty()) {
-                Spacer(Modifier.height(8.dp))
-                upcoming.take(2).forEach { item ->
-                    BentoMiniRow(
-                        title = item.tx.title,
-                        trailing = formatSigned(item.tx.type, item.tx.amount),
-                        trailingColor = amountColor(item.tx.type)
-                    )
-                }
-            }
-        }
-        BentoTile(
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-            icon = MaterialIcons.Filled.Bar_chart,
-            label = "Budget",
-            value = formatCurrency(netChange),
-            caption = "$netLabel · $budgetCaption",
-            accent = budgetAccent,
-            onClick = { onNavigate(ShelfDestination.BUDGET) }
-        )
+        ThisWeekTile(t, onOpenPlan, Modifier.weight(1f).fillMaxHeight(), previewCount = 2)
+        ThisMonthTile(t, onOpenPlan, Modifier.weight(1f).fillMaxHeight())
     }
 
-    BentoTile(
-        modifier = Modifier.fillMaxWidth(),
-        icon = MaterialIcons.Filled.History,
-        label = "History",
-        value = if (recentThree.isEmpty()) "—" else "${recentThree.size} recent",
-        caption = if (recentThree.isEmpty()) "Transactions appear once you post" else "Latest activity",
-        accent = MaterialTheme.colorScheme.secondary,
-        onClick = { onNavigate(ShelfDestination.HISTORY) }
-    ) {
-        if (recentThree.isNotEmpty()) {
-            Spacer(Modifier.height(10.dp))
-            recentThree.forEach { item ->
-                HistoryMiniRow(item)
-            }
-        }
-    }
+    ActivityTile(t, onNavigate, Modifier.fillMaxWidth(), wide = false)
 
     Row(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 120.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
-        BentoTile(
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-            icon = MaterialIcons.Filled.Swap_horiz,
-            label = "Schedules",
-            value = if (scheduleCount == 0) "—" else "$scheduleCount",
-            caption = scheduleCaption(scheduleBreakdown),
-            accent = MaterialTheme.colorScheme.primary,
-            onClick = { onNavigate(ShelfDestination.SCHEDULES) }
-        )
-        BentoTile(
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-            icon = MaterialIcons.Filled.Receipt,
-            label = "Receipts",
-            value = if (unattachedReceipts == 0) "✓" else "$unattachedReceipts",
-            caption = if (unattachedReceipts == 0) "All caught up" else "to attach",
-            accent = if (unattachedReceipts == 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
-            onClick = { onNavigate(ShelfDestination.RECEIPTS) }
-        )
-        BentoTile(
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-            icon = MaterialIcons.Filled.Label,
-            label = "Categories",
-            value = if (categoryCount == 0) "—" else "$categoryCount",
-            caption = if (topCategories.isEmpty()) "labels" else "top spenders",
-            accent = MaterialTheme.colorScheme.secondary,
-            onClick = { onNavigate(ShelfDestination.CATEGORIES) }
-        ) {
-            if (topCategories.isNotEmpty()) {
-                Spacer(Modifier.height(6.dp))
-                topCategories.take(2).forEach { total ->
-                    val dotColor = colorFromHex(total.category?.color) ?: MaterialTheme.colorScheme.onSurfaceVariant
-                    BentoMiniRow(
-                        title = total.category?.name ?: "Other",
-                        leadingDot = dotColor,
-                        trailing = formatCurrency(total.total),
-                        trailingColor = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-        }
+        SchedulesTile(t, onOpenPlan, Modifier.weight(1f).fillMaxHeight())
+        ReceiptsTile(t, onNavigate, Modifier.weight(1f).fillMaxHeight())
     }
+    CategoriesTile(t, onOpenPlan, Modifier.fillMaxWidth(), previewCount = 3)
 }
 
 @Composable
-private fun HomeBentoWideLayout(
-    totalBalance: Double,
-    accountCount: Int,
-    upcoming: List<ScheduledTxWithAccount>,
-    unpostedCount: Int,
-    netLabel: String,
-    netChange: Double,
-    budgetAccent: Color,
-    budgetCaption: String,
-    recentThree: List<PostingWithDetails>,
-    scheduleCount: Int,
-    scheduleBreakdown: Map<ScheduleType, Int>,
-    unattachedReceipts: Int,
-    categoryCount: Int,
-    topCategories: List<CategoryTotal>,
-    onNavigate: (ShelfDestination) -> Unit
-) {
+private fun HomeBentoWideLayout(t: HomeTiles, onNavigate: (ShelfDestination) -> Unit, onOpenPlan: (PlanRequest) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 200.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
         HomeHeroTile(
             modifier = Modifier.weight(1.1f).fillMaxHeight(),
-            balance = totalBalance,
-            accountCount = accountCount,
-            onClick = { onNavigate(ShelfDestination.ACCOUNTS) }
+            balance = t.totalBalance,
+            accountCount = t.accountCount,
+            onClick = { onOpenPlan(PlanRequest(PlanSection.ACCOUNTS)) }
         )
         Column(
             modifier = Modifier.weight(0.9f).fillMaxHeight(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            BentoTile(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                icon = MaterialIcons.Filled.Calendar_month,
-                label = "Weekly",
-                value = if (upcoming.isEmpty()) "Clear week" else "${upcoming.size} upcoming",
-                caption = weeklyCaption(upcoming.size, unpostedCount),
-                accent = MaterialTheme.colorScheme.primary,
-                onClick = { onNavigate(ShelfDestination.WEEKLY) }
-            )
-            BentoTile(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                icon = MaterialIcons.Filled.Bar_chart,
-                label = "Budget · $netLabel",
-                value = formatCurrency(netChange),
-                caption = budgetCaption,
-                accent = budgetAccent,
-                onClick = { onNavigate(ShelfDestination.BUDGET) }
-            )
+            ThisWeekTile(t, onOpenPlan, Modifier.weight(1f).fillMaxWidth(), previewCount = 0)
+            ThisMonthTile(t, onOpenPlan, Modifier.weight(1f).fillMaxWidth())
         }
     }
 
-    BentoTile(
-        modifier = Modifier.fillMaxWidth(),
-        icon = MaterialIcons.Filled.History,
-        label = "History",
-        value = if (recentThree.isEmpty()) "No transactions yet" else "Recent activity",
-        caption = null,
-        accent = MaterialTheme.colorScheme.secondary,
-        onClick = { onNavigate(ShelfDestination.HISTORY) }
-    ) {
-        if (recentThree.isNotEmpty()) {
-            Spacer(Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                recentThree.forEach { item ->
-                    Column(modifier = Modifier.weight(1f)) {
-                        HistoryMiniRow(item)
-                    }
-                }
-            }
-        }
-    }
+    ActivityTile(t, onNavigate, Modifier.fillMaxWidth(), wide = true)
 
     Row(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 132.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
-        BentoTile(
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-            icon = MaterialIcons.Filled.Swap_horiz,
-            label = "Schedules",
-            value = if (scheduleCount == 0) "None yet" else "$scheduleCount active",
-            caption = scheduleCaption(scheduleBreakdown),
-            accent = MaterialTheme.colorScheme.primary,
-            onClick = { onNavigate(ShelfDestination.SCHEDULES) }
-        )
-        BentoTile(
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-            icon = MaterialIcons.Filled.Receipt,
-            label = "Receipts",
-            value = if (unattachedReceipts == 0) "All caught up" else "$unattachedReceipts waiting",
-            caption = if (unattachedReceipts == 0) null else "Tap to attach",
-            accent = if (unattachedReceipts == 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
-            onClick = { onNavigate(ShelfDestination.RECEIPTS) }
-        )
-        BentoTile(
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-            icon = MaterialIcons.Filled.Label,
-            label = "Categories",
-            value = if (categoryCount == 0) "None yet" else "$categoryCount labels",
-            caption = if (topCategories.isEmpty()) null else "This month",
-            accent = MaterialTheme.colorScheme.secondary,
-            onClick = { onNavigate(ShelfDestination.CATEGORIES) }
-        ) {
-            if (topCategories.isNotEmpty()) {
-                Spacer(Modifier.height(8.dp))
-                topCategories.forEach { total ->
-                    val dotColor = colorFromHex(total.category?.color) ?: MaterialTheme.colorScheme.onSurfaceVariant
-                    BentoMiniRow(
-                        title = total.category?.name ?: "Other",
-                        leadingDot = dotColor,
-                        trailing = formatCurrency(total.total),
-                        trailingColor = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+        SchedulesTile(t, onOpenPlan, Modifier.weight(1f).fillMaxHeight())
+        ReceiptsTile(t, onNavigate, Modifier.weight(1f).fillMaxHeight())
+        CategoriesTile(t, onOpenPlan, Modifier.weight(1f).fillMaxHeight(), previewCount = 3)
+    }
+}
+
+@Composable
+private fun ThisWeekTile(t: HomeTiles, onOpenPlan: (PlanRequest) -> Unit, modifier: Modifier, previewCount: Int) {
+    BentoTile(
+        modifier = modifier,
+        icon = MaterialIcons.Filled.Calendar_month,
+        label = "This week",
+        value = t.weeklyValue,
+        caption = t.weeklyCaption,
+        accent = MaterialTheme.colorScheme.primary,
+        onClick = { onOpenPlan(PlanRequest(PlanSection.OVERVIEW, PlanPeriod.WEEK)) }
+    ) {
+        if (previewCount > 0 && t.upcoming.isNotEmpty()) {
+            Spacer(Modifier.height(Spacing.sm))
+            t.upcoming.take(previewCount).forEach { item ->
+                BentoMiniRow(
+                    title = item.tx.title,
+                    trailing = formatSigned(item.tx.type, item.tx.amount),
+                    trailingColor = amountColor(item.tx.type)
+                )
             }
         }
     }
 }
 
 @Composable
-private fun HomeGreeting(today: LocalDate) {
-    val hour = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour }
-    val greeting = remember(hour) {
-        when (hour) {
-            in 0..11 -> "Good morning"
-            in 12..16 -> "Good afternoon"
-            else -> "Good evening"
+private fun ThisMonthTile(t: HomeTiles, onOpenPlan: (PlanRequest) -> Unit, modifier: Modifier) {
+    BentoTile(
+        modifier = modifier,
+        icon = MaterialIcons.Filled.Bar_chart,
+        label = "This month",
+        value = formatCurrency(t.netChange),
+        caption = t.budgetCaption,
+        accent = t.budgetAccent,
+        onClick = { onOpenPlan(PlanRequest(PlanSection.OVERVIEW, PlanPeriod.MONTH)) }
+    )
+}
+
+@Composable
+private fun ActivityTile(t: HomeTiles, onNavigate: (ShelfDestination) -> Unit, modifier: Modifier, wide: Boolean) {
+    BentoTile(
+        modifier = modifier,
+        icon = MaterialIcons.Filled.History,
+        label = "Activity",
+        value = t.activityValue,
+        caption = t.activityCaption,
+        accent = MaterialTheme.colorScheme.secondary,
+        onClick = { onNavigate(ShelfDestination.ACTIVITY) }
+    ) {
+        if (t.recentThree.isNotEmpty()) {
+            Spacer(Modifier.height(Spacing.sm))
+            if (wide) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.lg)) {
+                    t.recentThree.forEach { item ->
+                        Column(modifier = Modifier.weight(1f)) { ActivityMiniRow(item) }
+                    }
+                }
+            } else {
+                t.recentThree.forEach { ActivityMiniRow(it) }
+            }
         }
     }
-    val monthLabel = remember(today) {
-        today.month.name.lowercase().replaceFirstChar { it.titlecase() }
-    }
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(
-            greeting,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold
-        )
-        Text(
-            "$monthLabel ${today.day}, ${today.year}",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+}
+
+@Composable
+private fun SchedulesTile(t: HomeTiles, onOpenPlan: (PlanRequest) -> Unit, modifier: Modifier) {
+    BentoTile(
+        modifier = modifier,
+        icon = MaterialIcons.Filled.Swap_horiz,
+        label = "Schedules",
+        value = t.scheduleValue,
+        caption = t.scheduleCaption,
+        accent = MaterialTheme.colorScheme.primary,
+        onClick = { onOpenPlan(PlanRequest(PlanSection.SCHEDULES)) }
+    )
+}
+
+@Composable
+private fun ReceiptsTile(t: HomeTiles, onNavigate: (ShelfDestination) -> Unit, modifier: Modifier) {
+    BentoTile(
+        modifier = modifier,
+        icon = MaterialIcons.Filled.Receipt,
+        label = "Receipts",
+        value = t.receiptsValue,
+        caption = t.receiptsCaption,
+        accent = when {
+            t.receiptCount == 0 -> MaterialTheme.colorScheme.secondary
+            t.unattachedReceipts == 0 -> MaterialTheme.colorScheme.tertiary
+            else -> MaterialTheme.colorScheme.primary
+        },
+        onClick = { onNavigate(ShelfDestination.RECEIPTS) }
+    )
+}
+
+@Composable
+private fun CategoriesTile(t: HomeTiles, onOpenPlan: (PlanRequest) -> Unit, modifier: Modifier, previewCount: Int) {
+    BentoTile(
+        modifier = modifier,
+        icon = MaterialIcons.Filled.Label,
+        label = "Categories",
+        value = t.categoriesValue,
+        caption = t.categoriesCaption,
+        accent = MaterialTheme.colorScheme.secondary,
+        onClick = { onOpenPlan(PlanRequest(PlanSection.CATEGORIES)) }
+    ) {
+        if (t.topCategories.isNotEmpty()) {
+            Spacer(Modifier.height(Spacing.sm))
+            t.topCategories.take(previewCount).forEach { total ->
+                BentoMiniRow(
+                    title = total.category?.name ?: "Uncategorized",
+                    leadingDot = colorFromHex(total.category?.color) ?: MaterialTheme.colorScheme.outlineVariant,
+                    trailing = formatCurrency(total.total),
+                    trailingColor = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
     }
 }
 
@@ -452,8 +397,8 @@ private fun HomeHeroTile(
 ) {
     val gradient = Brush.linearGradient(
         colors = listOf(
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f),
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.surfaceContainerLow
         )
     )
     Box(
@@ -485,7 +430,7 @@ private fun HomeHeroTile(
                 formatCurrency(balance),
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Text(
                 if (accountCount == 0) "Add an account to get started" else "$accountCount account${if (accountCount == 1) "" else "s"}",
@@ -507,13 +452,13 @@ private fun BentoTile(
     modifier: Modifier = Modifier,
     content: @Composable (() -> Unit)? = null
 ) {
-    val tileBackground = accent.copy(alpha = 0.08f)
+    val tileBackground = MaterialTheme.colorScheme.surfaceContainerLow
     Box(
         modifier = modifier
             .clip(MaterialTheme.shapes.large)
             .background(tileBackground)
             .clickable(onClick = onClick)
-            .padding(16.dp)
+            .padding(Spacing.lg)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -529,8 +474,7 @@ private fun BentoTile(
                     )
                     Text(
                         value,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge,
                         color = accent,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
@@ -624,7 +568,7 @@ private fun BentoMiniRow(
 }
 
 @Composable
-private fun HistoryMiniRow(item: PostingWithDetails) {
+private fun ActivityMiniRow(item: PostingWithDetails) {
     val dotColor = colorFromHex(item.categoryColor)
     BentoMiniRow(
         title = item.title,
@@ -636,28 +580,14 @@ private fun HistoryMiniRow(item: PostingWithDetails) {
 
 private fun weeklyCaption(total: Int, unposted: Int): String = when {
     total == 0 -> "Nothing due this week"
-    unposted == 0 -> "All posted"
-    unposted == 1 -> "1 to post"
-    else -> "$unposted to post"
+    unposted == 0 -> "All recorded"
+    unposted == 1 -> "1 to record"
+    else -> "$unposted to record"
 }
 
 private fun scheduleCaption(breakdown: Map<ScheduleType, Int>): String {
-    if (breakdown.isEmpty()) return "No schedules yet"
+    if (breakdown.isEmpty()) return "Set up bills, paychecks and transfers"
     return ScheduleType.entries.mapNotNull { type ->
-        breakdown[type]?.let { count ->
-            val short = when (type) {
-                ScheduleType.EXPENSE -> "exp"
-                ScheduleType.INCOME -> "inc"
-                ScheduleType.TRANSFER -> "xfer"
-            }
-            "$count $short"
-        }
+        breakdown[type]?.let { count -> "$count ${type.pluralLabel.lowercase()}" }
     }.joinToString(" · ")
-}
-
-@Composable
-private fun amountColor(type: ScheduleType): Color = when (type) {
-    ScheduleType.EXPENSE -> MaterialTheme.colorScheme.error
-    ScheduleType.INCOME -> MaterialTheme.colorScheme.tertiary
-    ScheduleType.TRANSFER -> MaterialTheme.colorScheme.primary
 }

@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.composables.icons.materialicons.MaterialIcons
-import com.composables.icons.materialicons.filled.Chevron_left
+import com.composables.icons.materialicons.filled.Arrow_back
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +34,7 @@ fun BackNavigationScaffold(
                         if (showBackButton) {
                             IconButton(onClick = onBack) {
                                 Icon(
-                                    imageVector = MaterialIcons.Filled.Chevron_left,
+                                    imageVector = MaterialIcons.Filled.Arrow_back,
                                     contentDescription = "Back"
                                 )
                             }

@@ -69,24 +69,34 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     Posting.sq          # postings table schema + queries
     Receipt.sq          # receipts table schema + queries
     Bookkeeping.sq      # tracks failed writes for Store5 sync retry
-  src/commonTest/kotlin/ # cross-platform unit tests (kotlin-test)
+  src/commonTest/kotlin/ # NOTE: not run by Amper; put runnable tests in test@jvm/
   src@nonJvm/          # non-JVM platform sources (wasmJs + iOS)
     finance/shilling/shared/data/sync/
       WebRtcConnectionManager.kt # WebRTC peer connection management
 app/shared-ui/            # shared Compose UI (jvm, wasmJs, iOS)
   module.yaml
   src/commonMain/kotlin/finance/shilling/shared/ui/
-    Navigation.kt        # ShillingScaffold, nav rail + route definitions
-    WeeklyView.kt        # upcoming transactions (Friday-to-Friday window)
-    HistoryView.kt       # transaction history + quick ad-hoc entry
-    ReceiptsScreen.kt    # standalone receipt store (upload, attach, manage)
-    ImportView.kt        # CSV import wizard
-    AccountsView.kt     # account CRUD
-    CategoriesView.kt   # category CRUD with color picker
-    BudgetView.kt        # monthly budget projection
-    ScheduleViews.kt     # expense/income/transfer schedule CRUD + AddScheduleForm
-    Formatting.kt        # formatCurrency, describeRecurrence, colorFromHex
-    DevView.kt           # seed demo data
+    Navigation.kt        # ShillingScaffold: NavHost, rail / bottom bar (Settings pinned), long-press tab reorder
+    AppRoutes.kt         # @Serializable navigation-compose routes (tabs + detail routes)
+    AppPaths.kt          # route <-> URL path codec (web browser history, deep links)
+    ScreenScaffold.kt    # standard screen header + content padding, Spacing scale
+    EditorScaffold.kt    # create/edit chrome (Save/Cancel/Delete+confirm), Loadable, ReadableColumn
+    ListDetailLayout.kt  # two-pane list/detail on wide screens, single pane + routes on phones
+    FormFields.kt        # AmountField, DateField/DatePickerModal, DropdownField, TextInputField
+    Components.kt        # ConfirmDialog, EmptyState, AddButton, EntityListItem, ListSectionHeader
+    SnackbarController.kt # app-level snackbar + undo (LocalSnackbarController)
+    DisplayPreferences.kt # theme mode, currency symbol, week start (persisted in Settings)
+    Formatting.kt        # formatCurrency/formatDate/describeRecurrence + domain labels
+    PlanView.kt          # Plan tab: Overview (week/month, by day / by category) + Schedules, Categories, Accounts sections
+    ActivityView.kt      # Activity tab: recorded transactions (search, ranges, list-detail)
+    ImportView.kt        # CSV import, opened from Activity (ImportRoute)
+    HomeView.kt
+    ReceiptsScreen.kt    # list + editor
+    AccountsView.kt / CategoriesView.kt / ScheduleViews.kt # list + editor, rendered as Plan sections
+    TransactionEditor.kt # view/edit/create a posting, transfer pairs, attached receipts
+    PostingActions.kt    # mark paid / skip / change amount with undo
+    SettingsView.kt      # appearance, account, sync status, hidden developer tools
+    DevView.kt           # seedDemoData helper (developer tools)
 app/web-app/              # Tauri desktop app (wasmJs)
   module.yaml         # product: wasm-js/app
   src/wasmJsMain/kotlin/finance/shilling/web/
@@ -173,9 +183,28 @@ SQLDelight migrations with version checks.
 counter after writes; use cases use `notifier.version.flatMapLatest` to re-query
 across entities.
 
-**Compose state**: UI collects flows with `collectAsState`. Writes use
-`rememberCoroutineScope` + `launch`. Navigation via `NavigationRail` + Jetpack
-Navigation Compose.
+**Compose state**: UI collects flows with `remember { repo.watchX() }.collectAsState()`
+(always remember the Flow). Writes use `rememberCoroutineScope` + `launch` and report
+results through `LocalSnackbarController` (with Undo where reversible). Screen state that
+should survive process death uses `rememberSaveable`.
+
+**Navigation**: Jetpack Navigation Compose (JetBrains KMP) with type-safe routes in
+`AppRoutes.kt`. Each `ShelfDestination` is a top-level route; detail/editor routes live at
+the graph root so any tab can open them. Entity screens use `ListDetailLayout`: two panes
+on wide windows, navigate to the detail route on phones. System back is handled by
+the NavHost; don't use screen-local boolean "pages". Two-pane detail panes close on Back via
+`ListDetailLayout`. Web: `AppPaths` maps every route to a `#/path` URL and
+`web-app/.../BrowserHistory.kt` syncs it with browser back/forward/reload — add new routes to
+`AppPaths` or they won't appear in the URL.
+
+**Headers**: `ScreenScaffold` has a fixed 64dp title row (`titleLarge`, same position on every
+screen); a subtitle sits on its own line below. Don't add custom header rows.
+
+**UI conventions**: every screen uses `ScreenScaffold`; every create/edit form uses
+`EditorScaffold`. Use the shared fields (`AmountField`, `DateField`, `DropdownField`)
+rather than raw text fields for money, dates, or selects. Destructive actions need a
+`ConfirmDialog` (EditorScaffold's `delete` does this). Format with `formatCurrency` /
+`formatDate` / `formatSigned`; never show raw ISO dates or enum names.
 
 **DI**: Koin provides `SqlDriver`, `ShillingDatabase`, `IdGenerator`, `ReceiptFileStore`,
 `ChangeNotifier`, all repositories, all use cases, and all Store5 stores as singletons.
@@ -204,7 +233,7 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
 - **Posting**: recorded/settled occurrence (stored in DB)
 - **Exception**: per-date override (amount/account change) or skip for a schedule
 - **Receipt**: uploaded file (image, PDF, etc.) — can exist independently or be attached to a posting
-- **Friday window**: default weekly view runs Friday-to-Friday
+- **Week window**: Plan's week view shows 7 days starting on the next week-start day (Friday by default, configurable in Settings)
 
 ## Conventions
 

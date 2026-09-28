@@ -104,7 +104,9 @@ fun main() {
                 onboardingTopPadding = tauriTopPadding,
                 navRailTopPadding = tauriTopPadding,
                 selfHostedOnly = selfHostedOnly,
-                defaultSelfHostedServerUrl = if (selfHostedOnly) browserOrigin() else DEFAULT_SELF_HOSTED_SERVER_URL
+                defaultSelfHostedServerUrl = if (selfHostedOnly) browserOrigin() else DEFAULT_SELF_HOSTED_SERVER_URL,
+                navControllerHook = { navController -> BrowserHistoryBinding(navController) },
+                developerToolsEnabled = isDevToolsBuild()
             )
         )
     }
@@ -153,3 +155,8 @@ private fun rememberWebSyncRuntime(
         )
     }
 }
+
+/** Set at build time by build-web.sh (SHILLING_DEV_TOOLS) via a meta tag in index.html. */
+private fun isDevToolsBuild(): Boolean =
+    kotlinx.browser.document.querySelector("meta[name=shilling-dev-tools]")
+        ?.getAttribute("content") == "true"
