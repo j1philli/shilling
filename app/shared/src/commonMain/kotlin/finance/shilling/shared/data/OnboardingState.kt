@@ -146,3 +146,26 @@ suspend fun wipeLocalAppState(
     db.clearAllSyncMetadata()
     resetOnboardingState(settings)
 }
+
+/** Koin-provided entry point for [wipeLocalAppState], so callers don't hand-build repositories. */
+class LocalDataWiper(
+    private val db: ShillingDatabase,
+    private val settings: Settings,
+    private val fileStore: ReceiptFileStore,
+    private val accountRepository: AccountRepository,
+    private val categoryRepository: CategoryRepository,
+    private val scheduleRepository: ScheduleRepository,
+    private val postingRepository: PostingRepository,
+    private val receiptRepository: ReceiptRepository
+) {
+    suspend fun wipe() = wipeLocalAppState(
+        db = db,
+        settings = settings,
+        fileStore = fileStore,
+        accountRepository = accountRepository,
+        categoryRepository = categoryRepository,
+        scheduleRepository = scheduleRepository,
+        postingRepository = postingRepository,
+        receiptRepository = receiptRepository
+    )
+}

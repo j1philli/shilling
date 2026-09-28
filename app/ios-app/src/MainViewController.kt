@@ -1,77 +1,46 @@
 package finance.shilling.app
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import finance.shilling.shared.ui.ShillingScaffold
-import finance.shilling.shared.ui.ShillingTheme
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.window.ComposeUIViewController
-import app.cash.sqldelight.async.coroutines.await
-import app.cash.sqldelight.db.QueryResult
-import app.cash.sqldelight.db.SqlDriver
-import com.russhwolf.settings.Settings
-import finance.shilling.shared.data.DEFAULT_SERVER_URL
-import finance.shilling.shared.data.DeploymentSelection
-import finance.shilling.shared.data.IdGenerator
-import finance.shilling.shared.data.ReceiptFileStore
-import finance.shilling.shared.data.SETTINGS_KEY_HOSTED_HOUSEHOLD_ID
-import finance.shilling.shared.data.SETTINGS_KEY_SERVER_URL
-import finance.shilling.shared.data.ensureLocalSchemaReady
-import finance.shilling.shared.data.HouseholdIdCallback
-import finance.shilling.shared.data.ServerUrlCallback
-import finance.shilling.shared.data.auth.*
-import finance.shilling.shared.data.store.*
-import finance.shilling.shared.data.sync.*
-import finance.shilling.shared.data.usecase.ComputeBudgetUseCase
-import finance.shilling.shared.data.usecase.ComputeWindowUseCase
-import finance.shilling.shared.db.ShillingDatabase
-import finance.shilling.shared.ui.AppBootstrapServices
-import finance.shilling.shared.ui.AppBootstrapScaffoldConfig
-import finance.shilling.shared.ui.PlatformSyncRuntime
-import finance.shilling.shared.ui.ShillingAppBootstrap
-import io.ktor.client.*
-import io.ktor.client.engine.darwin.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.websocket.*
-import io.ktor.client.webrtc.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.koin.compose.KoinApplication
-import org.koin.compose.koinInject
-import org.koin.dsl.module
-import finance.shilling.shared.ui.ShelfDestination
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.flow.MutableStateFlow
-import co.touchlab.kermit.Logger
+import androidx.compose.ui.window.ComposeUIViewController
 import co.touchlab.kermit.LogWriter
+import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import com.russhwolf.settings.Settings
+import finance.shilling.shared.data.IdGenerator
+import finance.shilling.shared.data.ReceiptFileStore
+import finance.shilling.shared.data.ensureLocalSchemaReady
+import finance.shilling.shared.data.sync.BOOTSTRAP_NETWORK_TIMEOUT_MS
+import finance.shilling.shared.db.ShillingDatabase
+import finance.shilling.shared.ui.AppBootstrapScaffoldConfig
+import finance.shilling.shared.ui.ShelfDestination
+import finance.shilling.shared.ui.ShillingAppBootstrap
+import finance.shilling.shared.ui.WebRtcPlatform
+import io.github.vinceglb.filekit.PlatformFile
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.darwin.Darwin
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.client.webrtc.IosWebRtc
+import io.ktor.client.webrtc.WebRtcClient
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import org.koin.dsl.module
 import platform.Foundation.NSTemporaryDirectory
 import platform.UIKit.UIViewController
-import kotlinx.cinterop.ExperimentalForeignApi
 import platform.posix.fclose
 import platform.posix.fflush
 import platform.posix.fopen
 import platform.posix.fprintf
-import io.github.vinceglb.filekit.PlatformFile
-import kotlinx.coroutines.withContext
 
 private val log = Logger.withTag("iOS")
 
@@ -135,17 +104,23 @@ fun MainViewController(): UIViewController {
     runBlocking {
         ensureLocalSchemaReady(driver, logTag = "iOS")
     }
-    val settings = Settings()
-    val idGenerator = IosIdGenerator()
-    val services = AppBootstrapServices(
-        db = ShillingDatabase(driver),
-        settings = settings,
-        idGenerator = idGenerator,
-        receiptFileStore = IosReceiptFileStore(),
-        httpClient = createIosHttpClient(),
-        deviceIdentity = DeviceIdentity(settings, idGenerator),
-        notifier = ChangeNotifier()
-    )
+    val platformModule = module {
+        single { ShillingDatabase(driver) }
+        single { Settings() }
+        single<IdGenerator> { IosIdGenerator() }
+        single<ReceiptFileStore> { IosReceiptFileStore() }
+        single { createIosHttpClient() }
+        single {
+            WebRtcPlatform(
+                createClient = { currentIceServers ->
+                    WebRtcClient(IosWebRtc) {
+                        defaultConnectionConfig = { iceServers = currentIceServers() }
+                    }
+                },
+                delayFn = iosDelay
+            )
+        }
+    }
 
     return ComposeUIViewController {
         val deepLinkAction by DeepLinkState.pendingAction.collectAsState()
@@ -161,11 +136,8 @@ fun MainViewController(): UIViewController {
         }
 
         ShillingAppBootstrap(
-            services = services,
+            platformModule = platformModule,
             logTag = "iOS",
-            syncRuntimeFactory = { syncConfig, authService, iceServers, bootstrapServices ->
-                rememberIosSyncRuntime(syncConfig, authService, iceServersState = iceServers, services = bootstrapServices)
-            },
             scaffoldConfig = AppBootstrapScaffoldConfig(
                 cameraButton = { onFile -> MobileCameraReceiptButton(onFile) },
                 photoButton = { onFile -> MobilePhotoLibraryReceiptButton(onFile) },
@@ -204,56 +176,6 @@ private fun createIosHttpClient(): HttpClient = HttpClient(Darwin) {
         connectTimeoutMillis = BOOTSTRAP_NETWORK_TIMEOUT_MS
         requestTimeoutMillis = BOOTSTRAP_NETWORK_TIMEOUT_MS
         socketTimeoutMillis = BOOTSTRAP_NETWORK_TIMEOUT_MS
-    }
-}
-
-@Composable
-private fun rememberIosSyncRuntime(
-    syncConfig: SyncConfig,
-    authService: AuthService,
-    iceServersState: androidx.compose.runtime.State<List<WebRtc.IceServer>>,
-    services: AppBootstrapServices
-): PlatformSyncRuntime {
-    val currentIceServers = androidx.compose.runtime.rememberUpdatedState(iceServersState.value)
-    val webRtcClient = remember {
-        WebRtcClient(IosWebRtc) {
-            defaultConnectionConfig = { this.iceServers = currentIceServers.value }
-        }
-    }
-    val signalingClient = remember(services.httpClient, syncConfig.serverUrl, syncConfig.deviceId, syncConfig.householdId, authService) {
-        SignalingClient(services.httpClient, syncConfig.serverUrl, syncConfig.deviceId, syncConfig.householdId, authService)
-    }
-    val webRtcManager = remember(signalingClient, syncConfig.deviceId) {
-        WebRtcConnectionManager(
-            webRtcClient,
-            signalingClient,
-            syncConfig.deviceId,
-            delayFn = iosDelay
-        )
-    }
-    val fileTransferManager = remember(services.receiptFileStore) {
-        FileTransferManager(services.receiptFileStore)
-    }
-    val syncStoreFacade = koinInject<SyncStoreFacade>()
-    val incomingChangeRouter = remember(syncStoreFacade, webRtcManager, services.receiptFileStore, syncConfig.deviceId) {
-        IncomingChangeRouter(
-            syncStoreFacade,
-            services.notifier,
-            webRtcManager,
-            fileTransferManager,
-            services.receiptFileStore,
-            delayFn = iosDelay,
-            deviceId = syncConfig.deviceId,
-            idGenerator = services.idGenerator
-        )
-    }
-    return remember(signalingClient, webRtcManager, incomingChangeRouter, fileTransferManager) {
-        PlatformSyncRuntime(
-            signalingClient = signalingClient,
-            peerSyncManager = webRtcManager,
-            incomingChangeRouter = incomingChangeRouter,
-            fileTransferManager = fileTransferManager
-        )
     }
 }
 

@@ -9,16 +9,23 @@ import finance.shilling.shared.data.auth.HostedBootstrapRetryCallback
 import finance.shilling.shared.data.auth.HostedBootstrapState
 import finance.shilling.shared.data.auth.HostedBootstrapStatus
 import finance.shilling.shared.data.store.AccountRepository
-import finance.shilling.shared.data.store.ChangeNotifier
+import finance.shilling.shared.data.store.CategoryRepository
+import finance.shilling.shared.data.store.PostingRepository
+import finance.shilling.shared.data.store.ReceiptRepository
+import finance.shilling.shared.data.store.ScheduleRepository
 import finance.shilling.shared.data.store.StoreSyncDeps
+import finance.shilling.shared.data.store.SyncStoreFacade
 import finance.shilling.shared.data.usecase.ComputeBudgetUseCase
+import finance.shilling.shared.data.usecase.ComputeWindowUseCase
 import finance.shilling.shared.db.ShillingDatabase
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.koin.dsl.koinApplication
+import org.koin.dsl.module
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertSame
 
 class AppModuleTest {
     @Test
@@ -37,9 +44,12 @@ class AppModuleTest {
                 return "id-$nextId"
             }
         }
-        val deviceIdentity = DeviceIdentity(settings, idGenerator)
-        val notifier = ChangeNotifier()
-        val syncDeps = StoreSyncDeps(db, peerSyncManager = null, deviceId = deviceIdentity.deviceId, idGenerator = idGenerator)
+        val platformModule = module {
+            single { db }
+            single { settings }
+            single<IdGenerator> { idGenerator }
+            single<ReceiptFileStore> { InMemoryReceiptFileStore() }
+        }
         var updatedServerUrl: String? = null
         var updatedHouseholdId: String? = null
         var hostedBootstrapRetryCount = 0
@@ -65,14 +75,9 @@ class AppModuleTest {
 
         val app = koinApplication {
             modules(
-                createAppModule(
-                    db = db,
-                    idGenerator = idGenerator,
-                    fileStore = InMemoryReceiptFileStore(),
-                    settings = settings,
-                    deviceIdentity = deviceIdentity,
-                    notifier = notifier,
-                    syncDeps = syncDeps,
+                platformModule,
+                dataModule,
+                bootstrapSessionModule(
                     hostedBootstrapState = hostedBootstrapState,
                     onRetryHostedBootstrap = hostedBootstrapRetryCallback,
                     onResetOnboardingUi = onResetOnboardingUi,
@@ -84,9 +89,21 @@ class AppModuleTest {
         }
 
         try {
-            assertNotNull(app.koin.get<AccountRepository>())
-            assertNotNull(app.koin.get<ComputeBudgetUseCase>())
-            assertNotNull(app.koin.get<HostedBootstrapState>())
+            val koin = app.koin
+            assertNotNull(koin.get<AccountRepository>())
+            assertNotNull(koin.get<CategoryRepository>())
+            assertNotNull(koin.get<ScheduleRepository>())
+            assertNotNull(koin.get<PostingRepository>())
+            assertNotNull(koin.get<ReceiptRepository>())
+            assertNotNull(koin.get<ComputeWindowUseCase>())
+            assertNotNull(koin.get<ComputeBudgetUseCase>())
+            assertNotNull(koin.get<SyncStoreFacade>())
+            assertNotNull(koin.get<LocalDataWiper>())
+            assertNotNull(koin.get<HostedBootstrapState>())
+            // Stores and repositories must share one StoreSyncDeps so the sync runtime can
+            // attach its peer manager in a single place.
+            assertSame(koin.get<StoreSyncDeps>(), koin.get<StoreSyncDeps>())
+            assertEquals(koin.get<DeviceIdentity>().deviceId, koin.get<StoreSyncDeps>().state.deviceId)
 
             app.koin.get<ServerUrlCallback>().onChange("http://example.com")
             app.koin.get<HouseholdIdCallback>().onChange("household-1")

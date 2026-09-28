@@ -100,14 +100,14 @@ app/shared-ui/            # shared Compose UI (jvm, wasmJs, iOS)
 app/web-app/              # Tauri desktop app (wasmJs)
   module.yaml         # product: wasm-js/app
   src/wasmJsMain/kotlin/finance/shilling/web/
-    Main.kt              # entry point, Koin module, WebWorkerDriver setup
+    Main.kt              # entry point, platform Koin module, WebWorkerDriver setup
     WasmPlatformServices.kt # wasmJs IdGenerator + ReceiptFileStore stubs
 app/ios-app/              # Compose Multiplatform iOS app
   module.yaml         # product: ios/app
   module.xcodeproj/   # Kotlin Toolchain–managed Xcode project (has -lsqlite3 linker flag)
   src/
     App.swift           # SwiftUI @main entry, wraps ComposeUIViewController
-    MainViewController.kt  # ComposeUIViewController factory + Koin init
+    MainViewController.kt  # ComposeUIViewController factory + platform Koin module
     IosPlatformServices.kt # IosIdGenerator (NSUUID), IosReceiptFileStore (NSFileManager), NativeSqliteDriver
     ShillingIosApp.kt      # receipt store UI (add, list, edit, attach, delete)
 src-tauri/            # Tauri native shell (Rust)
@@ -206,9 +206,17 @@ rather than raw text fields for money, dates, or selects. Destructive actions ne
 `ConfirmDialog` (EditorScaffold's `delete` does this). Format with `formatCurrency` /
 `formatDate` / `formatSigned`; never show raw ISO dates or enum names.
 
-**DI**: Koin provides `SqlDriver`, `ShillingDatabase`, `IdGenerator`, `ReceiptFileStore`,
-`ChangeNotifier`, all repositories, all use cases, and all Store5 stores as singletons.
-Injected in composables with `koinInject<T>()`.
+**DI**: Each app passes a platform Koin module to `ShillingAppBootstrap`, which provides
+`ShillingDatabase`, `Settings`, `IdGenerator`, `ReceiptFileStore`, `HttpClient`, and
+`WebRtcPlatform` (the WebRTC client factory plus the sync delay). `ShillingAppBootstrap` hosts
+one `KoinApplication` for the app's whole lifetime: the platform module plus the shared
+`dataModule` (`AppModule.kt`: `DeviceIdentity`, `ChangeNotifier`, `StoreSyncDeps`, Store5
+stores, `SyncStoreFacade`, repositories, use cases, `LocalDataWiper`). It loads
+`bootstrapSessionModule` (hosted-bootstrap state and the Settings callbacks) with
+`rememberKoinModules`. Definitions resolve their dependencies through `get()`, not captured
+instances. Composables use `koinInject<T>()`. Don't construct repositories or stores by hand
+outside tests. Session-scoped objects (sync runtime, `ServerApi`, `AuthService`) stay
+`remember`ed in the bootstrap because they are rebuilt when the server or auth changes.
 
 ## Database Schema
 

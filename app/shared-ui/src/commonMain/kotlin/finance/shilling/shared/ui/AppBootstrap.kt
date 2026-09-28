@@ -32,7 +32,9 @@ import finance.shilling.shared.data.IdGenerator
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.SETTINGS_KEY_SERVER_URL
 import finance.shilling.shared.data.completeFirstLaunchOnboarding
-import finance.shilling.shared.data.createAppModule
+import finance.shilling.shared.data.LocalDataWiper
+import finance.shilling.shared.data.bootstrapSessionModule
+import finance.shilling.shared.data.dataModule
 import finance.shilling.shared.data.clearWelcomeHoldState
 import finance.shilling.shared.data.hadPersistedAccountSession
 import finance.shilling.shared.data.hasHeldLocalData
@@ -44,7 +46,6 @@ import finance.shilling.shared.data.savedDeploymentSelection
 import finance.shilling.shared.data.shouldShowFirstLaunchOnboarding
 import finance.shilling.shared.data.softReturnToWelcome
 import finance.shilling.shared.data.welcomeNotice
-import finance.shilling.shared.data.wipeLocalAppState
 import finance.shilling.shared.data.auth.AuthRuntime
 import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.shared.data.auth.DeviceIdentity
@@ -58,70 +59,61 @@ import finance.shilling.shared.data.auth.createPlaceholderStartupIdentity
 import finance.shilling.shared.data.auth.hostedBootstrapRetryDelay
 import finance.shilling.shared.data.auth.resolveEffectiveHostedBootstrapStatus
 import finance.shilling.shared.data.auth.resolveStartupIdentity
-import finance.shilling.shared.data.store.AccountRepository
-import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.ChangeNotifier
-import finance.shilling.shared.data.store.PostingRepository
-import finance.shilling.shared.data.store.ReceiptRepository
-import finance.shilling.shared.data.store.ScheduleRepository
 import finance.shilling.shared.data.store.StoreSyncDeps
 import finance.shilling.shared.data.store.SyncState
-import finance.shilling.shared.data.store.createAccountStore
-import finance.shilling.shared.data.store.createCategoryStore
-import finance.shilling.shared.data.store.createPostingStore
-import finance.shilling.shared.data.store.createReceiptStore
-import finance.shilling.shared.data.store.createScheduleExceptionStore
-import finance.shilling.shared.data.store.createScheduleStore
+import finance.shilling.shared.data.store.SyncStoreFacade
 import finance.shilling.shared.data.sync.FileTransferManager
 import finance.shilling.shared.data.sync.IncomingChangeRouter
 import finance.shilling.shared.data.sync.PeerSyncManager
 import finance.shilling.shared.data.sync.ServerApi
 import finance.shilling.shared.data.sync.SignalingClient
 import finance.shilling.shared.data.sync.SyncConfig
-import finance.shilling.shared.db.ShillingDatabase
+import finance.shilling.shared.data.sync.WebRtcConnectionManager
 import io.github.vinceglb.filekit.PlatformFile
 import io.ktor.client.HttpClient
 import io.ktor.client.webrtc.WebRtc
+import io.ktor.client.webrtc.WebRtcClient
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 import org.koin.compose.KoinApplication
+import org.koin.compose.koinInject
+import org.koin.compose.module.rememberKoinModules
+import org.koin.core.annotation.KoinExperimentalAPI
+import org.koin.core.logger.Level
+import org.koin.core.module.Module
+import org.koin.dsl.koinConfiguration
 
 private const val MANUAL_RETRY_MIN_LOADING_MS = 2_000L
 private const val SELF_HOSTED_MODE_MISMATCH_MESSAGE =
     "This server requires managed auth. Use the hosted flow instead."
 
-data class AppBootstrapServices(
-    val db: ShillingDatabase,
-    val settings: Settings,
-    val idGenerator: IdGenerator,
-    val receiptFileStore: ReceiptFileStore,
-    val httpClient: HttpClient,
-    val deviceIdentity: DeviceIdentity,
-    val notifier: ChangeNotifier
+/**
+ * Platform WebRTC wiring. Each app binds one in its platform Koin module alongside
+ * `ShillingDatabase`, `Settings`, `IdGenerator`, `ReceiptFileStore`, and `HttpClient`.
+ */
+class WebRtcPlatform(
+    /** Builds the platform [WebRtcClient]; [iceServers] is read per connection so ICE updates apply. */
+    val createClient: (iceServers: () -> List<WebRtc.IceServer>) -> WebRtcClient,
+    /** Delay used by the sync loops (iOS needs a cooperative replacement for `delay`). */
+    val delayFn: suspend (Long) -> Unit = { delay(it) }
 )
 
-data class PlatformSyncRuntime(
+private class SyncRuntime(
     val signalingClient: SignalingClient,
     val peerSyncManager: PeerSyncManager,
-    val incomingChangeRouter: IncomingChangeRouter,
-    val fileTransferManager: FileTransferManager
+    val incomingChangeRouter: IncomingChangeRouter
 )
-
-typealias PlatformSyncRuntimeFactory = @Composable (
-    syncConfig: SyncConfig,
-    authService: AuthService,
-    iceServers: State<List<WebRtc.IceServer>>,
-    services: AppBootstrapServices
-) -> PlatformSyncRuntime
 
 data class AppBootstrapScaffoldConfig(
     val onboardingTopPadding: Dp = 0.dp,
@@ -141,15 +133,39 @@ data class AppBootstrapScaffoldConfig(
     val startupPendingContent: @Composable () -> Unit = { DefaultLoadingSurface() }
 )
 
+/**
+ * Hosts the app's Koin graph ([platformModule] + shared [dataModule]) and runs onboarding,
+ * hosted bootstrap, and sync inside it.
+ */
 @Composable
 fun ShillingAppBootstrap(
-    services: AppBootstrapServices,
-    syncRuntimeFactory: PlatformSyncRuntimeFactory,
+    platformModule: Module,
     scaffoldConfig: AppBootstrapScaffoldConfig = AppBootstrapScaffoldConfig(),
     logTag: String = "AppBootstrap"
 ) {
+    // KoinApplication rebuilds the graph whenever its configuration changes, so keep it stable.
+    val configuration = remember(platformModule) {
+        koinConfiguration { modules(platformModule, dataModule) }
+    }
+    KoinApplication(configuration = configuration, logLevel = Level.ERROR) {
+        AppBootstrapContent(scaffoldConfig, logTag)
+    }
+}
+
+@OptIn(KoinExperimentalAPI::class)
+@Composable
+private fun AppBootstrapContent(
+    scaffoldConfig: AppBootstrapScaffoldConfig,
+    logTag: String
+) {
+    val settings = koinInject<Settings>()
+    val idGenerator = koinInject<IdGenerator>()
+    val httpClient = koinInject<HttpClient>()
+    val deviceIdentity = koinInject<DeviceIdentity>()
+    val syncDeps = koinInject<StoreSyncDeps>()
+    val localDataWiper = koinInject<LocalDataWiper>()
     val log = remember(logTag) { Logger.withTag(logTag) }
-    remember(services.settings) { DisplayPreferences.load(services.settings) }
+    remember(settings) { DisplayPreferences.load(settings) }
     val syncExceptionHandler = remember(logTag) {
         CoroutineExceptionHandler { _, throwable ->
             log.e {
@@ -158,20 +174,20 @@ fun ShillingAppBootstrap(
         }
     }
     var onboardingComplete by remember {
-        mutableStateOf(!shouldShowFirstLaunchOnboarding(services.settings))
+        mutableStateOf(!shouldShowFirstLaunchOnboarding(settings))
     }
     var settingsRevision by remember { mutableStateOf(0) }
     var serverUrl by remember {
         mutableStateOf(
-            services.settings.getStringOrNull(SETTINGS_KEY_SERVER_URL)
+            settings.getStringOrNull(SETTINGS_KEY_SERVER_URL)
                 ?: if (scaffoldConfig.selfHostedOnly) scaffoldConfig.defaultSelfHostedServerUrl else DEFAULT_SERVER_URL
         )
     }
-    val savedSelection = remember(settingsRevision) { savedDeploymentSelection(services.settings) }
-    val heldLocalData = remember(settingsRevision) { hasHeldLocalData(services.settings) }
-    val notice = remember(settingsRevision) { welcomeNotice(services.settings) }
+    val savedSelection = remember(settingsRevision) { savedDeploymentSelection(settings) }
+    val heldLocalData = remember(settingsRevision) { hasHeldLocalData(settings) }
+    val notice = remember(settingsRevision) { welcomeNotice(settings) }
     val hadAccountSession = remember(settingsRevision, onboardingComplete) {
-        hadPersistedAccountSession(services.settings)
+        hadPersistedAccountSession(settings)
     }
     val deploymentSelection = resolveDeploymentSelection(
         onboardingComplete = onboardingComplete,
@@ -184,7 +200,7 @@ fun ShillingAppBootstrap(
     val expectHostedBootstrap = onboardingComplete && deploymentSelection == DeploymentSelection.HOSTED
     var startupIdentity by remember(
         serverUrl,
-        services.deviceIdentity.deviceId,
+        deviceIdentity.deviceId,
         onboardingComplete,
         expectHostedBootstrap,
         settingsRevision
@@ -194,15 +210,15 @@ fun ShillingAppBootstrap(
                 null
             } else {
                 createPlaceholderStartupIdentity(
-                    settings = services.settings,
-                    idGenerator = services.idGenerator,
-                    deviceId = services.deviceIdentity.deviceId,
+                    settings = settings,
+                    idGenerator = idGenerator,
+                    deviceId = deviceIdentity.deviceId,
                     expectHosted = expectHostedBootstrap
                 )
             }
         )
     }
-    var authRuntime by remember(serverUrl, services.deviceIdentity.deviceId) {
+    var authRuntime by remember(serverUrl, deviceIdentity.deviceId) {
         mutableStateOf<AuthRuntime?>(null)
     }
     var welcomeAuthService by remember { mutableStateOf<AuthService?>(null) }
@@ -215,9 +231,9 @@ fun ShillingAppBootstrap(
     val hostedBootstrapStatusFlow = remember {
         MutableStateFlow(
             createPlaceholderStartupIdentity(
-                settings = services.settings,
-                idGenerator = services.idGenerator,
-                deviceId = services.deviceIdentity.deviceId,
+                settings = settings,
+                idGenerator = idGenerator,
+                deviceId = deviceIdentity.deviceId,
                 expectHosted = expectHostedBootstrap
             ).bootstrapStatus
         )
@@ -242,16 +258,16 @@ fun ShillingAppBootstrap(
             manualRetryStartedAt = null
             settingsRevision += 1
             hostedBootstrapStatusFlow.value = createPlaceholderStartupIdentity(
-                settings = services.settings,
-                idGenerator = services.idGenerator,
-                deviceId = services.deviceIdentity.deviceId,
+                settings = settings,
+                idGenerator = idGenerator,
+                deviceId = deviceIdentity.deviceId,
                 expectHosted = false
             ).bootstrapStatus
         }
     }
     val onSoftReturnToWelcomeUi: suspend () -> Unit = remember {
         {
-            softReturnToWelcome(services.settings, notice = "signed_out")
+            softReturnToWelcome(settings, notice = "signed_out")
             authScopeGeneration += 1
             authRuntime = null
             welcomeAuthService = null
@@ -260,12 +276,30 @@ fun ShillingAppBootstrap(
             manualRetryStartedAt = null
             settingsRevision += 1
             hostedBootstrapStatusFlow.value = createPlaceholderStartupIdentity(
-                settings = services.settings,
-                idGenerator = services.idGenerator,
-                deviceId = services.deviceIdentity.deviceId,
+                settings = settings,
+                idGenerator = idGenerator,
+                deviceId = deviceIdentity.deviceId,
                 expectHosted = false
             ).bootstrapStatus
         }
+    }
+    // The household id state is re-keyed per server, so Settings changes are delivered as
+    // events and applied to whichever state is current (see the collector further down).
+    val householdIdChanges = remember { MutableSharedFlow<String>(extraBufferCapacity = 1) }
+    rememberKoinModules(unloadModules = true) {
+        listOf(
+            bootstrapSessionModule(
+                hostedBootstrapState = hostedBootstrapState,
+                onRetryHostedBootstrap = hostedBootstrapRetryCallback,
+                onResetOnboardingUi = onResetOnboardingUi,
+                onRestartHostedLoginUi = onSoftReturnToWelcomeUi,
+                onServerUrlChanged = { newUrl ->
+                    settings.putString(SETTINGS_KEY_SERVER_URL, newUrl)
+                    serverUrl = newUrl
+                },
+                onHouseholdIdChanged = { householdIdChanges.tryEmit(it) }
+            )
+        )
     }
     val hostedBootstrapLoop = remember { HostedBootstrapLoop(::hostedBootstrapRetryDelay) }
     val authScope = remember(serverUrl, authScopeGeneration) {
@@ -276,58 +310,16 @@ fun ShillingAppBootstrap(
         onDispose { authScope.cancel() }
     }
 
-    suspend fun wipeHeldLocalData() {
-        val syncDeps = StoreSyncDeps(
-            services.db,
-            null,
-            services.deviceIdentity.deviceId,
-            services.idGenerator
-        )
-        val accountStore = createAccountStore(services.db, syncDeps)
-        val categoryStore = createCategoryStore(services.db, syncDeps)
-        val scheduleStore = createScheduleStore(services.db, syncDeps)
-        val scheduleExceptionStore = createScheduleExceptionStore(services.db, syncDeps)
-        val postingStore = createPostingStore(services.db, syncDeps)
-        val receiptStore = createReceiptStore(services.db, syncDeps)
-        wipeLocalAppState(
-            db = services.db,
-            settings = services.settings,
-            fileStore = services.receiptFileStore,
-            accountRepository = AccountRepository(services.notifier, accountStore, syncDeps),
-            categoryRepository = CategoryRepository(services.notifier, categoryStore, syncDeps),
-            scheduleRepository = ScheduleRepository(
-                services.notifier,
-                scheduleStore,
-                scheduleExceptionStore,
-                syncDeps
-            ),
-            postingRepository = PostingRepository(
-                services.idGenerator,
-                services.notifier,
-                postingStore,
-                accountStore,
-                categoryStore,
-                scheduleStore,
-                syncDeps
-            ),
-            receiptRepository = ReceiptRepository(
-                services.notifier,
-                receiptStore,
-                postingStore,
-                scheduleStore,
-                syncDeps
-            )
-        )
-    }
+    suspend fun wipeHeldLocalData() = localDataWiper.wipe()
 
     suspend fun ensureWelcomeAuthService(): AuthService {
         welcomeAuthService?.let { return it }
         val resolution = resolveStartupIdentity(
-            httpClient = services.httpClient,
+            httpClient = httpClient,
             serverUrl = serverUrl,
-            settings = services.settings,
-            idGenerator = services.idGenerator,
-            deviceId = services.deviceIdentity.deviceId,
+            settings = settings,
+            idGenerator = idGenerator,
+            deviceId = deviceIdentity.deviceId,
             scope = authScope,
             deploymentSelection = DeploymentSelection.HOSTED,
             sessionRequirement = HostedSessionRequirement.ACCOUNT_REQUIRED,
@@ -351,7 +343,7 @@ fun ShillingAppBootstrap(
         val welcomeAuth = welcomeAuthService
         ShillingTheme {
             FirstLaunchOnboardingView(
-                initialSelfHostedUrl = services.settings.getStringOrNull(SETTINGS_KEY_SERVER_URL)
+                initialSelfHostedUrl = settings.getStringOrNull(SETTINGS_KEY_SERVER_URL)
                     ?: scaffoldConfig.defaultSelfHostedServerUrl,
                 selfHostedOnly = scaffoldConfig.selfHostedOnly,
                 hasHeldLocalData = heldLocalData,
@@ -367,10 +359,10 @@ fun ShillingAppBootstrap(
                     if (wipeHeldData) {
                         wipeHeldLocalData()
                     } else {
-                        clearWelcomeHoldState(services.settings)
+                        clearWelcomeHoldState(settings)
                     }
                     completeFirstLaunchOnboarding(
-                        settings = services.settings,
+                        settings = settings,
                         selection = DeploymentSelection.HOSTED,
                         serverUrl = serverUrl
                     )
@@ -382,10 +374,10 @@ fun ShillingAppBootstrap(
                     if (wipeHeldData) {
                         wipeHeldLocalData()
                     } else {
-                        clearWelcomeHoldState(services.settings)
+                        clearWelcomeHoldState(settings)
                     }
                     completeFirstLaunchOnboarding(
-                        settings = services.settings,
+                        settings = settings,
                         selection = DeploymentSelection.HOSTED,
                         serverUrl = serverUrl
                     )
@@ -410,8 +402,8 @@ fun ShillingAppBootstrap(
                             }
                         }
                         val userId = service.authState.value.userId
-                        if (hasHeldLocalData(services.settings) &&
-                            !matchesPendingRestore(services.settings, userId)
+                        if (hasHeldLocalData(settings) &&
+                            !matchesPendingRestore(settings, userId)
                         ) {
                             throw NonMatchingAccountException()
                         }
@@ -419,12 +411,12 @@ fun ShillingAppBootstrap(
                     }
                 },
                 onContinueSelfHosted = { selectedUrl ->
-                    validateSelfHostedServer(services.httpClient, selectedUrl).onSuccess {
+                    validateSelfHostedServer(httpClient, selectedUrl).onSuccess {
                         if (heldLocalData) {
                             wipeHeldLocalData()
                         }
                         completeFirstLaunchOnboarding(
-                            settings = services.settings,
+                            settings = settings,
                             selection = DeploymentSelection.SELF_HOSTED,
                             serverUrl = selectedUrl
                         )
@@ -464,7 +456,7 @@ fun ShillingAppBootstrap(
         onboardingComplete,
         hostedSessionRequirement,
         serverUrl,
-        services.deviceIdentity.deviceId,
+        deviceIdentity.deviceId,
         authScope,
         startupRetryToken,
         settingsRevision
@@ -476,11 +468,11 @@ fun ShillingAppBootstrap(
             resolve = { currentAuthRuntime ->
                 hostedBootstrapStatusFlow.value = hostedBootstrapStatusFlow.value.copy(isChecking = true)
                 resolveStartupIdentity(
-                    httpClient = services.httpClient,
+                    httpClient = httpClient,
                     serverUrl = serverUrl,
-                    settings = services.settings,
-                    idGenerator = services.idGenerator,
-                    deviceId = services.deviceIdentity.deviceId,
+                    settings = settings,
+                    idGenerator = idGenerator,
+                    deviceId = deviceIdentity.deviceId,
                     scope = authScope,
                     deploymentSelection = deploymentSelection,
                     sessionRequirement = hostedSessionRequirement ?: HostedSessionRequirement.GUEST_ALLOWED,
@@ -497,7 +489,7 @@ fun ShillingAppBootstrap(
                     authState = authState
                 )
                 if (routing.shouldSoftReturnToWelcome) {
-                    softReturnToWelcome(services.settings, notice = "session_expired")
+                    softReturnToWelcome(settings, notice = "session_expired")
                     authRuntime = null
                     welcomeAuthService = null
                     startupIdentity = null
@@ -537,7 +529,7 @@ fun ShillingAppBootstrap(
             return@LaunchedEffect
         }
         if (sawAccountSession && (!authState.isAuthenticated || authState.isAnonymous)) {
-            softReturnToWelcome(services.settings, notice = "session_expired")
+            softReturnToWelcome(settings, notice = "session_expired")
             sawAccountSession = false
             onboardingComplete = false
             startupIdentity = null
@@ -547,138 +539,141 @@ fun ShillingAppBootstrap(
         }
     }
 
-    var householdId by remember(serverUrl, services.deviceIdentity.deviceId) {
+    var householdId by remember(serverUrl, deviceIdentity.deviceId) {
         mutableStateOf(startup.activeHouseholdId)
     }
     LaunchedEffect(startup.activeHouseholdId) {
         householdId = startup.activeHouseholdId
     }
+    LaunchedEffect(serverUrl, deviceIdentity.deviceId) {
+        householdIdChanges.collect { householdId = it }
+    }
 
     val wsUrl = remember(serverUrl) {
         serverUrl.replace("http://", "ws://").replace("https://", "wss://")
     }
-    val syncConfig = remember(wsUrl, householdId, services.deviceIdentity.deviceId) {
-        SyncConfig(wsUrl, householdId, services.deviceIdentity.deviceId)
+    val syncConfig = remember(wsUrl, householdId, deviceIdentity.deviceId) {
+        SyncConfig(wsUrl, householdId, deviceIdentity.deviceId)
     }
-    val serverApi = remember(services.httpClient, serverUrl, authService) {
-        ServerApi(services.httpClient, serverUrl, authService)
+    val serverApi = remember(httpClient, serverUrl, authService) {
+        ServerApi(httpClient, serverUrl, authService)
     }
 
     val iceServers = rememberUpdatedState(iceServerList)
-    val syncDeps = remember(syncConfig.deviceId) {
-        StoreSyncDeps(
-            services.db,
-            null,
-            syncConfig.deviceId,
-            services.idGenerator
-        )
-    }
-
-    val koinModule = remember(
-        syncDeps,
-        hostedBootstrapState,
-        hostedBootstrapRetryCallback,
-        onResetOnboardingUi,
-        onSoftReturnToWelcomeUi
-    ) {
-        createAppModule(
-            db = services.db,
-            idGenerator = services.idGenerator,
-            fileStore = services.receiptFileStore,
-            settings = services.settings,
-            deviceIdentity = services.deviceIdentity,
-            notifier = services.notifier,
-            syncDeps = syncDeps,
-            hostedBootstrapState = hostedBootstrapState,
-            onRetryHostedBootstrap = hostedBootstrapRetryCallback,
-            onResetOnboardingUi = onResetOnboardingUi,
-            onRestartHostedLoginUi = onSoftReturnToWelcomeUi,
-            onServerUrlChanged = { newUrl ->
-                services.settings.putString(SETTINGS_KEY_SERVER_URL, newUrl)
-                serverUrl = newUrl
-            },
-            onHouseholdIdChanged = { newHouseholdId ->
-                householdId = newHouseholdId
-            }
-        )
-    }
     val featureGate = remember(authService, selfHosted) { FeatureGate(authService, selfHosted) }
 
-    KoinApplication(application = { modules(koinModule) }) {
-        // Sync runtime must run inside Koin so platforms can inject SyncStoreFacade / stores.
-        val runtime = syncRuntimeFactory(syncConfig, authService, iceServers, services)
-        val serverApiRef = rememberUpdatedState(serverApi)
+    val runtime = rememberSyncRuntime(syncConfig, authService, iceServers)
+    val serverApiRef = rememberUpdatedState(serverApi)
 
-        LaunchedEffect(runtime.peerSyncManager, syncConfig.deviceId) {
-            syncDeps.state = SyncState(
-                peerSyncManager = runtime.peerSyncManager,
-                deviceId = syncConfig.deviceId
+    DisposableEffect(runtime.peerSyncManager, syncConfig.deviceId) {
+        syncDeps.state = SyncState(
+            peerSyncManager = runtime.peerSyncManager,
+            deviceId = syncConfig.deviceId
+        )
+        // Stores outlive this runtime; don't leave them broadcasting through a stopped manager.
+        onDispose { syncDeps.state = SyncState(peerSyncManager = null, deviceId = syncConfig.deviceId) }
+    }
+
+    DisposableEffect(
+        effectiveBootstrapStatus.syncReady,
+        serverUrl,
+        householdId,
+        syncConfig.deviceId,
+        runtime.signalingClient,
+        runtime.peerSyncManager,
+        runtime.incomingChangeRouter,
+    ) {
+        if (!effectiveBootstrapStatus.syncReady) {
+            log.w {
+                "Hosted bootstrap is not ready; signaling remains disabled until auth and household metadata are available"
+            }
+            onDispose { }
+        } else {
+            val activeRuntime = runtime
+            val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + syncExceptionHandler)
+            log.i {
+                "Starting sync services (device=${syncConfig.deviceId}, server=$serverUrl, ws=$wsUrl, household=$householdId)"
+            }
+            activeRuntime.signalingClient.connect(syncScope)
+            activeRuntime.peerSyncManager.start(syncScope)
+            activeRuntime.incomingChangeRouter.start(syncScope)
+            syncScope.launch {
+                try {
+                    val resp = serverApiRef.value.fetchIceServers()
+                    val fetched = resp.iceServers.flatMap { cfg -> cfg.urls.map { WebRtc.IceServer(it) } }
+                    if (fetched.isNotEmpty()) {
+                        iceServerList = fetched
+                        log.i { "ICE servers updated: ${fetched.size} entries" }
+                    }
+                } catch (e: Exception) {
+                    log.w { "ICE server fetch failed: ${e.message}" }
+                }
+            }
+
+            onDispose {
+                activeRuntime.peerSyncManager.stop()
+                activeRuntime.signalingClient.disconnect()
+                syncScope.cancel()
+            }
+        }
+    }
+
+    ShillingTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            scaffoldConfig.preScaffoldContent()
+            ShillingScaffold(
+                authService = authService,
+                featureGate = featureGate,
+                selfHosted = selfHosted,
+                onRetryHostedBootstrap = hostedBootstrapRetryCallback.onRetry,
+                navRailTopPadding = scaffoldConfig.navRailTopPadding,
+                cameraButton = scaffoldConfig.cameraButton,
+                photoButton = scaffoldConfig.photoButton,
+                externalNavRequest = scaffoldConfig.externalNavRequest,
+                pendingReceiptFile = scaffoldConfig.pendingReceiptFile,
+                onPendingReceiptConsumed = scaffoldConfig.onPendingReceiptConsumed,
+                developerToolsEnabled = scaffoldConfig.developerToolsEnabled,
+                navControllerHook = scaffoldConfig.navControllerHook
             )
         }
+    }
+}
 
-        DisposableEffect(
-            effectiveBootstrapStatus.syncReady,
-            serverUrl,
-            householdId,
-            syncConfig.deviceId,
-            runtime.signalingClient,
-            runtime.peerSyncManager,
-            runtime.incomingChangeRouter,
-        ) {
-            if (!effectiveBootstrapStatus.syncReady) {
-                log.w {
-                    "Hosted bootstrap is not ready; signaling remains disabled until auth and household metadata are available"
-                }
-                onDispose { }
-            } else {
-                val activeRuntime = runtime
-                val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + syncExceptionHandler)
-                log.i {
-                    "Starting sync services (device=${syncConfig.deviceId}, server=$serverUrl, ws=$wsUrl, household=$householdId)"
-                }
-                activeRuntime.signalingClient.connect(syncScope)
-                activeRuntime.peerSyncManager.start(syncScope)
-                activeRuntime.incomingChangeRouter.start(syncScope)
-                syncScope.launch {
-                    try {
-                        val resp = serverApiRef.value.fetchIceServers()
-                        val fetched = resp.iceServers.flatMap { cfg -> cfg.urls.map { WebRtc.IceServer(it) } }
-                        if (fetched.isNotEmpty()) {
-                            iceServerList = fetched
-                            log.i { "ICE servers updated: ${fetched.size} entries" }
-                        }
-                    } catch (e: Exception) {
-                        log.w { "ICE server fetch failed: ${e.message}" }
-                    }
-                }
+@Composable
+private fun rememberSyncRuntime(
+    syncConfig: SyncConfig,
+    authService: AuthService,
+    iceServers: State<List<WebRtc.IceServer>>
+): SyncRuntime {
+    val webRtcPlatform = koinInject<WebRtcPlatform>()
+    val httpClient = koinInject<HttpClient>()
+    val fileStore = koinInject<ReceiptFileStore>()
+    val notifier = koinInject<ChangeNotifier>()
+    val idGenerator = koinInject<IdGenerator>()
+    val syncStoreFacade = koinInject<SyncStoreFacade>()
 
-                onDispose {
-                    activeRuntime.peerSyncManager.stop()
-                    activeRuntime.signalingClient.disconnect()
-                    syncScope.cancel()
-                }
-            }
-        }
-
-        ShillingTheme {
-            Surface(modifier = Modifier.fillMaxSize()) {
-                scaffoldConfig.preScaffoldContent()
-                ShillingScaffold(
-                    authService = authService,
-                    featureGate = featureGate,
-                    selfHosted = selfHosted,
-                    onRetryHostedBootstrap = hostedBootstrapRetryCallback.onRetry,
-                    navRailTopPadding = scaffoldConfig.navRailTopPadding,
-                    cameraButton = scaffoldConfig.cameraButton,
-                    photoButton = scaffoldConfig.photoButton,
-                    externalNavRequest = scaffoldConfig.externalNavRequest,
-                    pendingReceiptFile = scaffoldConfig.pendingReceiptFile,
-                    onPendingReceiptConsumed = scaffoldConfig.onPendingReceiptConsumed,
-                    developerToolsEnabled = scaffoldConfig.developerToolsEnabled,
-                    navControllerHook = scaffoldConfig.navControllerHook
-                )
-            }
-        }
+    val webRtcClient = remember(webRtcPlatform) { webRtcPlatform.createClient { iceServers.value } }
+    val signalingClient = remember(httpClient, syncConfig.serverUrl, syncConfig.deviceId, syncConfig.householdId, authService) {
+        SignalingClient(httpClient, syncConfig.serverUrl, syncConfig.deviceId, syncConfig.householdId, authService)
+    }
+    val webRtcManager = remember(webRtcClient, signalingClient, syncConfig.deviceId) {
+        WebRtcConnectionManager(webRtcClient, signalingClient, syncConfig.deviceId, delayFn = webRtcPlatform.delayFn)
+    }
+    val fileTransferManager = remember(fileStore) { FileTransferManager(fileStore) }
+    val incomingChangeRouter = remember(syncStoreFacade, webRtcManager, fileTransferManager, syncConfig.deviceId) {
+        IncomingChangeRouter(
+            syncStoreFacade,
+            notifier,
+            webRtcManager,
+            fileTransferManager,
+            fileStore,
+            delayFn = webRtcPlatform.delayFn,
+            deviceId = syncConfig.deviceId,
+            idGenerator = idGenerator
+        )
+    }
+    return remember(signalingClient, webRtcManager, incomingChangeRouter) {
+        SyncRuntime(signalingClient, webRtcManager, incomingChangeRouter)
     }
 }
 
