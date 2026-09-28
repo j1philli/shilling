@@ -31,9 +31,9 @@ setup: deps generate-icons setup-webrtc
 
 # ─── Build ───────────────────────────────────────────────────────────
 
-# Workaround: Amper cache state around sqldelight-plugin can become inconsistent.
-# We clear incremental state, ensure expected output dirs exist, then warm the
-# plugin compile task. If warmup fails, fall back to full clean once.
+# Workaround: Amper cache state around the SQLDelight plugin can become inconsistent.
+# We clear incremental state, then warm the plugin compile task. If warmup fails,
+# fall back to full clean once.
 [private]
 ensure-plugin:
     #!/usr/bin/env bash
@@ -41,25 +41,19 @@ ensure-plugin:
     shopt -s nullglob
 
     stale=(
-      build/tasks/_sqldelight-plugin_*
-      build/incremental.state/_sqldelight-plugin_*
-      build/incremental.state/_shared_generateSqlDelight_*
+      build/tasks/_sqldelight_*
+      build/incremental.state/_sqldelight_*
+      build/incremental.state/_shared_generate_sqldelight*
       build/incremental.state/_shared_compile*
     )
     if [ ${#stale[@]} -gt 0 ]; then
       rm -rf "${stale[@]}"
     fi
 
-    # Amper sometimes expects both output roots in this artifact directory.
-    mkdir -p build/artifacts/CompiledJvmClassesArtifact/sqldelight-pluginjvm/java-output
-    mkdir -p build/artifacts/CompiledJvmClassesArtifact/sqldelight-pluginjvm/kotlin-output
-
-    if ! ./kotlin task :sqldelight-plugin:compileJvm; then
-      echo "sqldelight-plugin warmup failed; running ./kotlin clean fallback"
+    if ! ./kotlin task :sqldelight:compileJvm; then
+      echo "SQLDelight plugin warmup failed; running ./kotlin clean fallback"
       ./kotlin clean
-      mkdir -p build/artifacts/CompiledJvmClassesArtifact/sqldelight-pluginjvm/java-output
-      mkdir -p build/artifacts/CompiledJvmClassesArtifact/sqldelight-pluginjvm/kotlin-output
-      ./kotlin task :sqldelight-plugin:compileJvm
+      ./kotlin task :sqldelight:compileJvm
     fi
 
 # Build only the wasmJs web-app (dev database)

@@ -6,7 +6,7 @@ modules:
   - app/web-app
   - core
   - server
-  - sqldelight-plugin
+  - third_party/sqldelight-kotlin-toolchain/sqldelight
 
 plugins:
-  - ./sqldelight-plugin
+  - ./third_party/sqldelight-kotlin-toolchain/sqldelight

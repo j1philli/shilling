@@ -43,10 +43,13 @@ dependencies@jvm:
   - $libs.ktor.client.mock
 
 plugins:
-  sqldelight-plugin:
+  sqldelight:
     enabled: true
-    packageName: "finance.shilling.shared.db"
-    databaseName: "ShillingDatabase"
+    packageName: finance.shilling.shared.db
+    databaseName: ShillingDatabase
+    sourceDir: src/commonMain/sqldelight
+    dialect: sqlite-3-38-dialect
+    generateAsync: true
 
 settings:
   kotlin:

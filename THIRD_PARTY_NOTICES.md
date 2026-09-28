@@ -15,10 +15,11 @@ copyright and license notices remain in effect. A copy of that license is in
 - Changes: inlined and adapted for this application's Android database setup,
   avoiding duplicate Android AAR variants in the build.
 
-## SQLDelight compiler environment
+## SQLDelight plugin for the Kotlin Toolchain
 
-- File: `sqldelight-plugin/libs/compiler-env-2.4.0.jar`
-- Origin: [`app.cash.sqldelight:compiler-env:2.4.0`](https://repo.maven.apache.org/maven2/app/cash/sqldelight/compiler-env/2.4.0/)
-- Developer: Square, Inc.
-- License: Apache-2.0, as declared by the published Maven POM
-- Changes: none; the checked-in JAR matches the published Maven artifact.
+- Directory: `third_party/sqldelight-kotlin-toolchain/`
+- Origin: [j1philli/sqldelight-kotlin-toolchain](https://github.com/j1philli/sqldelight-kotlin-toolchain)
+  v0.1.0, vendored with `git subtree`
+- License: MIT OR Apache-2.0; see the licenses in that directory
+- Changes: none. The SQLDelight compiler it runs is downloaded from Maven
+  Central at build time and not checked in.
