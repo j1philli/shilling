@@ -66,21 +66,12 @@ import co.touchlab.kermit.Severity
 import platform.Foundation.NSTemporaryDirectory
 import platform.UIKit.UIViewController
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.addressOf
-import kotlinx.cinterop.usePinned
 import platform.posix.fclose
 import platform.posix.fflush
 import platform.posix.fopen
 import platform.posix.fprintf
-import platform.posix.memcpy
-import WebRTC.RTCDataBuffer
-import WebRTC.RTCDataChannel
-import WebRTC.RTCDataChannelDelegateProtocol
 import io.github.vinceglb.filekit.PlatformFile
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.withContext
-import platform.darwin.NSObject
 
 private val log = Logger.withTag("iOS")
 
@@ -131,100 +122,6 @@ private val iosDelay: suspend (Long) -> Unit = { ms ->
             kotlinx.coroutines.yield()
         }
     }
-}
-
-/**
- * Strongly-held ObjC delegate for RTCDataChannel that routes received messages
- * into a Kotlin coroutine [Channel] for non-blocking polling.
- *
- * Root cause of the iOS receive bug:
- *   RTCDataChannel.delegate is declared @property(nonatomic, weak) in RTCDataChannel.h.
- *   ktor's setupEvents() creates an anonymous K/N object and assigns it to this weak ObjC
- *   property. K/N GC immediately collects the anonymous object (nothing holds a strong K/N
- *   reference). Result: didReceiveMessageWithBuffer never fires, iOS silently drops all
- *   incoming data channel messages.
- *
- * Fix: this named class is held strongly in [nativeReceivers]. The ObjC weak property
- * points to our instance, which K/N GC cannot collect while the strong reference lives.
- */
-@OptIn(ExperimentalForeignApi::class)
-private class NativeChannelReceiver : NSObject(), RTCDataChannelDelegateProtocol {
-    val messages = Channel<String>(capacity = 256, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-
-    override fun dataChannelDidChangeState(dataChannel: RTCDataChannel) {
-        // State changes are handled by ktor's native peer connection layer.
-    }
-
-    override fun dataChannel(dataChannel: RTCDataChannel, didReceiveMessageWithBuffer: RTCDataBuffer) {
-        val data = didReceiveMessageWithBuffer.data
-        val length = data.length.toInt()
-        if (length == 0) return
-        val bytes = ByteArray(length)
-        bytes.usePinned { pinned ->
-            memcpy(pinned.addressOf(0), data.bytes, data.length)
-        }
-        messages.trySend(bytes.decodeToString())
-    }
-}
-
-// Strong references to our native channel receivers — prevents K/N GC from collecting them.
-// Keyed by WebRtcDataChannel identity (one entry per active channel).
-private val nativeReceivers = mutableMapOf<io.ktor.client.webrtc.WebRtcDataChannel, NativeChannelReceiver>()
-
-/**
- * Eagerly installs [NativeChannelReceiver] as soon as a channel is registered — before
- * [listenForMessages] starts polling. This eliminates the window where incoming messages
- * land on ktor's already-GC'd anonymous RTCDataChannel.delegate and are silently dropped.
- *
- * Called by [WebRtcConnectionManager.onChannelOpen] synchronously at:
- *   • offerer path: immediately after createDataChannel (channel is CONNECTING)
- *   • answerer path: at DataChannelEvent.Open, before attachListener
- */
-@OptIn(ExperimentalForeignApi::class)
-private val nativeChannelOpen: (io.ktor.client.webrtc.WebRtcDataChannel) -> Unit = { ch ->
-    val nativeCh = ch.getNative()  // io.ktor.client.webrtc extension: RTCDataChannel on iOS
-    val rcvr = NativeChannelReceiver()
-    nativeCh.delegate = rcvr  // replace ktor's already-dead anonymous delegate
-    nativeReceivers[ch] = rcvr
-    log.i { "Pre-installed NativeChannelReceiver for channel '${ch.label}'" }
-}
-
-/**
- * Non-blocking receive for iOS Kotlin/Native.
- *
- * Channel.receive() doesn't resume reliably on K/N in this Compose Multiplatform
- * environment, so we poll with tryReceive(). To avoid saturating the thread pool
- * when multiple peer channels are active, each poll iteration context-switches
- * Default→Main→Default via withContext(Dispatchers.Main), adding ~1-10ms of natural
- * GCD dispatch overhead per iteration. This keeps the Default thread pool available
- * for signaling, ICE callbacks, and other peer channel listeners.
- */
-@OptIn(ExperimentalForeignApi::class)
-private val iosReceiveText: suspend (io.ktor.client.webrtc.WebRtcDataChannel) -> String = { ch ->
-    val receiver = nativeReceivers.getOrPut(ch) {
-        // Safety net: should have been pre-installed by nativeChannelOpen, but install here
-        // if somehow missed (e.g. future code path changes).
-        val nativeCh = ch.getNative()
-        val rcvr = NativeChannelReceiver()
-        nativeCh.delegate = rcvr
-        log.w { "Lazy-installed NativeChannelReceiver for channel '${ch.label}' (missed onChannelOpen?)" }
-        rcvr
-    }
-    var text: String? = null
-    while (text == null) {
-        text = receiver.messages.tryReceive().getOrNull()
-        if (text == null) {
-            // Context-switch to Main and back for natural throttling (~1-10ms per iteration).
-            // This prevents tight yield() loops from starving the Default thread pool when
-            // multiple peer channels are active.
-            try {
-                withContext(Dispatchers.Main) { kotlinx.coroutines.yield() }
-            } catch (_: Exception) {
-                kotlinx.coroutines.yield()
-            }
-        }
-    }
-    text
 }
 
 @OptIn(ExperimentalForeignApi::class)
@@ -330,8 +227,6 @@ private fun rememberIosSyncRuntime(
             webRtcClient,
             signalingClient,
             syncConfig.deviceId,
-            iosReceiveText,
-            onChannelOpen = nativeChannelOpen,
             delayFn = iosDelay
         )
     }

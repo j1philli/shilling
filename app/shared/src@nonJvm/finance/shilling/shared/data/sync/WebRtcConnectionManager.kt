@@ -16,8 +16,6 @@ class WebRtcConnectionManager(
     private val webRtcClient: WebRtcClient,
     private val signalingClient: SignalingClient,
     private val deviceId: String,
-    private val receiveTextFn: suspend (WebRtcDataChannel) -> String = { it.receiveText() },
-    private val onChannelOpen: (WebRtcDataChannel) -> Unit = {},
     private val delayFn: suspend (Long) -> Unit = { kotlinx.coroutines.delay(it) }
 ) : PeerSyncManager {
     private val _incomingChanges = MutableSharedFlow<ChangeMessage>(extraBufferCapacity = 256)
@@ -383,7 +381,6 @@ class WebRtcConnectionManager(
             val channel = connection.createDataChannel("data")
             dataChannels[peerId] = channel
             log.i { "[RTC] Created 'data' channel for $peerId (${channelId(channel)}, state=${channel.state})" }
-            onChannelOpen(channel)
             attachListener(peerId, channel, replace = true, reason = "offerer createDataChannel")
 
             log.i { "[RTC] Creating offer for $peerId..." }
@@ -543,7 +540,6 @@ class WebRtcConnectionManager(
                         log.i { "[RTC] DataChannelEvent.Open: peer=$peerId label=${ch.label} state=${ch.state} existing=${dataChannels[peerId] != null}" }
                         if (ch.label == "data" && dataChannels[peerId] == null) {
                             dataChannels[peerId] = ch
-                            onChannelOpen(ch)
                             log.i { "[RTC] Registered answerer 'data' channel for $peerId (${channelId(ch)})" }
                             attachListener(peerId, ch, replace = true, reason = "answerer ondatachannel")
                         } else if (ch.label == "data") {
@@ -640,7 +636,7 @@ class WebRtcConnectionManager(
             var messageCount = 0
             try {
                 while (isActive) {
-                    val text = receiveTextFn(channel)
+                    val text = channel.receiveText()
                     messageCount++
                     if (!openDrainDone) {
                         openDrainDone = true
