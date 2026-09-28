@@ -1,0 +1,5 @@
+insert:
+INSERT INTO note(id, body, pinned) VALUES (?, ?, ?);
+
+pinned:
+SELECT body FROM note WHERE pinned != 0 ORDER BY id;

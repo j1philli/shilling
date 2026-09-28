@@ -1,0 +1,15 @@
+# Code generation only: checks that a non-bundled dialect works through `compilerDependencies`.
+product: jvm/lib
+
+dependencies:
+  - app.cash.sqldelight:runtime:2.4.0
+  - app.cash.sqldelight:jdbc-driver:2.4.0
+
+plugins:
+  sqldelight:
+    enabled: true
+    packageName: com.example.pg.db
+    databaseName: PgDatabase
+    dialect: postgresql-dialect
+    compilerDependencies:
+      - app.cash.sqldelight:postgresql-dialect:2.4.0

@@ -1,0 +1,12 @@
+CREATE TABLE event (
+  id UUID NOT NULL PRIMARY KEY,
+  payload JSONB NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+insert:
+INSERT INTO event(id, payload) VALUES (?, ?)
+RETURNING created_at;
+
+recent:
+SELECT * FROM event ORDER BY created_at DESC LIMIT :limit;

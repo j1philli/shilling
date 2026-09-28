@@ -1,0 +1,8 @@
+modules:
+  - sample
+  - sample-migrations
+  - sample-postgresql
+  - sqldelight
+
+plugins:
+  - ./sqldelight
