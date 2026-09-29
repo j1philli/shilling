@@ -139,6 +139,8 @@ sealed interface PlatformRoute {
     /** A transaction; null id creates one. */
     data class Transaction(val postingId: String?) : PlatformRoute
     data object Import : PlatformRoute
+    /** A receipt; null id adds one. */
+    data class Receipt(val receiptId: String?) : PlatformRoute
 }
 
 /** Tabs that were merged into others, mapped to where they live now. */
@@ -415,6 +417,7 @@ fun ShillingScaffold(
                 when (request) {
                     is PlatformRoute.Transaction -> navController.navigate(TransactionRoute(request.postingId))
                     PlatformRoute.Import -> navController.navigate(ImportRoute)
+                    is PlatformRoute.Receipt -> navController.navigate(ReceiptRoute(request.receiptId))
                 }
             }
         }

@@ -69,6 +69,7 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     HomeViewModel.kt     # Home state + copy (HomeUiState), HomeDestination
     SettingsViewModel.kt # Settings state + copy (account variants, sync status, developer info) and actions
     ActivityViewModel.kt # Activity rows (transfer legs merged), day sections, search, range, empty copy
+    ReceiptsViewModel.kt # Receipts rows, filter, "N not attached" subtitle, empty copy
     CredentialsCopy.kt   # email/password form + confirm-email copy (Welcome and Settings)
     SampleData.kt        # seedDemoData (developer tools)
   src/commonMain/sqldelight/finance/shilling/shared/db/
@@ -129,6 +130,7 @@ app/ios-app/              # Compose Multiplatform iOS app
     HomeModel.swift / HomeScreen.swift # native SwiftUI Home
     SettingsScreenModel.kt / SettingsScreen.swift # native SwiftUI Settings (+ ToastView snackbar stand-in)
     ActivityScreenModel.kt / ActivityScreen.swift # native SwiftUI Activity (opens the Compose editor/import)
+    ReceiptsScreenModel.kt / ReceiptsScreen.swift # native SwiftUI Receipts (opens the Compose receipt editor)
     DisplayPreferencesBridge.kt / AppearanceModel.swift # app theme mode → SwiftUI preferredColorScheme
     IosPlatformServices.kt # IosIdGenerator (NSUUID), IosReceiptFileStore (NSFileManager), NativeSqliteDriver
     ShillingIosApp.kt      # receipt store UI (add, list, edit, attach, delete)
@@ -238,8 +240,8 @@ Koin `viewModel {}`); Compose gets them with `koinViewModel()`. On iOS, a Kotlin
 annotations out of `app/shared`: its compiler plugin crashes non-Apple compilations and the
 toolchain can't scope `compilerPlugins` per platform, so it's only enabled in `ios-app`.
 `ShillingTabBarController` shows a SwiftUI screen for ported tabs (`nativeScreen(for:)`) and the
-shared Compose UI for the rest (native so far: Home, Activity, Settings). Native screens open
-not-yet-ported Compose screens (transaction editor, import) through `NativeTabBridge` →
+shared Compose UI for the rest (native so far: Home, Activity, Receipts, Settings). Native screens open
+not-yet-ported Compose screens (transaction/receipt editors, import) through `NativeTabBridge` →
 `PlatformTabBar.routeRequests`; while a Compose detail route is open (`detailOpen`), the tab
 controller shows Compose over the native screen and `ComposeOverlay` drops native toolbar items
 (the iPhone Duo lifts them into the side column). SwiftUI screens follow the app's

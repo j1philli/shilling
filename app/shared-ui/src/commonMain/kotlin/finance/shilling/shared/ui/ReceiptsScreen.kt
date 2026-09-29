@@ -60,26 +60,16 @@ import finance.shilling.shared.presentation.label
 import finance.shilling.shared.presentation.parseAmountInput
 import finance.shilling.shared.presentation.today
 import finance.shilling.shared.presentation.formatAmountInput
-
-private enum class ReceiptFilter(val label: String) {
-    ALL("All"), UNATTACHED("Not attached"), ATTACHED("Attached")
-}
+import finance.shilling.shared.presentation.ReceiptsViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun ReceiptsScreen(onOpenReceipt: (String?) -> Unit) {
-    val receiptRepo = koinInject<ReceiptRepository>()
-    val receipts by remember { receiptRepo.watchAll() }.collectAsState(initial = emptyList())
-    var filterName by rememberSaveable { mutableStateOf(ReceiptFilter.ALL.name) }
-    val filter = ReceiptFilter.valueOf(filterName)
+fun ReceiptsScreen(
+    onOpenReceipt: (String?) -> Unit,
+    viewModel: ReceiptsViewModel = koinViewModel()
+) {
+    val state by viewModel.state.collectAsState()
     var selectedKey by rememberSaveable { mutableStateOf<String?>(null) }
-
-    val filtered = remember(receipts, filter) {
-        when (filter) {
-            ReceiptFilter.ALL -> receipts
-            ReceiptFilter.UNATTACHED -> receipts.filter { it.receipt.postingId == null }
-            ReceiptFilter.ATTACHED -> receipts.filter { it.receipt.postingId != null }
-        }.sortedByDescending { it.receipt.addedAt }
-    }
 
     ListDetailLayout(
         selectedKey = selectedKey,
@@ -90,40 +80,41 @@ fun ReceiptsScreen(onOpenReceipt: (String?) -> Unit) {
             }
             ScreenScaffold(
                 title = "Receipts",
-                subtitle = receipts.count { it.receipt.postingId == null }.takeIf { it > 0 }?.let { "$it not attached" },
+                subtitle = state.subtitle,
                 actions = { AddButton("Add", onClick = { open(null) }) }
             ) { padding ->
                 LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = padding) {
                     item(key = "filters") {
                         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                            ReceiptFilter.entries.forEach { f ->
-                                FilterChip(selected = filter == f, onClick = { filterName = f.name }, label = { Text(f.label) })
+                            state.filters.forEach { f ->
+                                FilterChip(selected = state.filter == f, onClick = { viewModel.setFilter(f) }, label = { Text(f.label) })
                             }
                         }
                     }
-                    if (filtered.isEmpty()) {
+                    val empty = state.empty
+                    if (empty != null) {
                         item(key = "empty") {
-                            when (filter) {
-                                ReceiptFilter.ALL -> EmptyState(
-                                    title = "No receipts yet",
-                                    message = "Keep receipts here and attach them to transactions when they post.",
+                            if (empty.showAdd) {
+                                EmptyState(
+                                    title = empty.title,
+                                    message = empty.message,
                                     actionLabel = "Add receipt",
                                     onAction = { open(null) }
                                 )
-                                ReceiptFilter.UNATTACHED -> EmptyState(title = "All receipts are attached")
-                                ReceiptFilter.ATTACHED -> EmptyState(title = "No attached receipts")
+                            } else {
+                                EmptyState(title = empty.title)
                             }
                         }
                     } else {
-                        items(filtered, key = { it.receipt.id }) { item ->
+                        items(state.rows, key = { it.id }) { row ->
                             EntityListItem(
-                                title = item.receipt.originalName,
-                                supporting = receiptSummary(item),
-                                trailing = item.receipt.amount?.let { amount ->
-                                    { Text(formatCurrency(amount), style = MaterialTheme.typography.bodyLarge) }
+                                title = row.title,
+                                supporting = row.supporting,
+                                trailing = row.amount?.let { amount ->
+                                    { Text(amount, style = MaterialTheme.typography.bodyLarge) }
                                 },
-                                selected = twoPane && selectedKey == item.receipt.id,
-                                onClick = { open(item.receipt.id) }
+                                selected = twoPane && selectedKey == row.id,
+                                onClick = { open(row.id) }
                             )
                         }
                     }
@@ -141,15 +132,6 @@ fun ReceiptsScreen(onOpenReceipt: (String?) -> Unit) {
         emptyDetail = { EmptyState(title = "No receipt selected", message = "Choose a receipt to view or attach it.") }
     )
 }
-
-private fun receiptSummary(item: ReceiptWithPosting): String = buildList {
-    add(item.receipt.receiptDate?.let { formatDate(LocalDate.fromEpochDays(it)) } ?: "Added ${formatDate(addedDate(item.receipt))}")
-    add(item.postingTitle?.let { "Attached to $it" } ?: "Not attached")
-}.joinToString(" · ")
-
-private fun addedDate(receipt: Receipt): LocalDate =
-    kotlin.time.Instant.fromEpochMilliseconds(receipt.addedAt)
-        .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
 
 @Composable
 fun ReceiptEditor(

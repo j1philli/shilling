@@ -73,6 +73,8 @@ final class ShillingTabBarController: UITabBarController, UITabBarControllerDele
             })
         case "ACTIVITY":
             return UIHostingController(rootView: ActivityScreen())
+        case "RECEIPTS":
+            return UIHostingController(rootView: ReceiptsScreen())
         case "SETTINGS":
             return UIHostingController(rootView: SettingsScreen())
         default:

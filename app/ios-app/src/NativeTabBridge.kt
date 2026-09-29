@@ -38,6 +38,11 @@ object NativeTabBridge {
         routeRequests.tryEmit(PlatformRoute.Transaction(postingId))
     }
 
+    /** Swift: open a receipt in the (Compose) editor; null adds one. */
+    fun openReceipt(receiptId: String?) {
+        routeRequests.tryEmit(PlatformRoute.Receipt(receiptId))
+    }
+
     /** Swift: open CSV import (Compose). */
     fun openImport() {
         routeRequests.tryEmit(PlatformRoute.Import)
