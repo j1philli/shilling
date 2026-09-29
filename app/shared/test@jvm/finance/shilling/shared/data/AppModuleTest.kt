@@ -20,8 +20,10 @@ import finance.shilling.shared.data.usecase.ComputeWindowUseCase
 import finance.shilling.shared.db.ShillingDatabase
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.koin.core.context.stopKoin
 import org.koin.dsl.koinApplication
 import org.koin.dsl.module
+import org.koin.mp.KoinPlatform
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -118,6 +120,21 @@ class AppModuleTest {
             assertEquals(1, restartHostedLoginUiCount)
         } finally {
             app.close()
+        }
+    }
+
+    @Test
+    fun initKoinStartsOneGlobalGraph() {
+        val settings = Settings()
+        try {
+            val first = initKoin(module { single { settings } })
+            // A second entry point (e.g. a recreated Android Activity) gets the running graph.
+            val second = initKoin(module { single { Settings() } })
+            assertSame(first, second)
+            assertSame(first, KoinPlatform.getKoin())
+            assertSame(settings, second.get<Settings>())
+        } finally {
+            stopKoin()
         }
     }
 

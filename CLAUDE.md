@@ -105,8 +105,10 @@ app/ios-app/              # Compose Multiplatform iOS app
   module.yaml         # product: ios/app
   module.xcodeproj/   # Kotlin Toolchain–managed Xcode project (has -lsqlite3 linker flag)
   src/
-    App.swift           # SwiftUI @main entry, wraps ComposeUIViewController
-    MainViewController.kt  # ComposeUIViewController factory + platform Koin module
+    App.swift           # SwiftUI @main entry, starts Koin, hosts ShillingTabBarController
+    ShillingTabBarController.swift # native UITabBarController around the shared Compose UI
+    NativeTabBridge.kt  # tab list/selection bridge between Compose and the native tab bar
+    MainViewController.kt  # startIosKoin (platform Koin module) + ComposeUIViewController factory
     IosPlatformServices.kt # IosIdGenerator (NSUUID), IosReceiptFileStore (NSFileManager), NativeSqliteDriver
     ShillingIosApp.kt      # receipt store UI (add, list, edit, attach, delete)
 src-tauri/            # Tauri native shell (Rust)
@@ -205,14 +207,16 @@ rather than raw text fields for money, dates, or selects. Destructive actions ne
 `ConfirmDialog` (EditorScaffold's `delete` does this). Format with `formatCurrency` /
 `formatDate` / `formatSigned`; never show raw ISO dates or enum names.
 
-**DI**: Each app passes a platform Koin module to `ShillingAppBootstrap`, which provides
-`ShillingDatabase`, `Settings`, `IdGenerator`, `ReceiptFileStore`, `HttpClient`, and
-`WebRtcPlatform` (the WebRTC client factory plus the sync delay). `ShillingAppBootstrap` hosts
-one `KoinApplication` for the app's whole lifetime: the platform module plus the shared
-`dataModule` (`AppModule.kt`: `DeviceIdentity`, `ChangeNotifier`, `StoreSyncDeps`, Store5
-stores, `SyncStoreFacade`, repositories, use cases, `LocalDataWiper`). It loads
-`bootstrapSessionModule` (hosted-bootstrap state and the Settings callbacks) with
-`rememberKoinModules`. Definitions resolve their dependencies through `get()`, not captured
+**DI**: Each app calls `initKoin(platformModule)` (`AppModule.kt`) from its entry point before
+showing UI (iOS: `startIosKoin()` from `App.init`; web: once the database opens; Android:
+`MainActivity.onCreate`). The platform module provides `ShillingDatabase`, `Settings`,
+`IdGenerator`, `ReceiptFileStore`, `HttpClient`, and `WebRtcPlatform` (the WebRTC client factory
+plus the sync delay). `initKoin` starts one global Koin graph for the process: the platform module
+plus the shared `dataModule` (`DeviceIdentity`, `ChangeNotifier`, `StoreSyncDeps`, Store5 stores,
+`SyncStoreFacade`, repositories, use cases, `LocalDataWiper`); later calls return the running
+graph. Koin is started outside Compose so native (Swift) code can resolve from the same graph.
+`ShillingAppBootstrap` loads `bootstrapSessionModule` (hosted-bootstrap state and the Settings
+callbacks) with `rememberKoinModules`. Definitions resolve their dependencies through `get()`, not captured
 instances. Composables use `koinInject<T>()`. Don't construct repositories or stores by hand
 outside tests. Session-scoped objects (sync runtime, `ServerApi`, `AuthService`) stay
 `remember`ed in the bootstrap because they are rebuilt when the server or auth changes.

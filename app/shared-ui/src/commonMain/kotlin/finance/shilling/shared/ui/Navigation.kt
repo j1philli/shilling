@@ -36,6 +36,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -81,6 +82,7 @@ import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.shared.data.auth.FeatureGate
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.StateFlow
@@ -106,6 +108,22 @@ data class ReceiptPickers(
 )
 
 val LocalReceiptPickers = staticCompositionLocalOf { ReceiptPickers() }
+
+/** True when the platform draws the tab bar (see [PlatformTabBar]). */
+val LocalPlatformTabBar = staticCompositionLocalOf { false }
+
+/**
+ * A tab bar drawn by the platform instead of Compose (iOS: a native UITabBarController).
+ * When given to [ShillingScaffold], the scaffold draws no bar or rail of its own.
+ */
+class PlatformTabBar(
+    /** Taps on the platform bar: a tab, or null for Settings. */
+    val selections: Flow<ShelfDestination?>,
+    /** Tab order (Settings is always last) and the current selection (null = Settings). */
+    val onChange: (order: List<ShelfDestination>, selected: ShelfDestination?) -> Unit,
+    /** The scaffold left the screen (e.g. sign-out); the platform bar should hide. */
+    val onDispose: () -> Unit
+)
 
 /** Tabs that were merged into others, mapped to where they live now. */
 private val LEGACY_TABS = mapOf(
@@ -277,7 +295,8 @@ fun ShillingScaffold(
     onPendingReceiptConsumed: () -> Unit = {},
     developerToolsEnabled: Boolean = false,
     /** Platform hook given the app's NavController (the web build binds browser history). */
-    navControllerHook: @Composable (NavHostController) -> Unit = {}
+    navControllerHook: @Composable (NavHostController) -> Unit = {},
+    platformTabBar: PlatformTabBar? = null
 ) {
     val settings: Settings = koinInject()
     val navController = rememberNavController()
@@ -325,7 +344,8 @@ fun ShillingScaffold(
         CompositionLocalProvider(
             LocalSnackbarController provides snackbarController,
             LocalReceiptPickers provides ReceiptPickers(cameraButton, photoButton),
-            LocalAutoLaunchCamera provides autoOpenCamera
+            LocalAutoLaunchCamera provides autoOpenCamera,
+            LocalPlatformTabBar provides (platformTabBar != null)
         ) {
             ShillingNavHost(
                 navController = navController,
@@ -343,7 +363,18 @@ fun ShillingScaffold(
     val useCompactChrome = !currentWindowAdaptiveInfoV2().windowSizeClass
         .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
-    if (useCompactChrome) {
+    if (platformTabBar != null) {
+        LaunchedEffect(navController, platformTabBar) {
+            platformTabBar.selections.collect { dest -> if (dest == null) onSettings() else onSelectTab(dest) }
+        }
+        LaunchedEffect(platformTabBar, orderedDestinations, selectedTab) {
+            platformTabBar.onChange(orderedDestinations, selectedTab)
+        }
+        DisposableEffect(platformTabBar) {
+            onDispose { platformTabBar.onDispose() }
+        }
+        PlatformTabBarScaffold(snackbarHostState = snackbarHostState, host = host)
+    } else if (useCompactChrome) {
         CompactScaffold(
             selectedTab = selectedTab,
             showingSettings = showingSettings,
@@ -545,6 +576,26 @@ private fun ExpandedScaffold(
             ) {
                 host(Modifier.widthIn(max = 1200.dp).fillMaxSize())
             }
+        }
+    }
+}
+
+/** Content only: the platform draws the tab bar and reports its height through the safe area. */
+@Composable
+private fun PlatformTabBarScaffold(
+    snackbarHostState: SnackbarHostState,
+    host: @Composable (Modifier) -> Unit
+) {
+    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding(),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            host(Modifier.widthIn(max = 1200.dp).fillMaxSize())
         }
     }
 }

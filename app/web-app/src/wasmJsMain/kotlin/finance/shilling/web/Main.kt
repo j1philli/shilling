@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +20,7 @@ import app.cash.sqldelight.driver.worker.WebWorkerDriver
 import com.russhwolf.settings.Settings
 import finance.shilling.shared.data.DEFAULT_SELF_HOSTED_SERVER_URL
 import finance.shilling.shared.data.IdGenerator
+import finance.shilling.shared.data.initKoin
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.sync.createSyncHttpClient
 import finance.shilling.shared.db.ShillingDatabase
@@ -31,6 +31,8 @@ import finance.shilling.shared.ui.WebRtcPlatform
 import io.ktor.client.webrtc.JsWebRtc
 import io.ktor.client.webrtc.WebRtcClient
 import kotlinx.browser.document
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.koin.dsl.module
 import org.w3c.dom.Worker
 
@@ -45,19 +47,18 @@ private fun installTauriDragHandler(): JsAny? = js("(function(){document.addEven
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     if (isTauriEnvironment()) installTauriDragHandler()
+    // The web database opens asynchronously, so Koin starts once it's ready; UI waits on this.
+    var koinReady by mutableStateOf(false)
+    MainScope().launch {
+        val driver = WebWorkerDriver(Worker("sqldelight.worker.js"))
+        (ShillingDatabase.Schema.create(driver) as QueryResult.AsyncValue).await()
+        (driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0) as QueryResult.AsyncValue).await()
+        initKoin(webPlatformModule(ShillingDatabase(driver)))
+        koinReady = true
+    }
     ComposeViewport(document.body!!) {
         val selfHostedOnly = remember { isSelfHostedDistribution() }
-        var db by remember { mutableStateOf<ShillingDatabase?>(null) }
-
-        LaunchedEffect(Unit) {
-            val driver = WebWorkerDriver(Worker("sqldelight.worker.js"))
-            (ShillingDatabase.Schema.create(driver) as QueryResult.AsyncValue).await()
-            (driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0) as QueryResult.AsyncValue).await()
-            db = ShillingDatabase(driver)
-        }
-
-        val currentDb = db
-        if (currentDb == null) {
+        if (!koinReady) {
             ShillingTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -68,11 +69,9 @@ fun main() {
             return@ComposeViewport
         }
 
-        val platformModule = remember(currentDb) { webPlatformModule(currentDb) }
         val tauriTopPadding = if (isTauriEnvironment()) 32.dp else 0.dp
 
         ShillingAppBootstrap(
-            platformModule = platformModule,
             logTag = "Sync",
             scaffoldConfig = AppBootstrapScaffoldConfig(
                 onboardingTopPadding = tauriTopPadding,

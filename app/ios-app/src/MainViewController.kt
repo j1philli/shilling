@@ -14,6 +14,7 @@ import com.russhwolf.settings.Settings
 import finance.shilling.shared.data.IdGenerator
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.ensureLocalSchemaReady
+import finance.shilling.shared.data.initKoin
 import finance.shilling.shared.data.sync.BOOTSTRAP_NETWORK_TIMEOUT_MS
 import finance.shilling.shared.db.ShillingDatabase
 import finance.shilling.shared.ui.AppBootstrapScaffoldConfig
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.koin.dsl.module
+import org.koin.mp.KoinPlatform
 import platform.Foundation.NSTemporaryDirectory
 import platform.UIKit.UIViewController
 import platform.posix.fclose
@@ -93,8 +95,13 @@ private val iosDelay: suspend (Long) -> Unit = { ms ->
     }
 }
 
+/**
+ * Starts logging and the app's Koin graph. Called from `App.init` in Swift so native code can
+ * resolve dependencies before any UI exists; safe to call again (returns early).
+ */
 @OptIn(ExperimentalForeignApi::class)
-fun MainViewController(): UIViewController {
+fun startIosKoin() {
+    if (KoinPlatform.getKoinOrNull() != null) return
     // File-based logging only — OSLogWriter blocks the calling thread after
     // the initial burst due to os_log rate limiting, which freezes all log
     // calls across every thread (coroutines, GCD, etc.).
@@ -104,7 +111,7 @@ fun MainViewController(): UIViewController {
     runBlocking {
         ensureLocalSchemaReady(driver, logTag = "iOS")
     }
-    val platformModule = module {
+    initKoin(module {
         single { ShillingDatabase(driver) }
         single { Settings() }
         single<IdGenerator> { IosIdGenerator() }
@@ -120,8 +127,11 @@ fun MainViewController(): UIViewController {
                 delayFn = iosDelay
             )
         }
-    }
+    })
+}
 
+fun MainViewController(): UIViewController {
+    startIosKoin()
     return ComposeUIViewController {
         val deepLinkAction by DeepLinkState.pendingAction.collectAsState()
         var cameraLaunchToken by remember { mutableStateOf(0L) }
@@ -136,7 +146,6 @@ fun MainViewController(): UIViewController {
         }
 
         ShillingAppBootstrap(
-            platformModule = platformModule,
             logTag = "iOS",
             scaffoldConfig = AppBootstrapScaffoldConfig(
                 cameraButton = { onFile -> MobileCameraReceiptButton(onFile) },
@@ -145,6 +154,7 @@ fun MainViewController(): UIViewController {
                 externalNavRequest = externalNavRequest,
                 pendingReceiptFile = pendingReceiptFile,
                 onPendingReceiptConsumed = { pendingReceiptFile = null },
+                platformTabBar = NativeTabBridge.tabBar,
                 preScaffoldContent = {
                     MobileAutoLaunchReceiptCamera(
                         launchToken = cameraLaunchToken.takeIf { it > 0L },

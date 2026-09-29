@@ -166,16 +166,19 @@ private fun AppearanceSection() {
             onSelect = { day -> day?.let(DisplayPreferences::updateWeekStart) },
             supportingText = "Plan and Home show weeks starting on this day."
         )
-        Text("Tabs", style = MaterialTheme.typography.labelLarge)
-        Text(
-            "Press and hold a tab, then drag it to reorder.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        OutlinedButton(onClick = {
-            resetTabOrder(settings)
-            snackbar.show("Tab order reset")
-        }) { Text("Reset tab order") }
+        // Native tab bars (iOS) can't be reordered by dragging.
+        if (!LocalPlatformTabBar.current) {
+            Text("Tabs", style = MaterialTheme.typography.labelLarge)
+            Text(
+                "Press and hold a tab, then drag it to reorder.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            OutlinedButton(onClick = {
+                resetTabOrder(settings)
+                snackbar.show("Tab order reset")
+            }) { Text("Reset tab order") }
+        }
     }
 }
 

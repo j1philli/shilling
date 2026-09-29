@@ -19,8 +19,20 @@ import finance.shilling.shared.data.store.createScheduleExceptionStore
 import finance.shilling.shared.data.store.createScheduleStore
 import finance.shilling.shared.data.usecase.ComputeBudgetUseCase
 import finance.shilling.shared.data.usecase.ComputeWindowUseCase
+import org.koin.core.Koin
+import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import org.koin.mp.KoinPlatform
+
+/**
+ * Starts the app's single Koin graph: the platform's [platformModule] plus the shared
+ * [dataModule]. Each platform calls this from its entry point before showing any UI, so both
+ * Compose and native (Swift) code resolve from the same graph. Later calls return the running
+ * instance (e.g. an Android Activity recreated in the same process).
+ */
+fun initKoin(platformModule: Module): Koin =
+    KoinPlatform.getKoinOrNull() ?: startKoin { modules(platformModule, dataModule) }.koin
 
 /**
  * Shared data graph: identity, Store5 stores, repositories, use cases, and the sync facade.

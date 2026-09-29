@@ -34,7 +34,7 @@ import finance.shilling.shared.data.SETTINGS_KEY_SERVER_URL
 import finance.shilling.shared.data.completeFirstLaunchOnboarding
 import finance.shilling.shared.data.LocalDataWiper
 import finance.shilling.shared.data.bootstrapSessionModule
-import finance.shilling.shared.data.dataModule
+import finance.shilling.shared.data.initKoin
 import finance.shilling.shared.data.clearWelcomeHoldState
 import finance.shilling.shared.data.hadPersistedAccountSession
 import finance.shilling.shared.data.hasHeldLocalData
@@ -86,13 +86,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
-import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 import org.koin.compose.module.rememberKoinModules
 import org.koin.core.annotation.KoinExperimentalAPI
-import org.koin.core.logger.Level
-import org.koin.core.module.Module
-import org.koin.dsl.koinConfiguration
 
 private const val MANUAL_RETRY_MIN_LOADING_MS = 2_000L
 private const val SELF_HOSTED_MODE_MISMATCH_MESSAGE =
@@ -130,26 +126,21 @@ data class AppBootstrapScaffoldConfig(
     val developerToolsEnabled: Boolean = false,
     /** Given the app's NavController once the main scaffold is shown (web: browser history). */
     val navControllerHook: @Composable (NavHostController) -> Unit = {},
+    /** Native tab bar drawn by the platform (iOS); null draws the Compose bar / rail. */
+    val platformTabBar: PlatformTabBar? = null,
     val startupPendingContent: @Composable () -> Unit = { DefaultLoadingSurface() }
 )
 
 /**
- * Hosts the app's Koin graph ([platformModule] + shared [dataModule]) and runs onboarding,
- * hosted bootstrap, and sync inside it.
+ * Runs onboarding, hosted bootstrap, and sync. Koin must already be running: each platform calls
+ * [initKoin] before showing UI, and composables resolve from that global graph.
  */
 @Composable
 fun ShillingAppBootstrap(
-    platformModule: Module,
     scaffoldConfig: AppBootstrapScaffoldConfig = AppBootstrapScaffoldConfig(),
     logTag: String = "AppBootstrap"
 ) {
-    // KoinApplication rebuilds the graph whenever its configuration changes, so keep it stable.
-    val configuration = remember(platformModule) {
-        koinConfiguration { modules(platformModule, dataModule) }
-    }
-    KoinApplication(configuration = configuration, logLevel = Level.ERROR) {
-        AppBootstrapContent(scaffoldConfig, logTag)
-    }
+    AppBootstrapContent(scaffoldConfig, logTag)
 }
 
 @OptIn(KoinExperimentalAPI::class)
@@ -633,7 +624,8 @@ private fun AppBootstrapContent(
                 pendingReceiptFile = scaffoldConfig.pendingReceiptFile,
                 onPendingReceiptConsumed = scaffoldConfig.onPendingReceiptConsumed,
                 developerToolsEnabled = scaffoldConfig.developerToolsEnabled,
-                navControllerHook = scaffoldConfig.navControllerHook
+                navControllerHook = scaffoldConfig.navControllerHook,
+                platformTabBar = scaffoldConfig.platformTabBar
             )
         }
     }

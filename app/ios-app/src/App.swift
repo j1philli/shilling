@@ -9,6 +9,7 @@ struct ShillingApp: App {
     @State private var shieldDismissWorkItem: DispatchWorkItem?
 
     init() {
+        MainViewControllerKt.startIosKoin()
         _showSnapshotShield = State(initialValue: !Self.hasPendingReceiptCameraLaunch())
     }
 
@@ -109,7 +110,7 @@ private struct ReceiptShortcutLaunchView: View {
 
 struct ComposeViewRepresentable: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.MainViewController()
+        ShillingTabBarController()
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
