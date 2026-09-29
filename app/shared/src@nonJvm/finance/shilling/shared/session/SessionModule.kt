@@ -1,7 +1,6 @@
 package finance.shilling.shared.session
 
 import finance.shilling.shared.data.HouseholdIdCallback
-import finance.shilling.shared.data.LocalDataWiper
 import finance.shilling.shared.data.ResetOnboardingCallback
 import finance.shilling.shared.data.RestartHostedLoginCallback
 import finance.shilling.shared.data.ServerUrlCallback
@@ -31,15 +30,8 @@ val sessionModule: Module = module {
     }
     single { get<AppSession>().hostedBootstrapState }
     single { HostedBootstrapRetryCallback(get<AppSession>()::retryBootstrap) }
-    single {
-        val session = get<AppSession>()
-        val wiper = get<LocalDataWiper>()
-        // Full reset: wipe local data through Store5 repositories, then back to Welcome.
-        ResetOnboardingCallback {
-            wiper.wipe()
-            session.resetOnboarding()
-        }
-    }
+    // Full reset: stop sync, end the auth session, wipe local data, back to Welcome.
+    single { ResetOnboardingCallback(get<AppSession>()::startOver) }
     // Soft-return to Welcome while keeping local data for a matching re-login.
     single { RestartHostedLoginCallback(get<AppSession>()::restartHostedLogin) }
     single { ServerUrlCallback(get<AppSession>()::changeServerUrl) }

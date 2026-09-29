@@ -267,8 +267,23 @@ class AppSession(
         Unit
     }
 
-    /** After local data was wiped (Settings reset): back to a fresh Welcome. */
-    suspend fun resetOnboarding() = onMain {
+    /**
+     * Settings "Start over" / self-hosted "Sign out and reset": delete everything on this device
+     * and return to a fresh Welcome. Sync stops first so no peer changes land during the wipe, and
+     * the auth session ends so the next guest is a new user (with a new household) rather than
+     * the auth SDK restoring the old one from its own storage.
+     */
+    suspend fun startOver() = onMain {
+        clearMainEffects(includeBootstrap = true)
+        listOfNotNull(startupIdentity?.authService, authRuntime?.authService, welcomeAuthService)
+            .distinct()
+            .forEach { service -> runCatching { service.signOut() } }
+        localDataWiper.wipe()
+        resetOnboarding()
+    }
+
+    /** After local data was wiped: back to a fresh Welcome. */
+    private fun resetOnboarding() {
         authScopeGeneration += 1
         authRuntime = null
         welcomeAuthService = null
