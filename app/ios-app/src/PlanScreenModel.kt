@@ -24,7 +24,7 @@ import org.koin.mp.KoinPlatform
 
 /**
  * Swift-facing Plan: Overview plus the Schedules, Categories and Accounts sections. Actions that
- * can be undone return their message and keep the undo for [undoLast]. Editors open in Compose.
+ * can be undone return their message and keep the undo for [undoLast].
  */
 class PlanScreenModel : IosViewModelHost() {
     private val overview = viewModel<PlanOverviewViewModel>()
@@ -85,7 +85,6 @@ class PlanScreenModel : IosViewModelHost() {
     fun setScheduleFilter(type: ScheduleType?) = schedules.setFilter(type)
 
     // Navigation to editors (Compose for now)
-    fun openTransaction(postingId: String) = NativeTabBridge.openTransaction(postingId)
     fun openSchedule(scheduleId: String?, type: ScheduleType?) = NativeTabBridge.openSchedule(scheduleId, type)
     fun openCategory(categoryId: String?) = NativeTabBridge.openCategory(categoryId)
     fun openAccount(accountId: String?) = NativeTabBridge.openAccount(accountId)

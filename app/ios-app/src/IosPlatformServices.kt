@@ -101,21 +101,27 @@ class IosReceiptFileStore : ReceiptFileStore {
         )
     }
 
+    /** Copies the receipt to a temp file named after [originalName] (for Quick Look / sharing). */
+    fun previewPath(receiptId: String, originalName: String): String? {
+        val data = NSData.dataWithContentsOfFile(pathForReceipt(receiptId)) ?: run {
+            log.w { "Preview failed: file bytes missing for id=$receiptId" }
+            return null
+        }
+        val safeName = originalName
+            .substringAfterLast('/')
+            .substringAfterLast('\\')
+            .ifBlank { "$receiptId.bin" }
+        // A folder per receipt keeps the original file name (Quick Look shows it as the title).
+        val tempDir = NSTemporaryDirectory().trimEnd('/') + "/receipts/$receiptId"
+        NSFileManager.defaultManager.createDirectoryAtPath(tempDir, withIntermediateDirectories = true, attributes = null, error = null)
+        val tempPath = "$tempDir/$safeName"
+        return if (data.writeToFile(tempPath, atomically = true)) tempPath else null
+    }
+
     override suspend fun openExternally(receiptId: String, originalName: String) {
         log.i { "Open requested: id=$receiptId, name=$originalName" }
         runCatching {
-            val data = NSData.dataWithContentsOfFile(pathForReceipt(receiptId))
-            if (data == null) {
-                log.w { "Open failed: file bytes missing for id=$receiptId" }
-                return
-            }
-            val safeName = originalName
-                .substringAfterLast('/')
-                .substringAfterLast('\\')
-                .ifBlank { "$receiptId.bin" }
-            val tempDir = NSTemporaryDirectory().trimEnd('/')
-            val tempPath = "$tempDir/$receiptId-$safeName"
-            data.writeToFile(tempPath, atomically = true)
+            val tempPath = previewPath(receiptId, originalName) ?: return
             val fileUrl = NSURL.fileURLWithPath(tempPath)
             val app = UIApplication.sharedApplication
             if (!app.canOpenURL(fileUrl)) {

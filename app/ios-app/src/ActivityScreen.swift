@@ -30,10 +30,17 @@ struct ActivityScreen: View {
     @StateObject private var model = ActivityModel()
     @ObservedObject private var overlay = ComposeOverlay.shared
     @State private var query = ""
+    @State private var path: [Editor] = []
+    @State private var toast: Toast?
+
+    /** Native editors pushed onto Activity's navigation stack. */
+    enum Editor: Hashable {
+        case transaction(String?)
+    }
 
     var body: some View {
         let state = model.state
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 Section {
                     Picker("Range", selection: Binding(
@@ -57,7 +64,7 @@ struct ActivityScreen: View {
                             Text(empty.message)
                         } actions: {
                             if empty.showActions {
-                                Button("Add transaction") { model.screen.openTransaction(postingId: nil) }
+                                Button("Add transaction") { path.append(.transaction(nil)) }
                                     .buttonStyle(.borderedProminent)
                                 Button("Import from CSV") { model.screen.openImport() }
                             }
@@ -68,12 +75,9 @@ struct ActivityScreen: View {
                     ForEach(state.sections, id: \.header) { section in
                         Section(section.header) {
                             ForEach(section.rows, id: \.id) { row in
-                                Button {
-                                    model.screen.openTransaction(postingId: row.id)
-                                } label: {
+                                NavigationLink(value: Editor.transaction(row.id)) {
                                     ActivityRow(row: row)
                                 }
-                                .buttonStyle(.plain)
                             }
                         }
                     }
@@ -83,21 +87,28 @@ struct ActivityScreen: View {
             .navigationTitle("Activity")
             .searchable(text: $query, prompt: "Search transactions")
             .onChange(of: query) { _, text in model.screen.setQuery(text: text) }
+            .navigationDestination(for: Editor.self) { editor in
+                switch editor {
+                case .transaction(let id):
+                    TransactionEditorScreen(postingId: id) { result in toast = result }
+                }
+            }
             .toolbar {
-                if !overlay.detailOpen {
+                if !overlay.detailOpen && path.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button { model.screen.openImport() } label: {
                             Label("Import", systemImage: "square.and.arrow.down")
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button { model.screen.openTransaction(postingId: nil) } label: {
+                        Button { path.append(.transaction(nil)) } label: {
                             Label("Add", systemImage: "plus")
                         }
                     }
                 }
             }
         }
+        .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .task { await model.observe() }
     }
 }

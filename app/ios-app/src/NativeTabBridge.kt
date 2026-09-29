@@ -34,11 +34,6 @@ object NativeTabBridge {
         listener(tabs, selected, detailOpen)
     }
 
-    /** Swift: open a transaction in the (Compose) editor; null creates one. */
-    fun openTransaction(postingId: String?) {
-        routeRequests.tryEmit(PlatformRoute.Transaction(postingId))
-    }
-
     /** Swift: open a receipt in the (Compose) editor; null adds one. */
     fun openReceipt(receiptId: String?) {
         routeRequests.tryEmit(PlatformRoute.Receipt(receiptId))

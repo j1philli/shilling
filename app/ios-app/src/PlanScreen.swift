@@ -53,7 +53,7 @@ final class PlanModel: ObservableObject {
 }
 
 /// Native Plan: Overview (week/month, by day or by category) plus Schedules, Categories and
-/// Accounts. Editors still open in Compose.
+/// Accounts, with native editors pushed onto its navigation stack.
 struct PlanScreen: View {
     @StateObject private var model = PlanModel()
     @ObservedObject private var overlay = ComposeOverlay.shared
@@ -68,6 +68,7 @@ struct PlanScreen: View {
         case category(String?)
         case account(String?)
         case schedule(String?, ScheduleType?)
+        case transaction(String)
     }
 
     private struct AmountEdit {
@@ -104,6 +105,8 @@ struct PlanScreen: View {
                     AccountEditorScreen(accountId: id) { message in toast = Toast(message) }
                 case .schedule(let id, let type):
                     ScheduleEditorScreen(scheduleId: id, presetType: type) { message in toast = Toast(message) }
+                case .transaction(let id):
+                    TransactionEditorScreen(postingId: id) { result in toast = result }
                 }
             }
             .toolbar {
@@ -213,7 +216,7 @@ struct PlanScreen: View {
                         ForEach(group.lines, id: \.key) { line in
                             Button {
                                 if line.isSchedule { path.append(.schedule(line.key, nil)) }
-                                else if let id = line.postingId { model.screen.openTransaction(postingId: id) }
+                                else if let id = line.postingId { path.append(.transaction(id)) }
                             } label: {
                                 ListRow(title: line.title, supporting: line.supporting,
                                         trailing: line.amount, trailingColor: line.type.amountColor)
@@ -250,7 +253,7 @@ struct PlanScreen: View {
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            if row.posted, let id = row.postingId { model.screen.openTransaction(postingId: id) }
+            if row.posted, let id = row.postingId { path.append(.transaction(id)) }
         }
         .swipeActions(edge: .leading) {
             if !row.posted {
@@ -266,7 +269,7 @@ struct PlanScreen: View {
         .contextMenu {
             if row.posted {
                 if let id = row.postingId {
-                    Button("View transaction") { model.screen.openTransaction(postingId: id) }
+                    Button("View transaction") { path.append(.transaction(id)) }
                 }
                 if row.canUnmark {
                     Button(row.unmarkLabel) { run { model.screen.unmark(key: row.key) } }

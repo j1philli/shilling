@@ -33,6 +33,7 @@ final class FlowModel<State, Screen: IosViewModelHost>: ObservableObject {
 /// with confirmation, and loading / deleted states.
 struct EditorChrome<Content: View>: View {
     let title: String
+    var subtitle: String? = nil
     let load: EditorLoad
     let missingMessage: String
     let saveEnabled: Bool
@@ -67,11 +68,20 @@ struct EditorChrome<Content: View>: View {
                         }
                     }
                 }
+                // Number pads have no return key.
+                .scrollDismissesKeyboard(.interactively)
             }
         }
         .navigationTitle(title)
+        .modifier(NavigationSubtitle(text: subtitle))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+            }
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save") {
                     working = true
@@ -82,6 +92,19 @@ struct EditorChrome<Content: View>: View {
                 }
                 .disabled(!saveEnabled || working || load != .ready)
             }
+        }
+    }
+}
+
+/// `navigationSubtitle` where available (iOS 26+).
+private struct NavigationSubtitle: ViewModifier {
+    let text: String?
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *), let text {
+            content.navigationSubtitle(text)
+        } else {
+            content
         }
     }
 }
