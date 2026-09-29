@@ -12,12 +12,14 @@ project {
     // --- Phase 1: CI (run by the branch build chain) ---
     buildType(CI)
 
-    // --- Phase 2: release chain and manual platform builds ---
+    // --- Phase 2: packages, runtime checks, and deployment ---
     // The settings VCS root must include refs/tags/*; these trigger filters use
     // the resulting logical names (v*), not the fully qualified Git refs.
     buildType(AndroidBuild)
     buildType(ServerBuild)
     buildType(WebDeploy)
+    buildType(RuntimeSmoke)
+    buildType(HostedWebDeploy)
     buildType(SelfHostRelease)
     buildType(IosBuild)
     buildType(DesktopLinux)
@@ -199,7 +201,7 @@ object DesktopLinux : BuildType({
 object DesktopMacOS : BuildType({
     name = "Desktop macOS"
     description = "Build an unsigned macOS desktop DMG from the tested web bundle"
-    artifactRules = "desktop-artifacts/macos/** => desktop-macos.zip"
+    artifactRules = "desktop-artifacts/macos/** => desktop-macos.zip\nsmoke-results/macos/** => macos-smoke.zip"
 
     vcs {
         root(DslContext.settingsRoot)
@@ -223,6 +225,10 @@ object DesktopMacOS : BuildType({
         script {
             name = "Package macOS desktop app"
             scriptContent = "bash scripts/ci/build-desktop-macos.sh"
+        }
+        script {
+            name = "Verify and launch packaged DMG"
+            scriptContent = "bash scripts/ci/smoke-desktop-macos.sh"
         }
     }
 
@@ -263,12 +269,13 @@ object DesktopWindows : BuildType({
 })
 
 // =============================================================================
-// Phase 2d: Web Deploy to Cloudflare Pages
+// Phase 2d: Web build, runtime checks, and gated Cloudflare Pages deployment
 // =============================================================================
 
 object WebDeploy : BuildType({
-    name = "Web Deploy"
-    description = "Build wasmJs and deploy to Cloudflare Pages"
+    // Keep the existing ID so historical builds and artifact dependencies survive.
+    name = "Web Build"
+    description = "Build the web bundle consumed by desktop, smoke tests, and Pages"
     artifactRules = "web-app-dist/** => web-app-dist.zip"
 
     vcs {
@@ -298,6 +305,35 @@ object WebDeploy : BuildType({
             name = "Build wasmJs artifacts"
             scriptContent = "bash build-web.sh"
         }
+
+    }
+
+    requirements {
+        equals("teamcity.agent.jvm.os.name", "Linux")
+    }
+})
+
+// Deploy only after the complete same-revision chain passes.
+object HostedWebDeploy : BuildType({
+    name = "Hosted Web Deploy"
+    description = "Promote the web artifact after every target and runtime smoke check passes"
+    params { param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%") }
+    vcs { root(DslContext.settingsRoot) }
+    triggers {
+        finishBuildTrigger {
+            buildType = "${AllTargets.id}"
+            successfulOnly = true
+            branchFilter = "+:<default>\n+:main"
+        }
+    }
+    dependencies {
+        snapshot(AllTargets) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        artifacts(WebDeploy) {
+            buildRule = sameChain()
+            artifactRules = "web-app-dist.zip!** => web-app-dist"
+        }
+    }
+    steps {
         script {
             name = "Deploy to Cloudflare Pages"
             scriptContent = """
@@ -365,10 +401,34 @@ object WebDeploy : BuildType({
             """.trimIndent()
         }
     }
+    requirements { equals("teamcity.agent.jvm.os.name", "Linux") }
+})
 
-    requirements {
-        equals("teamcity.agent.jvm.os.name", "Linux")
+object RuntimeSmoke : BuildType({
+    name = "Web and Server Smoke"
+    description = "Run packaged images, browser onboarding, hosted auth, and WebRTC data-channel checks"
+    artifactRules = "smoke-results/runtime/** => runtime-smoke.zip"
+    vcs { root(DslContext.settingsRoot) }
+    dependencies {
+        snapshot(ServerBuild) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        artifacts(ServerBuild) {
+            buildRule = sameChain()
+            artifactRules = "server-jvm-executable.jar => release-input/server"
+        }
+        snapshot(WebDeploy) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        artifacts(WebDeploy) {
+            buildRule = sameChain()
+            artifactRules = "web-app-dist.zip!** => web-app-dist"
+        }
     }
+    steps {
+        script {
+            name = "Test packaged web and server images"
+            scriptContent = "bash scripts/ci/smoke-runtime.sh"
+        }
+    }
+    failureConditions { executionTimeoutMin = 20 }
+    requirements { equals("teamcity.agent.jvm.os.name", "Linux") }
 })
 
 // =============================================================================
@@ -423,6 +483,7 @@ object SelfHostRelease : BuildType({
     }
 
     dependencies {
+        snapshot(RuntimeSmoke) { onDependencyFailure = FailureAction.FAIL_TO_START }
         snapshot(ServerBuild) {
             onDependencyFailure = FailureAction.FAIL_TO_START
             reuseBuilds = ReuseBuilds.SUCCESSFUL
@@ -454,7 +515,7 @@ object SelfHostRelease : BuildType({
 })
 
 // Agentless orchestration jobs keep every package on one source revision.
-// The Linux matrix runs on every branch; neither job publishes a release.
+// Feature branches run the Linux matrix; main and release tags run every target.
 object LinuxTargets : BuildType({
     name = "Build Linux-agent targets"
     description = "Build Android, Linux desktop, Windows desktop, web, and server at one revision"
@@ -466,11 +527,12 @@ object LinuxTargets : BuildType({
 
     triggers {
         vcs {
-            branchFilter = "+:*\n-:v*"
+            branchFilter = "+:*\n-:<default>\n-:main\n-:v*"
         }
     }
 
     dependencies {
+        snapshot(RuntimeSmoke) { onDependencyFailure = FailureAction.FAIL_TO_START }
         snapshot(AndroidBuild) { onDependencyFailure = FailureAction.FAIL_TO_START }
         snapshot(DesktopLinux) { onDependencyFailure = FailureAction.FAIL_TO_START }
         snapshot(DesktopWindows) { onDependencyFailure = FailureAction.FAIL_TO_START }
@@ -480,11 +542,15 @@ object LinuxTargets : BuildType({
 
 object AllTargets : BuildType({
     name = "Build all targets"
-    description = "Build every package at one revision when the macOS agent is connected"
+    description = "Build every target and run available runtime checks at one revision"
     type = BuildTypeSettings.Type.COMPOSITE
 
     vcs {
         root(DslContext.settingsRoot)
+    }
+
+    triggers {
+        vcs { branchFilter = "+:<default>\n+:main\n+:v*" }
     }
 
     dependencies {

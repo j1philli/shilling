@@ -31,13 +31,13 @@ version at that commit.
 
 | Event | Result |
 | --- | --- |
-| Push to any branch | `Build Linux-agent targets` runs CI, web, server, Android, Linux desktop, and Windows desktop at the same revision. Package files become TeamCity artifacts. |
-| Merge to `main` | The branch chain also deploys the hosted web app to Cloudflare Pages after CI passes. Coolify tracks the hosted server's source separately. |
-| Push a `vX.Y.Z` or preview tag | Nothing publishes automatically. Queue a build matrix on the tag, review the artifacts, and explicitly publish the selected targets. |
+| Push to a feature branch | `Build Linux-agent targets` runs CI, web/server runtime checks, Android, Linux desktop, and Windows desktop at the same revision. Package files become TeamCity artifacts. |
+| Merge to `main` | `Build all targets` also builds iOS and macOS and tests the Mac DMG. After the whole chain passes, `Hosted Web Deploy` deploys that chain's web artifact to Cloudflare Pages. Coolify tracks the hosted server's source separately. |
+| Push a `vX.Y.Z` or preview tag | `Build all targets` runs automatically. Review its results and explicitly publish the selected targets. Tags do not deploy Pages or publish releases automatically. |
 
 The single Linux runner works through the branch matrix in a queue. The
-`Build all targets` composite also includes iOS and macOS desktop and can be
-queued on any branch or tag after the Mac agent is connected. Snapshot
+`Build all targets` composite also includes iOS and macOS desktop on the Mac
+runner and can be queued manually on a feature branch. Snapshot
 dependencies pin the jobs in a chain to one source revision. Failed jobs fail
 the composite. The macOS desktop job consumes the same tested web bundle as
 the Linux and Windows desktop jobs.
@@ -51,8 +51,34 @@ an unsigned universal DMG for Apple Silicon and Intel. These packages stay in
 TeamCity until explicitly published.
 The workflows do not yet sign or upload to Play, TestFlight, or desktop stores.
 
-The manual `Self-hosted Release` job consumes the tested server JAR and web
-bundle from the same tag. It pushes images to GHCR and creates a GitHub
+### Runtime checks
+
+`Web and Server Smoke` starts disposable containers built from the exact JAR
+and web artifacts in its chain. Playwright checks self-hosted onboarding,
+the hosted welcome/sign-in UI, hosted authentication rejection and acceptance,
+and two authenticated browser peers exchanging data over WebRTC after closing
+their signaling connections. Authentication uses an isolated Supabase protocol
+fixture with temporary signing keys; this does not test the production Supabase
+service, account creation, or the app's Store5 synchronization end to end.
+
+The Mac build verifies the DMG checksum, mounts and extracts it, checks both
+Intel and Apple Silicon executable slices, and runs the packaged app for ten
+seconds. It does not verify Gatekeeper acceptance or app interactions.
+Android, iOS, Windows, and Linux desktop still need device/OS installation and
+runtime checks. A green matrix proves the checks listed here, not full device
+acceptance.
+
+Browser JUnit results, failure screenshots/traces, and container logs are saved
+in `runtime-smoke.zip`; the Mac startup result is saved in `macos-smoke.zip`.
+To run the image suite locally, place the server artifact at
+`release-input/server/server-jvm-executable.jar` and extract the web artifact to
+`web-app-dist/`, then run `bash scripts/ci/smoke-runtime.sh` with Docker running.
+The suite publishes no ports, uses no production secrets, and removes its
+containers and temporary image tags on exit.
+
+The manual `Self-hosted Release` job requires the runtime smoke job to pass and
+consumes the tested server JAR and web bundle from the same tag. It pushes
+images to GHCR and creates a GitHub
 release. Set `env.SHILLING_RELEASE_TARGETS` on that run to `server,web`
 (default), `server`, or `web`. A two-image release includes Compose files. A
 one-image release omits Compose files because the other image remains on its
@@ -66,11 +92,11 @@ overwritten.
 ## Full release
 
 1. Run `just set-version X.Y.Z --android --ios`, review the manifest changes,
-   and merge them to `main`. Wait for its branch matrix to pass.
+   and merge them to `main`. Wait for its all-target matrix to pass.
 2. Tag that tested `main` commit `vX.Y.Z` (or `vX.Y.Z-beta.1`) and push the tag.
-3. Queue `Build all targets` on the tag and inspect the artifacts. Until the
-   Mac agent is connected, queue `Build Linux-agent targets` and treat the
-   release as partial.
+3. Wait for the automatic `Build all targets` run on the tag and inspect its
+   artifacts and smoke results. An unavailable Mac agent keeps the chain queued
+   and blocks automatic hosted web deployment from `main`.
 4. Complete signing and store upload checks. Queue `Self-hosted Release` on
    the same tag with `env.SHILLING_RELEASE_TARGETS=server,web` to publish both
    images and the Compose files. Attach only ready client packages to the
@@ -87,7 +113,7 @@ signed client package through its store or attach the installer to a GitHub
 release. Record the target shipped for that tag.
 
 The build matrix is coordinated, but delivery to every store is still manual.
-We need the Mac agent, Apple signing and notarization, Android upload signing,
+We still need Apple signing and notarization, Android upload signing,
 and store upload automation for one-click multi-target releases. Hosted Pages
 and Coolify deploy from `main` independently of release tags, so a tag does
 not move hosted web and server atomically. A GitHub release currently proves

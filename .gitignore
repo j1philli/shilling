@@ -20,6 +20,7 @@
 .kotlinc/
 .kotlin/
 .amper/
+.teamcity/target/
 **/build/
 **/out/
 **/dist/
@@ -52,6 +53,8 @@ src-tauri/gen/
 web-app-dist/
 desktop-artifacts/
 mobile-artifacts/
+smoke-results/
+release-input/
 
 # Tool caches
 node_modules/

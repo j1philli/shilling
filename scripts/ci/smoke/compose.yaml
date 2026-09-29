@@ -1,0 +1,22 @@
+services:
+  server:
+    image: shilling-smoke-server:${SHILLING_SMOKE_TAG}
+    environment:
+      SHILLING_AUTH_MODE: none
+  auth-fixture:
+    image: shilling-smoke-tests:${SHILLING_SMOKE_TAG}
+    command: [node, auth-fixture.mjs]
+  hosted-server:
+    image: shilling-smoke-server:${SHILLING_SMOKE_TAG}
+    environment:
+      SHILLING_AUTH_MODE: supabase
+      SHILLING_SUPABASE_URL: http://auth-fixture:9000
+      SHILLING_SUPABASE_ANON_KEY: smoke-publishable-key
+      SHILLING_SUPABASE_SERVICE_KEY: smoke-service-key
+  web:
+    image: shilling-smoke-web:${SHILLING_SMOKE_TAG}
+  hosted-web:
+    image: shilling-smoke-hosted-web:${SHILLING_SMOKE_TAG}
+  tests:
+    image: shilling-smoke-tests:${SHILLING_SMOKE_TAG}
+    shm_size: 1gb
