@@ -23,16 +23,17 @@ import org.koin.compose.koinInject
 import finance.shilling.shared.presentation.formatAmountInput
 import finance.shilling.shared.presentation.formatCurrency
 import finance.shilling.shared.presentation.parseAmountInput
+import finance.shilling.shared.presentation.AccountsViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AccountsView(
     onOpenAccount: (String?) -> Unit,
     title: String = "Accounts",
-    headerBottom: (@Composable () -> Unit)? = null
+    headerBottom: (@Composable () -> Unit)? = null,
+    viewModel: AccountsViewModel = koinViewModel()
 ) {
-    val accountRepo = koinInject<AccountRepository>()
-    val accounts by remember { accountRepo.watchAll() }.collectAsState(initial = emptyList())
-    val sorted = remember(accounts) { accounts.sortedBy { it.name.lowercase() } }
+    val state by viewModel.state.collectAsState()
     var selectedKey by rememberSaveable { mutableStateOf<String?>(null) }
 
     ListDetailLayout(
@@ -45,23 +46,24 @@ fun AccountsView(
             ScreenScaffold(
                 title = title,
                 headerBottom = headerBottom,
-                subtitle = if (accounts.isEmpty()) null else "Total ${formatCurrency(accounts.sumOf { it.balance })}",
+                subtitle = state.subtitle,
                 actions = { AddButton("Add", onClick = { open(null) }) }
             ) { padding ->
-                if (sorted.isEmpty()) {
+                val empty = state.empty
+                if (empty != null) {
                     EmptyState(
-                        title = "No accounts yet",
-                        message = "Add the bank accounts and cash you budget with.",
-                        actionLabel = "Add account",
+                        title = empty.title,
+                        message = empty.message,
+                        actionLabel = empty.actionLabel,
                         onAction = { open(null) }
                     )
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = padding) {
-                        items(sorted, key = { it.id }) { account ->
+                        items(state.rows, key = { it.id }) { account ->
                             EntityListItem(
                                 title = account.name,
                                 trailing = {
-                                    Text(formatCurrency(account.balance), style = MaterialTheme.typography.bodyLarge)
+                                    Text(account.balance, style = MaterialTheme.typography.bodyLarge)
                                 },
                                 selected = twoPane && selectedKey == account.id,
                                 onClick = { open(account.id) }

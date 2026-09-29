@@ -61,29 +61,20 @@ import finance.shilling.shared.presentation.shortLabel
 import finance.shilling.shared.presentation.today
 import finance.shilling.shared.presentation.weekOfMonth
 import finance.shilling.shared.presentation.formatAmountInput
+import finance.shilling.shared.presentation.SchedulesViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 private const val NEW_SCHEDULE_PREFIX = "new:"
 
 @Composable
 fun SchedulesView(onOpenSchedule: (id: String?, type: ScheduleType?) -> Unit,
     title: String = "Schedules",
-    headerBottom: (@Composable () -> Unit)? = null
+    headerBottom: (@Composable () -> Unit)? = null,
+    viewModel: SchedulesViewModel = koinViewModel()
 ) {
-    val scheduleRepo = koinInject<ScheduleRepository>()
-    val accountRepo = koinInject<AccountRepository>()
-    val categoryRepo = koinInject<CategoryRepository>()
-    val schedules by remember { scheduleRepo.watchAll() }.collectAsState(initial = emptyList())
-    val accounts by remember { accountRepo.watchAll() }.collectAsState(initial = emptyList())
-    val categories by remember { categoryRepo.watchAll() }.collectAsState(initial = emptyList())
-    var filterName by rememberSaveable { mutableStateOf<String?>(null) }
-    val filter = filterName?.let { ScheduleType.valueOf(it) }
+    val state by viewModel.state.collectAsState()
+    val filter = state.filter
     var selectedKey by rememberSaveable { mutableStateOf<String?>(null) }
-    val todayDate = remember { today() }
-
-    val visible = remember(schedules, filter) {
-        schedules.filter { filter == null || it.type == filter }
-            .sortedWith(compareBy<Schedule> { it.type.ordinal }.thenBy { it.title.lowercase() })
-    }
 
     ListDetailLayout(
         selectedKey = selectedKey,
@@ -104,38 +95,39 @@ fun SchedulesView(onOpenSchedule: (id: String?, type: ScheduleType?) -> Unit,
                             modifier = Modifier.horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                         ) {
-                            FilterChip(selected = filter == null, onClick = { filterName = null }, label = { Text("All") })
-                            ScheduleType.entries.forEach { type ->
+                            FilterChip(selected = filter == null, onClick = { viewModel.setFilter(null) }, label = { Text("All") })
+                            state.filterOptions.forEach { type ->
                                 FilterChip(
                                     selected = filter == type,
-                                    onClick = { filterName = type.name },
+                                    onClick = { viewModel.setFilter(type) },
                                     label = { Text(type.pluralLabel) }
                                 )
                             }
                         }
                     }
-                    if (visible.isEmpty()) {
+                    val empty = state.empty
+                    if (empty != null) {
                         item(key = "empty") {
                             EmptyState(
-                                title = if (filter == null) "No schedules yet" else "No ${filter.pluralLabel.lowercase()} scheduled",
-                                message = "Schedules are the bills, paychecks and transfers you expect. They drive Plan.",
-                                actionLabel = "Add schedule",
+                                title = empty.title,
+                                message = empty.message,
+                                actionLabel = empty.actionLabel,
                                 onAction = { open(null) }
                             )
                         }
                     } else {
-                        visible.groupBy { it.type }.forEach { (type, group) ->
-                            if (filter == null) {
-                                item(key = "header-$type") { ListSectionHeader(type.pluralLabel) }
+                        state.groups.forEach { group ->
+                            group.header?.let { header ->
+                                item(key = "header-$header") { ListSectionHeader(header) }
                             }
-                            items(group, key = { it.id }) { schedule ->
-                                ScheduleListItem(
-                                    schedule = schedule,
-                                    accounts = accounts,
-                                    categories = categories,
-                                    ended = schedule.endDate?.let { it < todayDate } == true,
-                                    selected = twoPane && selectedKey == schedule.id,
-                                    onClick = { open(schedule.id) }
+                            items(group.rows, key = { it.id }) { row ->
+                                EntityListItem(
+                                    title = row.title,
+                                    supporting = row.supporting,
+                                    leading = { ColorDot(colorFromHex(row.categoryColor)) },
+                                    trailing = { Text(row.amount, color = amountColor(row.type), style = MaterialTheme.typography.bodyLarge) },
+                                    selected = twoPane && selectedKey == row.id,
+                                    onClick = { open(row.id) }
                                 )
                             }
                         }
@@ -158,35 +150,6 @@ fun SchedulesView(onOpenSchedule: (id: String?, type: ScheduleType?) -> Unit,
     )
 }
 
-@Composable
-private fun ScheduleListItem(
-    schedule: Schedule,
-    accounts: List<Account>,
-    categories: List<Category>,
-    ended: Boolean,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val source = accounts.firstOrNull { it.id == schedule.accountId }?.name ?: "No account"
-    val category = categories.firstOrNull { it.id == schedule.categoryId }
-    val supporting = buildList {
-        add(if (ended) "Ended ${formatDate(schedule.endDate!!)}" else describeRecurrence(schedule))
-        add(
-            if (schedule.type == ScheduleType.TRANSFER) {
-                "$source → ${accounts.firstOrNull { it.id == schedule.counterAccountId }?.name ?: "No account"}"
-            } else source
-        )
-        category?.let { add(it.name) }
-    }.joinToString(" · ")
-    EntityListItem(
-        title = schedule.title,
-        supporting = supporting,
-        leading = { ColorDot(colorFromHex(category?.color)) },
-        trailing = { AmountText(schedule.type, schedule.amount) },
-        selected = selected,
-        onClick = onClick
-    )
-}
 
 @Composable
 fun ScheduleEditor(

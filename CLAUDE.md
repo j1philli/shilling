@@ -70,6 +70,10 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     SettingsViewModel.kt # Settings state + copy (account variants, sync status, developer info) and actions
     ActivityViewModel.kt # Activity rows (transfer legs merged), day sections, search, range, empty copy
     ReceiptsViewModel.kt # Receipts rows, filter, "N not attached" subtitle, empty copy
+    PlanNavigation.kt    # PlanPeriod/PlanSection/PlanRequest + PlanRequests (Home tiles → Plan section)
+    PlanOverviewViewModel.kt # Plan overview: period/anchor, by day / by category, summary, row copy, actions
+    PlanListViewModels.kt # Schedules (type filter), Categories, Accounts list state
+    OccurrenceActions.kt # mark paid / unmark / skip / change amount, each returning an Undoable
     CredentialsCopy.kt   # email/password form + confirm-email copy (Welcome and Settings)
     SampleData.kt        # seedDemoData (developer tools)
   src/commonMain/sqldelight/finance/shilling/shared/db/
@@ -110,7 +114,6 @@ app/shared-ui/            # shared Compose UI (jvm, wasmJs, iOS)
     ReceiptsScreen.kt    # list + editor
     AccountsView.kt / CategoriesView.kt / ScheduleViews.kt # list + editor, rendered as Plan sections
     TransactionEditor.kt # view/edit/create a posting, transfer pairs, attached receipts
-    PostingActions.kt    # mark paid / skip / change amount with undo
     SettingsView.kt      # appearance, account, sync status, hidden developer tools
 app/web-app/              # Tauri desktop app (wasmJs)
   module.yaml         # product: wasm-js/app
@@ -131,6 +134,8 @@ app/ios-app/              # Compose Multiplatform iOS app
     SettingsScreenModel.kt / SettingsScreen.swift # native SwiftUI Settings (+ ToastView snackbar stand-in)
     ActivityScreenModel.kt / ActivityScreen.swift # native SwiftUI Activity (opens the Compose editor/import)
     ReceiptsScreenModel.kt / ReceiptsScreen.swift # native SwiftUI Receipts (opens the Compose receipt editor)
+    PlanScreenModel.kt / PlanScreen.swift # native SwiftUI Plan (Overview + Schedules/Categories/Accounts)
+    Toast.swift          # snackbar stand-in with optional action (Undo)
     DisplayPreferencesBridge.kt / AppearanceModel.swift # app theme mode → SwiftUI preferredColorScheme
     IosPlatformServices.kt # IosIdGenerator (NSUUID), IosReceiptFileStore (NSFileManager), NativeSqliteDriver
     ShillingIosApp.kt      # receipt store UI (add, list, edit, attach, delete)
@@ -240,8 +245,8 @@ Koin `viewModel {}`); Compose gets them with `koinViewModel()`. On iOS, a Kotlin
 annotations out of `app/shared`: its compiler plugin crashes non-Apple compilations and the
 toolchain can't scope `compilerPlugins` per platform, so it's only enabled in `ios-app`.
 `ShillingTabBarController` shows a SwiftUI screen for ported tabs (`nativeScreen(for:)`) and the
-shared Compose UI for the rest (native so far: Home, Activity, Receipts, Settings). Native screens open
-not-yet-ported Compose screens (transaction/receipt editors, import) through `NativeTabBridge` →
+shared Compose UI for the rest (all tabs are native now: Home, Plan, Activity, Receipts, Settings; editors, import and onboarding are still Compose). Native screens open
+not-yet-ported Compose screens (transaction/receipt/schedule/category/account editors, import) through `NativeTabBridge` →
 `PlatformTabBar.routeRequests`; while a Compose detail route is open (`detailOpen`), the tab
 controller shows Compose over the native screen and `ComposeOverlay` drops native toolbar items
 (the iPhone Duo lifts them into the side column). SwiftUI screens follow the app's

@@ -71,6 +71,8 @@ final class ShillingTabBarController: UITabBarController, UITabBarControllerDele
             return UIHostingController(rootView: HomeScreen { destination in
                 NativeTabBridge.shared.openHome(destination: destination)
             })
+        case "PLAN":
+            return UIHostingController(rootView: PlanScreen())
         case "ACTIVITY":
             return UIHostingController(rootView: ActivityScreen())
         case "RECEIPTS":

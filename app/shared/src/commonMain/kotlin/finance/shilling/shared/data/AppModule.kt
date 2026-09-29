@@ -20,6 +20,12 @@ import finance.shilling.shared.data.usecase.ComputeWindowUseCase
 import finance.shilling.shared.presentation.DisplayPreferences
 import finance.shilling.shared.presentation.ActivityViewModel
 import finance.shilling.shared.presentation.HomeViewModel
+import finance.shilling.shared.presentation.AccountsViewModel
+import finance.shilling.shared.presentation.CategoriesViewModel
+import finance.shilling.shared.presentation.OccurrenceActions
+import finance.shilling.shared.presentation.SchedulesViewModel
+import finance.shilling.shared.presentation.PlanOverviewViewModel
+import finance.shilling.shared.presentation.PlanRequests
 import finance.shilling.shared.presentation.ReceiptsViewModel
 import finance.shilling.shared.presentation.SettingsViewModel
 import org.koin.core.Koin
@@ -83,6 +89,12 @@ val dataModule: Module = module {
     viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { ActivityViewModel(get()) }
     viewModel { ReceiptsViewModel(get()) }
+    single { PlanRequests() }
+    factory { OccurrenceActions(get(), get()) }
+    viewModel { PlanOverviewViewModel(get(), get()) }
+    viewModel { SchedulesViewModel(get(), get(), get()) }
+    viewModel { CategoriesViewModel(get()) }
+    viewModel { AccountsViewModel(get()) }
     // Needs SessionState and the Settings callbacks from sessionModule.
     viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 

@@ -29,7 +29,7 @@ final class SettingsModel: ObservableObject {
 struct SettingsScreen: View {
     @StateObject private var model = SettingsModel()
     @State private var confirmingAccountAction = false
-    @State private var toast: String?
+    @State private var toast: Toast?
 
     var body: some View {
         let state = model.state
@@ -50,7 +50,7 @@ struct SettingsScreen: View {
             }
             .navigationTitle("Settings")
         }
-        .overlay(alignment: .bottom) { ToastView(message: $toast) }
+        .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .task { await model.observe() }
     }
 
@@ -155,7 +155,7 @@ struct SettingsScreen: View {
         Section("About") {
             Button {
                 if model.screen.aboutTapped() && !model.screen.developerToolsAlwaysOn {
-                    toast = "Developer tools enabled"
+                    toast = Toast("Developer tools enabled")
                 }
             } label: {
                 VStack(alignment: .leading, spacing: 4) {
@@ -177,7 +177,7 @@ private struct CredentialsForm: View {
     let screen: SettingsScreenModel
     let enabled: Bool
     let disabledReason: String?
-    @Binding var toast: String?
+    @Binding var toast: Toast?
 
     @State private var mode: HostedCredentialsMode = .createAccount
     @State private var email = ""
@@ -250,7 +250,7 @@ private struct CredentialsForm: View {
 private struct DeveloperSections: View {
     let developer: DeveloperInfo
     let screen: SettingsScreenModel
-    @Binding var toast: String?
+    @Binding var toast: Toast?
 
     @State private var serverUrl = ""
     @State private var householdId = ""
@@ -265,14 +265,14 @@ private struct DeveloperSections: View {
                 TextField("Household ID", text: $householdId)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                Button("Save household ID") { toast = screen.saveHouseholdId(id: householdId) }
+                Button("Save household ID") { toast = Toast(screen.saveHouseholdId(id: householdId)) }
                     .disabled(householdId.trimmingCharacters(in: .whitespaces).isEmpty)
             }
             TextField("Server URL", text: $serverUrl)
                 .keyboardType(.URL)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-            Button("Save and reconnect") { toast = screen.saveServerUrl(url: serverUrl) }
+            Button("Save and reconnect") { toast = Toast(screen.saveServerUrl(url: serverUrl)) }
                 .disabled(serverUrl.trimmingCharacters(in: .whitespaces).isEmpty)
         } header: {
             Text("Developer tools")
@@ -308,7 +308,7 @@ private struct DeveloperSections: View {
             Button("Add sample data") {
                 Task {
                     if let message = try? await asyncFunction(for: screen.addSampleData()) {
-                        toast = message
+                        toast = Toast(message)
                     }
                 }
             }
@@ -316,29 +316,6 @@ private struct DeveloperSections: View {
             Text("Sample data")
         } footer: {
             Text("Adds demo accounts, categories and schedules for testing.")
-        }
-    }
-}
-
-// MARK: - Toast
-
-/// Transient confirmation at the bottom of the screen (the Compose app's snackbar).
-struct ToastView: View {
-    @Binding var message: String?
-
-    var body: some View {
-        if let message {
-            Text(message)
-                .font(.subheadline)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .background(.regularMaterial, in: Capsule())
-                .padding(.bottom, 24)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-                .task(id: message) {
-                    try? await Task.sleep(for: .seconds(2.5))
-                    withAnimation { self.message = nil }
-                }
         }
     }
 }

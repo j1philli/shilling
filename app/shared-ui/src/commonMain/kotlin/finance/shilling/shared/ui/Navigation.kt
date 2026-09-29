@@ -91,6 +91,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
+import finance.shilling.shared.presentation.PlanPeriod
+import finance.shilling.shared.presentation.PlanRequest
+import finance.shilling.shared.presentation.PlanRequests
+import finance.shilling.shared.presentation.PlanSection
 
 enum class ShelfDestination(
     val title: String,
@@ -141,6 +145,10 @@ sealed interface PlatformRoute {
     data object Import : PlatformRoute
     /** A receipt; null id adds one. */
     data class Receipt(val receiptId: String?) : PlatformRoute
+    /** A schedule; null id adds one (of [type], when given). */
+    data class Schedule(val scheduleId: String?, val type: ScheduleType? = null) : PlatformRoute
+    data class Category(val categoryId: String?) : PlatformRoute
+    data class Account(val accountId: String?) : PlatformRoute
 }
 
 /** Tabs that were merged into others, mapped to where they live now. */
@@ -351,8 +359,8 @@ fun ShillingScaffold(
         }
     }
 
-    // Lets Home open a specific Plan section/period; consumed by PlanView.
-    var planRequest by remember { mutableStateOf<PlanRequest?>(null) }
+    // Lets Home open a specific Plan section/period; consumed by whichever Plan screen shows.
+    val planRequests = koinInject<PlanRequests>()
     val openHomeDestination: (HomeDestination) -> Unit = { destination ->
         val request = when (destination) {
             HomeDestination.ACCOUNTS -> PlanRequest(PlanSection.ACCOUNTS)
@@ -364,7 +372,7 @@ fun ShillingScaffold(
         }
         when {
             request != null -> {
-                planRequest = request
+                planRequests.request(request)
                 navController.navigateToTab(ShelfDestination.PLAN)
             }
             destination == HomeDestination.ACTIVITY -> navController.navigateToTab(ShelfDestination.ACTIVITY)
@@ -388,8 +396,6 @@ fun ShillingScaffold(
         ) {
             ShillingNavHost(
                 navController = navController,
-                planRequest = planRequest,
-                onPlanRequestConsumed = { planRequest = null },
                 onHomeDestination = openHomeDestination,
                 modifier = modifier,
                 authService = authService,
@@ -418,6 +424,9 @@ fun ShillingScaffold(
                     is PlatformRoute.Transaction -> navController.navigate(TransactionRoute(request.postingId))
                     PlatformRoute.Import -> navController.navigate(ImportRoute)
                     is PlatformRoute.Receipt -> navController.navigate(ReceiptRoute(request.receiptId))
+                    is PlatformRoute.Schedule -> navController.navigate(ScheduleRoute(request.scheduleId, request.type?.name))
+                    is PlatformRoute.Category -> navController.navigate(CategoryRoute(request.categoryId))
+                    is PlatformRoute.Account -> navController.navigate(AccountRoute(request.accountId))
                 }
             }
         }
@@ -459,8 +468,6 @@ fun ShillingScaffold(
 @Composable
 private fun ShillingNavHost(
     navController: NavHostController,
-    planRequest: PlanRequest?,
-    onPlanRequestConsumed: () -> Unit,
     onHomeDestination: (HomeDestination) -> Unit,
     modifier: Modifier,
     authService: AuthService,
@@ -499,8 +506,6 @@ private fun ShillingNavHost(
         }
         composable<PlanRoute> {
             PlanView(
-                request = planRequest,
-                onRequestConsumed = onPlanRequestConsumed,
                 onOpenTransaction = { navController.navigate(TransactionRoute(it)) },
                 onOpenSchedule = { id, type -> navController.navigate(ScheduleRoute(id, type?.name)) },
                 onOpenCategory = { navController.navigate(CategoryRoute(it)) },

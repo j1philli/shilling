@@ -39,6 +39,8 @@ import finance.shilling.shared.data.store.CategoryRepository
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import finance.shilling.shared.presentation.CategoriesViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 private data class Swatch(val hex: String, val name: String)
 
@@ -62,11 +64,10 @@ private val categorySwatches = listOf(
 @Composable
 fun CategoriesView(onOpenCategory: (String?) -> Unit,
     title: String = "Categories",
-    headerBottom: (@Composable () -> Unit)? = null
+    headerBottom: (@Composable () -> Unit)? = null,
+    viewModel: CategoriesViewModel = koinViewModel()
 ) {
-    val categoryRepo = koinInject<CategoryRepository>()
-    val categories by remember { categoryRepo.watchAll() }.collectAsState(initial = emptyList())
-    val sorted = remember(categories) { categories.sortedBy { it.name.lowercase() } }
+    val state by viewModel.state.collectAsState()
     var selectedKey by rememberSaveable { mutableStateOf<String?>(null) }
 
     ListDetailLayout(
@@ -81,16 +82,17 @@ fun CategoriesView(onOpenCategory: (String?) -> Unit,
                 headerBottom = headerBottom,
                 actions = { AddButton("Add", onClick = { open(null) }) }
             ) { padding ->
-                if (sorted.isEmpty()) {
+                val empty = state.empty
+                if (empty != null) {
                     EmptyState(
-                        title = "No categories yet",
-                        message = "Categories group schedules and transactions in Plan.",
-                        actionLabel = "Add category",
+                        title = empty.title,
+                        message = empty.message,
+                        actionLabel = empty.actionLabel,
                         onAction = { open(null) }
                     )
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = padding) {
-                        items(sorted, key = { it.id }) { category ->
+                        items(state.rows, key = { it.id }) { category ->
                             EntityListItem(
                                 title = category.name,
                                 leading = { ColorDot(colorFromHex(category.color), size = 16) },
