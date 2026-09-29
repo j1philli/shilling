@@ -62,7 +62,7 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
       ComputeBudgetUseCase.kt  # monthly budget computation
   src/commonMain/kotlin/finance/shilling/shared/session/
     Credentials.kt       # sign-in modes/results for onboarding
-    SessionState.kt      # SessionPhase + SessionState (AppSession's phase, readable from view models)
+    SessionState.kt      # SessionPhase + SessionState + OnboardingActions (AppSession, readable from view models)
   src/commonMain/kotlin/finance/shilling/shared/presentation/  # UI-agnostic, used by Compose and SwiftUI
     Formatting.kt        # formatCurrency/formatDate/describeRecurrence + domain labels (no Compose)
     DisplayPreferences.kt # theme mode, currency symbol, week start (StateFlow, persisted in Settings)
@@ -78,8 +78,9 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     ScheduleEditorViewModel.kt # schedule editor: fields, recurrence options, validation, next-occurrence preview
     TransactionEditorViewModel.kt # posting editor: fields, transfer legs, delete/undo, attached receipts
     ReceiptEditorViewModel.kt # receipt add/edit: file, metadata, attach/detach + transaction picker
+    OnboardingViewModel.kt # Welcome flow: routes, copy, destructive confirm, self-hosted URL
     ImportViewModel.kt   # CSV import: column/date-format guessing, duplicate detection, per-row review
-    CredentialsCopy.kt   # email/password form + confirm-email copy (Welcome and Settings)
+    CredentialsCopy.kt   # email/password form + confirm-email copy, CredentialsOutcome (Welcome and Settings)
     SampleData.kt        # seedDemoData (developer tools)
   src/commonMain/sqldelight/finance/shilling/shared/db/
     Account.sq          # accounts table schema + queries
@@ -146,6 +147,8 @@ app/ios-app/              # Compose Multiplatform iOS app
     TransactionEditorScreenModel.kt / TransactionEditorScreen.swift # native transaction editor (+ UndoHandle, NSData bridge)
     ReceiptEditorScreenModel.kt / ReceiptEditorScreen.swift # native receipt editor + attach sheet
     ImportScreenModel.kt / ImportScreen.swift # native CSV import (pushed from Activity)
+    OnboardingScreenModel.kt / OnboardingScreen.swift # native Welcome + AppRoot.phase (App.swift shows it above the tabs)
+    CredentialsForm.swift # email/password rows shared by Welcome and Settings
     ReceiptPickers.swift # camera / photo library / file picker buttons for receipts
     DateBridge.swift     # epoch day ↔ Date (Kotlin dates cross into Swift as epoch days)
     DisplayPreferencesBridge.kt / AppearanceModel.swift # app theme mode → SwiftUI preferredColorScheme
@@ -257,7 +260,7 @@ Koin `viewModel {}`); Compose gets them with `koinViewModel()`. On iOS, a Kotlin
 annotations out of `app/shared`: its compiler plugin crashes non-Apple compilations and the
 toolchain can't scope `compilerPlugins` per platform, so it's only enabled in `ios-app`.
 `ShillingTabBarController` shows a SwiftUI screen for ported tabs (`nativeScreen(for:)`) and the
-shared Compose UI for the rest (all tabs are native now: Home, Plan, Activity, Receipts, Settings; all editors and CSV import are native; onboarding is still Compose). Native screens push their
+shared Compose UI for the rest (all tabs are native now: Home, Plan, Activity, Receipts, Settings; all editors, CSV import and onboarding are native). Native screens push their
 editors onto their own `NavigationStack`. Home tiles still switch tabs through `NativeTabBridge` →
 `PlatformTabBar`; while a Compose detail route is open (`detailOpen`), the tab
 controller shows Compose over the native screen and `ComposeOverlay` drops native toolbar items

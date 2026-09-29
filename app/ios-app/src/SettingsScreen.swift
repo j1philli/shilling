@@ -102,8 +102,10 @@ struct SettingsScreen: View {
                     Text(guest.title).font(.headline)
                     Text(guest.body).font(.subheadline).foregroundStyle(.secondary)
                 }
-                CredentialsForm(screen: model.screen, enabled: guest.authAvailable,
-                                disabledReason: guest.disabledReason, toast: $toast)
+                CredentialsForm(initialMode: .createAccount, enabled: guest.authAvailable,
+                                disabledReason: guest.disabledReason) { mode, email, password in
+                    try? await asyncFunction(for: model.screen.submitCredentials(mode: mode, email: email, password: password))
+                }
                 if let pending = guest.pendingConfirmation {
                     Text(pending).font(.footnote).foregroundStyle(.secondary)
                 }
@@ -166,81 +168,6 @@ struct SettingsScreen: View {
                 }
             }
             .buttonStyle(.plain)
-        }
-    }
-}
-
-// MARK: - Account form
-
-/// Email + password form: create an account (upgrading the guest) or sign in.
-private struct CredentialsForm: View {
-    let screen: SettingsScreenModel
-    let enabled: Bool
-    let disabledReason: String?
-    @Binding var toast: Toast?
-
-    @State private var mode: HostedCredentialsMode = .createAccount
-    @State private var email = ""
-    @State private var password = ""
-    @State private var submitting = false
-    @State private var message: String?
-    @State private var confirmEmailMessage: String?
-
-    var body: some View {
-        Text(CredentialsCopy.shared.prompt(mode: mode))
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-        if let disabledReason {
-            Text(disabledReason).font(.footnote).foregroundStyle(.secondary)
-        }
-        TextField("Email", text: $email)
-            .textContentType(.emailAddress)
-            .keyboardType(.emailAddress)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-        SecureField("Password", text: $password)
-            .textContentType(mode == .signIn ? .password : .newPassword)
-        Button {
-            submit()
-        } label: {
-            HStack {
-                if submitting { ProgressView() }
-                Text(CredentialsCopy.shared.submitLabel(mode: mode, signInLabel: "Sign in"))
-            }
-        }
-        .disabled(!enabled || submitting || email.trimmingCharacters(in: .whitespaces).isEmpty || password.isEmpty)
-        Button(CredentialsCopy.shared.switchLabel(mode: mode)) {
-            mode = CredentialsCopy.shared.other(mode: mode)
-            message = nil
-        }
-        .disabled(!enabled || submitting)
-        if let message {
-            Text(message).font(.footnote)
-        }
-        EmptyView()
-            .alert(CredentialsCopy.shared.CONFIRM_EMAIL_TITLE, isPresented: Binding(
-                get: { confirmEmailMessage != nil },
-                set: { if !$0 { confirmEmailMessage = nil } }
-            )) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(confirmEmailMessage ?? "")
-            }
-    }
-
-    private func submit() {
-        submitting = true
-        Task {
-            defer { submitting = false }
-            guard let outcome = try? await asyncFunction(
-                for: screen.submitCredentials(mode: mode, email: email, password: password)
-            ) else { return }
-            message = outcome.message
-            if outcome.succeeded {
-                email = ""
-                password = ""
-            }
-            confirmEmailMessage = outcome.confirmEmailMessage
         }
     }
 }

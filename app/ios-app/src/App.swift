@@ -8,6 +8,7 @@ struct ShillingApp: App {
     @State private var showSnapshotShield = true
     @State private var shieldDismissWorkItem: DispatchWorkItem?
     @StateObject private var appearance = AppearanceModel()
+    @StateObject private var appPhase = AppPhaseModel()
 
     init() {
         MainViewControllerKt.startIosKoin()
@@ -20,6 +21,18 @@ struct ShillingApp: App {
                 ComposeViewRepresentable()
                     .ignoresSafeArea(.all)
 
+                switch appPhase.phase {
+                case .onboarding:
+                    OnboardingScreen()
+                case .starting:
+                    ZStack {
+                        Color(.systemBackground).ignoresSafeArea()
+                        ProgressView()
+                    }
+                default:
+                    EmptyView()
+                }
+
                 ReceiptShortcutLaunchView()
                     .ignoresSafeArea(.all)
                     .opacity(showSnapshotShield ? 1 : 0)
@@ -27,6 +40,7 @@ struct ShillingApp: App {
                     .animation(.easeInOut(duration: 0.22), value: showSnapshotShield)
             }
             .preferredColorScheme(appearance.colorScheme)
+            .task { await appPhase.observe() }
             .onOpenURL { url in
                 handleDeepLink(url)
             }

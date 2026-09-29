@@ -3,6 +3,14 @@ package finance.shilling.shared.presentation
 import finance.shilling.shared.session.HostedCredentialsMode
 import finance.shilling.shared.session.HostedCredentialsSubmitResult
 
+/** Result of an email/password submit, ready for a UI to show. */
+data class CredentialsOutcome(
+    val succeeded: Boolean,
+    val message: String,
+    /** Non-null when a "Confirm your email" prompt should appear. */
+    val confirmEmailMessage: String?
+)
+
 /** Copy for the email/password form (Welcome and Settings), shared by every UI. */
 object CredentialsCopy {
     fun prompt(mode: HostedCredentialsMode): String = when (mode) {
@@ -52,4 +60,18 @@ object CredentialsCopy {
         }
 
     const val CONFIRM_EMAIL_NOTE = "Until you confirm it, this account change is still pending in Supabase Auth."
+
+    /** [result] of submitting [email], as a status line plus the confirm-email prompt if needed. */
+    fun outcome(result: Result<HostedCredentialsSubmitResult>, email: String): CredentialsOutcome = CredentialsOutcome(
+        succeeded = result.isSuccess,
+        message = resultMessage(result),
+        confirmEmailMessage = if (needsEmailConfirmation(result)) {
+            confirmEmailMessage(
+                email,
+                upgradedFromGuest = result.getOrNull()?.signUpResult?.upgradedAnonymousSession == true
+            ) + "\n\n" + CONFIRM_EMAIL_NOTE
+        } else {
+            null
+        }
+    )
 }

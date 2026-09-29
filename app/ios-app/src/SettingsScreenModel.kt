@@ -3,6 +3,7 @@ package finance.shilling.app
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutines
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutinesState
 import finance.shilling.shared.presentation.CredentialsCopy
+import finance.shilling.shared.presentation.CredentialsOutcome
 import finance.shilling.shared.presentation.SettingsUiState
 import finance.shilling.shared.presentation.SettingsViewModel
 import finance.shilling.shared.presentation.ThemeMode
@@ -10,14 +11,6 @@ import finance.shilling.shared.presentation.fullLabel
 import finance.shilling.shared.session.HostedCredentialsMode
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.DayOfWeek
-
-/** Result of the guest account form, ready for Swift to show. */
-data class CredentialsOutcome(
-    val succeeded: Boolean,
-    val message: String,
-    /** Non-null when a "Confirm your email" prompt should appear. */
-    val confirmEmailMessage: String?
-)
 
 /** Swift-facing Settings. Week days and results are flattened to Swift-friendly types. */
 class SettingsScreenModel : IosViewModelHost() {
@@ -45,19 +38,8 @@ class SettingsScreenModel : IosViewModelHost() {
 
     @NativeCoroutines
     suspend fun submitCredentials(mode: HostedCredentialsMode, email: String, password: String): CredentialsOutcome {
-        val result = viewModel.submitCredentials(mode, email.trim(), password)
-        return CredentialsOutcome(
-            succeeded = result.isSuccess,
-            message = CredentialsCopy.resultMessage(result),
-            confirmEmailMessage = if (CredentialsCopy.needsEmailConfirmation(result)) {
-                CredentialsCopy.confirmEmailMessage(
-                    email.trim(),
-                    upgradedFromGuest = result.getOrNull()?.signUpResult?.upgradedAnonymousSession == true
-                ) + "\n\n" + CredentialsCopy.CONFIRM_EMAIL_NOTE
-            } else {
-                null
-            }
-        )
+        val trimmed = email.trim()
+        return CredentialsCopy.outcome(viewModel.submitCredentials(mode, trimmed, password), trimmed)
     }
 
     @NativeCoroutines

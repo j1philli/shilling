@@ -13,6 +13,23 @@ interface SessionState {
     val phase: StateFlow<SessionPhase>
 }
 
+/** The Welcome flow's actions (readable from common code); `AppSession` implements them. */
+interface OnboardingActions {
+    /** Continue as a guest; [wipeHeldData] replaces a budget kept from a signed-out session. */
+    suspend fun getStarted(wipeHeldData: Boolean)
+
+    /** Signed in (or signed up) with a managed account. */
+    suspend fun completeSignIn(wipeHeldData: Boolean)
+
+    /** Fails with [NonMatchingAccountException] when the account doesn't match held local data. */
+    suspend fun submitCredentials(mode: HostedCredentialsMode, email: String, password: String): Result<HostedCredentialsSubmitResult>
+
+    suspend fun continueSelfHosted(selectedUrl: String): Result<Unit>
+
+    /** The user kept their held budget after signing in to a non-matching account. */
+    suspend fun cancelDestructiveAuth()
+}
+
 /** What the app shell shows. */
 sealed interface SessionPhase {
     /** First launch or signed out: the Welcome flow. */

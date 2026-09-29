@@ -5,7 +5,7 @@ import KotlinModules
 /// Native tab bar around the app. Compose owns navigation; this controller mirrors its tabs and
 /// selection (via `NativeTabBridge`). Tabs with a SwiftUI screen (`nativeScreen(for:)`) show it;
 /// every other tab shows the single Compose view. The bar stays hidden until the main scaffold is
-/// up (onboarding, sign-in).
+/// up; until then SwiftUI's onboarding / startup screens cover this controller (App.swift).
 ///
 /// The Compose view must never leave the window: Compose Multiplatform disposes its scene when it
 /// does (losing the Compose tabs' navigation state) and crashes when it comes back. So it always moves into the selected tab's container, and sits hidden under the
@@ -23,6 +23,7 @@ final class ShillingTabBarController: UITabBarController, UITabBarControllerDele
         setTabs([placeholderTab], animated: false)
         setTabBarHidden(true, animated: false)
         attachCompose(to: placeholderTab)
+        composeController.view.isHidden = true
         NativeTabBridge.shared.setListener { [weak self] tabs, selected, detailOpen in
             self?.detailOpen = detailOpen.boolValue
             ComposeOverlay.shared.detailOpen = detailOpen.boolValue
@@ -35,6 +36,8 @@ final class ShillingTabBarController: UITabBarController, UITabBarControllerDele
             if tabs != [placeholderTab] { setTabs([placeholderTab], animated: false) }
             setTabBarHidden(true, animated: false)
             attachCompose(to: placeholderTab)
+            // SwiftUI shows onboarding / startup above this controller (App.swift).
+            composeController.view.isHidden = true
             return
         }
         let keys = nativeTabs.map(\.key)

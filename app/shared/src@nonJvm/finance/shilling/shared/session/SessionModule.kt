@@ -29,6 +29,7 @@ val sessionModule: Module = module {
         )
     }
     single<SessionState> { get<AppSession>() }
+    single<OnboardingActions> { get<AppSession>() }
     single { get<AppSession>().hostedBootstrapState }
     single { HostedBootstrapRetryCallback(get<AppSession>()::retryBootstrap) }
     // Full reset: stop sync, end the auth session, wipe local data, back to Welcome.

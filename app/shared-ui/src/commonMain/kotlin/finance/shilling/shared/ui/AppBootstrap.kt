@@ -55,18 +55,7 @@ fun ShillingAppBootstrap(
     when (val current = phase) {
         is SessionPhase.Onboarding -> ShillingTheme {
             FirstLaunchOnboardingView(
-                initialSelfHostedUrl = current.initialSelfHostedUrl,
-                selfHostedOnly = current.selfHostedOnly,
-                hasHeldLocalData = current.hasHeldLocalData,
-                welcomeNotice = current.welcomeNotice,
                 authService = current.authService,
-                authReady = current.authReady,
-                authDisabledReason = current.authDisabledReason,
-                onGetStarted = session::getStarted,
-                onAuthenticated = session::completeSignIn,
-                onSubmitCredentials = session::submitCredentials,
-                onContinueSelfHosted = session::continueSelfHosted,
-                onCancelDestructiveAuth = session::cancelDestructiveAuth,
                 topPadding = scaffoldConfig.onboardingTopPadding
             )
         }

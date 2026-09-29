@@ -27,11 +27,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,58 +39,26 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.composables.icons.materialicons.MaterialIcons
 import com.composables.icons.materialicons.filled.Chevron_right
-import finance.shilling.shared.data.DEFAULT_SELF_HOSTED_SERVER_URL
 import finance.shilling.shared.data.auth.AuthService
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import shared_ui.generated.resources.Res
 import shared_ui.generated.resources.app_logo
-import finance.shilling.shared.session.HostedCredentialsMode
-import finance.shilling.shared.session.HostedCredentialsSubmitResult
-import finance.shilling.shared.session.NonMatchingAccountException
-
-private enum class FirstLaunchRoute {
-    LANDING,
-    LOGIN,
-    SELF_HOSTED
-}
-
-private enum class PendingDestructiveAction {
-    GET_STARTED,
-    NON_MATCHING_AUTH
-}
+import finance.shilling.shared.presentation.OnboardingOption
+import finance.shilling.shared.presentation.OnboardingRoute
+import finance.shilling.shared.presentation.OnboardingViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun FirstLaunchOnboardingView(
-    initialSelfHostedUrl: String = DEFAULT_SELF_HOSTED_SERVER_URL,
-    selfHostedOnly: Boolean = false,
-    hasHeldLocalData: Boolean = false,
-    welcomeNotice: String? = null,
     authService: AuthService? = null,
-    authReady: Boolean = authService != null,
-    authDisabledReason: String? = null,
-    onGetStarted: suspend (wipeHeldData: Boolean) -> Unit,
-    onAuthenticated: suspend (wipeHeldData: Boolean) -> Unit,
-    onSubmitCredentials: suspend (
-        mode: HostedCredentialsMode,
-        email: String,
-        password: String
-    ) -> Result<HostedCredentialsSubmitResult>,
-    onContinueSelfHosted: suspend (String) -> Result<Unit>,
-    onCancelDestructiveAuth: suspend () -> Unit = {},
-    topPadding: Dp = 0.dp
+    topPadding: Dp = 0.dp,
+    viewModel: OnboardingViewModel = koinViewModel()
 ) {
-    val scope = rememberCoroutineScope()
-    var route by remember { mutableStateOf(if (selfHostedOnly) FirstLaunchRoute.SELF_HOSTED else FirstLaunchRoute.LANDING) }
-    var selfHostedUrl by remember { mutableStateOf(initialSelfHostedUrl) }
-    var selfHostedError by remember { mutableStateOf<String?>(null) }
-    var isValidatingSelfHosted by remember { mutableStateOf(false) }
-    var pendingDestructive by remember { mutableStateOf<PendingDestructiveAction?>(null) }
-    val trimmedSelfHostedUrl = selfHostedUrl.trim()
+    val state by viewModel.state.collectAsState()
 
     Surface(modifier = Modifier.fillMaxSize()) {
-        when (route) {
-            FirstLaunchRoute.LANDING -> {
+        when (state.route) {
+            OnboardingRoute.LANDING -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -108,64 +74,38 @@ fun FirstLaunchOnboardingView(
                         verticalArrangement = Arrangement.spacedBy(18.dp)
                     ) {
                         AppLogo()
-                        Text("Welcome to Shilling", style = MaterialTheme.typography.headlineMedium)
+                        Text(state.welcomeTitle, style = MaterialTheme.typography.headlineMedium)
                         Text(
-                            "Get started quickly, sign in to an existing account, or connect to your own server.",
+                            state.welcomeMessage,
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.widthIn(max = 540.dp)
                         )
 
-                        if (hasHeldLocalData) {
+                        state.heldDataTitle?.let { title ->
                             HeldLocalDataCard(
-                                notice = welcomeNotice,
-                                onRelogin = { route = FirstLaunchRoute.LOGIN }
+                                title = title,
+                                message = state.heldDataMessage,
+                                action = state.heldDataAction,
+                                onRelogin = { viewModel.open(OnboardingRoute.LOGIN) }
                             )
                         }
 
-                        OnboardingActionCard(
-                            title = if (hasHeldLocalData) "Start over" else "Get Started",
-                            body = if (hasHeldLocalData) {
-                                "Begin fresh as a guest. This replaces the budget saved on this device."
-                            } else {
-                                "Create a guest account and jump straight into the app."
-                            },
-                            onClick = {
-                                if (hasHeldLocalData) {
-                                    pendingDestructive = PendingDestructiveAction.GET_STARTED
-                                } else {
-                                    scope.launch { onGetStarted(false) }
-                                }
-                            }
-                        )
-                        OnboardingActionCard(
-                            title = "Sign in",
-                            body = if (hasHeldLocalData) {
-                                "Use the same account to keep your current budget."
-                            } else {
-                                "Sign in to an existing account or create one with email and password."
-                            },
-                            onClick = { route = FirstLaunchRoute.LOGIN }
-                        )
+                        OnboardingActionCard(state.getStarted, onClick = viewModel::getStarted)
+                        OnboardingActionCard(state.signIn, onClick = { viewModel.open(OnboardingRoute.LOGIN) })
                     }
 
                     OutlinedButton(
-                        onClick = { route = FirstLaunchRoute.SELF_HOSTED },
+                        onClick = { viewModel.open(OnboardingRoute.SELF_HOSTED) },
                         modifier = Modifier.align(Alignment.BottomCenter)
                     ) {
-                        Text(
-                            text = "Self-hosted",
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        Text(text = state.selfHostedLabel, style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
 
-            FirstLaunchRoute.LOGIN -> {
-                BackNavigationScaffold(
-                    onBack = { route = FirstLaunchRoute.LANDING },
-                    topPadding = topPadding
-                ) { innerPadding ->
+            OnboardingRoute.LOGIN -> {
+                BackNavigationScaffold(onBack = viewModel::back, topPadding = topPadding) { innerPadding ->
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -177,36 +117,14 @@ fun FirstLaunchOnboardingView(
                             modifier = Modifier.widthIn(max = 520.dp).fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            SectionHeader(
-                                "Sign in",
-                                if (hasHeldLocalData) {
-                                    "Use the same account to keep the budget saved on this device."
-                                } else {
-                                    "Sign in or create an account to continue."
-                                }
-                            )
+                            SectionHeader(state.signIn.title, state.loginSubtitle)
                             ShillingCard {
                                 HostedCredentialsForm(
                                     authService = authService,
-                                    enabled = authReady,
-                                    disabledReason = authDisabledReason,
+                                    enabled = state.authReady,
+                                    disabledReason = state.authDisabledReason,
                                     signInLabel = "Sign in",
-                                    onSubmit = { mode, email, password ->
-                                        val result = onSubmitCredentials(mode, email, password)
-                                        result.fold(
-                                            onSuccess = {
-                                                onAuthenticated(false)
-                                                Result.success(it)
-                                            },
-                                            onFailure = { error ->
-                                                if (error is NonMatchingAccountException) {
-                                                    pendingDestructive =
-                                                        PendingDestructiveAction.NON_MATCHING_AUTH
-                                                }
-                                                Result.failure(error)
-                                            }
-                                        )
-                                    }
+                                    onSubmit = viewModel::submitCredentials
                                 )
                             }
                         }
@@ -214,10 +132,10 @@ fun FirstLaunchOnboardingView(
                 }
             }
 
-            FirstLaunchRoute.SELF_HOSTED -> {
+            OnboardingRoute.SELF_HOSTED -> {
                 BackNavigationScaffold(
-                    onBack = { route = FirstLaunchRoute.LANDING },
-                    showBackButton = !selfHostedOnly,
+                    onBack = viewModel::back,
+                    showBackButton = state.canLeaveSelfHosted,
                     topPadding = topPadding
                 ) { innerPadding ->
                     Box(
@@ -232,44 +150,19 @@ fun FirstLaunchOnboardingView(
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             ShillingCard {
-                                Text(
-                                    "Connect to a server you operate yourself.",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                Text(state.selfHostedMessage, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 OutlinedTextField(
-                                    value = selfHostedUrl,
-                                    onValueChange = {
-                                        selfHostedUrl = it
-                                        selfHostedError = null
-                                    },
+                                    value = state.selfHostedUrl,
+                                    onValueChange = viewModel::setSelfHostedUrl,
                                     label = { Text("Server URL") },
-                                    supportingText = {
-                                        Text(
-                                            selfHostedError
-                                                ?: "Enter the server URL for the instance you operate."
-                                        )
-                                    },
-                                    isError = selfHostedError != null,
+                                    supportingText = { Text(state.selfHostedHint) },
+                                    isError = state.selfHostedError != null,
                                     singleLine = true,
                                     modifier = Modifier.fillMaxWidth()
                                 )
-                                Button(
-                                    onClick = {
-                                        selfHostedError = null
-                                        isValidatingSelfHosted = true
-                                        scope.launch {
-                                            val result = onContinueSelfHosted(trimmedSelfHostedUrl)
-                                            selfHostedError = result.exceptionOrNull()?.message
-                                            isValidatingSelfHosted = false
-                                        }
-                                    },
-                                    enabled = trimmedSelfHostedUrl.isNotEmpty() && !isValidatingSelfHosted
-                                ) {
-                                    if (isValidatingSelfHosted) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(16.dp),
-                                            strokeWidth = 2.dp
-                                        )
+                                Button(onClick = viewModel::continueSelfHosted, enabled = state.canContinueSelfHosted) {
+                                    if (state.validatingSelfHosted) {
+                                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                                     } else {
                                         Text("Continue")
                                     }
@@ -282,57 +175,22 @@ fun FirstLaunchOnboardingView(
         }
     }
 
-    pendingDestructive?.let { action ->
+    state.destructiveConfirm?.let { confirm ->
         AlertDialog(
-            onDismissRequest = {
-                val dismissed = pendingDestructive
-                pendingDestructive = null
-                if (dismissed == PendingDestructiveAction.NON_MATCHING_AUTH) {
-                    scope.launch { onCancelDestructiveAuth() }
-                }
-            },
-            title = { Text("Replace your saved budget?") },
-            text = {
-                Text(
-                    "The budget on this device will be erased so you can start fresh. This can't be undone."
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val confirmed = action
-                        pendingDestructive = null
-                        scope.launch {
-                            when (confirmed) {
-                                PendingDestructiveAction.GET_STARTED -> onGetStarted(true)
-                                PendingDestructiveAction.NON_MATCHING_AUTH -> onAuthenticated(true)
-                            }
-                        }
-                    }
-                ) {
-                    Text("Replace budget")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        val dismissed = pendingDestructive
-                        pendingDestructive = null
-                        if (dismissed == PendingDestructiveAction.NON_MATCHING_AUTH) {
-                            scope.launch { onCancelDestructiveAuth() }
-                        }
-                    }
-                ) {
-                    Text("Keep it")
-                }
-            }
+            onDismissRequest = viewModel::dismissDestructive,
+            title = { Text(confirm.title) },
+            text = { Text(confirm.message) },
+            confirmButton = { TextButton(onClick = viewModel::confirmDestructive) { Text(confirm.confirmLabel) } },
+            dismissButton = { TextButton(onClick = viewModel::dismissDestructive) { Text(state.keepLabel) } }
         )
     }
 }
 
 @Composable
 private fun HeldLocalDataCard(
-    notice: String?,
+    title: String,
+    message: String,
+    action: String,
     onRelogin: () -> Unit
 ) {
     Card(
@@ -344,21 +202,10 @@ private fun HeldLocalDataCard(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(
-                when (notice) {
-                    "session_expired" -> "You're signed out, but your budget is still here."
-                    "signed_out" -> "You're signed out, but your budget is still here."
-                    else -> "Your budget is still saved on this device."
-                },
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                "Sign in with the same account to pick up where you left off. Starting over or using a different account will replace what's here.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(title, style = MaterialTheme.typography.bodyMedium)
+            Text(message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             TextButton(onClick = onRelogin) {
-                Text("Sign in to keep it")
+                Text(action)
             }
         }
     }
@@ -366,8 +213,7 @@ private fun HeldLocalDataCard(
 
 @Composable
 private fun OnboardingActionCard(
-    title: String,
-    body: String,
+    option: OnboardingOption,
     onClick: () -> Unit
 ) {
     Card(
@@ -385,9 +231,9 @@ private fun OnboardingActionCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text(option.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 Text(
-                    body,
+                    option.body,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -105,7 +105,7 @@ class AppSession(
     private val notifier: ChangeNotifier,
     private val syncStoreFacade: SyncStoreFacade,
     private val config: AppSessionConfig = AppSessionConfig()
-) : SessionState {
+) : SessionState, OnboardingActions {
     private val log = Logger.withTag(config.logTag)
     private val syncExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         log.e { "Sync uncaught exception: ${throwable::class.simpleName ?: "?"}: ${throwable.message ?: "?"}" }
@@ -191,12 +191,12 @@ class AppSession(
     }
 
     /** Welcome: continue as a guest. */
-    suspend fun getStarted(wipeHeldData: Boolean) = onMain { completeHostedOnboarding(wipeHeldData) }
+    override suspend fun getStarted(wipeHeldData: Boolean): Unit = onMain { completeHostedOnboarding(wipeHeldData) }
 
     /** Welcome: signed in (or signed up) with a managed account. */
-    suspend fun completeSignIn(wipeHeldData: Boolean) = onMain { completeHostedOnboarding(wipeHeldData) }
+    override suspend fun completeSignIn(wipeHeldData: Boolean): Unit = onMain { completeHostedOnboarding(wipeHeldData) }
 
-    suspend fun submitCredentials(
+    override suspend fun submitCredentials(
         mode: HostedCredentialsMode,
         email: String,
         password: String
@@ -222,7 +222,7 @@ class AppSession(
         }
     }
 
-    suspend fun continueSelfHosted(selectedUrl: String): Result<Unit> = onMain {
+    override suspend fun continueSelfHosted(selectedUrl: String): Result<Unit> = onMain {
         validateSelfHostedServer(selectedUrl).onSuccess {
             if (heldLocalData) localDataWiper.wipe()
             completeFirstLaunchOnboarding(settings, DeploymentSelection.SELF_HOSTED, selectedUrl)
@@ -234,7 +234,7 @@ class AppSession(
         }
     }
 
-    suspend fun cancelDestructiveAuth() = onMain {
+    override suspend fun cancelDestructiveAuth(): Unit = onMain {
         runCatching { welcomeAuthService?.signOut() }
         Unit
     }
