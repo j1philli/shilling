@@ -368,6 +368,12 @@ object HostedWebDeploy : BuildType({
                         ;;
                 esac
 
+                CURRENT_MAIN=$(git ls-remote https://github.com/j1philli/shilling.git refs/heads/main | cut -f1)
+                if [ "$(git rev-parse HEAD)" != "${'$'}CURRENT_MAIN" ]; then
+                    echo "Skipping deployment: main has advanced since this build"
+                    exit 0
+                fi
+
                 if [ -z "${'$'}{CLOUDFLARE_API_TOKEN:-}" ] && [ -n "${'$'}{CF_API_TOKEN:-}" ]; then
                     export CLOUDFLARE_API_TOKEN="${'$'}CF_API_TOKEN"
                 fi
@@ -544,6 +550,9 @@ object AllTargets : BuildType({
     name = "Build all targets"
     description = "Build every target and run available runtime checks at one revision"
     type = BuildTypeSettings.Type.COMPOSITE
+
+    // A release tag usually points to a commit already built on main.
+    params { param("teamcity.vcsTrigger.runBuildInNewEmptyBranch", "true") }
 
     vcs {
         root(DslContext.settingsRoot)
