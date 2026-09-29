@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlin.time.Clock
@@ -79,8 +78,7 @@ class TransactionEditorViewModel(
     private val fileStore: ReceiptFileStore,
     private val idGenerator: IdGenerator
 ) : ViewModel() {
-    private val fields = MutableStateFlow(TransactionFields())
-    private val load = MutableStateFlow(if (postingId == null) EditorLoad.READY else EditorLoad.LOADING)
+    private val form = EditorForm(TransactionFields(), if (postingId == null) EditorLoad.READY else EditorLoad.LOADING)
     private var existing: PostingWithDetails? = null
     private var debit: Posting? = null
     private var credit: Posting? = null
@@ -92,19 +90,26 @@ class TransactionEditorViewModel(
     }
 
     val state: StateFlow<TransactionEditorUiState> = combine(
-        fields, load, accountRepository.watchAll(), categoryRepository.watchAll(), receipts
-    ) { f, l, accounts, categories, attached ->
+        form.state, accountRepository.watchAll(), categoryRepository.watchAll(), receipts
+    ) { (f, l), accounts, categories, attached ->
         val accountId = f.accountId?.takeIf { id -> accounts.any { it.id == id } } ?: accounts.firstOrNull()?.id
-        val form = if (accountId != f.accountId) f.copy(accountId = accountId).also { fields.value = it } else f
-        build(form, l, accounts.map { Choice(it.id, it.name) }, categories.map { Choice(it.id, it.name) }, attached)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, TransactionEditorUiState(load = load.value, isNew = postingId == null))
+        val fields = if (accountId != f.accountId) {
+            // Repair the current value, not this snapshot: the item may have loaded since `f`
+            // was emitted, and writing `f.copy(…)` back would wipe the loaded fields.
+            form.update { current -> if (current.accountId == f.accountId) current.copy(accountId = accountId) else current }
+            f.copy(accountId = accountId)
+        } else {
+            f
+        }
+        build(fields, l, accounts.map { Choice(it.id, it.name) }, categories.map { Choice(it.id, it.name) }, attached)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, TransactionEditorUiState(load = form.load, isNew = postingId == null))
 
     init {
         if (postingId != null) {
             viewModelScope.launch {
                 val details = postingRepository.watchById(postingId).first()
                 if (details == null) {
-                    load.value = EditorLoad.MISSING
+                    form.missing()
                     return@launch
                 }
                 val posting = details.posting
@@ -115,31 +120,36 @@ class TransactionEditorViewModel(
                 debit = if (other == null || posting.type == ScheduleType.EXPENSE) posting else other
                 credit = if (other == null) null else if (debit === posting) other else posting
                 debitId.value = debit!!.id
-                fields.value = TransactionFields(
-                    type = if (other != null) ScheduleType.TRANSFER else posting.type,
-                    title = details.title,
-                    amountText = formatAmountInput(posting.amount),
-                    dateEpochDay = posting.date.toEpochDays(),
-                    accountId = debit!!.accountId,
-                    toAccountId = credit?.accountId,
-                    categoryId = posting.categoryId
+                form.loaded(
+                    TransactionFields(
+                        type = if (other != null) ScheduleType.TRANSFER else posting.type,
+                        title = details.title,
+                        amountText = formatAmountInput(posting.amount),
+                        dateEpochDay = posting.date.toEpochDays(),
+                        accountId = debit!!.accountId,
+                        toAccountId = credit?.accountId,
+                        categoryId = posting.categoryId
+                    )
                 )
-                load.value = EditorLoad.READY
+                // Deleted elsewhere (e.g. on another device) while open: show it as deleted, since saving
+                // would bring it back.
+                postingRepository.watchById(postingId).first { it == null }
+                form.missing()
             }
         }
     }
 
-    fun setType(value: ScheduleType) = fields.update { it.copy(type = value) }
-    fun setTitle(value: String) = fields.update { it.copy(title = value) }
-    fun setAmountText(value: String) = fields.update { it.copy(amountText = value) }
-    fun setDate(epochDay: Long) = fields.update { it.copy(dateEpochDay = epochDay) }
-    fun setAccount(id: String?) = fields.update { it.copy(accountId = id) }
-    fun setToAccount(id: String?) = fields.update { it.copy(toAccountId = id) }
-    fun setCategory(id: String?) = fields.update { it.copy(categoryId = id) }
+    fun setType(value: ScheduleType) = form.update { it.copy(type = value) }
+    fun setTitle(value: String) = form.update { it.copy(title = value) }
+    fun setAmountText(value: String) = form.update { it.copy(amountText = value) }
+    fun setDate(epochDay: Long) = form.update { it.copy(dateEpochDay = epochDay) }
+    fun setAccount(id: String?) = form.update { it.copy(accountId = id) }
+    fun setToAccount(id: String?) = form.update { it.copy(toAccountId = id) }
+    fun setCategory(id: String?) = form.update { it.copy(categoryId = id) }
 
     suspend fun save(): String? {
         if (!state.value.saveEnabled) return null
-        val f = fields.value
+        val f = form.fields
         val amount = parseAmountInput(f.amountText) ?: return null
         val from = f.accountId ?: return null
         val date = LocalDate.fromEpochDays(f.dateEpochDay)

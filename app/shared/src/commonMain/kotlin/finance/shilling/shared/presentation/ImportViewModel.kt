@@ -138,7 +138,10 @@ class ImportViewModel(
 
     val state: StateFlow<ImportUiState> = combine(input, rows, duplicates, accounts, categories) { i, rows, dupes, accounts, categories ->
         val accountId = i.accountId?.takeIf { id -> accounts.any { it.id == id } } ?: accounts.firstOrNull()?.id
-        if (accountId != i.accountId) input.update { it.copy(accountId = accountId) }
+        // Repair the current value only if it hasn't changed since this snapshot.
+        if (accountId != i.accountId) {
+            input.update { current -> if (current.accountId == i.accountId) current.copy(accountId = accountId) else current }
+        }
         val stage = when {
             i.content == null -> ImportStage.NO_FILE
             i.headers.isEmpty() -> ImportStage.UNREADABLE

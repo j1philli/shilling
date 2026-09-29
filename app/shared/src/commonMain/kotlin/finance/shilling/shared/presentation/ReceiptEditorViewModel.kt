@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -82,8 +81,7 @@ class ReceiptEditorViewModel(
 ) : ViewModel() {
     private class PickedFile(val name: String, val bytes: ByteArray)
 
-    private val fields = MutableStateFlow(ReceiptFields())
-    private val load = MutableStateFlow(if (receiptId == null) EditorLoad.READY else EditorLoad.LOADING)
+    private val form = EditorForm(ReceiptFields(), if (receiptId == null) EditorLoad.READY else EditorLoad.LOADING)
     private val file = MutableStateFlow<PickedFile?>(null)
     /** New receipts: the transaction to attach to on save. */
     private val pendingAttach = MutableStateFlow<PostingWithDetails?>(null)
@@ -96,10 +94,10 @@ class ReceiptEditorViewModel(
     }
 
     val state: StateFlow<ReceiptEditorUiState> = combine(
-        fields, load, file, pendingAttach, existing
-    ) { f, l, picked, attach, item ->
+        form.state, file, pendingAttach, existing
+    ) { (f, l), picked, attach, item ->
         build(f, if (receiptId != null && l == EditorLoad.READY && item == null) EditorLoad.MISSING else l, picked, attach, item)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, ReceiptEditorUiState(load = load.value, isNew = receiptId == null))
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, ReceiptEditorUiState(load = form.load, isNew = receiptId == null))
 
     private val recentPostings: StateFlow<List<PostingWithDetails>> = run {
         val end = today().plus(1, DateTimeUnit.DAY)
@@ -109,7 +107,7 @@ class ReceiptEditorViewModel(
 
     /** Transactions from the last six months; amount matches, then date matches, float to the top. */
     val picker: StateFlow<AttachPickerUiState> =
-        combine(recentPostings, pickerQuery, fields) { postings, query, f ->
+        combine(recentPostings, pickerQuery, form.state) { postings, query, (f, _) ->
             val q = query.trim().lowercase()
             val amount = parseAmountInput(f.amountText)
             val date = f.receiptDateEpochDay
@@ -141,25 +139,26 @@ class ReceiptEditorViewModel(
     init {
         if (receiptId != null) {
             viewModelScope.launch {
-                val item = existing.first()
-                if (item != null) {
-                    val receipt = item.receipt
-                    fields.value = ReceiptFields(
-                        name = receipt.originalName,
-                        receiptDateEpochDay = receipt.receiptDate,
-                        amountText = receipt.amount?.let(::formatAmountInput).orEmpty(),
-                        notes = receipt.notes.orEmpty()
-                    )
-                }
-                load.value = EditorLoad.READY
+                val receipt = existing.first()?.receipt
+                // A deleted receipt shows as missing (see `state`), so READY either way.
+                form.loaded(
+                    receipt?.let {
+                        ReceiptFields(
+                            name = it.originalName,
+                            receiptDateEpochDay = it.receiptDate,
+                            amountText = it.amount?.let(::formatAmountInput).orEmpty(),
+                            notes = it.notes.orEmpty()
+                        )
+                    } ?: form.fields
+                )
             }
         }
     }
 
-    fun setName(value: String) = fields.update { it.copy(name = value) }
-    fun setReceiptDate(epochDay: Long?) = fields.update { it.copy(receiptDateEpochDay = epochDay) }
-    fun setAmountText(value: String) = fields.update { it.copy(amountText = value) }
-    fun setNotes(value: String) = fields.update { it.copy(notes = value) }
+    fun setName(value: String) = form.update { it.copy(name = value) }
+    fun setReceiptDate(epochDay: Long?) = form.update { it.copy(receiptDateEpochDay = epochDay) }
+    fun setAmountText(value: String) = form.update { it.copy(amountText = value) }
+    fun setNotes(value: String) = form.update { it.copy(notes = value) }
     fun setPickerQuery(value: String) {
         pickerQuery.value = value
     }
@@ -167,7 +166,7 @@ class ReceiptEditorViewModel(
     /** New receipts: the picked file; its name becomes the receipt name if none was typed. */
     fun setFile(fileName: String, bytes: ByteArray) {
         file.value = PickedFile(fileName, bytes)
-        fields.update { if (it.name.isBlank()) it.copy(name = fileName) else it }
+        form.update { if (it.name.isBlank()) it.copy(name = fileName) else it }
     }
 
     /**
@@ -197,7 +196,7 @@ class ReceiptEditorViewModel(
 
     suspend fun save(): String? {
         if (!state.value.saveEnabled) return null
-        val f = fields.value
+        val f = form.fields
         val amount = parseAmountInput(f.amountText)
         val notes = f.notes.trim().ifBlank { null }
         if (receiptId != null) {

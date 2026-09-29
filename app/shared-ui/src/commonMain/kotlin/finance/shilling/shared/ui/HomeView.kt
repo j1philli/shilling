@@ -43,8 +43,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import finance.shilling.shared.data.PostingWithDetails
 import org.koin.compose.viewmodel.koinViewModel
+import finance.shilling.shared.presentation.ActivityRowUi
 import finance.shilling.shared.presentation.HomeDestination
 import finance.shilling.shared.presentation.HomeUiState
 import finance.shilling.shared.presentation.HomeViewModel
@@ -434,12 +434,12 @@ private fun BentoMiniRow(
 }
 
 @Composable
-private fun ActivityMiniRow(item: PostingWithDetails) {
+private fun ActivityMiniRow(item: ActivityRowUi) {
     val dotColor = colorFromHex(item.categoryColor)
     BentoMiniRow(
         title = item.title,
-        trailing = formatSigned(item.posting.type, item.posting.amount),
-        trailingColor = amountColor(item.posting.type),
+        trailing = item.amount,
+        trailingColor = amountColor(item.type),
         leadingDot = dotColor
     )
 }

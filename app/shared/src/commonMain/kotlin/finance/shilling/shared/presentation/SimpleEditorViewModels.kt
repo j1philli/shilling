@@ -16,6 +16,28 @@ import kotlinx.coroutines.launch
 /** How an editor for an existing item is doing: still loading, or the item was deleted. */
 enum class EditorLoad { READY, LOADING, MISSING }
 
+/** An editor's fields together with its [EditorLoad]. */
+internal data class FormState<F>(val fields: F, val load: EditorLoad)
+
+/**
+ * An editor's form fields and load state in one flow. Loading sets both at once, so a UI never
+ * sees READY with the fields still at their defaults (iOS copies text fields once, on READY).
+ */
+internal class EditorForm<F>(initial: F, load: EditorLoad) {
+    private val flow = MutableStateFlow(FormState(initial, load))
+    val state: StateFlow<FormState<F>> get() = flow
+    val fields: F get() = flow.value.fields
+    val load: EditorLoad get() = flow.value.load
+
+    fun update(transform: (F) -> F) = flow.update { it.copy(fields = transform(it.fields)) }
+
+    fun loaded(fields: F) {
+        flow.value = FormState(fields, EditorLoad.READY)
+    }
+
+    fun missing() = flow.update { it.copy(load = EditorLoad.MISSING) }
+}
+
 // ─── Category ────────────────────────────────────────────────────────────────
 
 data class Swatch(val hex: String, val name: String)
@@ -88,6 +110,12 @@ class CategoryEditorViewModel(
                             destructive = true
                         )
                     ).withSwatches()
+                }
+                if (category != null) {
+                    // Deleted elsewhere (e.g. on another device) while open: show it as deleted, since saving
+                    // would bring it back.
+                    categoryRepository.watchAll().first { list -> list.none { it.id == categoryId } }
+                    _state.update { it.copy(load = EditorLoad.MISSING) }
                 }
             }
         }
@@ -169,6 +197,12 @@ class AccountEditorViewModel(
                             destructive = true
                         )
                     )
+                }
+                if (account != null) {
+                    // Deleted elsewhere (e.g. on another device) while open: show it as deleted, since saving
+                    // would bring it back.
+                    accountRepository.watchAll().first { list -> list.none { it.id == accountId } }
+                    _state.update { it.copy(load = EditorLoad.MISSING) }
                 }
             }
         }

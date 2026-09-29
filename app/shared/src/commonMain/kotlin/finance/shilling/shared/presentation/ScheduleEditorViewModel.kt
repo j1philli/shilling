@@ -10,13 +10,11 @@ import finance.shilling.shared.data.generateOccurrences
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.ScheduleRepository
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
@@ -97,18 +95,27 @@ class ScheduleEditorViewModel(
     categoryRepository: CategoryRepository,
     private val idGenerator: IdGenerator
 ) : ViewModel() {
-    private val fields = MutableStateFlow(ScheduleFields(type = presetType ?: ScheduleType.EXPENSE))
-    private val load = MutableStateFlow(if (scheduleId == null) EditorLoad.READY else EditorLoad.LOADING)
+    private val form = EditorForm(
+        ScheduleFields(type = presetType ?: ScheduleType.EXPENSE),
+        if (scheduleId == null) EditorLoad.READY else EditorLoad.LOADING
+    )
     private var existing: Schedule? = null
 
     val state: StateFlow<ScheduleEditorUiState> = combine(
-        fields, load, accountRepository.watchAll(), categoryRepository.watchAll()
-    ) { f, l, accounts, categories ->
+        form.state, accountRepository.watchAll(), categoryRepository.watchAll()
+    ) { (f, l), accounts, categories ->
         // Default (or repair) the source account once accounts are known.
         val accountId = f.accountId?.takeIf { id -> accounts.any { it.id == id } } ?: accounts.firstOrNull()?.id
-        val form = if (accountId != f.accountId) f.copy(accountId = accountId).also { fields.value = it } else f
-        build(form, l, accounts.map { Choice(it.id, it.name) }, categories.map { Choice(it.id, it.name) })
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, ScheduleEditorUiState(load = load.value))
+        val fields = if (accountId != f.accountId) {
+            // Repair the current value, not this snapshot: the item may have loaded since `f`
+            // was emitted, and writing `f.copy(…)` back would wipe the loaded fields.
+            form.update { current -> if (current.accountId == f.accountId) current.copy(accountId = accountId) else current }
+            f.copy(accountId = accountId)
+        } else {
+            f
+        }
+        build(fields, l, accounts.map { Choice(it.id, it.name) }, categories.map { Choice(it.id, it.name) })
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, ScheduleEditorUiState(load = form.load))
 
     init {
         if (scheduleId != null) {
@@ -116,34 +123,39 @@ class ScheduleEditorViewModel(
                 val schedule = scheduleRepository.watchAll().first().firstOrNull { it.id == scheduleId }
                 existing = schedule
                 if (schedule == null) {
-                    load.value = EditorLoad.MISSING
+                    form.missing()
                 } else {
-                    fields.value = ScheduleFields(
-                        type = schedule.type,
-                        title = schedule.title,
-                        amountText = formatAmountInput(schedule.amount),
-                        accountId = schedule.accountId.takeIf { it.isNotBlank() },
-                        toAccountId = schedule.counterAccountId,
-                        categoryId = schedule.categoryId,
-                        frequency = schedule.freq,
-                        intervalText = schedule.interval.toString(),
-                        startEpochDay = schedule.startDate.toEpochDays(),
-                        endEpochDay = schedule.endDate?.toEpochDays(),
-                        weekdayMask = schedule.byDayMask ?: 0,
-                        monthDayText = (schedule.byMonthDay ?: schedule.startDate.day).toString(),
-                        lastDay = schedule.lastDayFlag,
-                        nth = schedule.nthWeekday ?: schedule.startDate.weekOfMonth(),
-                        nthWeekdayIndex = schedule.firstWeekdayFromMaskFallback().ordinal,
-                        autoPay = schedule.autoPay,
-                        notes = schedule.notes.orEmpty()
+                    form.loaded(
+                        ScheduleFields(
+                            type = schedule.type,
+                            title = schedule.title,
+                            amountText = formatAmountInput(schedule.amount),
+                            accountId = schedule.accountId.takeIf { it.isNotBlank() },
+                            toAccountId = schedule.counterAccountId,
+                            categoryId = schedule.categoryId,
+                            frequency = schedule.freq,
+                            intervalText = schedule.interval.toString(),
+                            startEpochDay = schedule.startDate.toEpochDays(),
+                            endEpochDay = schedule.endDate?.toEpochDays(),
+                            weekdayMask = schedule.byDayMask ?: 0,
+                            monthDayText = (schedule.byMonthDay ?: schedule.startDate.day).toString(),
+                            lastDay = schedule.lastDayFlag,
+                            nth = schedule.nthWeekday ?: schedule.startDate.weekOfMonth(),
+                            nthWeekdayIndex = schedule.firstWeekdayFromMaskFallback().ordinal,
+                            autoPay = schedule.autoPay,
+                            notes = schedule.notes.orEmpty()
+                        )
                     )
-                    load.value = EditorLoad.READY
+                    // Deleted elsewhere (e.g. on another device) while open: show it as deleted, since saving
+                    // would bring it back.
+                    scheduleRepository.watchAll().first { list -> list.none { it.id == scheduleId } }
+                    form.missing()
                 }
             }
         }
     }
 
-    fun update(transform: (ScheduleFields) -> ScheduleFields) = fields.update(transform)
+    fun update(transform: (ScheduleFields) -> ScheduleFields) = form.update(transform)
 
     // Swift-friendly setters (Kotlin lambdas with data-class copies are awkward from Swift).
     fun setType(value: ScheduleType) = update { it.copy(type = value) }
@@ -172,7 +184,7 @@ class ScheduleEditorViewModel(
 
     suspend fun save(): String? {
         if (!state.value.saveEnabled) return null
-        scheduleRepository.upsert(draft(fields.value).copy(id = existing?.id ?: idGenerator.newId()))
+        scheduleRepository.upsert(draft(form.fields).copy(id = existing?.id ?: idGenerator.newId()))
         return if (existing == null) "Schedule added" else "Schedule updated"
     }
 

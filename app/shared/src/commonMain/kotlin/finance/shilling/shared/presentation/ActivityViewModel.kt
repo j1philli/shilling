@@ -98,9 +98,9 @@ class ActivityViewModel(postingRepository: PostingRepository) : ViewModel() {
     }
 }
 
-private data class MergedRow(val item: PostingWithDetails, val type: ScheduleType, val toAccountName: String?)
+internal data class MergedRow(val item: PostingWithDetails, val type: ScheduleType, val toAccountName: String?)
 
-private fun MergedRow.toUi(): ActivityRowUi {
+internal fun MergedRow.toUi(): ActivityRowUi {
     val account = item.accountName ?: "No account"
     val supporting = buildList {
         add(if (type == ScheduleType.TRANSFER) "$account → ${toAccountName ?: "No account"}" else account)
@@ -117,7 +117,8 @@ private fun MergedRow.toUi(): ActivityRowUi {
     )
 }
 
-private fun mergeTransferLegs(postings: List<PostingWithDetails>): List<MergedRow> {
+/** Collapses each transfer's debit and credit legs into one row (from the debit's side). */
+internal fun mergeTransferLegs(postings: List<PostingWithDetails>): List<MergedRow> {
     val byId = postings.associateBy { it.posting.id }
     val consumed = mutableSetOf<String>()
     return postings.mapNotNull { item ->

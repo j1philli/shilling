@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import finance.shilling.shared.data.BudgetSummary
 import finance.shilling.shared.data.CategoryTotal
-import finance.shilling.shared.data.PostingWithDetails
 import finance.shilling.shared.data.ScheduleType
 import finance.shilling.shared.data.ScheduledTxWithAccount
 import finance.shilling.shared.data.store.AccountRepository
@@ -42,7 +41,8 @@ data class HomeUiState(
     val accountCount: Int = 0,
     val upcoming: List<ScheduledTxWithAccount> = emptyList(),
     val budget: BudgetSummary = BudgetSummary.empty(today.startOfMonth(), today.startOfMonth().plus(1, DateTimeUnit.MONTH)),
-    val recent: List<PostingWithDetails> = emptyList(),
+    /** Latest few transactions, transfer legs merged (as on Activity). */
+    val recent: List<ActivityRowUi> = emptyList(),
     val scheduleBreakdown: Map<ScheduleType, Int> = emptyMap(),
     val receiptCount: Int = 0,
     val unattachedReceipts: Int = 0,
@@ -139,7 +139,7 @@ class HomeViewModel(
             scheduleBreakdown = schedules.groupingBy { it.type }.eachCount(),
             receiptCount = receipts.size,
             unattachedReceipts = receipts.count { it.receipt.postingId == null },
-            recent = recent.take(3)
+            recent = mergeTransferLegs(recent).take(3).map { it.toUi() }
         )
     }
 

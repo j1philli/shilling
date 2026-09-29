@@ -126,10 +126,10 @@ struct HomeScreen: View {
                  systemImage: "clock.arrow.circlepath", tint: .secondary) {
             onDestination(.activity)
         } extra: {
-            ForEach(state.recent, id: \.self) { item in
+            ForEach(state.recent, id: \.id) { item in
                 MiniRow(title: item.title,
-                        trailing: FormattingKt.formatSigned(type: item.posting.type, amount: item.posting.amount),
-                        trailingColor: item.posting.type.amountColor,
+                        trailing: item.amount,
+                        trailingColor: item.type.amountColor,
                         dot: Color(hex: item.categoryColor))
             }
         }
