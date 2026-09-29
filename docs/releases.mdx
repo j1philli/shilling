@@ -41,6 +41,8 @@ runner and can be queued manually on a feature branch. Snapshot
 dependencies pin the jobs in a chain to one source revision. Failed jobs fail
 the composite. The macOS desktop job consumes the same tested web bundle as
 the Linux and Windows desktop jobs.
+If `main` advances while a chain is running, its deployment step skips the
+older artifact; the newer chain must pass before its web artifact is deployed.
 
 Android produces a debug APK and an unsigned release AAB. iOS produces an
 unsigned app ZIP by default; setting `env.SHILLING_IOS_SIGNED=1` with Apple
