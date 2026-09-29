@@ -33,11 +33,6 @@ object NativeTabBridge {
         listener(tabs, selected, detailOpen)
     }
 
-    /** Swift: open CSV import (Compose). */
-    fun openImport() {
-        routeRequests.tryEmit(PlatformRoute.Import)
-    }
-
     /** Swift: the user tapped the tab with [key]. */
     fun select(key: String) {
         selections.tryEmit(if (key == SETTINGS) null else ShelfDestination.valueOf(key))

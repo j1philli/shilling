@@ -5,7 +5,7 @@ import finance.shilling.shared.presentation.ActivityUiState
 import finance.shilling.shared.presentation.ActivityViewModel
 import kotlinx.coroutines.flow.StateFlow
 
-/** Swift-facing Activity. Import still opens the Compose screen. */
+/** Swift-facing Activity. */
 class ActivityScreenModel : IosViewModelHost() {
     private val viewModel = viewModel<ActivityViewModel>()
 
@@ -14,5 +14,4 @@ class ActivityScreenModel : IosViewModelHost() {
 
     fun setRange(months: Int) = viewModel.setRange(months)
     fun setQuery(text: String) = viewModel.setQuery(text)
-    fun openImport() = NativeTabBridge.openImport()
 }

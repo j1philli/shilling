@@ -78,6 +78,7 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     ScheduleEditorViewModel.kt # schedule editor: fields, recurrence options, validation, next-occurrence preview
     TransactionEditorViewModel.kt # posting editor: fields, transfer legs, delete/undo, attached receipts
     ReceiptEditorViewModel.kt # receipt add/edit: file, metadata, attach/detach + transaction picker
+    ImportViewModel.kt   # CSV import: column/date-format guessing, duplicate detection, per-row review
     CredentialsCopy.kt   # email/password form + confirm-email copy (Welcome and Settings)
     SampleData.kt        # seedDemoData (developer tools)
   src/commonMain/sqldelight/finance/shilling/shared/db/
@@ -136,7 +137,7 @@ app/ios-app/              # Compose Multiplatform iOS app
     HomeScreenModel.kt   # Swift-facing HomeViewModel facade (@NativeCoroutinesState)
     HomeModel.swift / HomeScreen.swift # native SwiftUI Home
     SettingsScreenModel.kt / SettingsScreen.swift # native SwiftUI Settings (+ ToastView snackbar stand-in)
-    ActivityScreenModel.kt / ActivityScreen.swift # native SwiftUI Activity (opens the Compose CSV import)
+    ActivityScreenModel.kt / ActivityScreen.swift # native SwiftUI Activity
     ReceiptsScreenModel.kt / ReceiptsScreen.swift # native SwiftUI Receipts
     PlanScreenModel.kt / PlanScreen.swift # native SwiftUI Plan (Overview + Schedules/Categories/Accounts)
     Toast.swift          # snackbar stand-in with optional action (Undo)
@@ -144,6 +145,7 @@ app/ios-app/              # Compose Multiplatform iOS app
     ScheduleEditorScreenModel.kt / ScheduleEditorScreen.swift # native schedule editor
     TransactionEditorScreenModel.kt / TransactionEditorScreen.swift # native transaction editor (+ UndoHandle, NSData bridge)
     ReceiptEditorScreenModel.kt / ReceiptEditorScreen.swift # native receipt editor + attach sheet
+    ImportScreenModel.kt / ImportScreen.swift # native CSV import (pushed from Activity)
     ReceiptPickers.swift # camera / photo library / file picker buttons for receipts
     DateBridge.swift     # epoch day ↔ Date (Kotlin dates cross into Swift as epoch days)
     DisplayPreferencesBridge.kt / AppearanceModel.swift # app theme mode → SwiftUI preferredColorScheme
@@ -255,9 +257,9 @@ Koin `viewModel {}`); Compose gets them with `koinViewModel()`. On iOS, a Kotlin
 annotations out of `app/shared`: its compiler plugin crashes non-Apple compilations and the
 toolchain can't scope `compilerPlugins` per platform, so it's only enabled in `ios-app`.
 `ShillingTabBarController` shows a SwiftUI screen for ported tabs (`nativeScreen(for:)`) and the
-shared Compose UI for the rest (all tabs are native now: Home, Plan, Activity, Receipts, Settings; all editors are native; CSV import and onboarding are still Compose). Native screens open
-not-yet-ported Compose screens (import) through `NativeTabBridge` →
-`PlatformTabBar.routeRequests`; while a Compose detail route is open (`detailOpen`), the tab
+shared Compose UI for the rest (all tabs are native now: Home, Plan, Activity, Receipts, Settings; all editors and CSV import are native; onboarding is still Compose). Native screens push their
+editors onto their own `NavigationStack`. Home tiles still switch tabs through `NativeTabBridge` →
+`PlatformTabBar`; while a Compose detail route is open (`detailOpen`), the tab
 controller shows Compose over the native screen and `ComposeOverlay` drops native toolbar items
 (the iPhone Duo lifts them into the side column). SwiftUI screens follow the app's
 Light/Dark/System choice through `AppearanceModel` (`preferredColorScheme` at the app root). The Compose view controller must stay in the window at all

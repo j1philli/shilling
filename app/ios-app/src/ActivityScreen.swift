@@ -36,6 +36,7 @@ struct ActivityScreen: View {
     /** Native editors pushed onto Activity's navigation stack. */
     enum Editor: Hashable {
         case transaction(String?)
+        case importCSV
     }
 
     var body: some View {
@@ -66,7 +67,7 @@ struct ActivityScreen: View {
                             if empty.showActions {
                                 Button("Add transaction") { path.append(.transaction(nil)) }
                                     .buttonStyle(.borderedProminent)
-                                Button("Import from CSV") { model.screen.openImport() }
+                                Button("Import from CSV") { path.append(.importCSV) }
                             }
                         }
                     }
@@ -91,12 +92,14 @@ struct ActivityScreen: View {
                 switch editor {
                 case .transaction(let id):
                     TransactionEditorScreen(postingId: id) { result in toast = result }
+                case .importCSV:
+                    ImportScreen { result in toast = result }
                 }
             }
             .toolbar {
                 if !overlay.detailOpen && path.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button { model.screen.openImport() } label: {
+                        Button { path.append(.importCSV) } label: {
                             Label("Import", systemImage: "square.and.arrow.down")
                         }
                     }
