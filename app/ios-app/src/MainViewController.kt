@@ -20,7 +20,6 @@ import finance.shilling.shared.db.ShillingDatabase
 import finance.shilling.shared.ui.AppBootstrapScaffoldConfig
 import finance.shilling.shared.ui.ShelfDestination
 import finance.shilling.shared.ui.ShillingAppBootstrap
-import finance.shilling.shared.ui.WebRtcPlatform
 import io.github.vinceglb.filekit.PlatformFile
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
@@ -43,6 +42,10 @@ import platform.posix.fclose
 import platform.posix.fflush
 import platform.posix.fopen
 import platform.posix.fprintf
+import finance.shilling.shared.data.sync.WebRtcPlatform
+import finance.shilling.shared.session.AppSession
+import finance.shilling.shared.session.AppSessionConfig
+import finance.shilling.shared.session.sessionModule
 
 private val log = Logger.withTag("iOS")
 
@@ -112,6 +115,7 @@ fun startIosKoin() {
         ensureLocalSchemaReady(driver, logTag = "iOS")
     }
     initKoin(module {
+        single { AppSessionConfig(logTag = "iOS") }
         single { ShillingDatabase(driver) }
         single { Settings() }
         single<IdGenerator> { IosIdGenerator() }
@@ -127,7 +131,7 @@ fun startIosKoin() {
                 delayFn = iosDelay
             )
         }
-    })
+    }, sessionModule).get<AppSession>().start()
 }
 
 fun MainViewController(): UIViewController {
@@ -146,7 +150,6 @@ fun MainViewController(): UIViewController {
         }
 
         ShillingAppBootstrap(
-            logTag = "iOS",
             scaffoldConfig = AppBootstrapScaffoldConfig(
                 cameraButton = { onFile -> MobileCameraReceiptButton(onFile) },
                 photoButton = { onFile -> MobilePhotoLibraryReceiptButton(onFile) },

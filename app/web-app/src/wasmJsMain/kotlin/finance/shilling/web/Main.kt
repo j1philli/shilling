@@ -27,7 +27,6 @@ import finance.shilling.shared.db.ShillingDatabase
 import finance.shilling.shared.ui.AppBootstrapScaffoldConfig
 import finance.shilling.shared.ui.ShillingAppBootstrap
 import finance.shilling.shared.ui.ShillingTheme
-import finance.shilling.shared.ui.WebRtcPlatform
 import io.ktor.client.webrtc.JsWebRtc
 import io.ktor.client.webrtc.WebRtcClient
 import kotlinx.browser.document
@@ -35,6 +34,10 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import org.koin.dsl.module
 import org.w3c.dom.Worker
+import finance.shilling.shared.data.sync.WebRtcPlatform
+import finance.shilling.shared.session.AppSession
+import finance.shilling.shared.session.AppSessionConfig
+import finance.shilling.shared.session.sessionModule
 
 private fun isTauriEnvironment(): Boolean = js("typeof window.__TAURI__ !== 'undefined'")
 
@@ -53,11 +56,10 @@ fun main() {
         val driver = WebWorkerDriver(Worker("sqldelight.worker.js"))
         (ShillingDatabase.Schema.create(driver) as QueryResult.AsyncValue).await()
         (driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0) as QueryResult.AsyncValue).await()
-        initKoin(webPlatformModule(ShillingDatabase(driver)))
+        initKoin(webPlatformModule(ShillingDatabase(driver)), sessionModule).get<AppSession>().start()
         koinReady = true
     }
     ComposeViewport(document.body!!) {
-        val selfHostedOnly = remember { isSelfHostedDistribution() }
         if (!koinReady) {
             ShillingTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -72,12 +74,9 @@ fun main() {
         val tauriTopPadding = if (isTauriEnvironment()) 32.dp else 0.dp
 
         ShillingAppBootstrap(
-            logTag = "Sync",
             scaffoldConfig = AppBootstrapScaffoldConfig(
                 onboardingTopPadding = tauriTopPadding,
                 navRailTopPadding = tauriTopPadding,
-                selfHostedOnly = selfHostedOnly,
-                defaultSelfHostedServerUrl = if (selfHostedOnly) browserOrigin() else DEFAULT_SELF_HOSTED_SERVER_URL,
                 navControllerHook = { navController -> BrowserHistoryBinding(navController) },
                 developerToolsEnabled = isDevToolsBuild()
             )
@@ -87,6 +86,14 @@ fun main() {
 
 private fun webPlatformModule(db: ShillingDatabase) = module {
     single { db }
+    single {
+        val selfHostedOnly = isSelfHostedDistribution()
+        AppSessionConfig(
+            selfHostedOnly = selfHostedOnly,
+            defaultSelfHostedServerUrl = if (selfHostedOnly) browserOrigin() else DEFAULT_SELF_HOSTED_SERVER_URL,
+            logTag = "Sync"
+        )
+    }
     single { Settings() }
     single<IdGenerator> { WasmIdGenerator() }
     single<ReceiptFileStore> { WasmReceiptFileStore(get()) }

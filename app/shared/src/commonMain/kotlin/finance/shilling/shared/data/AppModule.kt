@@ -1,8 +1,6 @@
 package finance.shilling.shared.data
 
 import finance.shilling.shared.data.auth.DeviceIdentity
-import finance.shilling.shared.data.auth.HostedBootstrapRetryCallback
-import finance.shilling.shared.data.auth.HostedBootstrapState
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.ChangeNotifier
@@ -29,13 +27,13 @@ import org.koin.dsl.module
 import org.koin.mp.KoinPlatform
 
 /**
- * Starts the app's single Koin graph: the platform's [platformModule] plus the shared
- * [dataModule]. Each platform calls this from its entry point before showing any UI, so both
- * Compose and native (Swift) code resolve from the same graph. Later calls return the running
- * instance (e.g. an Android Activity recreated in the same process).
+ * Starts the app's single Koin graph: the shared [dataModule] plus the app's [modules] (its
+ * platform module and, on apps, `sessionModule`). Each platform calls this from its entry point
+ * before showing any UI, so Compose and native (Swift) code resolve from the same graph. Later
+ * calls return the running instance (e.g. an Android Activity recreated in the same process).
  */
-fun initKoin(platformModule: Module): Koin =
-    KoinPlatform.getKoinOrNull() ?: startKoin { modules(platformModule, dataModule) }.koin.also {
+fun initKoin(vararg modules: Module): Koin =
+    KoinPlatform.getKoinOrNull() ?: startKoin { modules(dataModule, *modules) }.koin.also {
         DisplayPreferences.load(it.get())
     }
 
@@ -93,32 +91,4 @@ val dataModule: Module = module {
             receiptRepository = get()
         )
     }
-}
-
-/**
- * Bindings owned by the app bootstrap: hosted-bootstrap status plus the callbacks Settings
- * uses to drive bootstrap state (reset, sign-out, server/household changes).
- */
-fun bootstrapSessionModule(
-    hostedBootstrapState: HostedBootstrapState,
-    onRetryHostedBootstrap: HostedBootstrapRetryCallback,
-    onResetOnboardingUi: suspend () -> Unit,
-    onRestartHostedLoginUi: suspend () -> Unit,
-    onServerUrlChanged: (String) -> Unit,
-    onHouseholdIdChanged: (String) -> Unit
-): Module = module {
-    single { hostedBootstrapState }
-    single { onRetryHostedBootstrap }
-    single {
-        // Full reset: wipe local data through Store5 repositories, then reset the UI state.
-        val wiper = get<LocalDataWiper>()
-        ResetOnboardingCallback {
-            wiper.wipe()
-            onResetOnboardingUi()
-        }
-    }
-    // Soft-return to Welcome while keeping local data for a matching re-login.
-    single { RestartHostedLoginCallback(onRestartHostedLoginUi) }
-    single { ServerUrlCallback(onServerUrlChanged) }
-    single { HouseholdIdCallback(onHouseholdIdChanged) }
 }

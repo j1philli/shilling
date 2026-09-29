@@ -8,8 +8,7 @@ import KotlinModules
 /// up (onboarding, sign-in).
 ///
 /// The Compose view must never leave the window: Compose Multiplatform disposes its scene when it
-/// does (which would also stop the bootstrap and sync that still run in Compose) and crashes when
-/// it comes back. So it always moves into the selected tab's container, and sits hidden under the
+/// does (losing the Compose tabs' navigation state) and crashes when it comes back. So it always moves into the selected tab's container, and sits hidden under the
 /// SwiftUI screen on native tabs.
 final class ShillingTabBarController: UITabBarController, UITabBarControllerDelegate {
     private let composeController = MainViewControllerKt.MainViewController()

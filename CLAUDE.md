@@ -60,6 +60,7 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     usecase/
       ComputeWindowUseCase.kt  # Friday window computation, balanceAt, cashCurve
       ComputeBudgetUseCase.kt  # monthly budget computation
+  src/commonMain/kotlin/finance/shilling/shared/session/Credentials.kt # sign-in modes/results for onboarding
   src/commonMain/kotlin/finance/shilling/shared/presentation/  # UI-agnostic, used by Compose and SwiftUI
     Formatting.kt        # formatCurrency/formatDate/describeRecurrence + domain labels (no Compose)
     DisplayPreferences.kt # theme mode, currency symbol, week start (StateFlow, persisted in Settings)
@@ -73,12 +74,17 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     Receipt.sq          # receipts table schema + queries
     Bookkeeping.sq      # tracks failed writes for Store5 sync retry
   src/commonTest/kotlin/ # NOTE: not run by Amper; put runnable tests in test@jvm/
-  src@nonJvm/          # non-JVM platform sources (wasmJs + iOS)
+  src@nonJvm/          # non-JVM platform sources (android + wasmJs + iOS); JVM is tests only
     finance/shilling/shared/data/sync/
       WebRtcConnectionManager.kt # WebRTC peer connection management
+      WebRtcPlatform.kt     # platform WebRTC client factory + sync delay (bound per app)
+    finance/shilling/shared/session/
+      AppSession.kt         # onboarding state, hosted bootstrap, sync runtime; exposes SessionPhase
+      SessionModule.kt      # Koin: AppSession + Settings callbacks (reset, sign out, server/household)
 app/shared-ui/            # shared Compose UI (jvm, wasmJs, iOS)
   module.yaml
   src/commonMain/kotlin/finance/shilling/shared/ui/
+    AppBootstrap.kt      # renders AppSession.phase: onboarding, loading, or the main scaffold
     Navigation.kt        # ShillingScaffold: NavHost, rail / bottom bar (Settings pinned), long-press tab reorder
     AppRoutes.kt         # @Serializable navigation-compose routes (tabs + detail routes)
     AppPaths.kt          # route <-> URL path codec (web browser history, deep links)
@@ -226,22 +232,33 @@ toolchain can't scope `compilerPlugins` per platform, so it's only enabled in `i
 `ShillingTabBarController` shows a SwiftUI screen for ported tabs (`nativeScreen(for:)`) and the
 shared Compose UI for the rest. The Compose view controller must stay in the window at all
 times (Compose Multiplatform disposes its scene when it leaves and crashes on re-entry, and
-bootstrap/sync still run in that scene), so on native tabs it sits hidden under the SwiftUI screen.
+the Compose tabs would lose their state), so on native tabs it sits hidden under the SwiftUI screen.
+
+**App session**: `AppSession` (`shared/src@nonJvm/.../session`) owns the app lifecycle outside
+any UI: first-launch onboarding state, hosted bootstrap (auth + household resolution, retries),
+the WebRTC sync runtime (`SyncState` attach, signaling connect, ICE fetch), and the Settings
+actions (reset, sign out, server/household changes). It's a process-wide singleton started by
+each platform entry point right after `initKoin`; every UI renders `session.phase`
+(`Onboarding` / `Starting` / `Ready`) and calls its actions. Its state is confined to
+`AppSessionConfig.dispatcher` (Main); it re-evaluates everything in `reconcile()` after each
+change, with keyed `Effect`s standing in for Compose's `LaunchedEffect`/`DisposableEffect`.
+Platform options (self-hosted-only web distribution, log tag) come from an `AppSessionConfig`
+bound in the platform module.
 
 **DI**: Each app calls `initKoin(platformModule)` (`AppModule.kt`) from its entry point before
 showing UI (iOS: `startIosKoin()` from `App.init`; web: once the database opens; Android:
-`MainActivity.onCreate`). The platform module provides `ShillingDatabase`, `Settings`,
+`MainActivity.onCreate`), then starts `AppSession`. The platform module provides `ShillingDatabase`, `Settings`,
 `IdGenerator`, `ReceiptFileStore`, `HttpClient`, and `WebRtcPlatform` (the WebRTC client factory
 plus the sync delay). `initKoin` starts one global Koin graph for the process: the platform module
 plus the shared `dataModule` (`DeviceIdentity`, `ChangeNotifier`, `StoreSyncDeps`, Store5 stores,
 `SyncStoreFacade`, repositories, use cases, `LocalDataWiper`); later calls return the running
 graph, and loads `DisplayPreferences`. Koin is started outside Compose so native (Swift) code can
 resolve from the same graph.
-`ShillingAppBootstrap` loads `bootstrapSessionModule` (hosted-bootstrap state and the Settings
-callbacks) with `rememberKoinModules`. Definitions resolve their dependencies through `get()`, not captured
+Apps pass `sessionModule` too (it needs `WebRtcPlatform`, so it lives in the non-JVM sources);
+it binds `AppSession`, `HostedBootstrapState` and the Settings callbacks. Definitions resolve their dependencies through `get()`, not captured
 instances. Composables use `koinInject<T>()`. Don't construct repositories or stores by hand
-outside tests. Session-scoped objects (sync runtime, `ServerApi`, `AuthService`) stay
-`remember`ed in the bootstrap because they are rebuilt when the server or auth changes.
+outside tests. Session-scoped objects (sync runtime, `ServerApi`, `AuthService`) are owned by
+`AppSession`, which rebuilds them when the server or auth changes.
 
 ## Database Schema
 

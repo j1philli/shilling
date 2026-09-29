@@ -47,6 +47,9 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import shared_ui.generated.resources.Res
 import shared_ui.generated.resources.app_logo
+import finance.shilling.shared.session.HostedCredentialsMode
+import finance.shilling.shared.session.HostedCredentialsSubmitResult
+import finance.shilling.shared.session.NonMatchingAccountException
 
 private enum class FirstLaunchRoute {
     LANDING,
@@ -326,14 +329,6 @@ fun FirstLaunchOnboardingView(
         )
     }
 }
-
-/**
- * Thrown by welcome credential submit when auth succeeded but the account does not match
- * held local data. The Welcome screen prompts before wiping.
- */
-class NonMatchingAccountException(
-    message: String = "That account doesn't match the budget on this device."
-) : Exception(message)
 
 @Composable
 private fun HeldLocalDataCard(

@@ -26,13 +26,8 @@ import finance.shilling.shared.data.auth.HostedBootstrapPhase
 import finance.shilling.shared.data.auth.HostedBootstrapStatus
 import finance.shilling.shared.data.auth.SignUpResult
 import kotlinx.coroutines.launch
-
-enum class HostedCredentialsMode { SIGN_IN, CREATE_ACCOUNT }
-
-data class HostedCredentialsSubmitResult(
-    val mode: HostedCredentialsMode,
-    val signUpResult: SignUpResult? = null
-)
+import finance.shilling.shared.session.HostedCredentialsMode
+import finance.shilling.shared.session.HostedCredentialsSubmitResult
 
 @Composable
 fun HostedCredentialsForm(
