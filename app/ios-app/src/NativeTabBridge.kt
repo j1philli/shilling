@@ -1,5 +1,6 @@
 package finance.shilling.app
 
+import finance.shilling.shared.presentation.HomeDestination
 import finance.shilling.shared.ui.PlatformTabBar
 import finance.shilling.shared.ui.ShelfDestination
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,6 +16,7 @@ object NativeTabBridge {
     const val SETTINGS = "SETTINGS"
 
     private val selections = MutableSharedFlow<ShelfDestination?>(extraBufferCapacity = 1)
+    private val homeNavigation = MutableSharedFlow<HomeDestination>(extraBufferCapacity = 1)
     private var listener: ((List<NativeTab>, String?) -> Unit)? = null
     private var tabs: List<NativeTab> = emptyList()
     private var selected: String? = null
@@ -30,6 +32,11 @@ object NativeTabBridge {
         selections.tryEmit(if (key == SETTINGS) null else ShelfDestination.valueOf(key))
     }
 
+    /** Swift: a tile on the native Home screen was tapped; Compose opens the matching screen. */
+    fun openHome(destination: HomeDestination) {
+        homeNavigation.tryEmit(destination)
+    }
+
     val tabBar = PlatformTabBar(
         selections = selections,
         onChange = { order, selectedTab ->
@@ -39,7 +46,8 @@ object NativeTabBridge {
                 selected = selectedTab?.name ?: SETTINGS
             )
         },
-        onDispose = { publish(emptyList(), null) }
+        onDispose = { publish(emptyList(), null) },
+        homeNavigation = homeNavigation
     )
 
     private fun publish(tabs: List<NativeTab>, selected: String?) {

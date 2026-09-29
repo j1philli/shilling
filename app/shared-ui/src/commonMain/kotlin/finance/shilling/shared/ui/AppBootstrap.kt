@@ -156,7 +156,6 @@ private fun AppBootstrapContent(
     val syncDeps = koinInject<StoreSyncDeps>()
     val localDataWiper = koinInject<LocalDataWiper>()
     val log = remember(logTag) { Logger.withTag(logTag) }
-    remember(settings) { DisplayPreferences.load(settings) }
     val syncExceptionHandler = remember(logTag) {
         CoroutineExceptionHandler { _, throwable ->
             log.e {

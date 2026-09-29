@@ -1,9 +1,5 @@
-package finance.shilling.shared.ui
+package finance.shilling.shared.presentation
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.ui.graphics.Color
 import finance.shilling.shared.data.Frequency
 import finance.shilling.shared.data.Schedule
 import finance.shilling.shared.data.ScheduleType
@@ -36,19 +32,6 @@ fun formatSigned(type: ScheduleType, amount: Double): String = when (type) {
     ScheduleType.EXPENSE -> "-${formatCurrency(amount)}"
     ScheduleType.TRANSFER -> formatCurrency(amount)
 }
-
-@Composable
-@ReadOnlyComposable
-fun amountColor(type: ScheduleType): Color = when (type) {
-    ScheduleType.EXPENSE -> MaterialTheme.colorScheme.onSurface
-    ScheduleType.INCOME -> MaterialTheme.colorScheme.tertiary
-    ScheduleType.TRANSFER -> MaterialTheme.colorScheme.onSurfaceVariant
-}
-
-@Composable
-@ReadOnlyComposable
-fun netColor(amount: Double): Color =
-    if (amount >= 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error
 
 /** Plain editable representation of an amount, e.g. `1234.50`. */
 fun formatAmountInput(amount: Double): String {
@@ -219,18 +202,6 @@ fun Schedule.firstWeekdayFromMaskFallback(): DayOfWeek =
     byDayMask?.let { dayMaskFirst(it) } ?: startDate.dayOfWeek
 
 // ─── Misc ────────────────────────────────────────────────────────────────────
-
-fun colorFromHex(hex: String?): Color? {
-    hex ?: return null
-    val cleaned = hex.trim().removePrefix("#")
-    val long = cleaned.toLongOrNull(16) ?: return null
-    val argb = when (cleaned.length) {
-        6 -> 0xFF000000 or long
-        8 -> long
-        else -> return null
-    }
-    return Color(argb.toInt())
-}
 
 fun formatFileSize(bytes: Int): String = when {
     bytes < 1024 -> "$bytes B"

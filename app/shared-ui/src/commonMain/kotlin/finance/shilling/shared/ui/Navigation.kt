@@ -83,6 +83,8 @@ import finance.shilling.shared.data.auth.FeatureGate
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import finance.shilling.shared.presentation.HomeDestination
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.StateFlow
@@ -122,7 +124,9 @@ class PlatformTabBar(
     /** Tab order (Settings is always last) and the current selection (null = Settings). */
     val onChange: (order: List<ShelfDestination>, selected: ShelfDestination?) -> Unit,
     /** The scaffold left the screen (e.g. sign-out); the platform bar should hide. */
-    val onDispose: () -> Unit
+    val onDispose: () -> Unit,
+    /** Taps on a platform-drawn Home screen's tiles, routed like the Compose Home. */
+    val homeNavigation: Flow<HomeDestination> = emptyFlow()
 )
 
 /** Tabs that were merged into others, mapped to where they live now. */
@@ -333,6 +337,27 @@ fun ShillingScaffold(
         }
     }
 
+    // Lets Home open a specific Plan section/period; consumed by PlanView.
+    var planRequest by remember { mutableStateOf<PlanRequest?>(null) }
+    val openHomeDestination: (HomeDestination) -> Unit = { destination ->
+        val request = when (destination) {
+            HomeDestination.ACCOUNTS -> PlanRequest(PlanSection.ACCOUNTS)
+            HomeDestination.WEEK -> PlanRequest(PlanSection.OVERVIEW, PlanPeriod.WEEK)
+            HomeDestination.MONTH -> PlanRequest(PlanSection.OVERVIEW, PlanPeriod.MONTH)
+            HomeDestination.SCHEDULES -> PlanRequest(PlanSection.SCHEDULES)
+            HomeDestination.CATEGORIES -> PlanRequest(PlanSection.CATEGORIES)
+            HomeDestination.ACTIVITY, HomeDestination.RECEIPTS -> null
+        }
+        when {
+            request != null -> {
+                planRequest = request
+                navController.navigateToTab(ShelfDestination.PLAN)
+            }
+            destination == HomeDestination.ACTIVITY -> navController.navigateToTab(ShelfDestination.ACTIVITY)
+            else -> navController.navigateToTab(ShelfDestination.RECEIPTS)
+        }
+    }
+
     val onSelectTab: (ShelfDestination) -> Unit = { navController.navigateToTab(it) }
     val onSettings: () -> Unit = { navController.navigateToSettings() }
     val onReorder: (List<ShelfDestination>) -> Unit = { newOrder ->
@@ -349,6 +374,9 @@ fun ShillingScaffold(
         ) {
             ShillingNavHost(
                 navController = navController,
+                planRequest = planRequest,
+                onPlanRequestConsumed = { planRequest = null },
+                onHomeDestination = openHomeDestination,
                 modifier = modifier,
                 authService = authService,
                 featureGate = featureGate,
@@ -366,6 +394,9 @@ fun ShillingScaffold(
     if (platformTabBar != null) {
         LaunchedEffect(navController, platformTabBar) {
             platformTabBar.selections.collect { dest -> if (dest == null) onSettings() else onSelectTab(dest) }
+        }
+        LaunchedEffect(navController, platformTabBar) {
+            platformTabBar.homeNavigation.collect(openHomeDestination)
         }
         LaunchedEffect(platformTabBar, orderedDestinations, selectedTab) {
             platformTabBar.onChange(orderedDestinations, selectedTab)
@@ -404,6 +435,9 @@ fun ShillingScaffold(
 @Composable
 private fun ShillingNavHost(
     navController: NavHostController,
+    planRequest: PlanRequest?,
+    onPlanRequestConsumed: () -> Unit,
+    onHomeDestination: (HomeDestination) -> Unit,
     modifier: Modifier,
     authService: AuthService,
     featureGate: FeatureGate,
@@ -413,8 +447,6 @@ private fun ShillingNavHost(
     onPendingReceiptConsumed: () -> Unit
 ) {
     val back: () -> Unit = { navController.popBackStack() }
-    // Lets Home open a specific Plan section/period; consumed by PlanView.
-    var planRequest by remember { mutableStateOf<PlanRequest?>(null) }
     // Tabs cross-fade quickly; detail pages slide in from the trailing edge and back out.
     // (The platform default on iOS slides every change, including tab switches.)
     NavHost(
@@ -439,18 +471,12 @@ private fun ShillingNavHost(
         }
     ) {
         composable<HomeRoute> {
-            HomeView(
-                onNavigate = { navController.navigateToTab(it) },
-                onOpenPlan = { request ->
-                    planRequest = request
-                    navController.navigateToTab(ShelfDestination.PLAN)
-                }
-            )
+            HomeView(onDestination = onHomeDestination)
         }
         composable<PlanRoute> {
             PlanView(
                 request = planRequest,
-                onRequestConsumed = { planRequest = null },
+                onRequestConsumed = onPlanRequestConsumed,
                 onOpenTransaction = { navController.navigate(TransactionRoute(it)) },
                 onOpenSchedule = { id, type -> navController.navigate(ScheduleRoute(id, type?.name)) },
                 onOpenCategory = { navController.navigate(CategoryRoute(it)) },

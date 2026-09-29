@@ -60,6 +60,10 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     usecase/
       ComputeWindowUseCase.kt  # Friday window computation, balanceAt, cashCurve
       ComputeBudgetUseCase.kt  # monthly budget computation
+  src/commonMain/kotlin/finance/shilling/shared/presentation/  # UI-agnostic, used by Compose and SwiftUI
+    Formatting.kt        # formatCurrency/formatDate/describeRecurrence + domain labels (no Compose)
+    DisplayPreferences.kt # theme mode, currency symbol, week start (StateFlow, persisted in Settings)
+    HomeViewModel.kt     # Home state + copy (HomeUiState), HomeDestination
   src/commonMain/sqldelight/finance/shilling/shared/db/
     Account.sq          # accounts table schema + queries
     Category.sq         # categories table schema + queries
@@ -84,8 +88,8 @@ app/shared-ui/            # shared Compose UI (jvm, wasmJs, iOS)
     FormFields.kt        # AmountField, DateField/DatePickerModal, DropdownField, TextInputField
     Components.kt        # ConfirmDialog, EmptyState, AddButton, EntityListItem, ListSectionHeader
     SnackbarController.kt # app-level snackbar + undo (LocalSnackbarController)
-    DisplayPreferences.kt # theme mode, currency symbol, week start (persisted in Settings)
-    Formatting.kt        # formatCurrency/formatDate/describeRecurrence + domain labels
+    ComposeFormatting.kt # Compose-only helpers: amountColor, netColor, colorFromHex
+    ShillingTheme.kt     # Material theme; provides LocalDisplayPrefs (recomposes on pref changes)
     PlanView.kt          # Plan tab: Overview (week/month, by day / by category) + Schedules, Categories, Accounts sections
     ActivityView.kt      # Activity tab: recorded transactions (search, ranges, list-detail)
     ImportView.kt        # CSV import, opened from Activity (ImportRoute)
@@ -109,6 +113,9 @@ app/ios-app/              # Compose Multiplatform iOS app
     ShillingTabBarController.swift # native UITabBarController around the shared Compose UI
     NativeTabBridge.kt  # tab list/selection bridge between Compose and the native tab bar
     MainViewController.kt  # startIosKoin (platform Koin module) + ComposeUIViewController factory
+    IosViewModelHost.kt  # base for Swift-facing screen models (owns a ViewModelStore)
+    HomeScreenModel.kt   # Swift-facing HomeViewModel facade (@NativeCoroutinesState)
+    HomeModel.swift / HomeScreen.swift # native SwiftUI Home
     IosPlatformServices.kt # IosIdGenerator (NSUUID), IosReceiptFileStore (NSFileManager), NativeSqliteDriver
     ShillingIosApp.kt      # receipt store UI (add, list, edit, attach, delete)
 src-tauri/            # Tauri native shell (Rust)
@@ -207,6 +214,20 @@ rather than raw text fields for money, dates, or selects. Destructive actions ne
 `ConfirmDialog` (EditorScaffold's `delete` does this). Format with `formatCurrency` /
 `formatDate` / `formatSigned`; never show raw ISO dates or enum names.
 
+**Native iOS UI (migration in progress)**: iOS is moving to a fully native SwiftUI front end,
+one screen at a time; web/desktop and Android stay on Compose. Screen logic and copy live in
+shared view models (`shared/presentation`, AndroidX multiplatform `ViewModel`, registered with
+Koin `viewModel {}`); Compose gets them with `koinViewModel()`. On iOS, a Kotlin facade in
+`ios-app` (subclass of `IosViewModelHost`) exposes the view model's `StateFlow` with
+`@NativeCoroutinesState`, and a Swift `ObservableObject` consumes it with
+`asyncSequence(for: model.stateFlow)` from `KMPNativeCoroutinesAsync`. Keep KMP-NativeCoroutines
+annotations out of `app/shared`: its compiler plugin crashes non-Apple compilations and the
+toolchain can't scope `compilerPlugins` per platform, so it's only enabled in `ios-app`.
+`ShillingTabBarController` shows a SwiftUI screen for ported tabs (`nativeScreen(for:)`) and the
+shared Compose UI for the rest. The Compose view controller must stay in the window at all
+times (Compose Multiplatform disposes its scene when it leaves and crashes on re-entry, and
+bootstrap/sync still run in that scene), so on native tabs it sits hidden under the SwiftUI screen.
+
 **DI**: Each app calls `initKoin(platformModule)` (`AppModule.kt`) from its entry point before
 showing UI (iOS: `startIosKoin()` from `App.init`; web: once the database opens; Android:
 `MainActivity.onCreate`). The platform module provides `ShillingDatabase`, `Settings`,
@@ -214,7 +235,8 @@ showing UI (iOS: `startIosKoin()` from `App.init`; web: once the database opens;
 plus the sync delay). `initKoin` starts one global Koin graph for the process: the platform module
 plus the shared `dataModule` (`DeviceIdentity`, `ChangeNotifier`, `StoreSyncDeps`, Store5 stores,
 `SyncStoreFacade`, repositories, use cases, `LocalDataWiper`); later calls return the running
-graph. Koin is started outside Compose so native (Swift) code can resolve from the same graph.
+graph, and loads `DisplayPreferences`. Koin is started outside Compose so native (Swift) code can
+resolve from the same graph.
 `ShillingAppBootstrap` loads `bootstrapSessionModule` (hosted-bootstrap state and the Settings
 callbacks) with `rememberKoinModules`. Definitions resolve their dependencies through `get()`, not captured
 instances. Composables use `koinInject<T>()`. Don't construct repositories or stores by hand
@@ -284,7 +306,15 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
   Override version with `WEBRTC_SDK_VERSION` env var if needed.
 - **iOS Xcode project**: Kotlin Toolchain manages `app/ios-app/module.xcodeproj`. The
   `-lsqlite3` linker flag was manually added to `OTHER_LDFLAGS` — don't
-  regenerate the project without re-adding it.
+  regenerate the project without re-adding it. Swift packages are declared as `swiftPackage:`
+  dependencies in `app/ios-app/module.yaml`; the toolchain links them through the generated
+  `KotlinMultiplatformLinkedPackage/` (generated from `module.yaml`; committed because the Xcode
+  project references it, along with `project.xcworkspace/.../Package.resolved` — don't hand-edit). The first build
+  after adding a Swift package can fail with `Cannot cast ... PBXObject to ... PBXBuildFile`;
+  building again succeeds.
+- **KMP-NativeCoroutines version is tied to Kotlin**: `kmp-nativecoroutines` in
+  `libs.versions.toml`, the compiler plugin and the Swift package in `app/ios-app/module.yaml`
+  must all use the release built for the project's Kotlin version (1.0.6 = Kotlin 2.4.20).
 - **Icons are generated, then committed**: `icons/source/base-1024.png` is the
   master. `just generate-icons` (ImageMagick + `cargo tauri`) rewrites every
   platform asset; commit the results. Builds never generate or copy icons; they

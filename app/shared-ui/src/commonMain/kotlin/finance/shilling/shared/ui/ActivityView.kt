@@ -38,6 +38,8 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.koin.compose.koinInject
+import finance.shilling.shared.presentation.formatDayHeader
+import finance.shilling.shared.presentation.today
 
 private val activityRanges = listOf(1 to "1M", 3 to "3M", 6 to "6M", 12 to "1Y")
 

@@ -19,9 +19,12 @@ import finance.shilling.shared.data.store.createScheduleExceptionStore
 import finance.shilling.shared.data.store.createScheduleStore
 import finance.shilling.shared.data.usecase.ComputeBudgetUseCase
 import finance.shilling.shared.data.usecase.ComputeWindowUseCase
+import finance.shilling.shared.presentation.DisplayPreferences
+import finance.shilling.shared.presentation.HomeViewModel
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import org.koin.mp.KoinPlatform
 
@@ -32,7 +35,9 @@ import org.koin.mp.KoinPlatform
  * instance (e.g. an Android Activity recreated in the same process).
  */
 fun initKoin(platformModule: Module): Koin =
-    KoinPlatform.getKoinOrNull() ?: startKoin { modules(platformModule, dataModule) }.koin
+    KoinPlatform.getKoinOrNull() ?: startKoin { modules(platformModule, dataModule) }.koin.also {
+        DisplayPreferences.load(it.get())
+    }
 
 /**
  * Shared data graph: identity, Store5 stores, repositories, use cases, and the sync facade.
@@ -73,6 +78,8 @@ val dataModule: Module = module {
 
     single { ComputeWindowUseCase(get(), get(), get(), get(), get()) }
     single { ComputeBudgetUseCase(get(), get(), get()) }
+
+    viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get()) }
 
     single {
         LocalDataWiper(

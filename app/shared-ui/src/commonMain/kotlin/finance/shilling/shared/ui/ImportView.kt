@@ -52,6 +52,7 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.plus
 import org.koin.compose.koinInject
 import kotlin.math.abs
+import finance.shilling.shared.presentation.formatDate
 
 private fun dateFormatLabel(format: DateFormat): String = when (format) {
     DateFormat.ISO -> "2026-01-31 (YYYY-MM-DD)"

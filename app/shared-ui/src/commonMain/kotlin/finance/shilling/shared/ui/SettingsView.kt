@@ -53,6 +53,11 @@ import finance.shilling.shared.data.usecase.ComputeWindowUseCase
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import org.koin.compose.koinInject
+import finance.shilling.shared.presentation.DisplayPreferences
+import finance.shilling.shared.presentation.ThemeMode
+import finance.shilling.shared.presentation.formatCurrency
+import finance.shilling.shared.presentation.fullLabel
+import finance.shilling.shared.presentation.label
 
 private const val DEVELOPER_UNLOCK_TAPS = 7
 

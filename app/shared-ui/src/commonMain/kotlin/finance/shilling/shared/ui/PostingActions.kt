@@ -4,6 +4,9 @@ import finance.shilling.shared.data.ScheduleException
 import finance.shilling.shared.data.ScheduledTxWithAccount
 import finance.shilling.shared.data.store.PostingRepository
 import finance.shilling.shared.data.store.ScheduleRepository
+import finance.shilling.shared.presentation.formatCurrency
+import finance.shilling.shared.presentation.formatDate
+import finance.shilling.shared.presentation.postedLabel
 
 /**
  * Occurrence/posting actions shared by Plan and transaction detail, each paired
