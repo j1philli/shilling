@@ -20,7 +20,9 @@ import finance.shilling.shared.data.usecase.ComputeWindowUseCase
 import finance.shilling.shared.presentation.DisplayPreferences
 import finance.shilling.shared.presentation.ActivityViewModel
 import finance.shilling.shared.presentation.HomeViewModel
+import finance.shilling.shared.presentation.AccountEditorViewModel
 import finance.shilling.shared.presentation.AccountsViewModel
+import finance.shilling.shared.presentation.CategoryEditorViewModel
 import finance.shilling.shared.presentation.CategoriesViewModel
 import finance.shilling.shared.presentation.OccurrenceActions
 import finance.shilling.shared.presentation.SchedulesViewModel
@@ -95,6 +97,9 @@ val dataModule: Module = module {
     viewModel { SchedulesViewModel(get(), get(), get()) }
     viewModel { CategoriesViewModel(get()) }
     viewModel { AccountsViewModel(get()) }
+    // Editors take the item id (null = new) as a parameter.
+    viewModel { params -> CategoryEditorViewModel(params.getOrNull(), get(), get()) }
+    viewModel { params -> AccountEditorViewModel(params.getOrNull(), get(), get()) }
     // Needs SessionState and the Settings callbacks from sessionModule.
     viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 

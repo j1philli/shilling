@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import org.koin.core.parameter.parametersOf
 import org.koin.mp.KoinPlatform
 
 /**
@@ -14,10 +15,11 @@ import org.koin.mp.KoinPlatform
 abstract class IosViewModelHost {
     @PublishedApi internal val store = ViewModelStore()
 
-    protected inline fun <reified VM : ViewModel> viewModel(): VM =
+    /** The shared view model [VM] from Koin; [params] are its Koin parameters (e.g. an editor's item id). */
+    protected inline fun <reified VM : ViewModel> viewModel(vararg params: Any?): VM =
         ViewModelProvider.create(
             store,
-            viewModelFactory { initializer { KoinPlatform.getKoin().get<VM>() } }
+            viewModelFactory { initializer { KoinPlatform.getKoin().get<VM> { parametersOf(*params) } } }
         )[VM::class]
 
     fun close() = store.clear()

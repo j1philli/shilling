@@ -61,6 +61,13 @@ struct PlanScreen: View {
     @State private var toast: Toast?
     @State private var pickingDate = false
     @State private var amountEdit: AmountEdit?
+    @State private var path: [PlanEditor] = []
+
+    /** Native editors pushed onto Plan's navigation stack. */
+    enum PlanEditor: Hashable {
+        case category(String?)
+        case account(String?)
+    }
 
     private struct AmountEdit {
         let key: String
@@ -69,7 +76,7 @@ struct PlanScreen: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 Section {
                     Picker("Section", selection: $section) {
@@ -88,8 +95,16 @@ struct PlanScreen: View {
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Plan")
+            .navigationDestination(for: PlanEditor.self) { editor in
+                switch editor {
+                case .category(let id):
+                    CategoryEditorScreen(categoryId: id) { message in toast = Toast(message) }
+                case .account(let id):
+                    AccountEditorScreen(accountId: id) { message in toast = Toast(message) }
+                }
+            }
             .toolbar {
-                if !overlay.detailOpen && section != .overview {
+                if !overlay.detailOpen && section != .overview && path.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(action: addInSection) { Label("Add", systemImage: "plus") }
                     }
@@ -301,14 +316,13 @@ struct PlanScreen: View {
     private var categoriesContent: some View {
         let state = model.categories
         if let empty = state.empty {
-            emptySection(empty) { model.screen.openCategory(categoryId: nil) }
+            emptySection(empty) { path.append(.category(nil)) }
         } else {
             Section {
                 ForEach(state.rows, id: \.id) { row in
-                    Button { model.screen.openCategory(categoryId: row.id) } label: {
+                    NavigationLink(value: PlanEditor.category(row.id)) {
                         ListRow(title: row.name, dot: Color(hex: row.color) ?? Color(.tertiaryLabel))
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }
@@ -318,14 +332,13 @@ struct PlanScreen: View {
     private var accountsContent: some View {
         let state = model.accounts
         if let empty = state.empty {
-            emptySection(empty) { model.screen.openAccount(accountId: nil) }
+            emptySection(empty) { path.append(.account(nil)) }
         } else {
             Section {
                 ForEach(state.rows, id: \.id) { row in
-                    Button { model.screen.openAccount(accountId: row.id) } label: {
+                    NavigationLink(value: PlanEditor.account(row.id)) {
                         ListRow(title: row.name, trailing: row.balance)
                     }
-                    .buttonStyle(.plain)
                 }
             } footer: {
                 if let subtitle = state.subtitle { Text(subtitle) }
@@ -351,8 +364,8 @@ struct PlanScreen: View {
     private func addInSection() {
         switch section {
         case .schedules: model.screen.openSchedule(scheduleId: nil, type: model.schedules.filter)
-        case .categories: model.screen.openCategory(categoryId: nil)
-        case .accounts: model.screen.openAccount(accountId: nil)
+        case .categories: path.append(.category(nil))
+        case .accounts: path.append(.account(nil))
         default: break
         }
     }

@@ -41,25 +41,9 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import finance.shilling.shared.presentation.CategoriesViewModel
 import org.koin.compose.viewmodel.koinViewModel
-
-private data class Swatch(val hex: String, val name: String)
-
-private val categorySwatches = listOf(
-    Swatch("#EF5350", "Red"),
-    Swatch("#EC407A", "Pink"),
-    Swatch("#AB47BC", "Purple"),
-    Swatch("#7E57C2", "Violet"),
-    Swatch("#5C6BC0", "Indigo"),
-    Swatch("#42A5F5", "Blue"),
-    Swatch("#26C6DA", "Cyan"),
-    Swatch("#26A69A", "Teal"),
-    Swatch("#66BB6A", "Green"),
-    Swatch("#9CCC65", "Lime"),
-    Swatch("#FFCA28", "Amber"),
-    Swatch("#FFA726", "Orange"),
-    Swatch("#8D6E63", "Brown"),
-    Swatch("#78909C", "Slate"),
-)
+import finance.shilling.shared.presentation.CategoryEditorViewModel
+import finance.shilling.shared.presentation.EditorLoad
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun CategoriesView(onOpenCategory: (String?) -> Unit,
@@ -123,94 +107,70 @@ fun CategoryEditor(
     onClose: () -> Unit,
     onSaved: () -> Unit
 ) {
-    val categoryRepo = koinInject<CategoryRepository>()
-    if (categoryId == null) {
-        CategoryForm(existing = null, navIcon = navIcon, onClose = onClose, onSaved = onSaved)
-        return
-    }
-    val loadable = rememberLoadable(categoryId) {
-        categoryRepo.watchAll().map { list -> list.firstOrNull { it.id == categoryId } }
-    }
-    when (loadable) {
-        Loadable.Loading -> EditorPlaceholder("Category", navIcon, onClose, loading = true, missingMessage = "")
-        is Loadable.Ready -> loadable.value?.let { category ->
-            CategoryForm(existing = category, navIcon = navIcon, onClose = onClose, onSaved = onSaved)
-        } ?: EditorPlaceholder("Category", navIcon, onClose, loading = false, missingMessage = "This category was deleted.")
-    }
-}
-
-@Composable
-private fun CategoryForm(
-    existing: Category?,
-    navIcon: ScreenNavIcon,
-    onClose: () -> Unit,
-    onSaved: () -> Unit
-) {
-    val categoryRepo = koinInject<CategoryRepository>()
-    val idGen = koinInject<IdGenerator>()
+    val viewModel = koinViewModel<CategoryEditorViewModel>(key = "category-${categoryId ?: "new"}") { parametersOf(categoryId) }
+    val state by viewModel.state.collectAsState()
     val snackbar = LocalSnackbarController.current
     val scope = rememberCoroutineScope()
-    var name by rememberSaveable(existing?.id) { mutableStateOf(existing?.name.orEmpty()) }
-    var color by rememberSaveable(existing?.id) {
-        mutableStateOf(existing?.color ?: categorySwatches.random().hex)
-    }
-
-    EditorScaffold(
-        title = existing?.name ?: "New category",
-        navIcon = navIcon,
-        onClose = onClose,
-        saveEnabled = name.isNotBlank(),
-        onSave = {
-            scope.launch {
-                categoryRepo.upsert(Category(id = existing?.id ?: idGen.newId(), name = name.trim(), color = color))
-                snackbar.show(if (existing == null) "Category added" else "Category updated")
-                onSaved()
-            }
-        },
-        delete = existing?.let { category ->
-            DeleteConfirmation(
-                title = "Delete ${category.name}?",
-                message = "Schedules and transactions in this category become Uncategorized.",
-                confirmLabel = "Delete category",
-                onConfirm = {
-                    scope.launch {
-                        categoryRepo.delete(category.id)
+    when (state.load) {
+        EditorLoad.LOADING -> EditorPlaceholder("Category", navIcon, onClose, loading = true, missingMessage = "")
+        EditorLoad.MISSING -> EditorPlaceholder("Category", navIcon, onClose, loading = false, missingMessage = state.missingMessage)
+        EditorLoad.READY -> EditorScaffold(
+            title = state.title,
+            navIcon = navIcon,
+            onClose = onClose,
+            saveEnabled = state.saveEnabled,
+            onSave = {
+                scope.launch {
+                    viewModel.save()?.let {
+                        snackbar.show(it)
                         onSaved()
-                        snackbar.show("${category.name} deleted")
                     }
                 }
-            )
-        }
-    ) {
-        TextInputField(value = name, onValueChange = { name = it }, label = "Name", placeholder = "e.g. Groceries")
-        Text("Color", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-        ) {
-            val customColor = color.takeIf { current -> categorySwatches.none { it.hex.equals(current, ignoreCase = true) } }
-            (categorySwatches + listOfNotNull(customColor?.let { Swatch(it, "Custom") })).forEach { swatch ->
-                val isSelected = swatch.hex.equals(color, ignoreCase = true)
-                val fill = colorFromHex(swatch.hex) ?: Color.Gray
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .border(
-                            width = if (isSelected) 3.dp else 0.dp,
-                            color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
-                            shape = CircleShape
-                        )
-                        .clickable(role = Role.RadioButton) { color = swatch.hex }
-                        .semantics {
-                            contentDescription = swatch.name
-                            selected = isSelected
+            },
+            delete = state.deleteConfirm?.let { copy ->
+                DeleteConfirmation(
+                    title = copy.title,
+                    message = copy.message,
+                    confirmLabel = copy.confirmLabel,
+                    onConfirm = {
+                        scope.launch {
+                            val message = viewModel.delete()
+                            onSaved()
+                            message?.let(snackbar::show)
                         }
-                ) {
-                    Box(modifier = Modifier.size(32.dp).background(fill, CircleShape))
-                    if (isSelected) {
-                        Icon(MaterialIcons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                    }
+                )
+            }
+        ) {
+            TextInputField(value = state.name, onValueChange = viewModel::setName, label = "Name", placeholder = "e.g. Groceries")
+            Text("Color", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
+                state.swatches.forEach { swatch ->
+                    val isSelected = swatch.hex.equals(state.color, ignoreCase = true)
+                    val fill = colorFromHex(swatch.hex) ?: Color.Gray
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .border(
+                                width = if (isSelected) 3.dp else 0.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
+                                shape = CircleShape
+                            )
+                            .clickable(role = Role.RadioButton) { viewModel.setColor(swatch.hex) }
+                            .semantics {
+                                contentDescription = swatch.name
+                                selected = isSelected
+                            }
+                    ) {
+                        Box(modifier = Modifier.size(32.dp).background(fill, CircleShape))
+                        if (isSelected) {
+                            Icon(MaterialIcons.Filled.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                        }
                     }
                 }
             }
