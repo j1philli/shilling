@@ -60,11 +60,16 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     usecase/
       ComputeWindowUseCase.kt  # Friday window computation, balanceAt, cashCurve
       ComputeBudgetUseCase.kt  # monthly budget computation
-  src/commonMain/kotlin/finance/shilling/shared/session/Credentials.kt # sign-in modes/results for onboarding
+  src/commonMain/kotlin/finance/shilling/shared/session/
+    Credentials.kt       # sign-in modes/results for onboarding
+    SessionState.kt      # SessionPhase + SessionState (AppSession's phase, readable from view models)
   src/commonMain/kotlin/finance/shilling/shared/presentation/  # UI-agnostic, used by Compose and SwiftUI
     Formatting.kt        # formatCurrency/formatDate/describeRecurrence + domain labels (no Compose)
     DisplayPreferences.kt # theme mode, currency symbol, week start (StateFlow, persisted in Settings)
     HomeViewModel.kt     # Home state + copy (HomeUiState), HomeDestination
+    SettingsViewModel.kt # Settings state + copy (account variants, sync status, developer info) and actions
+    CredentialsCopy.kt   # email/password form + confirm-email copy (Welcome and Settings)
+    SampleData.kt        # seedDemoData (developer tools)
   src/commonMain/sqldelight/finance/shilling/shared/db/
     Account.sq          # accounts table schema + queries
     Category.sq         # categories table schema + queries
@@ -105,7 +110,6 @@ app/shared-ui/            # shared Compose UI (jvm, wasmJs, iOS)
     TransactionEditor.kt # view/edit/create a posting, transfer pairs, attached receipts
     PostingActions.kt    # mark paid / skip / change amount with undo
     SettingsView.kt      # appearance, account, sync status, hidden developer tools
-    DevView.kt           # seedDemoData helper (developer tools)
 app/web-app/              # Tauri desktop app (wasmJs)
   module.yaml         # product: wasm-js/app
   src/wasmJsMain/kotlin/finance/shilling/web/
@@ -122,6 +126,8 @@ app/ios-app/              # Compose Multiplatform iOS app
     IosViewModelHost.kt  # base for Swift-facing screen models (owns a ViewModelStore)
     HomeScreenModel.kt   # Swift-facing HomeViewModel facade (@NativeCoroutinesState)
     HomeModel.swift / HomeScreen.swift # native SwiftUI Home
+    SettingsScreenModel.kt / SettingsScreen.swift # native SwiftUI Settings (+ ToastView snackbar stand-in)
+    DisplayPreferencesBridge.kt / AppearanceModel.swift # app theme mode → SwiftUI preferredColorScheme
     IosPlatformServices.kt # IosIdGenerator (NSUUID), IosReceiptFileStore (NSFileManager), NativeSqliteDriver
     ShillingIosApp.kt      # receipt store UI (add, list, edit, attach, delete)
 src-tauri/            # Tauri native shell (Rust)
@@ -230,7 +236,8 @@ Koin `viewModel {}`); Compose gets them with `koinViewModel()`. On iOS, a Kotlin
 annotations out of `app/shared`: its compiler plugin crashes non-Apple compilations and the
 toolchain can't scope `compilerPlugins` per platform, so it's only enabled in `ios-app`.
 `ShillingTabBarController` shows a SwiftUI screen for ported tabs (`nativeScreen(for:)`) and the
-shared Compose UI for the rest. The Compose view controller must stay in the window at all
+shared Compose UI for the rest (native so far: Home, Settings). SwiftUI screens follow the app's
+Light/Dark/System choice through `AppearanceModel` (`preferredColorScheme` at the app root). The Compose view controller must stay in the window at all
 times (Compose Multiplatform disposes its scene when it leaves and crashes on re-entry, and
 the Compose tabs would lose their state), so on native tabs it sits hidden under the SwiftUI screen.
 

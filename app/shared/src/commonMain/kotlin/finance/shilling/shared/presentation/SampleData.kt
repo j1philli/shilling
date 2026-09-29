@@ -1,4 +1,4 @@
-package finance.shilling.shared.ui
+package finance.shilling.shared.presentation
 
 import finance.shilling.shared.data.Account
 import finance.shilling.shared.data.Category
@@ -12,9 +12,6 @@ import finance.shilling.shared.data.usecase.ComputeWindowUseCase
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.minus
-import finance.shilling.shared.presentation.startOfMonth
-import finance.shilling.shared.presentation.toDayMask
-import finance.shilling.shared.presentation.today
 
 /** Developer utility: populate a small, realistic household for local testing. */
 suspend fun seedDemoData(

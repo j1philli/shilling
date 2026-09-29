@@ -28,6 +28,7 @@ import finance.shilling.shared.data.auth.SignUpResult
 import kotlinx.coroutines.launch
 import finance.shilling.shared.session.HostedCredentialsMode
 import finance.shilling.shared.session.HostedCredentialsSubmitResult
+import finance.shilling.shared.presentation.CredentialsCopy
 
 @Composable
 fun HostedCredentialsForm(
@@ -50,11 +51,7 @@ fun HostedCredentialsForm(
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            if (mode == HostedCredentialsMode.SIGN_IN) {
-                "Sign in to an existing account."
-            } else {
-                "Create a new account with email and password."
-            },
+            CredentialsCopy.prompt(mode),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         disabledReason?.let {
@@ -84,26 +81,17 @@ fun HostedCredentialsForm(
                 scope.launch {
                     isSubmitting = true
                     val result = onSubmit(mode, emailText.trim(), passwordText)
-                    authMessage = result.fold(
-                        onSuccess = { submit ->
-                            val signUpResult = submit.signUpResult
-                            if (signUpResult?.requiresEmailConfirmation == true) {
-                                emailConfirmationSheet = EmailConfirmationSheetState(
-                                    email = emailText.trim(),
-                                    upgradedFromGuest = signUpResult.upgradedAnonymousSession
-                                )
-                            }
-                            emailText = ""
-                            passwordText = ""
-                            when {
-                                submit.mode == HostedCredentialsMode.SIGN_IN -> "Signed in."
-                                signUpResult?.requiresEmailConfirmation == true ->
-                                    "Check your email to confirm this account change."
-                                else -> "Account created."
-                            }
-                        },
-                        onFailure = { "Error: ${it.message ?: "Unknown error"}" }
-                    )
+                    result.onSuccess { submit ->
+                        if (CredentialsCopy.needsEmailConfirmation(result)) {
+                            emailConfirmationSheet = EmailConfirmationSheetState(
+                                email = emailText.trim(),
+                                upgradedFromGuest = submit.signUpResult?.upgradedAnonymousSession == true
+                            )
+                        }
+                        emailText = ""
+                        passwordText = ""
+                    }
+                    authMessage = CredentialsCopy.resultMessage(result)
                     onMessage(authMessage)
                     isSubmitting = false
                 }
@@ -118,28 +106,16 @@ fun HostedCredentialsForm(
                     strokeWidth = 2.dp
                 )
             }
-            Text(
-                if (mode == HostedCredentialsMode.SIGN_IN) signInLabel else "Create account"
-            )
+            Text(CredentialsCopy.submitLabel(mode, signInLabel))
         }
         TextButton(
             onClick = {
-                mode = if (mode == HostedCredentialsMode.SIGN_IN) {
-                    HostedCredentialsMode.CREATE_ACCOUNT
-                } else {
-                    HostedCredentialsMode.SIGN_IN
-                }
+                mode = CredentialsCopy.other(mode)
                 authMessage = ""
             },
             enabled = enabled && !isSubmitting
         ) {
-            Text(
-                if (mode == HostedCredentialsMode.SIGN_IN) {
-                    "Create a new account instead"
-                } else {
-                    "Already have an account? Sign in"
-                }
-            )
+            Text(CredentialsCopy.switchLabel(mode))
         }
         extraActions?.invoke()
         if (authMessage.isNotBlank()) {
@@ -154,60 +130,4 @@ fun HostedCredentialsForm(
             onDismiss = { emailConfirmationSheet = null }
         )
     }
-}
-
-@Composable
-fun HostedBootstrapStatusCard(
-    status: HostedBootstrapStatus,
-    onRetry: () -> Unit,
-    title: String = "Managed status"
-) {
-    ShillingCard {
-        Text(title, style = MaterialTheme.typography.titleMedium)
-        Text("Phase: ${bootstrapPhaseLabel(status.phase)}", style = MaterialTheme.typography.bodySmall)
-        Text("Server: ${reachabilityLabel(status.serverReachability)}", style = MaterialTheme.typography.bodySmall)
-        Text("Supabase: ${reachabilityLabel(status.supabaseReachability)}", style = MaterialTheme.typography.bodySmall)
-        Text(
-            "Sync: ${if (status.syncReady) "Ready" else "Not ready"}",
-            style = MaterialTheme.typography.bodySmall
-        )
-        status.lastError?.let {
-            Text(
-                it,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Button(
-            onClick = onRetry,
-            enabled = !status.isChecking
-        ) {
-            if (status.isChecking) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .size(16.dp),
-                    strokeWidth = 2.dp
-                )
-                Text("Checking...")
-            } else {
-                Text("Retry now")
-            }
-        }
-    }
-}
-
-private fun bootstrapPhaseLabel(phase: HostedBootstrapPhase): String = when (phase) {
-    HostedBootstrapPhase.LOCAL_ONLY -> "Local-only"
-    HostedBootstrapPhase.WAITING_FOR_SERVER -> "Waiting for server"
-    HostedBootstrapPhase.WAITING_FOR_SUPABASE -> "Waiting for Supabase"
-    HostedBootstrapPhase.WAITING_FOR_HOUSEHOLD -> "Waiting for household"
-    HostedBootstrapPhase.READY -> "Ready"
-    HostedBootstrapPhase.LOGIN_REQUIRED -> "Login required"
-}
-
-private fun reachabilityLabel(reachability: DependencyReachability): String = when (reachability) {
-    DependencyReachability.UNKNOWN -> "Unknown"
-    DependencyReachability.REACHABLE -> "Reachable"
-    DependencyReachability.UNREACHABLE -> "Unreachable"
 }

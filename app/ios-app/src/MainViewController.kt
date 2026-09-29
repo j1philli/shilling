@@ -193,4 +193,4 @@ private fun createIosHttpClient(): HttpClient = HttpClient(Darwin) {
 }
 
 @OptIn(kotlin.experimental.ExperimentalNativeApi::class)
-private fun isDebugBuild(): Boolean = kotlin.native.Platform.isDebugBinary
+internal fun isDebugBuild(): Boolean = kotlin.native.Platform.isDebugBinary

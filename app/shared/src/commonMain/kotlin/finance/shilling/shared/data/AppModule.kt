@@ -19,6 +19,7 @@ import finance.shilling.shared.data.usecase.ComputeBudgetUseCase
 import finance.shilling.shared.data.usecase.ComputeWindowUseCase
 import finance.shilling.shared.presentation.DisplayPreferences
 import finance.shilling.shared.presentation.HomeViewModel
+import finance.shilling.shared.presentation.SettingsViewModel
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -78,6 +79,8 @@ val dataModule: Module = module {
     single { ComputeBudgetUseCase(get(), get(), get()) }
 
     viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    // Needs SessionState and the Settings callbacks from sessionModule.
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 
     single {
         LocalDataWiper(

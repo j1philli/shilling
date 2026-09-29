@@ -7,6 +7,7 @@ struct ShillingApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @State private var showSnapshotShield = true
     @State private var shieldDismissWorkItem: DispatchWorkItem?
+    @StateObject private var appearance = AppearanceModel()
 
     init() {
         MainViewControllerKt.startIosKoin()
@@ -25,6 +26,7 @@ struct ShillingApp: App {
                     .allowsHitTesting(showSnapshotShield)
                     .animation(.easeInOut(duration: 0.22), value: showSnapshotShield)
             }
+            .preferredColorScheme(appearance.colorScheme)
             .onOpenURL { url in
                 handleDeepLink(url)
             }

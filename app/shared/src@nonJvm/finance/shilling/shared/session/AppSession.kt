@@ -67,8 +67,6 @@ import kotlin.time.TimeSource
 private const val MANUAL_RETRY_MIN_LOADING_MS = 2_000L
 private const val SELF_HOSTED_MODE_MISMATCH_MESSAGE =
     "This server requires managed auth. Use the hosted flow instead."
-private const val MANAGED_AUTH_UNAVAILABLE =
-    "Managed sign-in is unavailable until the server config is reachable."
 
 /** Platform options for [AppSession]; bind one in the platform Koin module to override. */
 data class AppSessionConfig(
@@ -79,32 +77,6 @@ data class AppSessionConfig(
     /** Runs the session state machine. Main everywhere: `delay` works there on iOS. */
     val dispatcher: CoroutineDispatcher = Dispatchers.Main
 )
-
-/** What the app shell shows. */
-sealed interface SessionPhase {
-    /** First launch or signed out: the Welcome flow. */
-    data class Onboarding(
-        val selfHostedOnly: Boolean,
-        val initialSelfHostedUrl: String,
-        val hasHeldLocalData: Boolean,
-        val welcomeNotice: String?,
-        /** Managed sign-in, once the server config has been fetched. */
-        val authService: AuthService?
-    ) : SessionPhase {
-        val authReady: Boolean get() = authService != null && authService !is NoOpAuthService
-        val authDisabledReason: String? get() = if (authReady) null else MANAGED_AUTH_UNAVAILABLE
-    }
-
-    /** Onboarding done, startup identity not resolved yet. */
-    data object Starting : SessionPhase
-
-    /** The main app. */
-    data class Ready(
-        val authService: AuthService,
-        val featureGate: FeatureGate,
-        val selfHosted: Boolean
-    ) : SessionPhase
-}
 
 private class SyncRuntime(
     val signalingClient: SignalingClient,
@@ -133,7 +105,7 @@ class AppSession(
     private val notifier: ChangeNotifier,
     private val syncStoreFacade: SyncStoreFacade,
     private val config: AppSessionConfig = AppSessionConfig()
-) {
+) : SessionState {
     private val log = Logger.withTag(config.logTag)
     private val syncExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         log.e { "Sync uncaught exception: ${throwable::class.simpleName ?: "?"}: ${throwable.message ?: "?"}" }
@@ -180,7 +152,7 @@ class AppSession(
     val hostedBootstrapState = HostedBootstrapState(statusFlow)
 
     private val _phase = MutableStateFlow<SessionPhase>(SessionPhase.Starting)
-    val phase: StateFlow<SessionPhase> = _phase
+    override val phase: StateFlow<SessionPhase> = _phase
 
     // ── Effects (key → restart) ──────────────────────────────────────────────
     private val authScopeEffect = Effect()

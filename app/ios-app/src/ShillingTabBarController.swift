@@ -67,6 +67,8 @@ final class ShillingTabBarController: UITabBarController, UITabBarControllerDele
             return UIHostingController(rootView: HomeScreen { destination in
                 NativeTabBridge.shared.openHome(destination: destination)
             })
+        case "SETTINGS":
+            return UIHostingController(rootView: SettingsScreen())
         default:
             return nil
         }

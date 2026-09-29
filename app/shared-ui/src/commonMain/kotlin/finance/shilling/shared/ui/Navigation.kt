@@ -494,12 +494,7 @@ private fun ShillingNavHost(
             ReceiptsScreen(onOpenReceipt = { navController.navigate(ReceiptRoute(it)) })
         }
         composable<SettingsRoute> {
-            SettingsView(
-                selfHosted = selfHosted,
-                authService = authService,
-                featureGate = featureGate,
-                developerToolsEnabled = developerToolsEnabled
-            )
+            SettingsView(developerToolsEnabled = developerToolsEnabled)
         }
 
         composable<TransactionRoute> { entry ->
