@@ -75,6 +75,7 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     PlanListViewModels.kt # Schedules (type filter), Categories, Accounts list state
     OccurrenceActions.kt # mark paid / unmark / skip / change amount, each returning an Undoable
     SimpleEditorViewModels.kt # Category + Account editors (form state, validation, save/delete copy)
+    ScheduleEditorViewModel.kt # schedule editor: fields, recurrence options, validation, next-occurrence preview
     CredentialsCopy.kt   # email/password form + confirm-email copy (Welcome and Settings)
     SampleData.kt        # seedDemoData (developer tools)
   src/commonMain/sqldelight/finance/shilling/shared/db/
@@ -138,6 +139,8 @@ app/ios-app/              # Compose Multiplatform iOS app
     PlanScreenModel.kt / PlanScreen.swift # native SwiftUI Plan (Overview + Schedules/Categories/Accounts)
     Toast.swift          # snackbar stand-in with optional action (Undo)
     SimpleEditorScreenModels.kt / SimpleEditors.swift # native Category/Account editors; FlowModel + EditorChrome helpers
+    ScheduleEditorScreenModel.kt / ScheduleEditorScreen.swift # native schedule editor
+    DateBridge.swift     # epoch day ↔ Date (Kotlin dates cross into Swift as epoch days)
     DisplayPreferencesBridge.kt / AppearanceModel.swift # app theme mode → SwiftUI preferredColorScheme
     IosPlatformServices.kt # IosIdGenerator (NSUUID), IosReceiptFileStore (NSFileManager), NativeSqliteDriver
     ShillingIosApp.kt      # receipt store UI (add, list, edit, attach, delete)
@@ -247,7 +250,7 @@ Koin `viewModel {}`); Compose gets them with `koinViewModel()`. On iOS, a Kotlin
 annotations out of `app/shared`: its compiler plugin crashes non-Apple compilations and the
 toolchain can't scope `compilerPlugins` per platform, so it's only enabled in `ios-app`.
 `ShillingTabBarController` shows a SwiftUI screen for ported tabs (`nativeScreen(for:)`) and the
-shared Compose UI for the rest (all tabs are native now: Home, Plan, Activity, Receipts, Settings; category/account editors are native; the other editors, import and onboarding are still Compose). Native screens open
+shared Compose UI for the rest (all tabs are native now: Home, Plan, Activity, Receipts, Settings; category/account/schedule editors are native; the other editors, import and onboarding are still Compose). Native screens open
 not-yet-ported Compose screens (transaction/receipt/schedule/category/account editors, import) through `NativeTabBridge` →
 `PlatformTabBar.routeRequests`; while a Compose detail route is open (`detailOpen`), the tab
 controller shows Compose over the native screen and `ComposeOverlay` drops native toolbar items

@@ -67,6 +67,7 @@ struct PlanScreen: View {
     enum PlanEditor: Hashable {
         case category(String?)
         case account(String?)
+        case schedule(String?, ScheduleType?)
     }
 
     private struct AmountEdit {
@@ -101,6 +102,8 @@ struct PlanScreen: View {
                     CategoryEditorScreen(categoryId: id) { message in toast = Toast(message) }
                 case .account(let id):
                     AccountEditorScreen(accountId: id) { message in toast = Toast(message) }
+                case .schedule(let id, let type):
+                    ScheduleEditorScreen(scheduleId: id, presetType: type) { message in toast = Toast(message) }
                 }
             }
             .toolbar {
@@ -209,7 +212,7 @@ struct PlanScreen: View {
                     if group.expanded {
                         ForEach(group.lines, id: \.key) { line in
                             Button {
-                                if line.isSchedule { model.screen.openSchedule(scheduleId: line.key, type: nil) }
+                                if line.isSchedule { path.append(.schedule(line.key, nil)) }
                                 else if let id = line.postingId { model.screen.openTransaction(postingId: id) }
                             } label: {
                                 ListRow(title: line.title, supporting: line.supporting,
@@ -294,16 +297,15 @@ struct PlanScreen: View {
             .listRowInsets(EdgeInsets())
         }
         if let empty = state.empty {
-            emptySection(empty) { model.screen.openSchedule(scheduleId: nil, type: state.filter) }
+            emptySection(empty) { path.append(.schedule(nil, state.filter)) }
         } else {
             ForEach(Array(state.groups.enumerated()), id: \.offset) { _, group in
                 Section {
                     ForEach(group.rows, id: \.id) { row in
-                        Button { model.screen.openSchedule(scheduleId: row.id, type: nil) } label: {
+                        NavigationLink(value: PlanEditor.schedule(row.id, nil)) {
                             ListRow(title: row.title, supporting: row.supporting, trailing: row.amount,
                                     trailingColor: row.type.amountColor, dot: Color(hex: row.categoryColor))
                         }
-                        .buttonStyle(.plain)
                     }
                 } header: {
                     if let header = group.header { Text(header) }
@@ -363,7 +365,7 @@ struct PlanScreen: View {
 
     private func addInSection() {
         switch section {
-        case .schedules: model.screen.openSchedule(scheduleId: nil, type: model.schedules.filter)
+        case .schedules: path.append(.schedule(nil, model.schedules.filter))
         case .categories: path.append(.category(nil))
         case .accounts: path.append(.account(nil))
         default: break
@@ -419,15 +421,7 @@ struct PlanScreen: View {
                 }
         }
         .presentationDetents([.medium, .large])
-        .onAppear { pickedDate = Self.date(fromEpochDay: model.overview.rangeStartEpochDay) }
-    }
-
-    /// Local calendar date for an epoch day (days since 1970-01-01).
-    private static func date(fromEpochDay epochDay: Int64) -> Date {
-        var utc = Calendar(identifier: .gregorian)
-        utc.timeZone = TimeZone(identifier: "UTC")!
-        let parts = utc.dateComponents([.year, .month, .day], from: Date(timeIntervalSince1970: TimeInterval(epochDay) * 86_400))
-        return Calendar.current.date(from: parts) ?? Date()
+        .onAppear { pickedDate = DateBridge.date(fromEpochDay: model.overview.rangeStartEpochDay) }
     }
 }
 
