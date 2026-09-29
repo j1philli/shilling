@@ -1,6 +1,5 @@
 package finance.shilling.app
 
-import finance.shilling.shared.data.ScheduleType
 import finance.shilling.shared.presentation.HomeDestination
 import finance.shilling.shared.ui.PlatformRoute
 import finance.shilling.shared.ui.PlatformTabBar
@@ -32,24 +31,6 @@ object NativeTabBridge {
     fun setListener(listener: (List<NativeTab>, String?, Boolean) -> Unit) {
         this.listener = listener
         listener(tabs, selected, detailOpen)
-    }
-
-    /** Swift: open a receipt in the (Compose) editor; null adds one. */
-    fun openReceipt(receiptId: String?) {
-        routeRequests.tryEmit(PlatformRoute.Receipt(receiptId))
-    }
-
-    /** Swift: open a schedule in the (Compose) editor; null adds one of [type]. */
-    fun openSchedule(scheduleId: String?, type: ScheduleType?) {
-        routeRequests.tryEmit(PlatformRoute.Schedule(scheduleId, type))
-    }
-
-    fun openCategory(categoryId: String?) {
-        routeRequests.tryEmit(PlatformRoute.Category(categoryId))
-    }
-
-    fun openAccount(accountId: String?) {
-        routeRequests.tryEmit(PlatformRoute.Account(accountId))
     }
 
     /** Swift: open CSV import (Compose). */

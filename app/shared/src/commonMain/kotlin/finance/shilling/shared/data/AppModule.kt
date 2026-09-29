@@ -26,6 +26,7 @@ import finance.shilling.shared.presentation.CategoryEditorViewModel
 import finance.shilling.shared.presentation.CategoriesViewModel
 import finance.shilling.shared.presentation.OccurrenceActions
 import finance.shilling.shared.presentation.ScheduleEditorViewModel
+import finance.shilling.shared.presentation.ReceiptEditorViewModel
 import finance.shilling.shared.presentation.SchedulesViewModel
 import finance.shilling.shared.presentation.TransactionEditorViewModel
 import finance.shilling.shared.presentation.PlanOverviewViewModel
@@ -103,6 +104,7 @@ val dataModule: Module = module {
     viewModel { params -> CategoryEditorViewModel(params.getOrNull(), get(), get()) }
     viewModel { params -> AccountEditorViewModel(params.getOrNull(), get(), get()) }
     // Parameters: schedule id (null = new), then the preset type for new schedules.
+    viewModel { params -> ReceiptEditorViewModel(params.getOrNull(), get(), get(), get(), get()) }
     viewModel { params -> TransactionEditorViewModel(params.getOrNull(), get(), get(), get(), get(), get(), get()) }
     viewModel { params -> ScheduleEditorViewModel(params.getOrNull(), params.getOrNull(), get(), get(), get(), get()) }
     // Needs SessionState and the Settings callbacks from sessionModule.

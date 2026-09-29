@@ -25,14 +25,21 @@ final class ReceiptsModel: ObservableObject {
     }
 }
 
-/// Native Receipts: filterable list; opening or adding a receipt uses the Compose editor for now.
+/// Native Receipts: filterable list, with the native receipt editor pushed onto its stack.
 struct ReceiptsScreen: View {
     @StateObject private var model = ReceiptsModel()
     @ObservedObject private var overlay = ComposeOverlay.shared
+    @State private var path: [Editor] = []
+    @State private var toast: Toast?
+
+    /** Native editors pushed onto Receipts' navigation stack. */
+    enum Editor: Hashable {
+        case receipt(String?)
+    }
 
     var body: some View {
         let state = model.state
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 Section {
                     Picker("Filter", selection: Binding(
@@ -60,7 +67,7 @@ struct ReceiptsScreen: View {
                             if let message = empty.message { Text(message) }
                         } actions: {
                             if empty.showAdd {
-                                Button("Add receipt") { model.screen.openReceipt(receiptId: nil) }
+                                Button("Add receipt") { path.append(.receipt(nil)) }
                                     .buttonStyle(.borderedProminent)
                             }
                         }
@@ -69,9 +76,7 @@ struct ReceiptsScreen: View {
                 } else {
                     Section {
                         ForEach(state.rows, id: \.id) { row in
-                            Button {
-                                model.screen.openReceipt(receiptId: row.id)
-                            } label: {
+                            NavigationLink(value: Editor.receipt(row.id)) {
                                 HStack(spacing: 12) {
                                     Image(systemName: "doc.text")
                                         .foregroundStyle(.secondary)
@@ -90,23 +95,29 @@ struct ReceiptsScreen: View {
                                 .contentShape(Rectangle())
                                 .accessibilityElement(children: .combine)
                             }
-                            .buttonStyle(.plain)
                         }
                     }
                 }
             }
             .listStyle(.insetGrouped)
             .navigationTitle("Receipts")
+            .navigationDestination(for: Editor.self) { editor in
+                switch editor {
+                case .receipt(let id):
+                    ReceiptEditorScreen(receiptId: id) { result in toast = result }
+                }
+            }
             .toolbar {
-                if !overlay.detailOpen {
+                if !overlay.detailOpen && path.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button { model.screen.openReceipt(receiptId: nil) } label: {
+                        Button { path.append(.receipt(nil)) } label: {
                             Label("Add", systemImage: "plus")
                         }
                     }
                 }
             }
         }
+        .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .task { await model.observe() }
     }
 }

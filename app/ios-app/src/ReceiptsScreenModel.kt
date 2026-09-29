@@ -6,7 +6,7 @@ import finance.shilling.shared.presentation.ReceiptsUiState
 import finance.shilling.shared.presentation.ReceiptsViewModel
 import kotlinx.coroutines.flow.StateFlow
 
-/** Swift-facing Receipts. Opening or adding a receipt goes to the Compose editor for now. */
+/** Swift-facing Receipts. */
 class ReceiptsScreenModel : IosViewModelHost() {
     private val viewModel = viewModel<ReceiptsViewModel>()
 
@@ -14,5 +14,4 @@ class ReceiptsScreenModel : IosViewModelHost() {
     val state: StateFlow<ReceiptsUiState> = viewModel.state
 
     fun setFilter(filter: ReceiptFilter) = viewModel.setFilter(filter)
-    fun openReceipt(receiptId: String?) = NativeTabBridge.openReceipt(receiptId)
 }

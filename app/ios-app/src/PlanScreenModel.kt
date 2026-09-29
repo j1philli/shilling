@@ -84,11 +84,6 @@ class PlanScreenModel : IosViewModelHost() {
     // Schedules
     fun setScheduleFilter(type: ScheduleType?) = schedules.setFilter(type)
 
-    // Navigation to editors (Compose for now)
-    fun openSchedule(scheduleId: String?, type: ScheduleType?) = NativeTabBridge.openSchedule(scheduleId, type)
-    fun openCategory(categoryId: String?) = NativeTabBridge.openCategory(categoryId)
-    fun openAccount(accountId: String?) = NativeTabBridge.openAccount(accountId)
-
     private fun remember(result: Undoable?): String? {
         lastUndo = result
         return result?.message
