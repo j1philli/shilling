@@ -71,6 +71,7 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     ActivityViewModel.kt # Activity rows (transfer legs merged), day sections, search, range, empty copy
     ReceiptsViewModel.kt # Receipts rows, filter, "N not attached" subtitle, empty copy
     PlanNavigation.kt    # PlanPeriod/PlanSection/PlanRequest + PlanRequests (Home tiles → Plan section)
+    AppTabs.kt           # AppTab, saved TabOrder, HomeDestination.target (tab + Plan request)
     PlanOverviewViewModel.kt # Plan overview: period/anchor, by day / by category, summary, row copy, actions
     PlanListViewModels.kt # Schedules (type filter), Categories, Accounts list state
     OccurrenceActions.kt # mark paid / unmark / skip / change amount, each returning an Undoable
@@ -98,7 +99,7 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     finance/shilling/shared/session/
       AppSession.kt         # onboarding state, hosted bootstrap, sync runtime; exposes SessionPhase
       SessionModule.kt      # Koin: AppSession + Settings callbacks (reset, sign out, server/household)
-app/shared-ui/            # shared Compose UI (jvm, wasmJs, iOS)
+app/shared-ui/            # shared Compose UI (web/desktop + Android; not used on iOS)
   module.yaml
   src/commonMain/kotlin/finance/shilling/shared/ui/
     AppBootstrap.kt      # renders AppSession.phase: onboarding, loading, or the main scaffold
@@ -126,14 +127,14 @@ app/web-app/              # Tauri desktop app (wasmJs)
   src/wasmJsMain/kotlin/finance/shilling/web/
     Main.kt              # entry point, platform Koin module, WebWorkerDriver setup
     WasmPlatformServices.kt # wasmJs IdGenerator + ReceiptFileStore stubs
-app/ios-app/              # Compose Multiplatform iOS app
+app/ios-app/              # native SwiftUI iOS app (no Compose) over the shared view models
   module.yaml         # product: ios/app
   module.xcodeproj/   # Kotlin Toolchain–managed Xcode project (has -lsqlite3 linker flag)
   src/
-    App.swift           # SwiftUI @main entry, starts Koin, hosts ShillingTabBarController
-    ShillingTabBarController.swift # native UITabBarController around the shared Compose UI
-    NativeTabBridge.kt  # tab list/selection bridge between Compose and the native tab bar
-    MainViewController.kt  # startIosKoin (platform Koin module) + ComposeUIViewController factory
+    App.swift           # SwiftUI @main entry: starts Koin, shows onboarding / startup / the tab bar by AppRoot.phase
+    ShillingTabBarController.swift # native UITabBarController (tabs → SwiftUI screens), ReceiptCameraRequest
+    NativeTabBridge.kt  # tab list from the saved TabOrder, Home tile → tab (+ PlanRequests)
+    IosKoin.kt           # startIosKoin (platform Koin module, logging, HttpClient), isDebugBuild
     IosViewModelHost.kt  # base for Swift-facing screen models (owns a ViewModelStore)
     HomeScreenModel.kt   # Swift-facing HomeViewModel facade (@NativeCoroutinesState)
     HomeModel.swift / HomeScreen.swift # native SwiftUI Home
@@ -153,7 +154,6 @@ app/ios-app/              # Compose Multiplatform iOS app
     DateBridge.swift     # epoch day ↔ Date (Kotlin dates cross into Swift as epoch days)
     DisplayPreferencesBridge.kt / AppearanceModel.swift # app theme mode → SwiftUI preferredColorScheme
     IosPlatformServices.kt # IosIdGenerator (NSUUID), IosReceiptFileStore (NSFileManager), NativeSqliteDriver
-    ShillingIosApp.kt      # receipt store UI (add, list, edit, attach, delete)
 src-tauri/            # Tauri native shell (Rust)
   tauri.conf.json     # app config, bundle identifier, frontend dist path
   src/main.rs         # Rust entry point
@@ -250,24 +250,20 @@ rather than raw text fields for money, dates, or selects. Destructive actions ne
 `ConfirmDialog` (EditorScaffold's `delete` does this). Format with `formatCurrency` /
 `formatDate` / `formatSigned`; never show raw ISO dates or enum names.
 
-**Native iOS UI (migration in progress)**: iOS is moving to a fully native SwiftUI front end,
-one screen at a time; web/desktop and Android stay on Compose. Screen logic and copy live in
-shared view models (`shared/presentation`, AndroidX multiplatform `ViewModel`, registered with
-Koin `viewModel {}`); Compose gets them with `koinViewModel()`. On iOS, a Kotlin facade in
-`ios-app` (subclass of `IosViewModelHost`) exposes the view model's `StateFlow` with
-`@NativeCoroutinesState`, and a Swift `ObservableObject` consumes it with
-`asyncSequence(for: model.stateFlow)` from `KMPNativeCoroutinesAsync`. Keep KMP-NativeCoroutines
+**Native iOS UI**: iOS is a fully native SwiftUI front end (no Compose); web/desktop and
+Android stay on Compose. Screen logic and copy live in shared view models (`shared/presentation`,
+AndroidX multiplatform `ViewModel`, registered with Koin `viewModel {}`), so both UIs say the same
+thing; Compose gets them with `koinViewModel()`. On iOS, a Kotlin facade in `ios-app` (subclass of
+`IosViewModelHost`) exposes the view model's `StateFlow` with `@NativeCoroutinesState` (suspend
+actions with `@NativeCoroutines`), and Swift consumes it with `asyncSequence(for: screen.stateFlow)`
+from `KMPNativeCoroutinesAsync` (usually through `FlowModel`). Keep KMP-NativeCoroutines
 annotations out of `app/shared`: its compiler plugin crashes non-Apple compilations and the
 toolchain can't scope `compilerPlugins` per platform, so it's only enabled in `ios-app`.
-`ShillingTabBarController` shows a SwiftUI screen for ported tabs (`nativeScreen(for:)`) and the
-shared Compose UI for the rest (all tabs are native now: Home, Plan, Activity, Receipts, Settings; all editors, CSV import and onboarding are native). Native screens push their
-editors onto their own `NavigationStack`. Home tiles still switch tabs through `NativeTabBridge` →
-`PlatformTabBar`; while a Compose detail route is open (`detailOpen`), the tab
-controller shows Compose over the native screen and `ComposeOverlay` drops native toolbar items
-(the iPhone Duo lifts them into the side column). SwiftUI screens follow the app's
-Light/Dark/System choice through `AppearanceModel` (`preferredColorScheme` at the app root). The Compose view controller must stay in the window at all
-times (Compose Multiplatform disposes its scene when it leaves and crashes on re-entry, and
-the Compose tabs would lose their state), so on native tabs it sits hidden under the SwiftUI screen.
+`App.swift` shows `OnboardingScreen`, a startup spinner, or `ShillingTabBarController` by
+`AppRoot.phase`; the tab controller maps each tab to its SwiftUI screen, and screens push their
+editors onto their own `NavigationStack`. Undoable results cross to Swift as `UndoHandle` (it
+outlives the editor that produced it, so the caller's `Toast` can offer Undo). SwiftUI follows the
+app's Light/Dark/System choice through `AppearanceModel` (`preferredColorScheme` at the app root).
 
 Editor view models take the item id (null = new) as a Koin parameter (`viewModel { params -> … }`);
 Compose passes it with `koinViewModel(key = …) { parametersOf(id) }` (key per id so two-pane

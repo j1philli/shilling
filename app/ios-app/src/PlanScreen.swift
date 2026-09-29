@@ -56,7 +56,6 @@ final class PlanModel: ObservableObject {
 /// Accounts, with native editors pushed onto its navigation stack.
 struct PlanScreen: View {
     @StateObject private var model = PlanModel()
-    @ObservedObject private var overlay = ComposeOverlay.shared
     @State private var section: PlanSection = .overview
     @State private var toast: Toast?
     @State private var pickingDate = false
@@ -110,7 +109,7 @@ struct PlanScreen: View {
                 }
             }
             .toolbar {
-                if !overlay.detailOpen && section != .overview && path.isEmpty {
+                if section != .overview && path.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(action: addInSection) { Label("Add", systemImage: "plus") }
                     }

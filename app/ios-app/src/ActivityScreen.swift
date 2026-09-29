@@ -28,7 +28,6 @@ final class ActivityModel: ObservableObject {
 /// Native Activity: recorded transactions by day, with search and a history range.
 struct ActivityScreen: View {
     @StateObject private var model = ActivityModel()
-    @ObservedObject private var overlay = ComposeOverlay.shared
     @State private var query = ""
     @State private var path: [Editor] = []
     @State private var toast: Toast?
@@ -97,7 +96,7 @@ struct ActivityScreen: View {
                 }
             }
             .toolbar {
-                if !overlay.detailOpen && path.isEmpty {
+                if path.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button { path.append(.importCSV) } label: {
                             Label("Import", systemImage: "square.and.arrow.down")

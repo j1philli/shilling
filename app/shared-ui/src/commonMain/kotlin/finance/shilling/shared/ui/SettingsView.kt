@@ -116,19 +116,16 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
             onSelect = { day -> day?.let(viewModel::setWeekStart) },
             supportingText = "Plan and Home show weeks starting on this day."
         )
-        // Native tab bars (iOS) can't be reordered by dragging.
-        if (!LocalPlatformTabBar.current) {
-            Text("Tabs", style = MaterialTheme.typography.labelLarge)
-            Text(
-                "Press and hold a tab, then drag it to reorder.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            OutlinedButton(onClick = {
-                resetTabOrder(settings)
-                snackbar.show("Tab order reset")
-            }) { Text("Reset tab order") }
-        }
+        Text("Tabs", style = MaterialTheme.typography.labelLarge)
+        Text(
+            "Press and hold a tab, then drag it to reorder.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        OutlinedButton(onClick = {
+            resetTabOrder(settings)
+            snackbar.show("Tab order reset")
+        }) { Text("Reset tab order") }
     }
 }
 

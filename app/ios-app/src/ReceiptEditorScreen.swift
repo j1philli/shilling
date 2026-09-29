@@ -16,11 +16,13 @@ struct ReceiptEditorScreen: View {
     @State private var toast: Toast?
     @State private var preview: URL?
     @State private var picking = false
+    let launchCamera: Bool
     let onDone: (Toast) -> Void
 
-    init(receiptId: String?, onDone: @escaping (Toast) -> Void) {
+    init(receiptId: String?, launchCamera: Bool = false, onDone: @escaping (Toast) -> Void) {
         let screen = ReceiptEditorScreenModel(receiptId: receiptId)
         _model = StateObject(wrappedValue: FlowModel(screen: screen, initial: screen.state, flow: screen.stateFlow))
+        self.launchCamera = launchCamera
         self.onDone = onDone
     }
 
@@ -41,7 +43,7 @@ struct ReceiptEditorScreen: View {
         ) {
             if state.isNew {
                 Section {
-                    ReceiptSourceButtons { file in
+                    ReceiptSourceButtons(launchCamera: launchCamera) { file in
                         screen.setFile(fileName: file.name, data: file.data)
                         if name.isEmpty { name = file.name }
                     }

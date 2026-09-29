@@ -34,8 +34,6 @@ data class AppBootstrapScaffoldConfig(
     val developerToolsEnabled: Boolean = false,
     /** Given the app's NavController once the main scaffold is shown (web: browser history). */
     val navControllerHook: @Composable (NavHostController) -> Unit = {},
-    /** Native tab bar drawn by the platform (iOS); null draws the Compose bar / rail. */
-    val platformTabBar: PlatformTabBar? = null,
     val startupPendingContent: @Composable () -> Unit = { DefaultLoadingSurface() }
 )
 
@@ -79,8 +77,7 @@ fun ShillingAppBootstrap(
                     pendingReceiptFile = scaffoldConfig.pendingReceiptFile,
                     onPendingReceiptConsumed = scaffoldConfig.onPendingReceiptConsumed,
                     developerToolsEnabled = scaffoldConfig.developerToolsEnabled,
-                    navControllerHook = scaffoldConfig.navControllerHook,
-                    platformTabBar = scaffoldConfig.platformTabBar
+                    navControllerHook = scaffoldConfig.navControllerHook
                 )
             }
         }

@@ -36,7 +36,6 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -76,25 +75,22 @@ import com.composables.icons.materialicons.filled.Home
 import com.composables.icons.materialicons.filled.Receipt
 import com.composables.icons.materialicons.filled.Settings
 import com.russhwolf.settings.Settings
-import finance.shilling.shared.data.SETTINGS_KEY_TAB_ORDER
 import finance.shilling.shared.data.ScheduleType
 import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.shared.data.auth.FeatureGate
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import finance.shilling.shared.presentation.AppTab
 import finance.shilling.shared.presentation.HomeDestination
+import finance.shilling.shared.presentation.TabOrder
+import finance.shilling.shared.presentation.target
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
-import finance.shilling.shared.presentation.PlanPeriod
-import finance.shilling.shared.presentation.PlanRequest
 import finance.shilling.shared.presentation.PlanRequests
-import finance.shilling.shared.presentation.PlanSection
 
 enum class ShelfDestination(
     val title: String,
@@ -115,69 +111,15 @@ data class ReceiptPickers(
 
 val LocalReceiptPickers = staticCompositionLocalOf { ReceiptPickers() }
 
-/** True when the platform draws the tab bar (see [PlatformTabBar]). */
-val LocalPlatformTabBar = staticCompositionLocalOf { false }
+private fun loadTabOrder(settings: Settings): List<ShelfDestination> =
+    TabOrder.load(settings).map { ShelfDestination.valueOf(it.name) }
 
-/**
- * A tab bar drawn by the platform instead of Compose (iOS: a native UITabBarController).
- * When given to [ShillingScaffold], the scaffold draws no bar or rail of its own.
- */
-class PlatformTabBar(
-    /** Taps on the platform bar: a tab, or null for Settings. */
-    val selections: Flow<ShelfDestination?>,
-    /**
-     * Tab order (Settings is always last), the current selection (null = Settings), and whether a
-     * detail/editor route is open (the platform must show Compose over a native tab screen then).
-     */
-    val onChange: (order: List<ShelfDestination>, selected: ShelfDestination?, detailOpen: Boolean) -> Unit,
-    /** The scaffold left the screen (e.g. sign-out); the platform bar should hide. */
-    val onDispose: () -> Unit,
-    /** Taps on a platform-drawn Home screen's tiles, routed like the Compose Home. */
-    val homeNavigation: Flow<HomeDestination> = emptyFlow(),
-    /** Detail/editor screens a platform-drawn screen asks Compose to open. */
-    val routeRequests: Flow<PlatformRoute> = emptyFlow()
-)
-
-/** Compose screens a platform-drawn screen can open (while those screens are still Compose). */
-sealed interface PlatformRoute {
-    /** A transaction; null id creates one. */
-    data class Transaction(val postingId: String?) : PlatformRoute
-    data object Import : PlatformRoute
-    /** A receipt; null id adds one. */
-    data class Receipt(val receiptId: String?) : PlatformRoute
-    /** A schedule; null id adds one (of [type], when given). */
-    data class Schedule(val scheduleId: String?, val type: ScheduleType? = null) : PlatformRoute
-    data class Category(val categoryId: String?) : PlatformRoute
-    data class Account(val accountId: String?) : PlatformRoute
-}
-
-/** Tabs that were merged into others, mapped to where they live now. */
-private val LEGACY_TABS = mapOf(
-    "WEEKLY" to "PLAN", "BUDGET" to "PLAN", "SCHEDULES" to "PLAN", "CATEGORIES" to "PLAN",
-    "ACCOUNTS" to "PLAN", "HISTORY" to "ACTIVITY", "IMPORT" to "ACTIVITY"
-)
-
-private fun loadTabOrder(settings: Settings): List<ShelfDestination> {
-    val saved = settings.getStringOrNull(SETTINGS_KEY_TAB_ORDER)
-        ?: return ShelfDestination.entries.toList()
-    // Merged tabs take the first of their predecessors' saved positions.
-    val result = saved.split(",")
-        .map { name -> LEGACY_TABS[name] ?: name }
-        .mapNotNull { name -> ShelfDestination.entries.find { it.name == name } }
-        .distinct()
-        .toMutableList()
-    // Append any new destinations not in saved order
-    ShelfDestination.entries.filter { it !in result }.forEach { result.add(it) }
-    return result
-}
-
-private fun saveTabOrder(settings: Settings, order: List<ShelfDestination>) {
-    settings.putString(SETTINGS_KEY_TAB_ORDER, order.joinToString(",") { it.name })
-}
+private fun saveTabOrder(settings: Settings, order: List<ShelfDestination>) =
+    TabOrder.save(settings, order.map { AppTab.valueOf(it.name) })
 
 /** Restores the default tab order (used by Settings). */
 fun resetTabOrder(settings: Settings) {
-    settings.remove(SETTINGS_KEY_TAB_ORDER)
+    TabOrder.reset(settings)
     TabOrderChanges.version++
 }
 
@@ -321,8 +263,7 @@ fun ShillingScaffold(
     onPendingReceiptConsumed: () -> Unit = {},
     developerToolsEnabled: Boolean = false,
     /** Platform hook given the app's NavController (the web build binds browser history). */
-    navControllerHook: @Composable (NavHostController) -> Unit = {},
-    platformTabBar: PlatformTabBar? = null
+    navControllerHook: @Composable (NavHostController) -> Unit = {}
 ) {
     val settings: Settings = koinInject()
     val navController = rememberNavController()
@@ -337,8 +278,7 @@ fun ShillingScaffold(
     }
     val showingSettings = currentDestination?.hasRoute(SettingsRoute::class) == true
     val selectedTab = if (showingSettings) null else (
-        (LEGACY_TABS[selectedTabName] ?: selectedTabName)
-            .let { name -> ShelfDestination.entries.find { it.name == name } } ?: ShelfDestination.HOME
+        TabOrder.resolve(selectedTabName)?.let { ShelfDestination.valueOf(it.name) } ?: ShelfDestination.HOME
     )
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -362,22 +302,9 @@ fun ShillingScaffold(
     // Lets Home open a specific Plan section/period; consumed by whichever Plan screen shows.
     val planRequests = koinInject<PlanRequests>()
     val openHomeDestination: (HomeDestination) -> Unit = { destination ->
-        val request = when (destination) {
-            HomeDestination.ACCOUNTS -> PlanRequest(PlanSection.ACCOUNTS)
-            HomeDestination.WEEK -> PlanRequest(PlanSection.OVERVIEW, PlanPeriod.WEEK)
-            HomeDestination.MONTH -> PlanRequest(PlanSection.OVERVIEW, PlanPeriod.MONTH)
-            HomeDestination.SCHEDULES -> PlanRequest(PlanSection.SCHEDULES)
-            HomeDestination.CATEGORIES -> PlanRequest(PlanSection.CATEGORIES)
-            HomeDestination.ACTIVITY, HomeDestination.RECEIPTS -> null
-        }
-        when {
-            request != null -> {
-                planRequests.request(request)
-                navController.navigateToTab(ShelfDestination.PLAN)
-            }
-            destination == HomeDestination.ACTIVITY -> navController.navigateToTab(ShelfDestination.ACTIVITY)
-            else -> navController.navigateToTab(ShelfDestination.RECEIPTS)
-        }
+        val target = destination.target
+        target.planRequest?.let(planRequests::request)
+        navController.navigateToTab(ShelfDestination.valueOf(target.tab.name))
     }
 
     val onSelectTab: (ShelfDestination) -> Unit = { navController.navigateToTab(it) }
@@ -391,8 +318,7 @@ fun ShillingScaffold(
         CompositionLocalProvider(
             LocalSnackbarController provides snackbarController,
             LocalReceiptPickers provides ReceiptPickers(cameraButton, photoButton),
-            LocalAutoLaunchCamera provides autoOpenCamera,
-            LocalPlatformTabBar provides (platformTabBar != null)
+            LocalAutoLaunchCamera provides autoOpenCamera
         ) {
             ShillingNavHost(
                 navController = navController,
@@ -411,34 +337,7 @@ fun ShillingScaffold(
     val useCompactChrome = !currentWindowAdaptiveInfoV2().windowSizeClass
         .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
-    if (platformTabBar != null) {
-        LaunchedEffect(navController, platformTabBar) {
-            platformTabBar.selections.collect { dest -> if (dest == null) onSettings() else onSelectTab(dest) }
-        }
-        LaunchedEffect(navController, platformTabBar) {
-            platformTabBar.homeNavigation.collect(openHomeDestination)
-        }
-        LaunchedEffect(navController, platformTabBar) {
-            platformTabBar.routeRequests.collect { request ->
-                when (request) {
-                    is PlatformRoute.Transaction -> navController.navigate(TransactionRoute(request.postingId))
-                    PlatformRoute.Import -> navController.navigate(ImportRoute)
-                    is PlatformRoute.Receipt -> navController.navigate(ReceiptRoute(request.receiptId))
-                    is PlatformRoute.Schedule -> navController.navigate(ScheduleRoute(request.scheduleId, request.type?.name))
-                    is PlatformRoute.Category -> navController.navigate(CategoryRoute(request.categoryId))
-                    is PlatformRoute.Account -> navController.navigate(AccountRoute(request.accountId))
-                }
-            }
-        }
-        val detailOpen = currentDestination != null && !currentDestination.isTopLevel()
-        LaunchedEffect(platformTabBar, orderedDestinations, selectedTab, detailOpen) {
-            platformTabBar.onChange(orderedDestinations, selectedTab, detailOpen)
-        }
-        DisposableEffect(platformTabBar) {
-            onDispose { platformTabBar.onDispose() }
-        }
-        PlatformTabBarScaffold(snackbarHostState = snackbarHostState, host = host)
-    } else if (useCompactChrome) {
+    if (useCompactChrome) {
         CompactScaffold(
             selectedTab = selectedTab,
             showingSettings = showingSettings,
@@ -626,26 +525,6 @@ private fun ExpandedScaffold(
             ) {
                 host(Modifier.widthIn(max = 1200.dp).fillMaxSize())
             }
-        }
-    }
-}
-
-/** Content only: the platform draws the tab bar and reports its height through the safe area. */
-@Composable
-private fun PlatformTabBarScaffold(
-    snackbarHostState: SnackbarHostState,
-    host: @Composable (Modifier) -> Unit
-) {
-    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding)
-                .imePadding(),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            host(Modifier.widthIn(max = 1200.dp).fillMaxSize())
         }
     }
 }

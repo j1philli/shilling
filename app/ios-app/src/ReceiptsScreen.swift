@@ -28,13 +28,15 @@ final class ReceiptsModel: ObservableObject {
 /// Native Receipts: filterable list, with the native receipt editor pushed onto its stack.
 struct ReceiptsScreen: View {
     @StateObject private var model = ReceiptsModel()
-    @ObservedObject private var overlay = ComposeOverlay.shared
     @State private var path: [Editor] = []
     @State private var toast: Toast?
+    @ObservedObject private var cameraRequest = ReceiptCameraRequest.shared
 
     /** Native editors pushed onto Receipts' navigation stack. */
     enum Editor: Hashable {
         case receipt(String?)
+        /// A new receipt with the camera up ("Scan Receipt").
+        case scan
     }
 
     var body: some View {
@@ -105,10 +107,12 @@ struct ReceiptsScreen: View {
                 switch editor {
                 case .receipt(let id):
                     ReceiptEditorScreen(receiptId: id) { result in toast = result }
+                case .scan:
+                    ReceiptEditorScreen(receiptId: nil, launchCamera: true) { result in toast = result }
                 }
             }
             .toolbar {
-                if !overlay.detailOpen && path.isEmpty {
+                if path.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button { path.append(.receipt(nil)) } label: {
                             Label("Add", systemImage: "plus")
@@ -119,5 +123,10 @@ struct ReceiptsScreen: View {
         }
         .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .task { await model.observe() }
+        .onReceive(cameraRequest.$pending) { pending in
+            guard pending else { return }
+            cameraRequest.pending = false
+            path = [.scan]
+        }
     }
 }

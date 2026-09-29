@@ -11,16 +11,13 @@ struct ShillingApp: App {
     @StateObject private var appPhase = AppPhaseModel()
 
     init() {
-        MainViewControllerKt.startIosKoin()
+        IosKoinKt.startIosKoin()
         _showSnapshotShield = State(initialValue: !Self.hasPendingReceiptCameraLaunch())
     }
 
     var body: some Scene {
         WindowGroup {
             ZStack {
-                ComposeViewRepresentable()
-                    .ignoresSafeArea(.all)
-
                 switch appPhase.phase {
                 case .onboarding:
                     OnboardingScreen()
@@ -30,7 +27,8 @@ struct ShillingApp: App {
                         ProgressView()
                     }
                 default:
-                    EmptyView()
+                    // Rebuilt on each return to the main app (e.g. after Start over).
+                    TabBarView().ignoresSafeArea(.all)
                 }
 
                 ReceiptShortcutLaunchView()
@@ -71,7 +69,7 @@ struct ShillingApp: App {
     private func handleDeepLink(_ url: URL) {
         guard url.scheme == "shilling.finance" else { return }
         if url.host == "receipt-camera" {
-            DeepLinkState.shared.setAction(action: .receiptCamera)
+            ReceiptCameraRequest.shared.pending = true
         }
     }
 
@@ -84,7 +82,7 @@ struct ShillingApp: App {
         print("[DeepLink] checkAppGroupFlag: pendingReceiptCamera = \(flag)")
         if flag {
             defaults.removeObject(forKey: "pendingReceiptCamera")
-            DeepLinkState.shared.setAction(action: .receiptCamera)
+            ReceiptCameraRequest.shared.pending = true
             print("[DeepLink] Set DeepLinkAction to receiptCamera")
         }
     }
@@ -122,12 +120,4 @@ private struct ReceiptShortcutLaunchView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
     }
-}
-
-struct ComposeViewRepresentable: UIViewControllerRepresentable {
-    func makeUIViewController(context: Context) -> UIViewController {
-        ShillingTabBarController()
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }

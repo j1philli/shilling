@@ -11,47 +11,54 @@ struct PickedFile {
 /// "Take photo", "Choose photo" and "Attach file" buttons for adding a receipt. Each hands the
 /// picked file to `onPick`.
 struct ReceiptSourceButtons: View {
+    /// Opens the camera right away (once), e.g. for "Scan Receipt".
+    var launchCamera = false
     let onPick: (PickedFile) -> Void
 
+    @State private var launchedCamera = false
     @State private var showingCamera = false
     @State private var showingFiles = false
     @State private var photo: PhotosPickerItem?
 
     var body: some View {
-        Group {
-            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                Button { showingCamera = true } label: { Label("Take photo", systemImage: "camera") }
-            }
-            PhotosPicker(selection: $photo, matching: .images) {
-                Label("Choose photo", systemImage: "photo.on.rectangle")
-            }
-            Button { showingFiles = true } label: { Label("Attach file", systemImage: "doc") }
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            Button { showingCamera = true } label: { Label("Take photo", systemImage: "camera") }
         }
-        .fullScreenCover(isPresented: $showingCamera) {
-            CameraPicker { image in
-                if let data = image.jpegData(compressionQuality: 0.85) {
-                    onPick(PickedFile(name: "Receipt \(Self.timestamp()).jpg", data: data))
+        PhotosPicker(selection: $photo, matching: .images) {
+            Label("Choose photo", systemImage: "photo.on.rectangle")
+        }
+        // The presenters live on this one row: modifiers on a group would apply to every row.
+        Button { showingFiles = true } label: { Label("Attach file", systemImage: "doc") }
+            .fullScreenCover(isPresented: $showingCamera) {
+                CameraPicker { image in
+                    if let data = image.jpegData(compressionQuality: 0.85) {
+                        onPick(PickedFile(name: "Receipt \(Self.timestamp()).jpg", data: data))
+                    }
+                }
+                .ignoresSafeArea()
+            }
+            .fileImporter(isPresented: $showingFiles, allowedContentTypes: [.item]) { result in
+                guard case .success(let url) = result else { return }
+                let scoped = url.startAccessingSecurityScopedResource()
+                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+                if let data = try? Data(contentsOf: url) {
+                    onPick(PickedFile(name: url.lastPathComponent, data: data))
                 }
             }
-            .ignoresSafeArea()
-        }
-        .fileImporter(isPresented: $showingFiles, allowedContentTypes: [.item]) { result in
-            guard case .success(let url) = result else { return }
-            let scoped = url.startAccessingSecurityScopedResource()
-            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            if let data = try? Data(contentsOf: url) {
-                onPick(PickedFile(name: url.lastPathComponent, data: data))
+            .onAppear {
+                guard launchCamera, !launchedCamera, UIImagePickerController.isSourceTypeAvailable(.camera) else { return }
+                launchedCamera = true
+                showingCamera = true
             }
-        }
-        .onChange(of: photo) { _, item in
-            guard let item else { return }
-            photo = nil
-            Task {
-                guard let data = try? await item.loadTransferable(type: Data.self) else { return }
-                let ext = item.supportedContentTypes.first?.preferredFilenameExtension ?? "jpg"
-                onPick(PickedFile(name: "Photo \(Self.timestamp()).\(ext)", data: data))
+            .onChange(of: photo) { _, item in
+                guard let item else { return }
+                photo = nil
+                Task {
+                    guard let data = try? await item.loadTransferable(type: Data.self) else { return }
+                    let ext = item.supportedContentTypes.first?.preferredFilenameExtension ?? "jpg"
+                    onPick(PickedFile(name: "Photo \(Self.timestamp()).\(ext)", data: data))
+                }
             }
-        }
     }
 
     private static func timestamp() -> String {

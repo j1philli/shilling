@@ -1,12 +1,5 @@
 package finance.shilling.app
 
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.window.ComposeUIViewController
 import co.touchlab.kermit.LogWriter
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
@@ -17,10 +10,6 @@ import finance.shilling.shared.data.ensureLocalSchemaReady
 import finance.shilling.shared.data.initKoin
 import finance.shilling.shared.data.sync.BOOTSTRAP_NETWORK_TIMEOUT_MS
 import finance.shilling.shared.db.ShillingDatabase
-import finance.shilling.shared.ui.AppBootstrapScaffoldConfig
-import finance.shilling.shared.ui.ShelfDestination
-import finance.shilling.shared.ui.ShillingAppBootstrap
-import io.github.vinceglb.filekit.PlatformFile
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.plugins.HttpTimeout
@@ -31,13 +20,11 @@ import io.ktor.client.webrtc.WebRtcClient
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.koin.dsl.module
 import org.koin.mp.KoinPlatform
 import platform.Foundation.NSTemporaryDirectory
-import platform.UIKit.UIViewController
 import platform.posix.fclose
 import platform.posix.fflush
 import platform.posix.fopen
@@ -132,47 +119,6 @@ fun startIosKoin() {
             )
         }
     }, sessionModule).get<AppSession>().start()
-}
-
-fun MainViewController(): UIViewController {
-    startIosKoin()
-    return ComposeUIViewController {
-        val deepLinkAction by DeepLinkState.pendingAction.collectAsState()
-        var cameraLaunchToken by remember { mutableStateOf(0L) }
-        var pendingReceiptFile by remember { mutableStateOf<PlatformFile?>(null) }
-        val externalNavRequest = remember { MutableStateFlow<ShelfDestination?>(null) }
-
-        LaunchedEffect(deepLinkAction) {
-            if (deepLinkAction == DeepLinkAction.RECEIPT_CAMERA) {
-                cameraLaunchToken += 1L
-                DeepLinkState.consume()
-            }
-        }
-
-        ShillingAppBootstrap(
-            scaffoldConfig = AppBootstrapScaffoldConfig(
-                cameraButton = { onFile -> MobileCameraReceiptButton(onFile) },
-                photoButton = { onFile -> MobilePhotoLibraryReceiptButton(onFile) },
-                developerToolsEnabled = isDebugBuild(),
-                externalNavRequest = externalNavRequest,
-                pendingReceiptFile = pendingReceiptFile,
-                onPendingReceiptConsumed = { pendingReceiptFile = null },
-                platformTabBar = NativeTabBridge.tabBar,
-                preScaffoldContent = {
-                    MobileAutoLaunchReceiptCamera(
-                        launchToken = cameraLaunchToken.takeIf { it > 0L },
-                        onFile = { file ->
-                            cameraLaunchToken = 0L
-                            if (file != null) {
-                                pendingReceiptFile = file
-                                externalNavRequest.value = ShelfDestination.RECEIPTS
-                            }
-                        }
-                    )
-                }
-            )
-        )
-    }
 }
 
 private fun createIosHttpClient(): HttpClient = HttpClient(Darwin) {
