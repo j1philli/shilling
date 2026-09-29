@@ -1,6 +1,7 @@
 package finance.shilling.app
 
 import finance.shilling.shared.presentation.HomeDestination
+import finance.shilling.shared.ui.PlatformRoute
 import finance.shilling.shared.ui.PlatformTabBar
 import finance.shilling.shared.ui.ShelfDestination
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,14 +18,29 @@ object NativeTabBridge {
 
     private val selections = MutableSharedFlow<ShelfDestination?>(extraBufferCapacity = 1)
     private val homeNavigation = MutableSharedFlow<HomeDestination>(extraBufferCapacity = 1)
-    private var listener: ((List<NativeTab>, String?) -> Unit)? = null
+    private val routeRequests = MutableSharedFlow<PlatformRoute>(extraBufferCapacity = 1)
+    private var listener: ((List<NativeTab>, String?, Boolean) -> Unit)? = null
     private var tabs: List<NativeTab> = emptyList()
     private var selected: String? = null
+    private var detailOpen = false
 
-    /** Swift: receives the tabs (empty while the main scaffold isn't showing) and the selected key. */
-    fun setListener(listener: (List<NativeTab>, String?) -> Unit) {
+    /**
+     * Swift: receives the tabs (empty while the main scaffold isn't showing), the selected key, and
+     * whether a Compose detail/editor screen is open (shown over native tab screens).
+     */
+    fun setListener(listener: (List<NativeTab>, String?, Boolean) -> Unit) {
         this.listener = listener
-        listener(tabs, selected)
+        listener(tabs, selected, detailOpen)
+    }
+
+    /** Swift: open a transaction in the (Compose) editor; null creates one. */
+    fun openTransaction(postingId: String?) {
+        routeRequests.tryEmit(PlatformRoute.Transaction(postingId))
+    }
+
+    /** Swift: open CSV import (Compose). */
+    fun openImport() {
+        routeRequests.tryEmit(PlatformRoute.Import)
     }
 
     /** Swift: the user tapped the tab with [key]. */
@@ -39,21 +55,24 @@ object NativeTabBridge {
 
     val tabBar = PlatformTabBar(
         selections = selections,
-        onChange = { order, selectedTab ->
+        onChange = { order, selectedTab, detail ->
             publish(
                 tabs = order.map { NativeTab(it.name, it.title, it.systemImage()) } +
                     NativeTab(SETTINGS, "Settings", "gearshape"),
-                selected = selectedTab?.name ?: SETTINGS
+                selected = selectedTab?.name ?: SETTINGS,
+                detailOpen = detail
             )
         },
-        onDispose = { publish(emptyList(), null) },
-        homeNavigation = homeNavigation
+        onDispose = { publish(emptyList(), null, false) },
+        homeNavigation = homeNavigation,
+        routeRequests = routeRequests
     )
 
-    private fun publish(tabs: List<NativeTab>, selected: String?) {
+    private fun publish(tabs: List<NativeTab>, selected: String?, detailOpen: Boolean) {
         this.tabs = tabs
         this.selected = selected
-        listener?.invoke(tabs, selected)
+        this.detailOpen = detailOpen
+        listener?.invoke(tabs, selected, detailOpen)
     }
 
     private fun ShelfDestination.systemImage(): String = when (this) {

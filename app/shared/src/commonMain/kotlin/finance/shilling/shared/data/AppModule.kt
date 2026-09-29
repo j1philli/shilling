@@ -18,6 +18,7 @@ import finance.shilling.shared.data.store.createScheduleStore
 import finance.shilling.shared.data.usecase.ComputeBudgetUseCase
 import finance.shilling.shared.data.usecase.ComputeWindowUseCase
 import finance.shilling.shared.presentation.DisplayPreferences
+import finance.shilling.shared.presentation.ActivityViewModel
 import finance.shilling.shared.presentation.HomeViewModel
 import finance.shilling.shared.presentation.SettingsViewModel
 import org.koin.core.Koin
@@ -79,6 +80,7 @@ val dataModule: Module = module {
     single { ComputeBudgetUseCase(get(), get(), get()) }
 
     viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { ActivityViewModel(get()) }
     // Needs SessionState and the Settings callbacks from sessionModule.
     viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 

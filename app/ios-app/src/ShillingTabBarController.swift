@@ -12,6 +12,8 @@ import KotlinModules
 /// SwiftUI screen on native tabs.
 final class ShillingTabBarController: UITabBarController, UITabBarControllerDelegate {
     private let composeController = MainViewControllerKt.MainViewController()
+    /// A Compose detail/editor screen is open; it shows over the native tab screen until closed.
+    private var detailOpen = false
     /// Hosts Compose while there are no tabs (before the main scaffold appears).
     private lazy var placeholderTab = UITab(title: "", image: nil, identifier: "") { _ in TabContainerController() }
 
@@ -21,7 +23,9 @@ final class ShillingTabBarController: UITabBarController, UITabBarControllerDele
         setTabs([placeholderTab], animated: false)
         setTabBarHidden(true, animated: false)
         attachCompose(to: placeholderTab)
-        NativeTabBridge.shared.setListener { [weak self] tabs, selected in
+        NativeTabBridge.shared.setListener { [weak self] tabs, selected, detailOpen in
+            self?.detailOpen = detailOpen.boolValue
+            ComposeOverlay.shared.detailOpen = detailOpen.boolValue
             self?.update(tabs: tabs, selected: selected)
         }
     }
@@ -67,6 +71,8 @@ final class ShillingTabBarController: UITabBarController, UITabBarControllerDele
             return UIHostingController(rootView: HomeScreen { destination in
                 NativeTabBridge.shared.openHome(destination: destination)
             })
+        case "ACTIVITY":
+            return UIHostingController(rootView: ActivityScreen())
         case "SETTINGS":
             return UIHostingController(rootView: SettingsScreen())
         default:
@@ -83,11 +89,16 @@ final class ShillingTabBarController: UITabBarController, UITabBarControllerDele
             container.addChild(composeController)
             composeController.view.frame = container.view.bounds
             composeController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            // Below the native screen, if any.
             container.view.insertSubview(composeController.view, at: 0)
             composeController.didMove(toParent: container)
         }
-        composeController.view.isHidden = container.native != nil
+        // On native tabs Compose sits hidden below the SwiftUI screen, except while it shows a
+        // detail/editor screen the native screen opened.
+        let showCompose = container.native == nil || detailOpen
+        composeController.view.isHidden = !showCompose
+        // Hide the native screen too (not just cover it), so its toolbar and accessibility
+        // elements don't show through the Compose editor.
+        container.native?.view.isHidden = showCompose
     }
 }
 
@@ -113,4 +124,13 @@ private final class TabContainerController: UIViewController {
         view.addSubview(native.view)
         native.didMove(toParent: self)
     }
+}
+
+/// Whether a Compose detail/editor screen is showing over the native tab screens. On the iPhone Duo
+/// the system lifts toolbar items into the side column, outside the hidden native view, so native
+/// screens drop their toolbar items while this is set.
+@MainActor
+final class ComposeOverlay: ObservableObject {
+    static let shared = ComposeOverlay()
+    @Published var detailOpen = false
 }

@@ -121,13 +121,25 @@ val LocalPlatformTabBar = staticCompositionLocalOf { false }
 class PlatformTabBar(
     /** Taps on the platform bar: a tab, or null for Settings. */
     val selections: Flow<ShelfDestination?>,
-    /** Tab order (Settings is always last) and the current selection (null = Settings). */
-    val onChange: (order: List<ShelfDestination>, selected: ShelfDestination?) -> Unit,
+    /**
+     * Tab order (Settings is always last), the current selection (null = Settings), and whether a
+     * detail/editor route is open (the platform must show Compose over a native tab screen then).
+     */
+    val onChange: (order: List<ShelfDestination>, selected: ShelfDestination?, detailOpen: Boolean) -> Unit,
     /** The scaffold left the screen (e.g. sign-out); the platform bar should hide. */
     val onDispose: () -> Unit,
     /** Taps on a platform-drawn Home screen's tiles, routed like the Compose Home. */
-    val homeNavigation: Flow<HomeDestination> = emptyFlow()
+    val homeNavigation: Flow<HomeDestination> = emptyFlow(),
+    /** Detail/editor screens a platform-drawn screen asks Compose to open. */
+    val routeRequests: Flow<PlatformRoute> = emptyFlow()
 )
+
+/** Compose screens a platform-drawn screen can open (while those screens are still Compose). */
+sealed interface PlatformRoute {
+    /** A transaction; null id creates one. */
+    data class Transaction(val postingId: String?) : PlatformRoute
+    data object Import : PlatformRoute
+}
 
 /** Tabs that were merged into others, mapped to where they live now. */
 private val LEGACY_TABS = mapOf(
@@ -398,8 +410,17 @@ fun ShillingScaffold(
         LaunchedEffect(navController, platformTabBar) {
             platformTabBar.homeNavigation.collect(openHomeDestination)
         }
-        LaunchedEffect(platformTabBar, orderedDestinations, selectedTab) {
-            platformTabBar.onChange(orderedDestinations, selectedTab)
+        LaunchedEffect(navController, platformTabBar) {
+            platformTabBar.routeRequests.collect { request ->
+                when (request) {
+                    is PlatformRoute.Transaction -> navController.navigate(TransactionRoute(request.postingId))
+                    PlatformRoute.Import -> navController.navigate(ImportRoute)
+                }
+            }
+        }
+        val detailOpen = currentDestination != null && !currentDestination.isTopLevel()
+        LaunchedEffect(platformTabBar, orderedDestinations, selectedTab, detailOpen) {
+            platformTabBar.onChange(orderedDestinations, selectedTab, detailOpen)
         }
         DisposableEffect(platformTabBar) {
             onDispose { platformTabBar.onDispose() }

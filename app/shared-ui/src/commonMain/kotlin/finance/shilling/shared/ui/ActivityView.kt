@@ -20,9 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -31,69 +29,22 @@ import com.composables.icons.materialicons.MaterialIcons
 import com.composables.icons.materialicons.filled.Close
 import com.composables.icons.materialicons.filled.Search
 import com.composables.icons.materialicons.filled.Upload
-import finance.shilling.shared.data.PostingWithDetails
-import finance.shilling.shared.data.ScheduleType
-import finance.shilling.shared.data.store.PostingRepository
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.minus
-import kotlinx.datetime.plus
-import org.koin.compose.koinInject
-import finance.shilling.shared.presentation.formatDayHeader
-import finance.shilling.shared.presentation.today
-
-private val activityRanges = listOf(1 to "1M", 3 to "3M", 6 to "6M", 12 to "1Y")
-
-/** An activity row; transfers collapse their debit/credit legs into one entry. */
-private data class ActivityRow(
-    val item: PostingWithDetails,
-    val type: ScheduleType,
-    val toAccountName: String?
-)
-
-private fun mergeTransferLegs(postings: List<PostingWithDetails>): List<ActivityRow> {
-    val byId = postings.associateBy { it.posting.id }
-    val consumed = mutableSetOf<String>()
-    return postings.mapNotNull { item ->
-        val p = item.posting
-        if (p.id in consumed) return@mapNotNull null
-        val partner = when {
-            p.id.endsWith("_dr") -> byId[p.id.removeSuffix("_dr") + "_cr"]
-            p.id.endsWith("_cr") -> byId[p.id.removeSuffix("_cr") + "_dr"]
-            p.scheduleId == null && p.pairId != null ->
-                postings.firstOrNull { it.posting.pairId == p.pairId && it.posting.id != p.id && it.posting.scheduleId == null }
-            else -> null
-        }
-        if (partner == null) return@mapNotNull ActivityRow(item, p.type, null)
-        consumed += partner.posting.id
-        val (debit, credit) = if (p.type == ScheduleType.EXPENSE) item to partner else partner to item
-        ActivityRow(debit, ScheduleType.TRANSFER, credit.accountName)
-    }
-}
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
+import finance.shilling.shared.presentation.ActivityRowUi
+import finance.shilling.shared.presentation.ActivityViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ActivityView(
     onOpenTransaction: (String?) -> Unit,
-    onOpenImport: () -> Unit
+    onOpenImport: () -> Unit,
+    viewModel: ActivityViewModel = koinViewModel()
 ) {
-    val postingRepo = koinInject<PostingRepository>()
-    val todayDate = remember { today() }
-    var rangeMonths by rememberSaveable { mutableIntStateOf(1) }
+    val state by viewModel.state.collectAsState()
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedKey by rememberSaveable { mutableStateOf<String?>(null) }
-
-    val rangeStart = remember(rangeMonths, todayDate) { todayDate.minus(rangeMonths, DateTimeUnit.MONTH) }
-    // Include items recorded ahead of their date (e.g. a bill marked paid early).
-    val rangeEnd = remember(todayDate) { todayDate.plus(60, DateTimeUnit.DAY) }
-    val postings by remember(rangeStart, rangeEnd) { postingRepo.watchBetween(rangeStart, rangeEnd) }
-        .collectAsState(initial = emptyList())
-    val rows = remember(postings) { mergeTransferLegs(postings) }
-    val filtered = remember(rows, searchQuery) {
-        val q = searchQuery.trim().lowercase()
-        if (q.isEmpty()) rows else rows.filter { row ->
-            listOfNotNull(row.item.title, row.item.accountName, row.item.categoryName, row.toAccountName)
-                .any { it.lowercase().contains(q) }
-        }
-    }
+    LaunchedEffect(searchQuery) { viewModel.setQuery(searchQuery) }
 
     ListDetailLayout(
         selectedKey = selectedKey,
@@ -137,44 +88,43 @@ fun ActivityView(
                             SingleChoiceSegmentedButtonRow(
                                 modifier = Modifier.fillMaxWidth().padding(top = Spacing.md)
                             ) {
-                                activityRanges.forEachIndexed { index, (months, label) ->
+                                state.ranges.forEachIndexed { index, range ->
                                     SegmentedButton(
-                                        selected = rangeMonths == months,
-                                        onClick = { rangeMonths = months },
-                                        shape = SegmentedButtonDefaults.itemShape(index, activityRanges.size)
-                                    ) { Text(label) }
+                                        selected = state.selectedRange == range,
+                                        onClick = { viewModel.setRange(range.months) },
+                                        shape = SegmentedButtonDefaults.itemShape(index, state.ranges.size)
+                                    ) { Text(range.label) }
                                 }
                             }
                         }
                     }
-                    if (filtered.isEmpty()) {
+                    val empty = state.empty
+                    if (empty != null) {
                         item(key = "empty") {
-                            if (searchQuery.isNotBlank()) {
-                                EmptyState(title = "No matches", message = "Nothing matches \"${searchQuery.trim()}\" in this period.")
-                            } else {
+                            if (empty.showActions) {
                                 EmptyState(
-                                    title = "No transactions yet",
-                                    message = "Record items from Plan, add one-off transactions, or import a bank CSV.",
+                                    title = empty.title,
+                                    message = empty.message,
                                     actionLabel = "Add transaction",
                                     onAction = { open(null) },
                                     secondaryActionLabel = "Import from CSV",
                                     onSecondaryAction = onOpenImport
                                 )
+                            } else {
+                                EmptyState(title = empty.title, message = empty.message)
                             }
                         }
                     } else {
-                        filtered.groupBy { it.item.posting.date }.entries
-                            .sortedByDescending { it.key }
-                            .forEach { (date, dayRows) ->
-                                item(key = "header-$date") { ListSectionHeader(formatDayHeader(date, todayDate)) }
-                                items(dayRows, key = { it.item.posting.id }) { row ->
-                                    ActivityRowItem(
-                                        row = row,
-                                        selected = twoPane && selectedKey == row.item.posting.id,
-                                        onClick = { open(row.item.posting.id) }
-                                    )
-                                }
+                        state.sections.forEach { section ->
+                            item(key = "header-${section.header}") { ListSectionHeader(section.header) }
+                            items(section.rows, key = { it.id }) { row ->
+                                ActivityRowItem(
+                                    row = row,
+                                    selected = twoPane && selectedKey == row.id,
+                                    onClick = { open(row.id) }
+                                )
                             }
+                        }
                     }
                 }
             }
@@ -194,19 +144,14 @@ fun ActivityView(
 }
 
 @Composable
-private fun ActivityRowItem(row: ActivityRow, selected: Boolean, onClick: () -> Unit) {
-    val item = row.item
-    val supporting = buildList {
-        val account = item.accountName ?: "No account"
-        add(if (row.type == ScheduleType.TRANSFER) "$account → ${row.toAccountName ?: "No account"}" else account)
-        item.categoryName?.let { add(it) }
-        if (item.posting.scheduleId == null) add("One-off")
-    }.joinToString(" · ")
+private fun ActivityRowItem(row: ActivityRowUi, selected: Boolean, onClick: () -> Unit) {
     EntityListItem(
-        title = item.title,
-        supporting = supporting,
-        leading = { ColorDot(colorFromHex(item.categoryColor)) },
-        trailing = { AmountText(row.type, item.posting.amount) },
+        title = row.title,
+        supporting = row.supporting,
+        leading = { ColorDot(colorFromHex(row.categoryColor)) },
+        trailing = {
+            Text(row.amount, color = amountColor(row.type), style = MaterialTheme.typography.bodyLarge)
+        },
         selected = selected,
         onClick = onClick
     )
