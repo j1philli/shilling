@@ -18,6 +18,7 @@ dependencies:
   - $libs.datetime
   - $libs.koin.core
   - $libs.koin.compose
+  - $libs.koin.compose.viewmodel
   - $libs.ktor.client.core
   - $libs.ktor.client.webrtc
   - $libs.serialization.json

@@ -60,6 +60,29 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     usecase/
       ComputeWindowUseCase.kt  # Friday window computation, balanceAt, cashCurve
       ComputeBudgetUseCase.kt  # monthly budget computation
+  src/commonMain/kotlin/finance/shilling/shared/session/
+    Credentials.kt       # sign-in modes/results for onboarding
+    SessionState.kt      # SessionPhase + SessionState + OnboardingActions (AppSession, readable from view models)
+  src/commonMain/kotlin/finance/shilling/shared/presentation/  # UI-agnostic, used by Compose and SwiftUI
+    Formatting.kt        # formatCurrency/formatDate/describeRecurrence + domain labels (no Compose)
+    DisplayPreferences.kt # theme mode, currency symbol, week start (StateFlow, persisted in Settings)
+    HomeViewModel.kt     # Home state + copy (HomeUiState), HomeDestination
+    SettingsViewModel.kt # Settings state + copy (account variants, sync status, developer info) and actions
+    ActivityViewModel.kt # Activity rows (transfer legs merged), day sections, search, range, empty copy
+    ReceiptsViewModel.kt # Receipts rows, filter, "N not attached" subtitle, empty copy
+    PlanNavigation.kt    # PlanPeriod/PlanSection/PlanRequest + PlanRequests (Home tiles → Plan section)
+    AppTabs.kt           # AppTab, saved TabOrder, HomeDestination.target (tab + Plan request)
+    PlanOverviewViewModel.kt # Plan overview: period/anchor, by day / by category, summary, row copy, actions
+    PlanListViewModels.kt # Schedules (type filter), Categories, Accounts list state
+    OccurrenceActions.kt # mark paid / unmark / skip / change amount, each returning an Undoable
+    SimpleEditorViewModels.kt # Category + Account editors (form state, validation, save/delete copy)
+    ScheduleEditorViewModel.kt # schedule editor: fields, recurrence options, validation, next-occurrence preview
+    TransactionEditorViewModel.kt # posting editor: fields, transfer legs, delete/undo, attached receipts
+    ReceiptEditorViewModel.kt # receipt add/edit: file, metadata, attach/detach + transaction picker
+    OnboardingViewModel.kt # Welcome flow: routes, copy, destructive confirm, self-hosted URL
+    ImportViewModel.kt   # CSV import: column/date-format guessing, duplicate detection, per-row review
+    CredentialsCopy.kt   # email/password form + confirm-email copy, CredentialsOutcome (Welcome and Settings)
+    SampleData.kt        # seedDemoData (developer tools)
   src/commonMain/sqldelight/finance/shilling/shared/db/
     Account.sq          # accounts table schema + queries
     Category.sq         # categories table schema + queries
@@ -69,12 +92,17 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     Receipt.sq          # receipts table schema + queries
     Bookkeeping.sq      # tracks failed writes for Store5 sync retry
   src/commonTest/kotlin/ # NOTE: not run by Amper; put runnable tests in test@jvm/
-  src@nonJvm/          # non-JVM platform sources (wasmJs + iOS)
+  src@nonJvm/          # non-JVM platform sources (android + wasmJs + iOS); JVM is tests only
     finance/shilling/shared/data/sync/
       WebRtcConnectionManager.kt # WebRTC peer connection management
-app/shared-ui/            # shared Compose UI (jvm, wasmJs, iOS)
+      WebRtcPlatform.kt     # platform WebRTC client factory + sync delay (bound per app)
+    finance/shilling/shared/session/
+      AppSession.kt         # onboarding state, hosted bootstrap, sync runtime; exposes SessionPhase
+      SessionModule.kt      # Koin: AppSession + Settings callbacks (reset, sign out, server/household)
+app/shared-ui/            # shared Compose UI (web/desktop + Android; not used on iOS)
   module.yaml
   src/commonMain/kotlin/finance/shilling/shared/ui/
+    AppBootstrap.kt      # renders AppSession.phase: onboarding, loading, or the main scaffold
     Navigation.kt        # ShillingScaffold: NavHost, rail / bottom bar (Settings pinned), long-press tab reorder
     AppRoutes.kt         # @Serializable navigation-compose routes (tabs + detail routes)
     AppPaths.kt          # route <-> URL path codec (web browser history, deep links)
@@ -84,8 +112,8 @@ app/shared-ui/            # shared Compose UI (jvm, wasmJs, iOS)
     FormFields.kt        # AmountField, DateField/DatePickerModal, DropdownField, TextInputField
     Components.kt        # ConfirmDialog, EmptyState, AddButton, EntityListItem, ListSectionHeader
     SnackbarController.kt # app-level snackbar + undo (LocalSnackbarController)
-    DisplayPreferences.kt # theme mode, currency symbol, week start (persisted in Settings)
-    Formatting.kt        # formatCurrency/formatDate/describeRecurrence + domain labels
+    ComposeFormatting.kt # Compose-only helpers: amountColor, netColor, colorFromHex
+    ShillingTheme.kt     # Material theme; provides LocalDisplayPrefs (recomposes on pref changes)
     PlanView.kt          # Plan tab: Overview (week/month, by day / by category) + Schedules, Categories, Accounts sections
     ActivityView.kt      # Activity tab: recorded transactions (search, ranges, list-detail)
     ImportView.kt        # CSV import, opened from Activity (ImportRoute)
@@ -93,22 +121,39 @@ app/shared-ui/            # shared Compose UI (jvm, wasmJs, iOS)
     ReceiptsScreen.kt    # list + editor
     AccountsView.kt / CategoriesView.kt / ScheduleViews.kt # list + editor, rendered as Plan sections
     TransactionEditor.kt # view/edit/create a posting, transfer pairs, attached receipts
-    PostingActions.kt    # mark paid / skip / change amount with undo
     SettingsView.kt      # appearance, account, sync status, hidden developer tools
-    DevView.kt           # seedDemoData helper (developer tools)
 app/web-app/              # Tauri desktop app (wasmJs)
   module.yaml         # product: wasm-js/app
   src/wasmJsMain/kotlin/finance/shilling/web/
     Main.kt              # entry point, platform Koin module, WebWorkerDriver setup
     WasmPlatformServices.kt # wasmJs IdGenerator + ReceiptFileStore stubs
-app/ios-app/              # Compose Multiplatform iOS app
+app/ios-app/              # native SwiftUI iOS app (no Compose) over the shared view models
   module.yaml         # product: ios/app
   module.xcodeproj/   # Kotlin Toolchain–managed Xcode project (has -lsqlite3 linker flag)
   src/
-    App.swift           # SwiftUI @main entry, wraps ComposeUIViewController
-    MainViewController.kt  # ComposeUIViewController factory + platform Koin module
+    App.swift           # SwiftUI @main entry: starts Koin, shows onboarding / startup / the tab bar by AppRoot.phase
+    ShillingTabBarController.swift # native UITabBarController (tabs → SwiftUI screens), ReceiptCameraRequest
+    NativeTabBridge.kt  # tab list from the saved TabOrder, Home tile → tab (+ PlanRequests)
+    IosKoin.kt           # startIosKoin (platform Koin module, logging, HttpClient), isDebugBuild
+    IosViewModelHost.kt  # base for Swift-facing screen models (owns a ViewModelStore)
+    HomeScreenModel.kt   # Swift-facing HomeViewModel facade (@NativeCoroutinesState)
+    HomeModel.swift / HomeScreen.swift # native SwiftUI Home
+    SettingsScreenModel.kt / SettingsScreen.swift # native SwiftUI Settings (+ ToastView snackbar stand-in)
+    ActivityScreenModel.kt / ActivityScreen.swift # native SwiftUI Activity
+    ReceiptsScreenModel.kt / ReceiptsScreen.swift # native SwiftUI Receipts
+    PlanScreenModel.kt / PlanScreen.swift # native SwiftUI Plan (Overview + Schedules/Categories/Accounts)
+    Toast.swift          # snackbar stand-in with optional action (Undo)
+    SimpleEditorScreenModels.kt / SimpleEditors.swift # native Category/Account editors; FlowModel + EditorChrome helpers
+    ScheduleEditorScreenModel.kt / ScheduleEditorScreen.swift # native schedule editor
+    TransactionEditorScreenModel.kt / TransactionEditorScreen.swift # native transaction editor (+ UndoHandle, NSData bridge)
+    ReceiptEditorScreenModel.kt / ReceiptEditorScreen.swift # native receipt editor + attach sheet
+    ImportScreenModel.kt / ImportScreen.swift # native CSV import (pushed from Activity)
+    OnboardingScreenModel.kt / OnboardingScreen.swift # native Welcome + AppRoot.phase (App.swift shows it above the tabs)
+    CredentialsForm.swift # email/password rows shared by Welcome and Settings
+    ReceiptPickers.swift # camera / photo library / file picker buttons for receipts
+    DateBridge.swift     # epoch day ↔ Date (Kotlin dates cross into Swift as epoch days)
+    DisplayPreferencesBridge.kt / AppearanceModel.swift # app theme mode → SwiftUI preferredColorScheme
     IosPlatformServices.kt # IosIdGenerator (NSUUID), IosReceiptFileStore (NSFileManager), NativeSqliteDriver
-    ShillingIosApp.kt      # receipt store UI (add, list, edit, attach, delete)
 src-tauri/            # Tauri native shell (Rust)
   tauri.conf.json     # app config, bundle identifier, frontend dist path
   src/main.rs         # Rust entry point
@@ -205,17 +250,51 @@ rather than raw text fields for money, dates, or selects. Destructive actions ne
 `ConfirmDialog` (EditorScaffold's `delete` does this). Format with `formatCurrency` /
 `formatDate` / `formatSigned`; never show raw ISO dates or enum names.
 
-**DI**: Each app passes a platform Koin module to `ShillingAppBootstrap`, which provides
-`ShillingDatabase`, `Settings`, `IdGenerator`, `ReceiptFileStore`, `HttpClient`, and
-`WebRtcPlatform` (the WebRTC client factory plus the sync delay). `ShillingAppBootstrap` hosts
-one `KoinApplication` for the app's whole lifetime: the platform module plus the shared
-`dataModule` (`AppModule.kt`: `DeviceIdentity`, `ChangeNotifier`, `StoreSyncDeps`, Store5
-stores, `SyncStoreFacade`, repositories, use cases, `LocalDataWiper`). It loads
-`bootstrapSessionModule` (hosted-bootstrap state and the Settings callbacks) with
-`rememberKoinModules`. Definitions resolve their dependencies through `get()`, not captured
+**Native iOS UI**: iOS is a fully native SwiftUI front end (no Compose); web/desktop and
+Android stay on Compose. Screen logic and copy live in shared view models (`shared/presentation`,
+AndroidX multiplatform `ViewModel`, registered with Koin `viewModel {}`), so both UIs say the same
+thing; Compose gets them with `koinViewModel()`. On iOS, a Kotlin facade in `ios-app` (subclass of
+`IosViewModelHost`) exposes the view model's `StateFlow` with `@NativeCoroutinesState` (suspend
+actions with `@NativeCoroutines`), and Swift consumes it with `asyncSequence(for: screen.stateFlow)`
+from `KMPNativeCoroutinesAsync` (usually through `FlowModel`). Keep KMP-NativeCoroutines
+annotations out of `app/shared`: its compiler plugin crashes non-Apple compilations and the
+toolchain can't scope `compilerPlugins` per platform, so it's only enabled in `ios-app`.
+`App.swift` shows `OnboardingScreen`, a startup spinner, or `ShillingTabBarController` by
+`AppRoot.phase`; the tab controller maps each tab to its SwiftUI screen, and screens push their
+editors onto their own `NavigationStack`. Undoable results cross to Swift as `UndoHandle` (it
+outlives the editor that produced it, so the caller's `Toast` can offer Undo). SwiftUI follows the
+app's Light/Dark/System choice through `AppearanceModel` (`preferredColorScheme` at the app root).
+
+Editor view models take the item id (null = new) as a Koin parameter (`viewModel { params -> … }`);
+Compose passes it with `koinViewModel(key = …) { parametersOf(id) }` (key per id so two-pane
+selection changes get a fresh editor) and iOS facades with `viewModel<VM>(id)`. Native editors are
+pushed onto the native screen's own `NavigationStack` (no Compose bridge).
+
+**App session**: `AppSession` (`shared/src@nonJvm/.../session`) owns the app lifecycle outside
+any UI: first-launch onboarding state, hosted bootstrap (auth + household resolution, retries),
+the WebRTC sync runtime (`SyncState` attach, signaling connect, ICE fetch), and the Settings
+actions (reset, sign out, server/household changes). It's a process-wide singleton started by
+each platform entry point right after `initKoin`; every UI renders `session.phase`
+(`Onboarding` / `Starting` / `Ready`) and calls its actions. Its state is confined to
+`AppSessionConfig.dispatcher` (Main); it re-evaluates everything in `reconcile()` after each
+change, with keyed `Effect`s standing in for Compose's `LaunchedEffect`/`DisposableEffect`.
+Platform options (self-hosted-only web distribution, log tag) come from an `AppSessionConfig`
+bound in the platform module.
+
+**DI**: Each app calls `initKoin(platformModule)` (`AppModule.kt`) from its entry point before
+showing UI (iOS: `startIosKoin()` from `App.init`; web: once the database opens; Android:
+`MainActivity.onCreate`), then starts `AppSession`. The platform module provides `ShillingDatabase`, `Settings`,
+`IdGenerator`, `ReceiptFileStore`, `HttpClient`, and `WebRtcPlatform` (the WebRTC client factory
+plus the sync delay). `initKoin` starts one global Koin graph for the process: the platform module
+plus the shared `dataModule` (`DeviceIdentity`, `ChangeNotifier`, `StoreSyncDeps`, Store5 stores,
+`SyncStoreFacade`, repositories, use cases, `LocalDataWiper`); later calls return the running
+graph, and loads `DisplayPreferences`. Koin is started outside Compose so native (Swift) code can
+resolve from the same graph.
+Apps pass `sessionModule` too (it needs `WebRtcPlatform`, so it lives in the non-JVM sources);
+it binds `AppSession`, `HostedBootstrapState` and the Settings callbacks. Definitions resolve their dependencies through `get()`, not captured
 instances. Composables use `koinInject<T>()`. Don't construct repositories or stores by hand
-outside tests. Session-scoped objects (sync runtime, `ServerApi`, `AuthService`) stay
-`remember`ed in the bootstrap because they are rebuilt when the server or auth changes.
+outside tests. Session-scoped objects (sync runtime, `ServerApi`, `AuthService`) are owned by
+`AppSession`, which rebuilds them when the server or auth changes.
 
 ## Database Schema
 
@@ -280,7 +359,15 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
   Override version with `WEBRTC_SDK_VERSION` env var if needed.
 - **iOS Xcode project**: Kotlin Toolchain manages `app/ios-app/module.xcodeproj`. The
   `-lsqlite3` linker flag was manually added to `OTHER_LDFLAGS` — don't
-  regenerate the project without re-adding it.
+  regenerate the project without re-adding it. Swift packages are declared as `swiftPackage:`
+  dependencies in `app/ios-app/module.yaml`; the toolchain links them through the generated
+  `KotlinMultiplatformLinkedPackage/` (generated from `module.yaml`; committed because the Xcode
+  project references it, along with `project.xcworkspace/.../Package.resolved` — don't hand-edit). The first build
+  after adding a Swift package can fail with `Cannot cast ... PBXObject to ... PBXBuildFile`;
+  building again succeeds.
+- **KMP-NativeCoroutines version is tied to Kotlin**: `kmp-nativecoroutines` in
+  `libs.versions.toml`, the compiler plugin and the Swift package in `app/ios-app/module.yaml`
+  must all use the release built for the project's Kotlin version (1.0.6 = Kotlin 2.4.20).
 - **Icons are generated, then committed**: `icons/source/base-1024.png` is the
   master. `just generate-icons` (ImageMagick + `cargo tauri`) rewrites every
   platform asset; commit the results. Builds never generate or copy icons; they

@@ -8,9 +8,16 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import finance.shilling.shared.presentation.DisplayPreferences
+import finance.shilling.shared.presentation.DisplayPrefs
+import finance.shilling.shared.presentation.ThemeMode
 
 object ShillingColors {
     val Gold100 = Color(0xFFFEF9C3)
@@ -134,19 +141,29 @@ private val ShillingTypography = Typography().let { base ->
     )
 }
 
+/**
+ * Current display preferences. Static on purpose: a change (currency, week start, theme)
+ * recomposes all content, so text formatted from [DisplayPreferences] stays current.
+ */
+val LocalDisplayPrefs = staticCompositionLocalOf { DisplayPrefs() }
+
 @Composable
 fun ShillingTheme(
-    darkTheme: Boolean = when (DisplayPreferences.themeMode) {
+    darkTheme: Boolean? = null,
+    content: @Composable () -> Unit
+) {
+    val prefs by DisplayPreferences.state.collectAsState()
+    val dark = darkTheme ?: when (prefs.themeMode) {
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
-    },
-    content: @Composable () -> Unit
-) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
-        shapes = ShillingShapes,
-        typography = ShillingTypography,
-        content = content
-    )
+    }
+    CompositionLocalProvider(LocalDisplayPrefs provides prefs) {
+        MaterialTheme(
+            colorScheme = if (dark) DarkColorScheme else LightColorScheme,
+            shapes = ShillingShapes,
+            typography = ShillingTypography,
+            content = content
+        )
+    }
 }

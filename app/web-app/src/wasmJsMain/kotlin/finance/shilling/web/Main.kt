@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -22,18 +20,24 @@ import app.cash.sqldelight.driver.worker.WebWorkerDriver
 import com.russhwolf.settings.Settings
 import finance.shilling.shared.data.DEFAULT_SELF_HOSTED_SERVER_URL
 import finance.shilling.shared.data.IdGenerator
+import finance.shilling.shared.data.initKoin
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.sync.createSyncHttpClient
 import finance.shilling.shared.db.ShillingDatabase
 import finance.shilling.shared.ui.AppBootstrapScaffoldConfig
 import finance.shilling.shared.ui.ShillingAppBootstrap
 import finance.shilling.shared.ui.ShillingTheme
-import finance.shilling.shared.ui.WebRtcPlatform
 import io.ktor.client.webrtc.JsWebRtc
 import io.ktor.client.webrtc.WebRtcClient
 import kotlinx.browser.document
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.koin.dsl.module
 import org.w3c.dom.Worker
+import finance.shilling.shared.data.sync.WebRtcPlatform
+import finance.shilling.shared.session.AppSession
+import finance.shilling.shared.session.AppSessionConfig
+import finance.shilling.shared.session.sessionModule
 
 private fun isTauriEnvironment(): Boolean = js("typeof window.__TAURI__ !== 'undefined'")
 
@@ -65,19 +69,17 @@ fun main() {
         else -> 0
     }
     if (isTauriEnvironment()) installTauriDragHandler(titleStripHeight)
+    // The web database opens asynchronously, so Koin starts once it's ready; UI waits on this.
+    var koinReady by mutableStateOf(false)
+    MainScope().launch {
+        val driver = WebWorkerDriver(Worker("sqldelight.worker.js"))
+        (ShillingDatabase.Schema.create(driver) as QueryResult.AsyncValue).await()
+        (driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0) as QueryResult.AsyncValue).await()
+        initKoin(webPlatformModule(ShillingDatabase(driver)), sessionModule).get<AppSession>().start()
+        koinReady = true
+    }
     ComposeViewport(document.body!!) {
-        val selfHostedOnly = remember { isSelfHostedDistribution() }
-        var db by remember { mutableStateOf<ShillingDatabase?>(null) }
-
-        LaunchedEffect(Unit) {
-            val driver = WebWorkerDriver(Worker("sqldelight.worker.js"))
-            (ShillingDatabase.Schema.create(driver) as QueryResult.AsyncValue).await()
-            (driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0) as QueryResult.AsyncValue).await()
-            db = ShillingDatabase(driver)
-        }
-
-        val currentDb = db
-        if (currentDb == null) {
+        if (!koinReady) {
             ShillingTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -88,18 +90,13 @@ fun main() {
             return@ComposeViewport
         }
 
-        val platformModule = remember(currentDb) { webPlatformModule(currentDb) }
         val tauriTopPadding = titleStripHeight.dp
 
         ShillingAppBootstrap(
-            platformModule = platformModule,
-            logTag = "Sync",
             scaffoldConfig = AppBootstrapScaffoldConfig(
                 onboardingTopPadding = tauriTopPadding,
                 navRailTopPadding = tauriTopPadding,
                 navRailWidth = if (tauriMac) MAC_NAV_RAIL_WIDTH.dp else Dp.Unspecified,
-                selfHostedOnly = selfHostedOnly,
-                defaultSelfHostedServerUrl = if (selfHostedOnly) browserOrigin() else DEFAULT_SELF_HOSTED_SERVER_URL,
                 navControllerHook = { navController -> BrowserHistoryBinding(navController) },
                 developerToolsEnabled = isDevToolsBuild()
             )
@@ -109,6 +106,14 @@ fun main() {
 
 private fun webPlatformModule(db: ShillingDatabase) = module {
     single { db }
+    single {
+        val selfHostedOnly = isSelfHostedDistribution()
+        AppSessionConfig(
+            selfHostedOnly = selfHostedOnly,
+            defaultSelfHostedServerUrl = if (selfHostedOnly) browserOrigin() else DEFAULT_SELF_HOSTED_SERVER_URL,
+            logTag = "Sync"
+        )
+    }
     single { Settings() }
     single<IdGenerator> { WasmIdGenerator() }
     single<ReceiptFileStore> { WasmReceiptFileStore(get()) }
