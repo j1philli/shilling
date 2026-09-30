@@ -28,6 +28,7 @@ class SignalingClient(
 
     private var session: WebSocketSession? = null
     private var connectionJob: Job? = null
+    private val backoff = ReconnectBackoff()
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -42,13 +43,13 @@ class SignalingClient(
         }
         session = null
         connectionJob = scope.launch {
-            var backoffMs = 1000L
+            backoff.reset()
             while (isActive) {
                 try {
                     log.i { "[SIG] Opening WebSocket to $wsUrl/ws/signal ..." }
                     httpClient.webSocket("$wsUrl/ws/signal") {
                         session = this
-                        backoffMs = 1000L
+                        backoff.reset()
                         log.i { "[SIG] WebSocket CONNECTED to $wsUrl/ws/signal" }
                         val token = authService?.refreshTokenIfNeeded()
                         log.i { "[SIG] Sending Join(device=$deviceId, household=$householdId, hasToken=${token != null})" }
@@ -92,14 +93,24 @@ class SignalingClient(
                 }
                 session = null
                 if (!isActive) break
-                log.i { "[SIG] Reconnecting in ${backoffMs}ms..." }
-                delay(backoffMs)
-                backoffMs = (backoffMs * 2).coerceAtMost(30_000L)
+                log.i { "[SIG] Reconnecting in ${backoff.currentMs}ms..." }
+                if (backoff.await()) log.i { "[SIG] Woken early — reconnecting now" }
             }
         }
     }
 
     val isConnected: Boolean get() = session != null
+
+    /**
+     * The app came back to the foreground: if a reconnect is waiting out its backoff, retry now.
+     * A live session is left alone; a session the server already dropped ends on its own and
+     * reconnects from the start of the schedule.
+     */
+    fun reconnectNow() {
+        if (connectionJob == null) return
+        if (session == null) log.i { "[SIG] reconnectNow() — cutting reconnect backoff short" }
+        backoff.wake()
+    }
 
     suspend fun send(message: SignalingMessage): Boolean {
         val s = session

@@ -31,9 +31,12 @@ import io.ktor.client.webrtc.JsWebRtc
 import io.ktor.client.webrtc.WebRtcClient
 import kotlinx.browser.document
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import org.koin.dsl.module
 import org.w3c.dom.Worker
+import org.w3c.dom.events.Event
 import finance.shilling.shared.data.sync.WebRtcPlatform
 import finance.shilling.shared.session.AppSession
 import finance.shilling.shared.session.AppSessionConfig
@@ -44,6 +47,19 @@ private fun isTauriEnvironment(): Boolean = js("typeof window.__TAURI__ !== 'und
 private fun isSelfHostedDistribution(): Boolean = js("window.SHILLING_SELF_HOSTED_ONLY === true")
 
 private fun browserOrigin(): String = js("window.location.origin")
+
+private fun isDocumentVisible(): Boolean = js("document.visibilityState === 'visible'")
+
+/**
+ * WebKit pauses the page (timers, WebSocket frames) while the Tauri window is hidden, occluded,
+ * or the screen is locked; `visibilitychange` back to visible is when sync should catch up.
+ */
+private fun documentResumeSignals(): Flow<Unit> {
+    val signals = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val listener: (Event) -> Unit = { if (isDocumentVisible()) signals.tryEmit(Unit) }
+    document.addEventListener("visibilitychange", listener)
+    return signals
+}
 
 private fun isMacOs(): Boolean = js("/Mac/i.test(navigator.userAgent)")
 
@@ -119,11 +135,14 @@ private fun webPlatformModule(db: ShillingDatabase) = module {
     single<ReceiptFileStore> { WasmReceiptFileStore(get()) }
     single { createSyncHttpClient() }
     single {
-        WebRtcPlatform(createClient = { currentIceServers ->
-            WebRtcClient(JsWebRtc) {
-                defaultConnectionConfig = { iceServers = currentIceServers() }
-            }
-        })
+        WebRtcPlatform(
+            createClient = { currentIceServers ->
+                WebRtcClient(JsWebRtc) {
+                    defaultConnectionConfig = { iceServers = currentIceServers() }
+                }
+            },
+            resumeSignals = documentResumeSignals()
+        )
     }
 }
 

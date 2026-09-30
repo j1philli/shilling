@@ -425,6 +425,12 @@ class AppSession(
                     log.w { "ICE server fetch failed: ${e.message}" }
                 }
             }
+            syncScope.launch {
+                webRtcPlatform.resumeSignals.collect {
+                    log.i { "App resumed — retrying signaling without waiting out the backoff" }
+                    runtime.signalingClient.reconnectNow()
+                }
+            }
             onDispose {
                 runtime.peerSyncManager.stop()
                 runtime.signalingClient.disconnect()
