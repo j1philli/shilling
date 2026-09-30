@@ -1,3 +1,7 @@
+> **Public-main port:** The branch was rebased onto public `2abf1db` on September 29.
+> The older device measurements below remain historical. See the
+> [native UI audit](native-ios-audit-2026-09-29.md) for the port, new fixes and validation.
+
 > **Scope correction:** This audit was performed on the private-based worktree at
 > `73ace52`, tracking `origin/main` (`j1philli/shilling-private`). It is **not** a
 > benchmark of public `j1philli/shilling` main. Public main checked at `d12fe9a`

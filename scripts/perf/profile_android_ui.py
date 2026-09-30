@@ -43,7 +43,7 @@ def meminfo():
 def verify(screen):
     adb("shell", "uiautomator", "dump", "/sdcard/shilling-perf-window.xml")
     xml = adb("shell", "cat", "/sdcard/shilling-perf-window.xml")
-    marker = "10000 transactions" if screen == "history" else "Synthetic schedule"
+    marker = "Synthetic transaction" if screen == "activity" else "Synthetic schedule"
     if marker not in xml:
         raise RuntimeError(f"Populated {screen} screen not visible")
 
@@ -87,7 +87,7 @@ def main():
         parser.error("--runs must be 1–5")
     try:
         for run in range(1, args.runs + 1):
-            for screen in ("history", "weekly"):
+            for screen in ("activity", "plan"):
                 print(json.dumps(measure(screen, run, args.scroll)), flush=True)
     finally:
         subprocess.run(["adb", "shell", "am", "force-stop", "finance.shilling.perf"], check=False)

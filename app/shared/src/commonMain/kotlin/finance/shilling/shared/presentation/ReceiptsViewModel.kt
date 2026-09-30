@@ -2,6 +2,8 @@ package finance.shilling.shared.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import finance.shilling.shared.data.ReceiptWithPosting
 import finance.shilling.shared.data.store.ReceiptRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -61,7 +63,7 @@ class ReceiptsViewModel(receiptRepository: ReceiptRepository) : ViewModel() {
                 ReceiptFilter.ATTACHED -> ReceiptsEmpty("No attached receipts", null, showAdd = false)
             }
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReceiptsUiState())
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReceiptsUiState())
 
     fun setFilter(value: ReceiptFilter) {
         filter.value = value

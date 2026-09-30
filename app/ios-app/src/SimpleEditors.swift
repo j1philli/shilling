@@ -10,10 +10,14 @@ final class FlowModel<State, Screen: IosViewModelHost>: ObservableObject {
     let screen: Screen
     private let flow: NativeFlow<State, Error, KotlinUnit>
 
-    init(screen: Screen, initial: State, flow: @escaping NativeFlow<State, Error, KotlinUnit>) {
+    // Construct the Kotlin host inside StateObject's deferred initializer. Creating it in
+    // a View.init local would allocate a new ViewModelStore on every SwiftUI view rebuild.
+    init(create: () -> Screen, state: (Screen) -> State,
+         flow: (Screen) -> NativeFlow<State, Error, KotlinUnit>) {
+        let screen = create()
         self.screen = screen
-        self.state = initial
-        self.flow = flow
+        self.state = state(screen)
+        self.flow = flow(screen)
     }
 
     func observe() async {
@@ -119,8 +123,9 @@ struct CategoryEditorScreen: View {
     let onDone: (String) -> Void
 
     init(categoryId: String?, onDone: @escaping (String) -> Void) {
-        let screen = CategoryEditorScreenModel(categoryId: categoryId)
-        _model = StateObject(wrappedValue: FlowModel(screen: screen, initial: screen.state, flow: screen.stateFlow))
+        _model = StateObject(wrappedValue: FlowModel(
+            create: { CategoryEditorScreenModel(categoryId: categoryId) }, state: { $0.state }, flow: { $0.stateFlow }
+        ))
         self.onDone = onDone
     }
 
@@ -194,8 +199,9 @@ struct AccountEditorScreen: View {
     let onDone: (String) -> Void
 
     init(accountId: String?, onDone: @escaping (String) -> Void) {
-        let screen = AccountEditorScreenModel(accountId: accountId)
-        _model = StateObject(wrappedValue: FlowModel(screen: screen, initial: screen.state, flow: screen.stateFlow))
+        _model = StateObject(wrappedValue: FlowModel(
+            create: { AccountEditorScreenModel(accountId: accountId) }, state: { $0.state }, flow: { $0.stateFlow }
+        ))
         self.onDone = onDone
     }
 

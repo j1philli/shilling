@@ -46,6 +46,9 @@ dependencies@jvm:
   - $libs.sqldelight.sqlite.driver
   - $libs.ktor.client.mock
 
+test-dependencies@jvm:
+  - $libs.coroutines.test
+
 plugins:
   sqldelight:
     enabled: true

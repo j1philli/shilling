@@ -22,6 +22,7 @@ revenuecat-kmp = "3.4.0"
 kmp-nativecoroutines-core = { module = "com.rickclephas.kmp:kmp-nativecoroutines-core", version.ref = "kmp-nativecoroutines" }
 kmp-nativecoroutines-annotations = { module = "com.rickclephas.kmp:kmp-nativecoroutines-annotations", version.ref = "kmp-nativecoroutines" }
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 sqldelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
 sqldelight-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }

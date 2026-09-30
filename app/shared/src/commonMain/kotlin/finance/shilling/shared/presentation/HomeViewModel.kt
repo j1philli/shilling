@@ -2,6 +2,8 @@ package finance.shilling.shared.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import finance.shilling.shared.data.BudgetSummary
 import finance.shilling.shared.data.CategoryTotal
 import finance.shilling.shared.data.ScheduleType
@@ -156,7 +158,7 @@ class HomeViewModel(
                 .sortedByDescending { abs(it.total) }
                 .take(3)
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), initial)
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), initial)
 }
 
 private fun currentHour(): Int = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour

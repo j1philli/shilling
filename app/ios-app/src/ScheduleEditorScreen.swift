@@ -15,8 +15,9 @@ struct ScheduleEditorScreen: View {
     let onDone: (String) -> Void
 
     init(scheduleId: String?, presetType: ScheduleType?, onDone: @escaping (String) -> Void) {
-        let screen = ScheduleEditorScreenModel(scheduleId: scheduleId, presetType: presetType)
-        _model = StateObject(wrappedValue: FlowModel(screen: screen, initial: screen.state, flow: screen.stateFlow))
+        _model = StateObject(wrappedValue: FlowModel(
+            create: { ScheduleEditorScreenModel(scheduleId: scheduleId, presetType: presetType) }, state: { $0.state }, flow: { $0.stateFlow }
+        ))
         self.onDone = onDone
     }
 

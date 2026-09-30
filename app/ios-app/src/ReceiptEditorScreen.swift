@@ -20,8 +20,9 @@ struct ReceiptEditorScreen: View {
     let onDone: (Toast) -> Void
 
     init(receiptId: String?, launchCamera: Bool = false, onDone: @escaping (Toast) -> Void) {
-        let screen = ReceiptEditorScreenModel(receiptId: receiptId)
-        _model = StateObject(wrappedValue: FlowModel(screen: screen, initial: screen.state, flow: screen.stateFlow))
+        _model = StateObject(wrappedValue: FlowModel(
+            create: { ReceiptEditorScreenModel(receiptId: receiptId) }, state: { $0.state }, flow: { $0.stateFlow }
+        ))
         self.launchCamera = launchCamera
         self.onDone = onDone
     }

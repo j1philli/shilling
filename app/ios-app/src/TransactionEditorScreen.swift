@@ -17,8 +17,9 @@ struct TransactionEditorScreen: View {
     let onDone: (Toast) -> Void
 
     init(postingId: String?, onDone: @escaping (Toast) -> Void) {
-        let screen = TransactionEditorScreenModel(postingId: postingId)
-        _model = StateObject(wrappedValue: FlowModel(screen: screen, initial: screen.state, flow: screen.stateFlow))
+        _model = StateObject(wrappedValue: FlowModel(
+            create: { TransactionEditorScreenModel(postingId: postingId) }, state: { $0.state }, flow: { $0.stateFlow }
+        ))
         self.onDone = onDone
     }
 

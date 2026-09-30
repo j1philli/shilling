@@ -42,7 +42,7 @@ Unlock the device and keep it awake. Select it with `ANDROID_SERIAL` if more tha
 one ADB device is connected. Both scripts build **release** APKs with shrinking and
 packaged baseline profiles, signed with the standard local Android debug key.
 They require an existing `~/.android/debug.keystore` and never use a production
-signing key. Complete normal checkout setup (`just apply-icons dev`, etc.) first.
+signing key. Icons are committed on public main; no local icon generation is required.
 
 - `scripts/perf/profile_android_startup.sh`: replaces the locally signed Shilling
   installation in place, preserves its data, then measures five force-stop/cold
@@ -261,14 +261,14 @@ python3 scripts/perf/profile_android_ui.py --runs 3 --scroll
 ```
 
 This force-stops only the isolated fixture between openings, verifies that the
-10,000-posting History or 1,000-schedule Weekly screen is populated, records the
+10,000-posting Activity or 1,000-schedule Plan screen is populated, records the
 first five frame durations, the first nonempty projection, `gfxinfo` scroll
 statistics and a steady memory snapshot, then restores normal Shilling to the
 foreground. The fixture seeds its own `ui-synthetic.db` only when absent. To
 refresh an older fixture before profiling, launch it once with `--ez reseed true`:
 
 ```sh
-adb shell am start -S -W -n finance.shilling.perf/.UiPerformanceActivity --es screen history --ez reseed true
+adb shell am start -S -W -n finance.shilling.perf/.UiPerformanceActivity --es screen activity --ez reseed true
 ```
 
 `contentReady` means Compose observed nonempty Store5 data; it can precede the
@@ -278,14 +278,14 @@ measurements; app navigation is separate. Repeat commands and controlled
 results are in [`docs/pixel-ui-performance-2026-09-29.md`](../../docs/pixel-ui-performance-2026-09-29.md).
 
 ```sh
-adb shell am start -S -W -n finance.shilling.perf/.UiPerformanceActivity --es screen history
+adb shell am start -S -W -n finance.shilling.perf/.UiPerformanceActivity --es screen activity
 # Wait for ShillingUi status=rendering and visible data before resetting metrics.
 adb shell dumpsys gfxinfo finance.shilling.perf reset
 adb shell 'for i in 1 2 3 4 5 6 7 8 9 10; do input swipe 550 1800 550 800 350; done'
 adb shell dumpsys gfxinfo finance.shilling.perf
 ```
 
-Repeat with `--es screen weekly`. Coordinates are for the Pixel 6 in portrait;
+Repeat with `--es screen plan`. Coordinates are for the Pixel 6 in portrait;
 inspect the screen first on other devices. This renders the actual shared Compose
 screens with 10,000 postings and 1,000 schedules through Store5. It deliberately
 excludes app navigation and sync. Initial screen composition is excluded from the
@@ -381,3 +381,23 @@ timing more workloads. Only the benchmark APK enables shell profiling.
 The independent LAN TCP comparison in the audit streamed `/dev/zero` from an
 Android `toybox nc` listener to a local counting client. It measures link capacity
 outside Shilling; application sync continues to use WebRTC exclusively.
+
+## Public main: native iOS and shared presentation
+
+The audit branch now builds on public main `2abf1db`, using native SwiftUI on iOS.
+The Android UI fixture renders Activity and Plan; older History/Weekly results
+refer to the archived layout and are not measurements of these screens.
+
+```sh
+CI_RETRY_ATTEMPTS=1 ./scripts/ci/run-jvm-tests.sh
+python3 scripts/perf/bench_activity_projection.py
+```
+
+The projection benchmark reuses the toolchain's recorded JVM test classpath and
+JDK. It checks the original and indexed outputs, performs five warmups per size,
+and alternates 15 measured rounds at 1,000 / 10,000 / 20,000 synthetic transfer
+postings. Run after builds finish. It measures shared CPU work on the host JVM,
+not iPhone rendering, SQLite latency, or Swift bridging.
+
+See [the native UI audit](../../docs/native-ios-audit-2026-09-29.md) for results and
+the remaining native profiling workloads.
