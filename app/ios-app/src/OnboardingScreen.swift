@@ -167,6 +167,14 @@ private struct SelfHostedForm: View {
             } footer: {
                 Text(state.selfHostedHint).foregroundStyle(state.selfHostedError == nil ? Color.secondary : Color.red)
             }
+            if state.analyticsAvailable {
+                Section {
+                    Toggle("Share anonymous usage events", isOn: Binding(
+                        get: { state.analyticsConsent },
+                        set: { screen.setAnalyticsConsent(value: $0) }
+                    ))
+                }
+            }
             Section {
                 Button {
                     screen.continueSelfHosted()

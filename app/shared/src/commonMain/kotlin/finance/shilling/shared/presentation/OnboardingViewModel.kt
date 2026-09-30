@@ -143,7 +143,7 @@ class OnboardingViewModel(
         } else {
             viewModelScope.launch {
                 actions.getStarted(wipeHeldData = false)
-                analytics.capture(ProductEvent.ONBOARDING_COMPLETED, "guest")
+                analytics.captureAsync(ProductEvent.ONBOARDING_COMPLETED, "guest")
             }
         }
     }
@@ -154,7 +154,7 @@ class OnboardingViewModel(
         result.fold(
             onSuccess = {
                 actions.completeSignIn(wipeHeldData = false)
-                analytics.capture(ProductEvent.ONBOARDING_COMPLETED, "hosted")
+                analytics.captureAsync(ProductEvent.ONBOARDING_COMPLETED, "hosted")
             },
             onFailure = { error ->
                 if (error is NonMatchingAccountException) local.update { it.copy(pending = Pending.NON_MATCHING_AUTH) }
@@ -170,11 +170,11 @@ class OnboardingViewModel(
             when (pending) {
                 Pending.GET_STARTED -> {
                     actions.getStarted(wipeHeldData = true)
-                    analytics.capture(ProductEvent.ONBOARDING_COMPLETED, "guest")
+                    analytics.captureAsync(ProductEvent.ONBOARDING_COMPLETED, "guest")
                 }
                 Pending.NON_MATCHING_AUTH -> {
                     actions.completeSignIn(wipeHeldData = true)
-                    analytics.capture(ProductEvent.ONBOARDING_COMPLETED, "hosted")
+                    analytics.captureAsync(ProductEvent.ONBOARDING_COMPLETED, "hosted")
                 }
             }
         }
@@ -194,7 +194,7 @@ class OnboardingViewModel(
         local.update { it.copy(selfHostedError = null, validating = true) }
         viewModelScope.launch {
             val result = actions.continueSelfHosted(url)
-            if (result.isSuccess) analytics.capture(ProductEvent.ONBOARDING_COMPLETED, "self_hosted")
+            if (result.isSuccess) analytics.captureAsync(ProductEvent.ONBOARDING_COMPLETED, "self_hosted")
             local.update { it.copy(selfHostedError = result.exceptionOrNull()?.message, validating = false) }
         }
     }

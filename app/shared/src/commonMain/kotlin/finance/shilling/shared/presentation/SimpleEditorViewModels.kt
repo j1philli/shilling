@@ -220,7 +220,7 @@ class AccountEditorViewModel(
         val balance = current.balance ?: return null
         if (!current.saveEnabled) return null
         accountRepository.upsert(Account(id = existing?.id ?: idGenerator.newId(), name = current.name.trim(), balance = balance))
-        if (existing == null) viewModelScope.launch { analytics.capture(ProductEvent.ACCOUNT_CREATED) }
+        if (existing == null) analytics.captureAsync(ProductEvent.ACCOUNT_CREATED)
         return if (existing == null) "Account added" else "Account updated"
     }
 

@@ -188,7 +188,7 @@ class ScheduleEditorViewModel(
     suspend fun save(): String? {
         if (!state.value.saveEnabled) return null
         scheduleRepository.upsert(draft(form.fields).copy(id = existing?.id ?: idGenerator.newId()))
-        if (existing == null) viewModelScope.launch { analytics.capture(ProductEvent.SCHEDULE_CREATED, form.fields.type.name.lowercase()) }
+        if (existing == null) analytics.captureAsync(ProductEvent.SCHEDULE_CREATED, form.fields.type.name.lowercase())
         return if (existing == null) "Schedule added" else "Schedule updated"
     }
 

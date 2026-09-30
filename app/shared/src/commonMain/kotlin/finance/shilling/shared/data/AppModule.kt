@@ -112,7 +112,7 @@ val dataModule: Module = module {
     // OnboardingActions comes from sessionModule (AppSession).
     viewModel { OnboardingViewModel(get(), get(), get()) }
     viewModel { params -> ReceiptEditorViewModel(params.getOrNull(), get(), get(), get(), get(), get()) }
-    viewModel { params -> TransactionEditorViewModel(params.getOrNull(), get(), get(), get(), get(), get(), get()) }
+    viewModel { params -> TransactionEditorViewModel(params.getOrNull(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { params -> ScheduleEditorViewModel(params.getOrNull(), params.getOrNull(), get(), get(), get(), get(), get()) }
     // Needs SessionState and the Settings callbacks from sessionModule.
     viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }

@@ -8,6 +8,10 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
@@ -35,6 +39,14 @@ class ProductAnalytics(
     private val idGenerator: IdGenerator,
     private val httpClient: HttpClient
 ) {
+    private val deliveryScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    /** Dispatch independently of a screen that may close as soon as its action succeeds. */
+    fun captureAsync(event: ProductEvent, kind: String? = null) {
+        if (!consent || !configured) return
+        deliveryScope.launch { capture(event, kind) }
+    }
+
     var host: String
         get() = settings.getStringOrNull(HOST_KEY) ?: DEFAULT_POSTHOG_HOST
         set(value) = settings.putString(HOST_KEY, value.trim().trimEnd('/'))

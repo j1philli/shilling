@@ -13,7 +13,6 @@ import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.PostingRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -269,7 +268,7 @@ class ImportViewModel(
         }
         val accountName = current.accounts.firstOrNull { it.id == target }?.label ?: "this account"
         input.value = Input(accountId = target)
-        viewModelScope.launch { analytics.capture(ProductEvent.CSV_IMPORT_COMPLETED) }
+        analytics.captureAsync(ProductEvent.CSV_IMPORT_COMPLETED)
         return "Imported ${toImport.size} transactions into $accountName"
     }
 }

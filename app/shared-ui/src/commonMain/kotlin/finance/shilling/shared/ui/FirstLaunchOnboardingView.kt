@@ -168,6 +168,12 @@ fun FirstLaunchOnboardingView(
                                     singleLine = true,
                                     modifier = Modifier.fillMaxWidth()
                                 )
+                                if (state.analyticsAvailable) {
+                                    Row {
+                                        Text("Share anonymous usage events", modifier = Modifier.weight(1f))
+                                        Switch(checked = state.analyticsConsent, onCheckedChange = viewModel::setAnalyticsConsent)
+                                    }
+                                }
                                 Button(onClick = viewModel::continueSelfHosted, enabled = state.canContinueSelfHosted) {
                                     if (state.validatingSelfHosted) {
                                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
