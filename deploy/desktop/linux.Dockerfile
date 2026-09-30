@@ -24,6 +24,7 @@ WORKDIR /workspace/src-tauri
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/git \
     --mount=type=cache,target=/workspace/src-tauri/target \
+    rm -rf target/release/bundle && \
     tauri build --bundles deb,rpm,appimage \
       --config '{"build":{"beforeBuildCommand":""}}' && \
     mkdir -p /out && \

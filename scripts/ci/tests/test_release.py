@@ -27,7 +27,7 @@ class ReleaseTests(unittest.TestCase):
         for name, value in {
             "VERSION": "0.1.2\n", "web-app-dist/index.html": "hosted web", "web-app-dist/web-app.wasm": "wasm",
             "release-input/server/server-jvm-executable.jar": "jar", "deploy/self-host/compose.yaml": "services: {}",
-            **{f"release-input/clients/{target}/{target}.zip": target for target in release.TARGETS[2:]},
+            **{f"release-input/clients/{target}/Shilling_0.1.2_{target}.zip": target for target in release.TARGETS[2:]},
         }.items():
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -86,7 +86,7 @@ class ReleaseTests(unittest.TestCase):
         self.assertTrue(self.published())
         self.assertFalse(any(c[0] == "bash" for c in self.commands()))
         manifest = json.loads((self.root / "release-output/release-manifest.json").read_text())
-        self.assertEqual(list(manifest["assets"]), ["android.zip"])
+        self.assertEqual(list(manifest["assets"]), ["Shilling_0.1.2_android.zip"])
 
     def test_single_server_never_deploys_web(self):
         os.environ.update(SHILLING_RELEASE_MODE="single", SHILLING_RELEASE_TARGET="server")
@@ -101,10 +101,30 @@ class ReleaseTests(unittest.TestCase):
         self.assertFalse(any(c[0] in ("gh", "bash", "docker") for c in self.commands()))
 
     def test_missing_artifact_fails_before_any_publishing(self):
-        (self.root / "release-input/clients/ios/ios.zip").unlink()
+        (self.root / "release-input/clients/ios/Shilling_0.1.2_ios.zip").unlink()
         with self.assertRaisesRegex(ValueError, "Missing tested ios"):
             release.main()
         self.assertFalse(any(c[0] == "gh" for c in self.commands()))
+
+    def test_stale_desktop_package_blocks_all_publication(self):
+        for target, filename in (
+            ("windows", "Shilling_0.1.0_x64-setup.exe"),
+            ("linux", "Shilling-0.1.0-1.x86_64.rpm"),
+            ("macos", "Shilling_0.1.0_universal.dmg"),
+        ):
+            with self.subTest(target=target):
+                stale = self.root / "release-input/clients" / target / filename
+                stale.write_text("stale package")
+                with self.assertRaisesRegex(ValueError, "Unexpected .* package"):
+                    release.main()
+                self.assertFalse(any(c[0] in ("gh", "bash") for c in self.commands()))
+                stale.unlink()
+
+    def test_current_rpm_filename_is_accepted(self):
+        rpm = self.root / "release-input/clients/linux/Shilling-0.1.2-1.x86_64.rpm"
+        rpm.write_text("current rpm")
+        release.main()
+        self.assertTrue(self.published())
 
     def test_feature_branch_cannot_publish(self):
         os.environ["BUILD_VCS_BRANCH"] = "feature/test"
