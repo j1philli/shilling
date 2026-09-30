@@ -184,7 +184,7 @@ class ReceiptEditorViewModel(
             return null
         }
         receiptRepository.attach(receiptId, postingId)
-        viewModelScope.launch { analytics.capture(ProductEvent.RECEIPT_ATTACHED) }
+        analytics.captureAsync(ProductEvent.RECEIPT_ATTACHED)
         return "Attached to ${posting.title}"
     }
 
@@ -223,7 +223,7 @@ class ReceiptEditorViewModel(
                 amount = amount
             )
         )
-        if (pendingAttach.value != null) viewModelScope.launch { analytics.capture(ProductEvent.RECEIPT_ATTACHED) }
+        if (pendingAttach.value != null) analytics.captureAsync(ProductEvent.RECEIPT_ATTACHED)
         return "Receipt saved"
     }
 

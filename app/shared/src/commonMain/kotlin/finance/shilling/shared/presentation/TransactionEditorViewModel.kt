@@ -163,7 +163,7 @@ class TransactionEditorViewModel(
             } else {
                 postingRepository.recordAdHoc(f.title.trim(), amount, f.type, from, f.categoryId, date)
             }
-            viewModelScope.launch { analytics.capture(ProductEvent.POSTING_CREATED) }
+            analytics.captureAsync(ProductEvent.POSTING_CREATED)
             return "Transaction added"
         }
         val posting = details.posting
@@ -201,7 +201,7 @@ class TransactionEditorViewModel(
                 addedAt = Clock.System.now().toEpochMilliseconds()
             )
         )
-        viewModelScope.launch { analytics.capture(ProductEvent.RECEIPT_ATTACHED) }
+        analytics.captureAsync(ProductEvent.RECEIPT_ATTACHED)
         return "Receipt attached"
     }
 
