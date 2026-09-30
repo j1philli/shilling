@@ -1,6 +1,7 @@
 package finance.shilling.android
 
 import android.content.pm.ApplicationInfo
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -30,10 +31,19 @@ import io.ktor.client.webrtc.AndroidWebRtc
 import io.ktor.client.webrtc.WebRtcClient
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.dsl.module
 import finance.shilling.shared.data.sync.WebRtcPlatform
 import finance.shilling.shared.session.AppSession
 import finance.shilling.shared.session.AppSessionConfig
+import finance.shilling.shared.session.SessionPhase
 import finance.shilling.shared.session.sessionModule
 
 private val log = Logger.withTag("Android")
@@ -54,6 +64,8 @@ private fun isRunningOnEmulator(): Boolean {
 }
 
 class MainActivity : ComponentActivity() {
+    private val accountRefreshScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private lateinit var appSession: AppSession
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -80,7 +92,7 @@ class MainActivity : ComponentActivity() {
         val appContext = applicationContext
         // Returns the running graph if this Activity is recreated in the same process.
         initKoin(module {
-            single { AppSessionConfig(logTag = "Android") }
+            single { AppSessionConfig(logTag = "Android", authRedirectUrl = "shilling.finance://auth-callback") }
             single { ShillingDatabase(driver) }
             single { settings }
             single<IdGenerator> { AndroidIdGenerator() }
@@ -94,7 +106,7 @@ class MainActivity : ComponentActivity() {
                     }
                 })
             }
-        }, sessionModule).get<AppSession>().start()
+        }, sessionModule).get<AppSession>().also { appSession = it }.start()
 
         setContent {
             ShillingAppBootstrap(
@@ -109,6 +121,38 @@ class MainActivity : ComponentActivity() {
                     }
                 )
             )
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshAccountStatus()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.data?.scheme == "shilling.finance" && intent.data?.host == "auth-callback") {
+            refreshAccountStatus()
+        }
+    }
+
+    override fun onDestroy() {
+        accountRefreshScope.cancel()
+        super.onDestroy()
+    }
+
+    private fun refreshAccountStatus() {
+        if (!::appSession.isInitialized) return
+        accountRefreshScope.launch {
+            val ready = withTimeoutOrNull(10_000) {
+                appSession.phase.filterIsInstance<SessionPhase.Ready>().first()
+            } ?: return@launch
+            if (!ready.selfHosted && ready.authService.authState.value.isAuthenticated) {
+                ready.authService.refreshAccountStatus().onFailure { error ->
+                    log.w { "Could not refresh account status: ${error.message}" }
+                }
+            }
         }
     }
 }

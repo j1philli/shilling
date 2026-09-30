@@ -130,12 +130,21 @@ fun createAuthService(
     deviceId: String,
     scope: CoroutineScope,
     httpClient: HttpClient
+): AuthService = createAuthServiceWithRedirect(serverConfig, settings, deviceId, scope, httpClient, null)
+
+fun createAuthServiceWithRedirect(
+    serverConfig: ServerConfig,
+    settings: Settings,
+    deviceId: String,
+    scope: CoroutineScope,
+    httpClient: HttpClient,
+    authRedirectUrl: String?
 ): AuthService =
     if (serverConfig.authMode == AuthMode.SUPABASE) {
         val url = serverConfig.supabaseUrl.orEmpty()
         val key = serverConfig.supabaseAnonKey.orEmpty()
         if (url.isNotBlank() && key.isNotBlank()) {
-            SupabaseAuthService(url, key, deviceId, settings, scope, httpClient)
+            SupabaseAuthService(url, key, deviceId, settings, scope, httpClient, authRedirectUrl)
         } else {
             log.w { "Hosted auth selected but Supabase config is incomplete; disabling hosted auth for this session" }
             NoOpAuthService(deviceId)

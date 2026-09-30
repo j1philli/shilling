@@ -134,7 +134,7 @@ data class SettingsUiState(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModel(
-    sessionState: SessionState,
+    private val sessionState: SessionState,
     hostedBootstrapState: HostedBootstrapState,
     private val settings: Settings,
     private val retryCallback: HostedBootstrapRetryCallback,
@@ -201,7 +201,8 @@ class SettingsViewModel(
     }
 
     suspend fun refreshAccountStatus(): Result<Unit> =
-        authService?.refreshAccountStatus() ?: Result.failure(IllegalStateException("Not ready yet"))
+        ((sessionState.phase.value as? SessionPhase.Ready)?.authService ?: authService)
+            ?.refreshAccountStatus() ?: Result.failure(IllegalStateException("Not ready yet"))
 
     suspend fun setPassword(password: String): Result<Unit> =
         authService?.setPassword(password) ?: Result.failure(IllegalStateException("Not ready yet"))

@@ -21,6 +21,7 @@ import finance.shilling.shared.data.auth.NoOpAuthService
 import finance.shilling.shared.data.auth.StartupIdentity
 import finance.shilling.shared.data.auth.StartupStateResolution
 import finance.shilling.shared.data.auth.createPlaceholderStartupIdentity
+import finance.shilling.shared.data.auth.createAuthServiceWithRedirect
 import finance.shilling.shared.data.auth.hostedBootstrapRetryDelay
 import finance.shilling.shared.data.auth.resolveEffectiveHostedBootstrapStatus
 import finance.shilling.shared.data.auth.resolveStartupIdentity
@@ -74,6 +75,8 @@ data class AppSessionConfig(
     val selfHostedOnly: Boolean = false,
     val defaultSelfHostedServerUrl: String = DEFAULT_SELF_HOSTED_SERVER_URL,
     val logTag: String = "AppSession",
+    /** Mobile callback URL for email verification. Web and desktop use the Supabase Site URL. */
+    val authRedirectUrl: String? = null,
     /** Runs the session state machine. Main everywhere: `delay` works there on iOS. */
     val dispatcher: CoroutineDispatcher = Dispatchers.Main
 )
@@ -113,6 +116,12 @@ class AppSession(
     private val scope = CoroutineScope(SupervisorJob() + config.dispatcher)
     private val deviceId: String get() = deviceIdentity.deviceId
     private val hostedBootstrapLoop = HostedBootstrapLoop(::hostedBootstrapRetryDelay)
+    private val authServiceFactory: finance.shilling.shared.data.auth.AuthServiceFactory =
+        { serverConfig, authSettings, authDeviceId, authScope, authHttpClient ->
+            createAuthServiceWithRedirect(
+                serverConfig, authSettings, authDeviceId, authScope, authHttpClient, config.authRedirectUrl
+            )
+        }
 
     // ── State ────────────────────────────────────────────────────────────────
     private var started = false
@@ -464,7 +473,8 @@ class AppSession(
                     scope = authScope,
                     deploymentSelection = deploymentSelection,
                     sessionRequirement = sessionRequirement,
-                    currentAuthRuntime = currentAuthRuntime
+                    currentAuthRuntime = currentAuthRuntime,
+                    authServiceFactory = authServiceFactory
                 )
             },
             onResolution = { resolution ->
@@ -513,7 +523,8 @@ class AppSession(
             scope = authScope,
             deploymentSelection = DeploymentSelection.HOSTED,
             sessionRequirement = HostedSessionRequirement.ACCOUNT_REQUIRED,
-            currentAuthRuntime = authRuntime
+            currentAuthRuntime = authRuntime,
+            authServiceFactory = authServiceFactory
         )
         authRuntime = resolution.authRuntime
         welcomeAuthService = resolution.authRuntime.authService

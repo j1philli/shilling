@@ -43,7 +43,8 @@ class SupabaseAuthService(
     private val deviceId: String,
     private val settings: Settings,
     scope: CoroutineScope,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val authRedirectUrl: String? = null
 ) : AuthService {
     private val initializationComplete = CompletableDeferred<Unit>()
     private val profilesUrl = supabaseUrl.trimEnd('/') + "/rest/v1/user_profiles"
@@ -137,7 +138,7 @@ class SupabaseAuthService(
         if (_authState.value.isAnonymous && _authState.value.isAuthenticated) {
             val userId = requireNotNull(_authState.value.userId) { "Guest session has no user ID" }
             // Link the email to this UUID first. Supabase requires verification before setting a password.
-            val updatedUser = client.auth.updateUser {
+            val updatedUser = client.auth.updateUser(redirectUrl = authRedirectUrl) {
                 this.email = email
             }
             cachePendingEmailConfirmation(userId, email)
@@ -264,17 +265,21 @@ class SupabaseAuthService(
         val pendingEmail = settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_EMAIL)
         val pendingConfirmation = settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION) == "true"
         val passwordSetupUserId = settings.getStringOrNull(SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID)
-        val profileTier = if (emailConfirmed) fetchProfileTier(userId, token) else null
+        val profile = if (emailConfirmed) fetchUserProfile(userId, token) else null
         val state = resolveAuthenticatedState(
             userId = userId,
             sessionEmail = sessionEmail,
             emailConfirmed = emailConfirmed,
             token = token,
             deviceId = deviceId,
-            profileTier = profileTier,
+            profileTier = profile?.tier?.let(::parseStoredTier),
             pendingEmail = pendingEmail,
             pendingEmailConfirmation = pendingConfirmation,
-            needsPasswordSetup = passwordSetupUserId == userId
+            needsPasswordSetup = when (profile?.hasPassword) {
+                true -> false
+                false -> true
+                null -> passwordSetupUserId == userId
+            }
         )
         settings.putString(SETTINGS_KEY_AUTH_ACCESS_TOKEN, token)
         settings.putString(SETTINGS_KEY_AUTH_REFRESH_TOKEN, refreshToken)
@@ -285,18 +290,16 @@ class SupabaseAuthService(
         log.i { "Authenticated: userId=$userId, anon=${state.isAnonymous}, tier=${state.tier}, pendingEmailConfirmation=${state.pendingEmailConfirmation}" }
     }
 
-    private suspend fun fetchProfileTier(userId: String, token: String): UserTier? = runCatching {
+    private suspend fun fetchUserProfile(userId: String, token: String): UserProfileAuthRow? = runCatching {
         httpClient.get(profilesUrl) {
             header("apikey", anonKey)
             header("Authorization", "Bearer $token")
-            parameter("select", "tier")
+            parameter("select", "tier,has_password")
             parameter("user_id", "eq.$userId")
-        }.body<List<UserProfileTierRow>>()
+        }.body<List<UserProfileAuthRow>>()
             .firstOrNull()
-            ?.tier
-            ?.let(::parseStoredTier)
     }.getOrElse { error ->
-        log.w { "Supabase profile tier fetch failed: ${error.message}" }
+        log.w { "Supabase profile auth state fetch failed: ${error.message}" }
         null
     }
 
@@ -357,7 +360,9 @@ internal fun resolveAuthenticatedState(
 }
 
 @Serializable
-private data class UserProfileTierRow(
+private data class UserProfileAuthRow(
     @SerialName("tier")
-    val tier: String? = null
+    val tier: String? = null,
+    @SerialName("has_password")
+    val hasPassword: Boolean? = null
 )
