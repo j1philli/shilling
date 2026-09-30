@@ -42,6 +42,8 @@ class WebRtcConnectionManager(
     private val bufferedIceCandidates = mutableMapOf<String, MutableList<SignalingMessage.IceCandidate>>()
     /** Retry jobs for peers we're waiting on — cancelled once connected. */
     private val retryJobs = mutableMapOf<String, Job>()
+    /** Event collectors of each peer's current connection — cancelled with the connection. */
+    private val connectionJobs = mutableMapOf<String, MutableList<Job>>()
     /** Extra peerConnected re-emits to recover from startup/listener races. */
     private val peerConnectedRetryJobs = mutableMapOf<String, Job>()
     private var scope: CoroutineScope? = null
@@ -226,6 +228,8 @@ class WebRtcConnectionManager(
         bufferedIceCandidates.clear()
         retryJobs.values.forEach { it.cancel() }
         retryJobs.clear()
+        connectionJobs.values.flatten().forEach { it.cancel() }
+        connectionJobs.clear()
         peerConnectedRetryJobs.values.forEach { it.cancel() }
         peerConnectedRetryJobs.clear()
         listenersByPeerAndLabel.values.forEach { it.job.cancel() }
@@ -343,7 +347,36 @@ class WebRtcConnectionManager(
             }
         }
         bufferedIceCandidates.remove(peerId)
+        connectionJobs.remove(peerId)?.forEach { it.cancel() }
         peers.remove(peerId)?.close()
+    }
+
+    /**
+     * A connection lost ICE for good. Its data channel may still report OPEN, so leaving it in
+     * place would let sends "succeed" into a dead transport instead of queuing. Tear it down and
+     * start over in the usual role: the offerer re-offers, the answerer waits for an offer but
+     * offers itself if none arrives.
+     */
+    private fun handleIceFailed(peerId: String, connection: WebRtcPeerConnection) {
+        if (peers[peerId] !== connection) {
+            log.d { "[RTC] ICE FAILED for a replaced connection to $peerId — ignoring" }
+            return
+        }
+        log.w { "[RTC] ICE FAILED for $peerId — dropping connection and reconnecting (queued=${pendingChanges.size})" }
+        cleanupPeer(peerId)
+        scope?.launch {
+            if (shouldBeOfferer(deviceId, peerId)) {
+                log.i { "[RTC] Re-offering to $peerId after ICE failure" }
+                initiateConnection(peerId)
+            } else {
+                log.i { "[RTC] Waiting for a new offer from $peerId after ICE failure — scheduling retry" }
+                scheduleRetryOffer(peerId)
+            }
+        }
+    }
+
+    private fun trackConnectionJob(peerId: String, job: Job) {
+        connectionJobs.getOrPut(peerId) { mutableListOf() }.add(job)
     }
 
     /**
@@ -485,7 +518,7 @@ class WebRtcConnectionManager(
     }
 
     private fun collectIceCandidates(connection: WebRtcPeerConnection, peerId: String) {
-        scope?.launch {
+        val job = scope?.launch {
             connection.iceCandidates.collect { ice ->
                 log.d { "[RTC] ICE gathered for $peerId: ${ice.candidate.take(60)}" }
                 signalingClient.send(
@@ -494,11 +527,12 @@ class WebRtcConnectionManager(
                     )
                 )
             }
-        }
+        } ?: return
+        trackConnectionJob(peerId, job)
     }
 
     private fun collectConnectionState(connection: WebRtcPeerConnection, peerId: String) {
-        scope?.launch {
+        val iceJob = scope?.launch {
             connection.iceConnectionState.collect { state ->
                 val chState = dataChannels[peerId]?.state
                 log.i { "[RTC] ICE state $peerId: $state (channel=$chState)" }
@@ -513,6 +547,7 @@ class WebRtcConnectionManager(
                     }
                     WebRtc.IceConnectionState.FAILED -> {
                         log.e { "[RTC] ICE FAILED for $peerId — P2P unavailable" }
+                        handleIceFailed(peerId, connection)
                     }
                     WebRtc.IceConnectionState.DISCONNECTED -> {
                         log.w { "[RTC] ICE DISCONNECTED for $peerId — may recover" }
@@ -523,17 +558,23 @@ class WebRtcConnectionManager(
                     else -> {}
                 }
             }
-        }
-        scope?.launch {
+        } ?: return
+        trackConnectionJob(peerId, iceJob)
+        val stateJob = scope?.launch {
             connection.state.collect { state ->
                 log.i { "[RTC] PeerConnection state $peerId: $state" }
             }
-        }
+        } ?: return
+        trackConnectionJob(peerId, stateJob)
     }
 
     private fun collectDataChannelEvents(connection: WebRtcPeerConnection, peerId: String) {
-        scope?.launch(start = CoroutineStart.UNDISPATCHED) {
+        val job = scope?.launch(start = CoroutineStart.UNDISPATCHED) {
             connection.dataChannelEvents.collect { event ->
+                if (peers[peerId] !== connection) {
+                    log.d { "[RTC] DataChannelEvent ${event::class.simpleName} for a replaced connection to $peerId — ignoring" }
+                    return@collect
+                }
                 when (event) {
                     is DataChannelEvent.Open -> {
                         val ch = event.channel
@@ -559,7 +600,8 @@ class WebRtcConnectionManager(
                     }
                 }
             }
-        }
+        } ?: return
+        trackConnectionJob(peerId, job)
     }
 
     private suspend fun markPeerReady(peerId: String) {
