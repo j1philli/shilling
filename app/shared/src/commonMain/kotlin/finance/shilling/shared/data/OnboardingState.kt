@@ -68,7 +68,8 @@ fun softReturnToWelcome(settings: Settings, notice: String = "session_expired") 
         SETTINGS_KEY_AUTH_USER_ID,
         SETTINGS_KEY_AUTH_TIER,
         SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION,
-        SETTINGS_KEY_AUTH_PENDING_EMAIL
+        SETTINGS_KEY_AUTH_PENDING_EMAIL,
+        SETTINGS_KEY_CLOUD_RELAY_ENABLED
     ).forEach(settings::remove)
 }
 
@@ -102,7 +103,8 @@ fun resetOnboardingState(settings: Settings) {
         SETTINGS_KEY_AUTH_PENDING_EMAIL,
         SETTINGS_KEY_HELD_LOCAL_DATA,
         SETTINGS_KEY_PENDING_RESTORE_USER_ID,
-        SETTINGS_KEY_WELCOME_NOTICE
+        SETTINGS_KEY_WELCOME_NOTICE,
+        SETTINGS_KEY_CLOUD_RELAY_ENABLED
     ).forEach(settings::remove)
 }
 
@@ -114,7 +116,8 @@ fun clearHostedAuthSessionState(settings: Settings) {
         SETTINGS_KEY_AUTH_USER_ID,
         SETTINGS_KEY_AUTH_TIER,
         SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION,
-        SETTINGS_KEY_AUTH_PENDING_EMAIL
+        SETTINGS_KEY_AUTH_PENDING_EMAIL,
+        SETTINGS_KEY_CLOUD_RELAY_ENABLED
     ).forEach(settings::remove)
 }
 

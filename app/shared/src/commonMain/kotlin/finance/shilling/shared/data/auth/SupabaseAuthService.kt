@@ -20,10 +20,6 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
-import io.ktor.client.request.patch
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -297,9 +293,9 @@ internal fun resolveAuthenticatedState(
     val effectiveEmail = if (keepPendingConfirmation) pendingEmail else sessionEmail
     val effectiveTier = when {
         keepPendingConfirmation -> UserTier.FREE
-        profileTier != null -> profileTier
+        // Legacy profile tier is not a paid entitlement. Paid access comes from /api/tier.
+        profileTier == UserTier.FREE -> UserTier.FREE
         sessionEmail.isNullOrBlank() -> UserTier.ANONYMOUS
-        storedTier == UserTier.PAID -> UserTier.PAID
         else -> UserTier.FREE
     }
     return AuthState(

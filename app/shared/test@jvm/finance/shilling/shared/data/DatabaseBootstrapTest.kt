@@ -8,6 +8,7 @@ import finance.shilling.shared.db.ShillingDatabase
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class DatabaseBootstrapTest {
@@ -36,21 +37,23 @@ class DatabaseBootstrapTest {
     }
 
     @Test
-    fun versionMismatchRebuildsSchema() = runBlocking {
+    fun versionMismatchPreservesExistingData() = runBlocking {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         ShillingDatabase.Schema.create(driver).await()
         driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version - 1};", 0)
         val db = ShillingDatabase(driver)
         db.accountQueries.upsert("acct-1", "Checking", 123.45)
 
-        ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
+        assertFailsWith<IllegalStateException> {
+            ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
+        }
 
-        assertEquals(ShillingDatabase.Schema.version, userVersion(driver))
-        assertEquals(0L, rowCount(driver, "accounts"))
+        assertEquals(ShillingDatabase.Schema.version - 1, userVersion(driver))
+        assertEquals(1L, rowCount(driver, "accounts"))
     }
 
     @Test
-    fun missingRequiredTableRebuildsSchema() = runBlocking {
+    fun missingRequiredTablePreservesExistingData() = runBlocking {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         ShillingDatabase.Schema.create(driver).await()
         driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0)
@@ -58,10 +61,11 @@ class DatabaseBootstrapTest {
         db.accountQueries.upsert("acct-1", "Checking", 123.45)
         driver.execute(null, "DROP TABLE change_log;", 0)
 
-        ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
+        assertFailsWith<IllegalStateException> {
+            ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
+        }
 
-        assertTrue(tableExists(driver, "change_log"))
-        assertEquals(0L, rowCount(driver, "accounts"))
+        assertEquals(1L, rowCount(driver, "accounts"))
     }
 
     private fun userVersion(driver: SqlDriver): Long =

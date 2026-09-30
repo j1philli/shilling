@@ -1,0 +1,43 @@
+---
+title: Hosted plans
+---
+
+# Hosted plans
+
+The hosted service enforces Free, Silver, and Gold capabilities in its control plane. Local budgeting remains available on every plan. Synced user data stays in Store5 and moves between devices only through WebRTC data channels.
+
+| Capability | Hosted Free | Hosted Silver | Hosted Gold | Self-hosted |
+| --- | --- | --- | --- | --- |
+| Registered devices in a finance space | 2 | Unlimited | Unlimited | Operator controlled |
+| TURN for WebRTC | No hosted TURN | Hosted TURN | Hosted TURN | Operator configured |
+| Live bank account reading | No | Entitled; provider pending | Entitled; provider pending | Operator configured when supported |
+| Finance spaces an account may belong to | 1 | 1 | Unlimited, once space switching is implemented | Operator controlled |
+
+Self-hosted is a deployment edition, not a RevenueCat subscription. Its server uses `authMode=none`, does not query hosted billing, and does not enforce hosted quotas. A self-hosted bank connection would require the operator to configure a supported provider after that integration exists.
+
+Free receives STUN and can connect directly. Direct WebRTC sometimes works across networks without TURN, so Free must not be described as technically restricted to one local network. Silver and Gold may receive time-limited TURN credentials when configured; `/api/tier` reports TURN available only when both entitlement and server configuration are present. TURN is part of WebRTC, not an entity-sync API.
+
+Each device has a Cloud relay switch in Settings. It starts off, including after logout or local reset. The ICE endpoint only returns TURN credentials when the device explicitly requests relay and the space has a paid entitlement. The client also discards relay candidates advertised by peers while the switch is off, and reconnects peers when it changes. STUN and direct WebRTC remain available with the switch off. Self-hosted devices can make the same choice when their operator configures TURN.
+
+The space's effective sync plan is the highest active plan among its members. A Silver or Gold member sponsors device slots, TURN, and future bank reading for that space. Each account's own plan controls how many spaces it may join. The `hosted_spaces` migration stores roles and memberships, while `user_profiles.household_id` remains the legacy active-space pointer. Invitations and Gold switching still need local data isolation and client UI.
+
+Space owners and admins can manage registered devices. Side-business spaces will have their own Store5 data, with a linked transfer creating matching entries in both spaces when money moves between them. This cross-space transaction flow is not implemented yet.
+
+The hosted device list shows all registrations in the active finance space and labels the account that registered each new device as yours, another member's, or unknown for legacy registrations. Legacy registrations remain unknown until an owner or admin removes them and the device registers again; a peer cannot claim an old device ID merely by reconnecting. Connection badges are computed locally from open WebRTC data channels on the device viewing the list; "not connected" does not mean unregistered or offline. The server does not record P2P connection status. The owner metadata migration must be applied before deploying the server version that uses it.
+
+## RevenueCat setup
+
+1. Create Silver and Gold entitlements in one RevenueCat project and attach the iOS, Android, and web products to them. Use the Supabase user ID as the identified RevenueCat App User ID on every surface.
+2. Set the server API v2 project ID, secret key, and both entitlement IDs using the variables in `.env.example`. The secret API key needs `customer_information:customers:read` permission. If none are set, all hosted accounts are Free; partially configured RevenueCat variables fail server startup.
+3. Configure public iOS/Android SDK keys and offering IDs for native purchases. Configure production Web Purchase Links for browser and desktop checkout. Purchases are offered only to durable signed-in accounts. Native subscribers can open RevenueCat's management URL; web purchasers receive a customer portal link in their billing email. The browser and desktop app checks for entitlement activation after opening checkout.
+4. Apply the versioned `supabase/migrations/` migrations to the hosted Supabase project **before** deploying the server code. They make space metadata server-owned, backfill membership and roles, and register devices atomically. The hosted signaling server fails closed when required metadata is unavailable.
+5. Configure TURN if Silver/Gold internet relay is offered. The server returns TURN only to a household with an active paid entitlement. The client now keeps the returned username and credential and fetches ICE configuration before beginning peer discovery.
+
+The server reads current active entitlements from RevenueCat's API with a 30-second per-account cache. A 404 customer is Free. Other RevenueCat failures deny paid access until the service recovers. The app refreshes plan state after a purchase or restore; a user can also refresh it in Settings.
+
+## Current implementation limits
+
+- Space invitations, Gold multiple-space switching, linked cross-space transfers, and downgrade selection are not yet implemented. Existing shared `household_id` values are backfilled as space memberships, but there is no invitation UI yet.
+- A device that has cached one hosted household will refuse to start hosted sync after signing into a different household. Its current Store5 database is not household-scoped yet, so switching must wait for local data isolation.
+- The bank provider, consent flow, and transaction mapping are undecided. Silver/Gold entitlement is represented in the server response; no live bank data is fetched yet.
+- Store products, RevenueCat keys, Web Purchase Links, and Supabase schema must be configured in the hosted environment before paid checkout works.

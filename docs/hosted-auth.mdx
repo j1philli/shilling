@@ -55,7 +55,7 @@ create table if not exists public.user_profiles (
 
 Each new `auth.users` row should also create a `public.user_profiles` row. Hosted bootstrap will fail by design if the authenticated user has no hosted household metadata.
 
-The production schema is managed by `supabase/migrations/`. Its metadata policy grants authenticated clients read access to only their own `user_id` and `tier`. No client can update `user_profiles`, and `waitlist` is inaccessible through the public Data API. The server's secret key performs the household lookup. The Auth trigger updates a profile's tier when an anonymous account gains an email address.
+The production schema is managed by `supabase/migrations/`. Its metadata policy grants authenticated clients read access to only their own `user_id` and legacy `tier`. No client can update `user_profiles`, and `waitlist` is inaccessible through the public Data API. The server's secret key performs the space lookup. The Auth trigger updates the legacy profile tier when an anonymous account gains an email address; paid access comes from RevenueCat. The new space migration backfills memberships and gives each space an owner.
 
 ## Environment
 
@@ -73,8 +73,9 @@ For modern Supabase projects using asymmetric signing keys such as `ECC P-256`, 
 
 ## What Is Not Implemented Yet
 
-- dedicated sign-in and account-management screens outside the developer settings surface
-- tier/device metadata endpoints such as `/api/tier` or `/api/devices`
+- dedicated sign-in and account-management screens outside the settings surface
+- finance-space invitations and multiple-space management
+- configured RevenueCat products and hosted purchase deployment
 - backup peer and hosted backup storage
 - hosted abuse controls beyond the current join authorization path
 - full Store5 boundary cleanup in sync and projection code
