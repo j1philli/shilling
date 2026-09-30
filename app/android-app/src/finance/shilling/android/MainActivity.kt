@@ -15,12 +15,12 @@ import finance.shilling.shared.data.IdGenerator
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.SETTINGS_KEY_SERVER_URL
 import finance.shilling.shared.data.ensureLocalSchemaReady
+import finance.shilling.shared.data.initKoin
 import finance.shilling.shared.data.sync.BOOTSTRAP_NETWORK_TIMEOUT_MS
 import finance.shilling.shared.db.ShillingDatabase
 import finance.shilling.shared.ui.AppBootstrapScaffoldConfig
 import finance.shilling.shared.ui.ShillingAppBootstrap
 import finance.shilling.shared.ui.ShillingTheme
-import finance.shilling.shared.ui.WebRtcPlatform
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpTimeout
@@ -31,6 +31,10 @@ import io.ktor.client.webrtc.WebRtcClient
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import org.koin.dsl.module
+import finance.shilling.shared.data.sync.WebRtcPlatform
+import finance.shilling.shared.session.AppSession
+import finance.shilling.shared.session.AppSessionConfig
+import finance.shilling.shared.session.sessionModule
 
 private val log = Logger.withTag("Android")
 
@@ -74,7 +78,9 @@ class MainActivity : ComponentActivity() {
             log.i { "Emulator detected — defaulting server URL to http://10.0.2.2:8081" }
         }
         val appContext = applicationContext
-        val platformModule = module {
+        // Returns the running graph if this Activity is recreated in the same process.
+        initKoin(module {
+            single { AppSessionConfig(logTag = "Android") }
             single { ShillingDatabase(driver) }
             single { settings }
             single<IdGenerator> { AndroidIdGenerator() }
@@ -88,12 +94,10 @@ class MainActivity : ComponentActivity() {
                     }
                 })
             }
-        }
+        }, sessionModule).get<AppSession>().start()
 
         setContent {
             ShillingAppBootstrap(
-                platformModule = platformModule,
-                logTag = "Android",
                 scaffoldConfig = AppBootstrapScaffoldConfig(
                     cameraButton = { onFile -> MobileCameraReceiptButton(onFile) },
                     photoButton = { onFile -> MobilePhotoLibraryReceiptButton(onFile) },

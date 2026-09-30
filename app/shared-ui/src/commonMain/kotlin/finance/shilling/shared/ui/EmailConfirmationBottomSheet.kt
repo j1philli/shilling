@@ -7,6 +7,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import finance.shilling.shared.presentation.CredentialsCopy
 
 data class EmailConfirmationSheetState(
     val email: String,
@@ -25,17 +26,13 @@ fun EmailConfirmationBottomSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ) {
         ShillingCard {
-            Text("Confirm your email", style = MaterialTheme.typography.titleMedium)
+            Text(CredentialsCopy.CONFIRM_EMAIL_TITLE, style = MaterialTheme.typography.titleMedium)
             Text(
-                if (upgradedFromGuest) {
-                    "We sent a confirmation email to $email. Open it to finish upgrading this guest account to Free."
-                } else {
-                    "We sent a confirmation email to $email. Open it to finish creating your account."
-                },
+                CredentialsCopy.confirmEmailMessage(email, upgradedFromGuest),
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                "Until you confirm it, this account change is still pending in Supabase Auth.",
+                CredentialsCopy.CONFIRM_EMAIL_NOTE,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

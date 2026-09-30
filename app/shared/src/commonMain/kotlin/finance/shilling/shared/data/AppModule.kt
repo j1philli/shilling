@@ -1,8 +1,6 @@
 package finance.shilling.shared.data
 
 import finance.shilling.shared.data.auth.DeviceIdentity
-import finance.shilling.shared.data.auth.HostedBootstrapRetryCallback
-import finance.shilling.shared.data.auth.HostedBootstrapState
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.ChangeNotifier
@@ -19,8 +17,41 @@ import finance.shilling.shared.data.store.createScheduleExceptionStore
 import finance.shilling.shared.data.store.createScheduleStore
 import finance.shilling.shared.data.usecase.ComputeBudgetUseCase
 import finance.shilling.shared.data.usecase.ComputeWindowUseCase
+import finance.shilling.shared.presentation.DisplayPreferences
+import finance.shilling.shared.presentation.ActivityViewModel
+import finance.shilling.shared.presentation.HomeViewModel
+import finance.shilling.shared.presentation.AccountEditorViewModel
+import finance.shilling.shared.presentation.AccountsViewModel
+import finance.shilling.shared.presentation.CategoryEditorViewModel
+import finance.shilling.shared.presentation.CategoriesViewModel
+import finance.shilling.shared.presentation.OccurrenceActions
+import finance.shilling.shared.presentation.ScheduleEditorViewModel
+import finance.shilling.shared.presentation.ImportViewModel
+import finance.shilling.shared.presentation.OnboardingViewModel
+import finance.shilling.shared.presentation.ReceiptEditorViewModel
+import finance.shilling.shared.presentation.SchedulesViewModel
+import finance.shilling.shared.presentation.TransactionEditorViewModel
+import finance.shilling.shared.presentation.PlanOverviewViewModel
+import finance.shilling.shared.presentation.PlanRequests
+import finance.shilling.shared.presentation.ReceiptsViewModel
+import finance.shilling.shared.presentation.SettingsViewModel
+import org.koin.core.Koin
+import org.koin.core.context.startKoin
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+import org.koin.mp.KoinPlatform
+
+/**
+ * Starts the app's single Koin graph: the shared [dataModule] plus the app's [modules] (its
+ * platform module and, on apps, `sessionModule`). Each platform calls this from its entry point
+ * before showing any UI, so Compose and native (Swift) code resolve from the same graph. Later
+ * calls return the running instance (e.g. an Android Activity recreated in the same process).
+ */
+fun initKoin(vararg modules: Module): Koin =
+    KoinPlatform.getKoinOrNull() ?: startKoin { modules(dataModule, *modules) }.koin.also {
+        DisplayPreferences.load(it.get())
+    }
 
 /**
  * Shared data graph: identity, Store5 stores, repositories, use cases, and the sync facade.
@@ -62,6 +93,28 @@ val dataModule: Module = module {
     single { ComputeWindowUseCase(get(), get(), get(), get(), get()) }
     single { ComputeBudgetUseCase(get(), get(), get()) }
 
+    viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { ActivityViewModel(get()) }
+    viewModel { ReceiptsViewModel(get()) }
+    single { PlanRequests() }
+    factory { OccurrenceActions(get(), get()) }
+    viewModel { PlanOverviewViewModel(get(), get()) }
+    viewModel { SchedulesViewModel(get(), get(), get()) }
+    viewModel { CategoriesViewModel(get()) }
+    viewModel { AccountsViewModel(get()) }
+    // Editors take the item id (null = new) as a parameter.
+    viewModel { params -> CategoryEditorViewModel(params.getOrNull(), get(), get()) }
+    viewModel { params -> AccountEditorViewModel(params.getOrNull(), get(), get()) }
+    // Parameters: schedule id (null = new), then the preset type for new schedules.
+    viewModel { ImportViewModel(get(), get(), get()) }
+    // OnboardingActions comes from sessionModule (AppSession).
+    viewModel { OnboardingViewModel(get(), get()) }
+    viewModel { params -> ReceiptEditorViewModel(params.getOrNull(), get(), get(), get(), get()) }
+    viewModel { params -> TransactionEditorViewModel(params.getOrNull(), get(), get(), get(), get(), get(), get()) }
+    viewModel { params -> ScheduleEditorViewModel(params.getOrNull(), params.getOrNull(), get(), get(), get(), get()) }
+    // Needs SessionState and the Settings callbacks from sessionModule.
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+
     single {
         LocalDataWiper(
             db = get(),
@@ -74,32 +127,4 @@ val dataModule: Module = module {
             receiptRepository = get()
         )
     }
-}
-
-/**
- * Bindings owned by the app bootstrap: hosted-bootstrap status plus the callbacks Settings
- * uses to drive bootstrap state (reset, sign-out, server/household changes).
- */
-fun bootstrapSessionModule(
-    hostedBootstrapState: HostedBootstrapState,
-    onRetryHostedBootstrap: HostedBootstrapRetryCallback,
-    onResetOnboardingUi: suspend () -> Unit,
-    onRestartHostedLoginUi: suspend () -> Unit,
-    onServerUrlChanged: (String) -> Unit,
-    onHouseholdIdChanged: (String) -> Unit
-): Module = module {
-    single { hostedBootstrapState }
-    single { onRetryHostedBootstrap }
-    single {
-        // Full reset: wipe local data through Store5 repositories, then reset the UI state.
-        val wiper = get<LocalDataWiper>()
-        ResetOnboardingCallback {
-            wiper.wipe()
-            onResetOnboardingUi()
-        }
-    }
-    // Soft-return to Welcome while keeping local data for a matching re-login.
-    single { RestartHostedLoginCallback(onRestartHostedLoginUi) }
-    single { ServerUrlCallback(onServerUrlChanged) }
-    single { HouseholdIdCallback(onHouseholdIdChanged) }
 }

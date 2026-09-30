@@ -7,16 +7,29 @@ struct ShillingApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @State private var showSnapshotShield = true
     @State private var shieldDismissWorkItem: DispatchWorkItem?
+    @StateObject private var appearance = AppearanceModel()
+    @StateObject private var appPhase = AppPhaseModel()
 
     init() {
+        IosKoinKt.startIosKoin()
         _showSnapshotShield = State(initialValue: !Self.hasPendingReceiptCameraLaunch())
     }
 
     var body: some Scene {
         WindowGroup {
             ZStack {
-                ComposeViewRepresentable()
-                    .ignoresSafeArea(.all)
+                switch appPhase.phase {
+                case .onboarding:
+                    OnboardingScreen()
+                case .starting:
+                    ZStack {
+                        Color(.systemBackground).ignoresSafeArea()
+                        ProgressView()
+                    }
+                default:
+                    // Rebuilt on each return to the main app (e.g. after Start over).
+                    TabBarView().ignoresSafeArea(.all)
+                }
 
                 ReceiptShortcutLaunchView()
                     .ignoresSafeArea(.all)
@@ -24,6 +37,8 @@ struct ShillingApp: App {
                     .allowsHitTesting(showSnapshotShield)
                     .animation(.easeInOut(duration: 0.22), value: showSnapshotShield)
             }
+            .preferredColorScheme(appearance.colorScheme)
+            .task { await appPhase.observe() }
             .onOpenURL { url in
                 handleDeepLink(url)
             }
@@ -54,7 +69,7 @@ struct ShillingApp: App {
     private func handleDeepLink(_ url: URL) {
         guard url.scheme == "shilling.finance" else { return }
         if url.host == "receipt-camera" {
-            DeepLinkState.shared.setAction(action: .receiptCamera)
+            ReceiptCameraRequest.shared.pending = true
         }
     }
 
@@ -67,7 +82,7 @@ struct ShillingApp: App {
         print("[DeepLink] checkAppGroupFlag: pendingReceiptCamera = \(flag)")
         if flag {
             defaults.removeObject(forKey: "pendingReceiptCamera")
-            DeepLinkState.shared.setAction(action: .receiptCamera)
+            ReceiptCameraRequest.shared.pending = true
             print("[DeepLink] Set DeepLinkAction to receiptCamera")
         }
     }
@@ -105,12 +120,4 @@ private struct ReceiptShortcutLaunchView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
     }
-}
-
-struct ComposeViewRepresentable: UIViewControllerRepresentable {
-    func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.MainViewController()
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }

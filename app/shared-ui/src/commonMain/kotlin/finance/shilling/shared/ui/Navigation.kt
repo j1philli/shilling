@@ -76,18 +76,22 @@ import com.composables.icons.materialicons.filled.Home
 import com.composables.icons.materialicons.filled.Receipt
 import com.composables.icons.materialicons.filled.Settings
 import com.russhwolf.settings.Settings
-import finance.shilling.shared.data.SETTINGS_KEY_TAB_ORDER
 import finance.shilling.shared.data.ScheduleType
 import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.shared.data.auth.FeatureGate
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.delay
+import finance.shilling.shared.presentation.AppTab
+import finance.shilling.shared.presentation.HomeDestination
+import finance.shilling.shared.presentation.TabOrder
+import finance.shilling.shared.presentation.target
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
+import finance.shilling.shared.presentation.PlanRequests
 
 enum class ShelfDestination(
     val title: String,
@@ -108,33 +112,15 @@ data class ReceiptPickers(
 
 val LocalReceiptPickers = staticCompositionLocalOf { ReceiptPickers() }
 
-/** Tabs that were merged into others, mapped to where they live now. */
-private val LEGACY_TABS = mapOf(
-    "WEEKLY" to "PLAN", "BUDGET" to "PLAN", "SCHEDULES" to "PLAN", "CATEGORIES" to "PLAN",
-    "ACCOUNTS" to "PLAN", "HISTORY" to "ACTIVITY", "IMPORT" to "ACTIVITY"
-)
+private fun loadTabOrder(settings: Settings): List<ShelfDestination> =
+    TabOrder.load(settings).map { ShelfDestination.valueOf(it.name) }
 
-private fun loadTabOrder(settings: Settings): List<ShelfDestination> {
-    val saved = settings.getStringOrNull(SETTINGS_KEY_TAB_ORDER)
-        ?: return ShelfDestination.entries.toList()
-    // Merged tabs take the first of their predecessors' saved positions.
-    val result = saved.split(",")
-        .map { name -> LEGACY_TABS[name] ?: name }
-        .mapNotNull { name -> ShelfDestination.entries.find { it.name == name } }
-        .distinct()
-        .toMutableList()
-    // Append any new destinations not in saved order
-    ShelfDestination.entries.filter { it !in result }.forEach { result.add(it) }
-    return result
-}
-
-private fun saveTabOrder(settings: Settings, order: List<ShelfDestination>) {
-    settings.putString(SETTINGS_KEY_TAB_ORDER, order.joinToString(",") { it.name })
-}
+private fun saveTabOrder(settings: Settings, order: List<ShelfDestination>) =
+    TabOrder.save(settings, order.map { AppTab.valueOf(it.name) })
 
 /** Restores the default tab order (used by Settings). */
 fun resetTabOrder(settings: Settings) {
-    settings.remove(SETTINGS_KEY_TAB_ORDER)
+    TabOrder.reset(settings)
     TabOrderChanges.version++
 }
 
@@ -294,8 +280,7 @@ fun ShillingScaffold(
     }
     val showingSettings = currentDestination?.hasRoute(SettingsRoute::class) == true
     val selectedTab = if (showingSettings) null else (
-        (LEGACY_TABS[selectedTabName] ?: selectedTabName)
-            .let { name -> ShelfDestination.entries.find { it.name == name } } ?: ShelfDestination.HOME
+        TabOrder.resolve(selectedTabName)?.let { ShelfDestination.valueOf(it.name) } ?: ShelfDestination.HOME
     )
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -316,6 +301,14 @@ fun ShillingScaffold(
         }
     }
 
+    // Lets Home open a specific Plan section/period; consumed by whichever Plan screen shows.
+    val planRequests = koinInject<PlanRequests>()
+    val openHomeDestination: (HomeDestination) -> Unit = { destination ->
+        val target = destination.target
+        target.planRequest?.let(planRequests::request)
+        navController.navigateToTab(ShelfDestination.valueOf(target.tab.name))
+    }
+
     val onSelectTab: (ShelfDestination) -> Unit = { navController.navigateToTab(it) }
     val onSettings: () -> Unit = { navController.navigateToSettings() }
     val onReorder: (List<ShelfDestination>) -> Unit = { newOrder ->
@@ -331,6 +324,7 @@ fun ShillingScaffold(
         ) {
             ShillingNavHost(
                 navController = navController,
+                onHomeDestination = openHomeDestination,
                 modifier = modifier,
                 authService = authService,
                 featureGate = featureGate,
@@ -376,6 +370,7 @@ fun ShillingScaffold(
 @Composable
 private fun ShillingNavHost(
     navController: NavHostController,
+    onHomeDestination: (HomeDestination) -> Unit,
     modifier: Modifier,
     authService: AuthService,
     featureGate: FeatureGate,
@@ -385,8 +380,6 @@ private fun ShillingNavHost(
     onPendingReceiptConsumed: () -> Unit
 ) {
     val back: () -> Unit = { navController.popBackStack() }
-    // Lets Home open a specific Plan section/period; consumed by PlanView.
-    var planRequest by remember { mutableStateOf<PlanRequest?>(null) }
     // Tabs cross-fade quickly; detail pages slide in from the trailing edge and back out.
     // (The platform default on iOS slides every change, including tab switches.)
     NavHost(
@@ -411,18 +404,10 @@ private fun ShillingNavHost(
         }
     ) {
         composable<HomeRoute> {
-            HomeView(
-                onNavigate = { navController.navigateToTab(it) },
-                onOpenPlan = { request ->
-                    planRequest = request
-                    navController.navigateToTab(ShelfDestination.PLAN)
-                }
-            )
+            HomeView(onDestination = onHomeDestination)
         }
         composable<PlanRoute> {
             PlanView(
-                request = planRequest,
-                onRequestConsumed = { planRequest = null },
                 onOpenTransaction = { navController.navigate(TransactionRoute(it)) },
                 onOpenSchedule = { id, type -> navController.navigate(ScheduleRoute(id, type?.name)) },
                 onOpenCategory = { navController.navigate(CategoryRoute(it)) },
@@ -440,12 +425,7 @@ private fun ShillingNavHost(
             ReceiptsScreen(onOpenReceipt = { navController.navigate(ReceiptRoute(it)) })
         }
         composable<SettingsRoute> {
-            SettingsView(
-                selfHosted = selfHosted,
-                authService = authService,
-                featureGate = featureGate,
-                developerToolsEnabled = developerToolsEnabled
-            )
+            SettingsView(developerToolsEnabled = developerToolsEnabled)
         }
 
         composable<TransactionRoute> { entry ->

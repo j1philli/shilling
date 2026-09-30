@@ -21,6 +21,8 @@ dependencies:
   - $libs.sqldelight.coroutines
   - $libs.sqldelight.async.extensions
   - $libs.koin.core
+  - $libs.koin.core.viewmodel
+  - $libs.lifecycle.viewmodel
   - $libs.store5
   - $libs.ktor.client.core
   - $libs.ktor.client.websockets
