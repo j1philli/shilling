@@ -8,6 +8,7 @@ struct CredentialsForm: View {
     let disabledReason: String?
     let guestUpgrade: Bool
     let submit: (HostedCredentialsMode, String, String) async -> CredentialsOutcome?
+    let sendSignInLink: ((String) async -> String?)?
 
     @State private var mode: HostedCredentialsMode
     @State private var email = ""
@@ -21,6 +22,7 @@ struct CredentialsForm: View {
         enabled: Bool,
         disabledReason: String?,
         guestUpgrade: Bool = false,
+        sendSignInLink: ((String) async -> String?)? = nil,
         submit: @escaping (HostedCredentialsMode, String, String) async -> CredentialsOutcome?
     ) {
         _mode = State(initialValue: initialMode)
@@ -28,6 +30,7 @@ struct CredentialsForm: View {
         self.disabledReason = disabledReason
         self.guestUpgrade = guestUpgrade
         self.submit = submit
+        self.sendSignInLink = sendSignInLink
     }
 
     var body: some View {
@@ -61,6 +64,16 @@ struct CredentialsForm: View {
             message = nil
         }
         .disabled(!enabled || submitting)
+        if (mode == .signIn || guestUpgrade), let sendSignInLink {
+            Button(guestUpgrade && mode != .signIn ? "Use existing account: email me a link" : "Email me a sign-in link") {
+                submitting = true
+                Task {
+                    defer { submitting = false }
+                    message = await sendSignInLink(email.trimmingCharacters(in: .whitespaces))
+                }
+            }
+            .disabled(!enabled || submitting || email.trimmingCharacters(in: .whitespaces).isEmpty)
+        }
         if let message {
             Text(message).font(.footnote)
         }

@@ -231,6 +231,23 @@ class AppSession(
         }
     }
 
+    override suspend fun sendSignInLink(email: String): Result<Unit> = onMain {
+        ensureWelcomeAuthService().sendSignInLink(email)
+    }
+
+    suspend fun handleAuthCallback(url: String): Result<Unit> = onMain {
+        val service = (phase.value as? SessionPhase.Ready)?.authService
+            ?: welcomeAuthService ?: ensureWelcomeAuthService()
+        service.handleAuthCallback(url).onSuccess {
+            if (phase.value is SessionPhase.Onboarding && !service.authState.value.isAnonymous) {
+                completeHostedOnboarding(wipeHeldData = false)
+            } else {
+                startupRetryToken += 1
+                reconcile()
+            }
+        }
+    }
+
     override suspend fun continueSelfHosted(selectedUrl: String): Result<Unit> = onMain {
         validateSelfHostedServer(selectedUrl).onSuccess {
             if (heldLocalData) localDataWiper.wipe()
@@ -371,8 +388,14 @@ class AppSession(
         val selfHosted = startup.serverConfig.authMode == AuthMode.NONE
         authWatchEffect.update(listOf(authService, selfHosted)) {
             if (selfHosted) return@update
+            var observedUserId = authService.authState.value.userId
             launch {
                 authService.authState.collect { authState ->
+                    if (authState.isAuthenticated && authState.userId != observedUserId) {
+                        observedUserId = authState.userId
+                        startupRetryToken += 1
+                        reconcile()
+                    }
                     if (authState.isAuthenticated && !authState.isAnonymous) {
                         sawAccountSession = true
                     } else if (sawAccountSession) {

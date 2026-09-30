@@ -39,6 +39,7 @@ fun HostedCredentialsForm(
     guestUpgrade: Boolean = false,
     signInLabel: String = "Sign in",
     onSubmit: suspend (mode: HostedCredentialsMode, email: String, password: String) -> Result<HostedCredentialsSubmitResult>,
+    onSendSignInLink: (suspend (email: String) -> Result<Unit>)? = null,
     onMessage: (String) -> Unit = {},
     extraActions: @Composable (() -> Unit)? = null
 ) {
@@ -121,6 +122,21 @@ fun HostedCredentialsForm(
             enabled = enabled && !isSubmitting
         ) {
             Text(CredentialsCopy.switchLabel(mode))
+        }
+        if ((mode == HostedCredentialsMode.SIGN_IN || guestUpgrade) && onSendSignInLink != null) {
+            TextButton(
+                enabled = enabled && !isSubmitting && emailText.isNotBlank(),
+                onClick = {
+                    scope.launch {
+                        isSubmitting = true
+                        authMessage = onSendSignInLink(emailText.trim()).fold(
+                            onSuccess = { "Sign-in link sent. Open it on this device." },
+                            onFailure = { it.message ?: "Could not send a sign-in link." }
+                        )
+                        isSubmitting = false
+                    }
+                }
+            ) { Text(if (guestUpgrade && mode != HostedCredentialsMode.SIGN_IN) "Use existing account: email me a link" else "Email me a sign-in link") }
         }
         extraActions?.invoke()
         if (authMessage.isNotBlank()) {

@@ -124,7 +124,8 @@ fun FirstLaunchOnboardingView(
                                     enabled = state.authReady,
                                     disabledReason = state.authDisabledReason,
                                     signInLabel = "Sign in",
-                                    onSubmit = viewModel::submitCredentials
+                                    onSubmit = viewModel::submitCredentials,
+                                    onSendSignInLink = viewModel::sendSignInLink
                                 )
                             }
                         }

@@ -145,6 +145,8 @@ class OnboardingViewModel(
         return result
     }
 
+    suspend fun sendSignInLink(email: String): Result<Unit> = actions.sendSignInLink(email.trim())
+
     fun confirmDestructive() {
         val pending = local.value.pending ?: return
         local.update { it.copy(pending = null) }

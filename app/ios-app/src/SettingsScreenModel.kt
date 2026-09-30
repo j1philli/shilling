@@ -55,6 +55,12 @@ class SettingsScreenModel : IosViewModelHost() {
     )
 
     @NativeCoroutines
+    suspend fun sendSignInLink(email: String): String = viewModel.sendSignInLink(email).fold(
+        onSuccess = { "Sign-in link sent. Open it on this device." },
+        onFailure = { it.message ?: "Could not send a sign-in link." }
+    )
+
+    @NativeCoroutines
     suspend fun confirmAccountAction(): Unit = viewModel.confirmAccountAction()
 
     @NativeCoroutines

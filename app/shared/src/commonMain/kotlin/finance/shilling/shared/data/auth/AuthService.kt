@@ -31,6 +31,8 @@ interface AuthService {
     suspend fun ensureAuthenticated(): Result<Unit>
     suspend fun signUp(email: String, password: String): Result<SignUpResult>
     suspend fun signIn(email: String, password: String): Result<Unit>
+    suspend fun sendSignInLink(email: String): Result<Unit>
+    suspend fun handleAuthCallback(url: String): Result<Unit>
     suspend fun refreshAccountStatus(): Result<Unit>
     suspend fun setPassword(password: String): Result<Unit>
     suspend fun signOut()

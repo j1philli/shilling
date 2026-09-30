@@ -59,6 +59,8 @@ The production schema is managed by `supabase/migrations/`. Its metadata policy 
 
 Guest upgrades request an email change on the anonymous session. The account remains Guest until Supabase reports the email as confirmed. After confirmation, the app refreshes the same session and prompts for a password; it never collects or caches that password while confirmation is pending. The profile trigger in `supabase/migrations/20260930173234_track_profile_password_setup.sql` tracks whether a password has been set so the prompt survives an app restart. Manual identity linking and email confirmation must be enabled in Supabase Auth.
 
+Auth startup must finish loading the saved Supabase session before `ensureAuthenticated` can create a guest. A restore timeout or refresh failure leaves the saved identity intact and disables hosted startup until it can retry; it must never replace that identity with a new anonymous user. Users who lost a session before this fix can enter their existing email under **Account** and choose **Use existing account: email me a link**. The link opens the mobile app, restores the verified account, and then prompts for a password. This sign-in request sets `createUser=false` so it cannot create another account.
+
 Set Supabase Auth **Site URL** to `https://app.shilling.finance` for web and desktop confirmations. Add `shilling.finance://auth-callback` to **Additional Redirect URLs** for iOS and Android. The mobile apps pass that callback when requesting an email change, register it with the OS, and refresh their existing session when opened. They do not import callback tokens into a different account. A localhost Site URL lets verification succeed but sends the browser to a dead local page afterward.
 
 ## Guest signup abuse controls

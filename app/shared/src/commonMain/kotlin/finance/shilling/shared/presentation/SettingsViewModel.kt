@@ -207,6 +207,9 @@ class SettingsViewModel(
     suspend fun setPassword(password: String): Result<Unit> =
         authService?.setPassword(password) ?: Result.failure(IllegalStateException("Not ready yet"))
 
+    suspend fun sendSignInLink(email: String): Result<Unit> =
+        authService?.sendSignInLink(email.trim()) ?: Result.failure(IllegalStateException("Not ready yet"))
+
     /** The Account section's confirmed action: reset (self-hosted, guest) or sign out. */
     suspend fun confirmAccountAction() {
         when (state.value.account) {

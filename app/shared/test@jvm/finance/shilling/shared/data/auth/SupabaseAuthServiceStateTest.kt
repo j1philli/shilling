@@ -68,4 +68,13 @@ class SupabaseAuthServiceStateTest {
         assertTrue(authState.pendingEmailConfirmation)
         assertFalse(authState.needsPasswordSetup)
     }
+
+    @Test
+    fun authCallbackCannotSwitchToAnUnrequestedAccount() {
+        assertFalse(mayImportAuthCallback("other", "other@example.com", "current", null, null))
+        assertFalse(mayImportAuthCallback("other", "other@example.com", "current", "user@example.com", null))
+        assertFalse(mayImportAuthCallback("other", "user@example.com", "current", "user@example.com", "held"))
+        assertTrue(mayImportAuthCallback("current", null, "current", null, null))
+        assertTrue(mayImportAuthCallback("existing", "User@Example.com", "guest", "user@example.com", null))
+    }
 }

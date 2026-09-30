@@ -108,6 +108,8 @@ class MainActivity : ComponentActivity() {
             }
         }, sessionModule).get<AppSession>().also { appSession = it }.start()
 
+        intent?.data?.let(::handleAuthCallback)
+
         setContent {
             ShillingAppBootstrap(
                 scaffoldConfig = AppBootstrapScaffoldConfig(
@@ -133,7 +135,7 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         if (intent.data?.scheme == "shilling.finance" && intent.data?.host == "auth-callback") {
-            refreshAccountStatus()
+            intent.data?.let(::handleAuthCallback)
         }
     }
 
@@ -152,6 +154,15 @@ class MainActivity : ComponentActivity() {
                 ready.authService.refreshAccountStatus().onFailure { error ->
                     log.w { "Could not refresh account status: ${error.message}" }
                 }
+            }
+        }
+    }
+
+    private fun handleAuthCallback(url: android.net.Uri) {
+        if (url.scheme != "shilling.finance" || url.host != "auth-callback") return
+        accountRefreshScope.launch {
+            appSession.handleAuthCallback(url.toString()).onFailure { error ->
+                log.w { "Could not open auth callback: ${error.message}" }
             }
         }
     }

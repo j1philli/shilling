@@ -104,7 +104,10 @@ struct OnboardingScreen: View {
     private func login(_ state: OnboardingUiState) -> some View {
         Form {
             Section {
-                CredentialsForm(initialMode: .signIn, enabled: state.authReady, disabledReason: state.authDisabledReason) { mode, email, password in
+                CredentialsForm(initialMode: .signIn, enabled: state.authReady, disabledReason: state.authDisabledReason,
+                                sendSignInLink: { email in
+                                    try? await asyncFunction(for: screen.sendSignInLink(email: email))
+                                }) { mode, email, password in
                     try? await asyncFunction(for: screen.submitCredentials(mode: mode, email: email, password: password))
                 }
             } header: {

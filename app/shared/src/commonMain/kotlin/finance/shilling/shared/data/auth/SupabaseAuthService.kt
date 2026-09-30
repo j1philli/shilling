@@ -5,13 +5,17 @@ import com.russhwolf.settings.Settings
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_ACCESS_TOKEN
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_PENDING_EMAIL
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION
+import finance.shilling.shared.data.SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_REFRESH_TOKEN
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_TIER
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_USER_ID
+import finance.shilling.shared.data.SETTINGS_KEY_PENDING_RESTORE_USER_ID
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.parseSessionFromUrl
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.auth.providers.builtin.OTP
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.createSupabaseClient
@@ -28,6 +32,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -47,6 +53,7 @@ class SupabaseAuthService(
     private val authRedirectUrl: String? = null
 ) : AuthService {
     private val initializationComplete = CompletableDeferred<Unit>()
+    private val guestSignInMutex = Mutex()
     private val profilesUrl = supabaseUrl.trimEnd('/') + "/rest/v1/user_profiles"
     private val anonKey = supabaseAnonKey
 
@@ -85,7 +92,6 @@ class SupabaseAuthService(
             client.auth.sessionStatus.collect { status ->
                 when (status) {
                     is SessionStatus.Authenticated -> {
-                        if (!initializationComplete.isCompleted) initializationComplete.complete(Unit)
                         val session = status.session
                         val user = session.user
                         val userId = user?.id ?: return@collect
@@ -96,18 +102,19 @@ class SupabaseAuthService(
                             token = session.accessToken,
                             refreshToken = session.refreshToken
                         )
+                        if (!initializationComplete.isCompleted) initializationComplete.complete(Unit)
                     }
                     is SessionStatus.NotAuthenticated -> {
+                        if (status.isSignOut) setUnauthenticatedState()
                         if (!initializationComplete.isCompleted) initializationComplete.complete(Unit)
-                        setUnauthenticatedState()
                         log.i { "Not authenticated" }
                     }
                     is SessionStatus.Initializing -> {
                         log.d { "Auth initializing..." }
                     }
                     is SessionStatus.RefreshFailure -> {
+                        // Keep the saved identity through a temporary network or token refresh failure.
                         if (!initializationComplete.isCompleted) initializationComplete.complete(Unit)
-                        setUnauthenticatedState()
                         log.w { "Token refresh failed: ${status.cause}" }
                     }
                 }
@@ -115,23 +122,35 @@ class SupabaseAuthService(
         }
     }
 
-    override suspend fun ensureAuthenticated(): Result<Unit> = runCatching {
-        withTimeoutOrNull(5_000) { initializationComplete.await() }
-        if (_authState.value.isAuthenticated) return@runCatching
-        client.auth.signInAnonymously()
-        withTimeoutOrNull(10_000) {
-            authState
-                .filter { it.isAuthenticated }
-                .first()
+    override suspend fun ensureAuthenticated(): Result<Unit> = guestSignInMutex.withLock {
+        runCatching {
+            check(withTimeoutOrNull(10_000) { initializationComplete.await(); true } == true) {
+                "Timed out restoring the saved account"
+            }
+            val session = client.auth.currentSessionOrNull()
+            if (_authState.value.isAuthenticated && session?.user?.id == _authState.value.userId) {
+                return@runCatching
+            }
+            val savedRefreshToken = settings.getStringOrNull(SETTINGS_KEY_AUTH_REFRESH_TOKEN)
+            if (savedRefreshToken != null) {
+                client.auth.refreshSession(refreshToken = savedRefreshToken)
+            } else {
+                check(settings.getStringOrNull(SETTINGS_KEY_AUTH_USER_ID) == null) {
+                    "Saved account is missing its refresh token"
+                }
+                client.auth.signInAnonymously()
+            }
+            check(withTimeoutOrNull(10_000) {
+                authState.filter { state ->
+                    state.isAuthenticated &&
+                        state.userId == client.auth.currentSessionOrNull()?.user?.id &&
+                        state.accessToken == client.auth.currentSessionOrNull()?.accessToken
+                }.first()
+                true
+            } == true) { "Auth did not reach an authenticated state before timeout" }
+        }.onFailure { error ->
+            log.w { "Auth restoration or guest sign-in failed: ${error.message}" }
         }
-        if (_authState.value.isAuthenticated) {
-            log.i { "Anonymous sign-in successful" }
-        } else {
-            log.w { "Anonymous sign-in did not reach authenticated state before timeout" }
-            error("Anonymous sign-in did not complete before timeout")
-        }
-    }.onFailure { error ->
-        log.w { "Anonymous sign-in failed: ${error.message}" }
     }
 
     override suspend fun signUp(email: String, password: String): Result<SignUpResult> = runCatching {
@@ -186,6 +205,41 @@ class SupabaseAuthService(
         log.i { "Signed in" }
     }
 
+    override suspend fun sendSignInLink(email: String): Result<Unit> = runCatching {
+        val address = email.trim()
+        require(address.isNotBlank()) { "Enter your email address" }
+        client.auth.signInWith(OTP, redirectUrl = authRedirectUrl) {
+            this.email = address
+            createUser = false
+        }
+        settings.putString(SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL, address)
+    }
+
+    override suspend fun handleAuthCallback(url: String): Result<Unit> = runCatching {
+        if (!url.startsWith("shilling.finance://auth-callback") || "access_token=" !in url) {
+            refreshAccountStatus().getOrThrow()
+            return@runCatching
+        }
+        val sessionFromLink = client.auth.parseSessionFromUrl(url)
+        val linkUser = client.auth.retrieveUser(sessionFromLink.accessToken)
+        val currentUserId = client.auth.currentSessionOrNull()?.user?.id
+        val requestedEmail = settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL)
+        val heldAccountId = settings.getStringOrNull(SETTINGS_KEY_PENDING_RESTORE_USER_ID)
+        check(mayImportAuthCallback(linkUser.id, linkUser.email, currentUserId, requestedEmail, heldAccountId)) {
+            "This link is for a different account"
+        }
+        client.auth.importSession(sessionFromLink.copy(user = linkUser))
+        val imported = client.auth.currentSessionOrNull() ?: error("Could not open the sign-in link")
+        updateAuthenticatedState(
+            userId = linkUser.id,
+            sessionEmail = linkUser.email,
+            emailConfirmed = linkUser.emailConfirmedAt != null,
+            token = imported.accessToken,
+            refreshToken = imported.refreshToken
+        )
+        settings.remove(SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL)
+    }
+
     override suspend fun refreshAccountStatus(): Result<Unit> = runCatching {
         val originalUserId = client.auth.currentSessionOrNull()?.user?.id ?: error("No active session")
         val user = client.auth.retrieveUserForCurrentSession(updateSession = true)
@@ -211,6 +265,7 @@ class SupabaseAuthService(
         }
         client.auth.updateUser { this.password = password }
         settings.remove(SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID)
+        settings.remove(SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL)
         _authState.value = _authState.value.copy(needsPasswordSetup = false)
     }
 
@@ -238,6 +293,7 @@ class SupabaseAuthService(
         settings.remove(SETTINGS_KEY_AUTH_REFRESH_TOKEN)
         settings.remove(SETTINGS_KEY_AUTH_USER_ID)
         settings.remove(SETTINGS_KEY_AUTH_TIER)
+        settings.remove(SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL)
         clearPendingEmailConfirmation()
         settings.remove(SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID)
     }
@@ -323,6 +379,17 @@ internal fun parseStoredTier(value: String?): UserTier? =
         UserTier.PAID.name -> UserTier.PAID
         else -> null
     }
+
+internal fun mayImportAuthCallback(
+    linkUserId: String,
+    linkEmail: String?,
+    currentUserId: String?,
+    requestedEmail: String?,
+    heldAccountId: String?
+): Boolean =
+    (heldAccountId == null || heldAccountId == linkUserId) &&
+        (linkUserId == currentUserId ||
+            (!requestedEmail.isNullOrBlank() && linkEmail?.equals(requestedEmail, ignoreCase = true) == true))
 
 internal fun resolveAuthenticatedState(
     userId: String,

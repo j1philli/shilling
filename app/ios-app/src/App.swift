@@ -12,6 +12,7 @@ struct ShillingApp: App {
     @StateObject private var appPhase = AppPhaseModel()
     @StateObject private var account: SettingsModel
     @State private var showPasswordSetup = false
+    @State private var authCallbackError: String?
 
     init() {
         IosKoinKt.startIosKoin()
@@ -50,6 +51,14 @@ struct ShillingApp: App {
             .sheet(isPresented: $showPasswordSetup) {
                 PasswordSetupSheet(screen: account.screen)
             }
+            .alert("Could not open link", isPresented: Binding(
+                get: { authCallbackError != nil },
+                set: { if !$0 { authCallbackError = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(authCallbackError ?? "")
+            }
             .onOpenURL { url in
                 handleDeepLink(url)
             }
@@ -81,7 +90,12 @@ struct ShillingApp: App {
     private func handleDeepLink(_ url: URL) {
         guard url.scheme == "shilling.finance" else { return }
         if url.host == "auth-callback" {
-            refreshAccountStatus()
+            Task {
+                let result = try? await asyncFunction(for: AppRoot.shared.handleAuthCallback(url: url.absoluteString))
+                if result != "Account ready." {
+                    authCallbackError = result ?? "Could not open the sign-in link."
+                }
+            }
             return
         }
         if url.host == "receipt-camera" {

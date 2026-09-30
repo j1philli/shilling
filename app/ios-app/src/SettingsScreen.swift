@@ -105,7 +105,10 @@ struct SettingsScreen: View {
                     Text(guest.body).font(.subheadline).foregroundStyle(.secondary)
                 }
                 CredentialsForm(initialMode: .createAccount, enabled: guest.authAvailable,
-                                disabledReason: guest.disabledReason, guestUpgrade: true) { mode, email, password in
+                                disabledReason: guest.disabledReason, guestUpgrade: true,
+                                sendSignInLink: { email in
+                                    try? await asyncFunction(for: model.screen.sendSignInLink(email: email))
+                                }) { mode, email, password in
                     try? await asyncFunction(for: model.screen.submitCredentials(mode: mode, email: email, password: password))
                 }
                 if let pending = guest.pendingConfirmation {
