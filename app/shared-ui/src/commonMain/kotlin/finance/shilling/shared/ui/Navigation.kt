@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -269,6 +270,7 @@ fun ShillingScaffold(
     selfHosted: Boolean,
     onRetryHostedBootstrap: () -> Unit = {},
     navRailTopPadding: Dp = 0.dp,
+    navRailWidth: Dp = Dp.Unspecified,
     cameraButton: ReceiptPickerButton? = null,
     photoButton: ReceiptPickerButton? = null,
     externalNavRequest: StateFlow<ShelfDestination?> = MutableStateFlow(null),
@@ -359,6 +361,7 @@ fun ShillingScaffold(
             selectedTab = selectedTab,
             showingSettings = showingSettings,
             navRailTopPadding = navRailTopPadding,
+            navRailWidth = navRailWidth,
             orderedDestinations = orderedDestinations,
             snackbarHostState = snackbarHostState,
             onSelectTab = onSelectTab,
@@ -498,6 +501,7 @@ private fun ExpandedScaffold(
     selectedTab: ShelfDestination?,
     showingSettings: Boolean,
     navRailTopPadding: Dp,
+    navRailWidth: Dp,
     orderedDestinations: List<ShelfDestination>,
     snackbarHostState: SnackbarHostState,
     onSelectTab: (ShelfDestination) -> Unit,
@@ -507,7 +511,7 @@ private fun ExpandedScaffold(
 ) {
     val reorder = remember { TabReorderState(vertical = true) }
     Row(modifier = Modifier.fillMaxSize()) {
-        NavigationRail {
+        NavigationRail(modifier = Modifier.width(navRailWidth)) {
             if (navRailTopPadding > 0.dp) {
                 Spacer(modifier = Modifier.height(navRailTopPadding))
             }
