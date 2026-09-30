@@ -59,6 +59,8 @@ The production schema is managed by `supabase/migrations/`. Its metadata policy 
 
 Guest upgrades request an email change on the anonymous session. The user confirms the email, returns to Account settings, checks confirmation, and sets a password. The account remains Guest until Supabase reports the email as confirmed. The password is not collected or cached while confirmation is pending. Manual identity linking and email confirmation must be enabled in Supabase Auth.
 
+Set Supabase Auth **Site URL** to `https://app.shilling.finance`. Supabase uses this as the confirmation redirect when the client does not specify one. A localhost Site URL lets the email verification succeed but sends the browser to a dead local page afterward. The original mobile session can then use **Check confirmation** in Account settings; it does not need the browser's callback tokens.
+
 ## Guest signup abuse controls
 
 The `shilling.finance` project is configured for 10 anonymous sign-ins per IP per hour. Monitor Auth 429 responses and anonymous account creation to tune the limit. This rate limit reduces bulk creation but does not prove a request is human. If abuse warrants a CAPTCHA, Supabase can accept a Turnstile token for anonymous sign-in, but native clients still need a browser engine for the challenge.
