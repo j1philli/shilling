@@ -13,9 +13,13 @@ data class CredentialsOutcome(
 
 /** Copy for the email/password form (Welcome and Settings), shared by every UI. */
 object CredentialsCopy {
-    fun prompt(mode: HostedCredentialsMode): String = when (mode) {
+    fun prompt(mode: HostedCredentialsMode, guestUpgrade: Boolean = false): String = when (mode) {
         HostedCredentialsMode.SIGN_IN -> "Sign in to an existing account."
-        HostedCredentialsMode.CREATE_ACCOUNT -> "Create a new account with email and password."
+        HostedCredentialsMode.CREATE_ACCOUNT -> if (guestUpgrade) {
+            "Add an email to this guest account. After confirming it, set a password in Account settings."
+        } else {
+            "Create a new account with email and password."
+        }
     }
 
     fun submitLabel(mode: HostedCredentialsMode, signInLabel: String = "Sign in"): String = when (mode) {
@@ -40,6 +44,8 @@ object CredentialsCopy {
                 submit.mode == HostedCredentialsMode.SIGN_IN -> "Signed in."
                 submit.signUpResult?.requiresEmailConfirmation == true ->
                     "Check your email to confirm this account change."
+                submit.signUpResult?.upgradedAnonymousSession == true ->
+                    "Email linked. Set a password in Account settings."
                 else -> "Account created."
             }
         },
@@ -54,7 +60,7 @@ object CredentialsCopy {
 
     fun confirmEmailMessage(email: String, upgradedFromGuest: Boolean): String =
         if (upgradedFromGuest) {
-            "We sent a confirmation email to $email. Open it to finish upgrading this guest account to Free."
+            "We sent a confirmation email to $email. Open it, then return to Account settings to set a password. Your guest data stays with this account."
         } else {
             "We sent a confirmation email to $email. Open it to finish creating your account."
         }

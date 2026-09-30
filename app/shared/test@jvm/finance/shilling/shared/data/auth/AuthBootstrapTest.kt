@@ -465,6 +465,12 @@ class AuthBootstrapTest {
         override suspend fun signIn(email: String, password: String): Result<Unit> =
             Result.failure(UnsupportedOperationException("Not used in tests"))
 
+        override suspend fun refreshAccountStatus(): Result<Unit> =
+            Result.failure(UnsupportedOperationException("Not used in tests"))
+
+        override suspend fun setPassword(password: String): Result<Unit> =
+            Result.failure(UnsupportedOperationException("Not used in tests"))
+
         override suspend fun signOut() {}
 
         override suspend fun deleteAccount(): Result<Unit> =

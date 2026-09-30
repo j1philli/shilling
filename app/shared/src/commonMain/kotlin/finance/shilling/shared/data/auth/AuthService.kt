@@ -16,7 +16,8 @@ data class AuthState(
     val isAnonymous: Boolean,
     val deviceId: String,
     val pendingEmailConfirmation: Boolean = false,
-    val pendingEmail: String? = null
+    val pendingEmail: String? = null,
+    val needsPasswordSetup: Boolean = false
 )
 
 @Serializable
@@ -30,6 +31,8 @@ interface AuthService {
     suspend fun ensureAuthenticated(): Result<Unit>
     suspend fun signUp(email: String, password: String): Result<SignUpResult>
     suspend fun signIn(email: String, password: String): Result<Unit>
+    suspend fun refreshAccountStatus(): Result<Unit>
+    suspend fun setPassword(password: String): Result<Unit>
     suspend fun signOut()
     suspend fun deleteAccount(): Result<Unit>
     suspend fun refreshTokenIfNeeded(): String?

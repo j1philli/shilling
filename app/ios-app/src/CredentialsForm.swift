@@ -6,6 +6,7 @@ import KotlinModules
 struct CredentialsForm: View {
     let enabled: Bool
     let disabledReason: String?
+    let guestUpgrade: Bool
     let submit: (HostedCredentialsMode, String, String) async -> CredentialsOutcome?
 
     @State private var mode: HostedCredentialsMode
@@ -19,16 +20,18 @@ struct CredentialsForm: View {
         initialMode: HostedCredentialsMode,
         enabled: Bool,
         disabledReason: String?,
+        guestUpgrade: Bool = false,
         submit: @escaping (HostedCredentialsMode, String, String) async -> CredentialsOutcome?
     ) {
         _mode = State(initialValue: initialMode)
         self.enabled = enabled
         self.disabledReason = disabledReason
+        self.guestUpgrade = guestUpgrade
         self.submit = submit
     }
 
     var body: some View {
-        Text(CredentialsCopy.shared.prompt(mode: mode))
+        Text(CredentialsCopy.shared.prompt(mode: mode, guestUpgrade: guestUpgrade))
             .font(.subheadline)
             .foregroundStyle(.secondary)
         if let disabledReason {
@@ -39,8 +42,10 @@ struct CredentialsForm: View {
             .keyboardType(.emailAddress)
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
-        SecureField("Password", text: $password)
-            .textContentType(mode == .signIn ? .password : .newPassword)
+        if passwordRequired {
+            SecureField("Password", text: $password)
+                .textContentType(mode == .signIn ? .password : .newPassword)
+        }
         Button {
             send()
         } label: {
@@ -49,9 +54,10 @@ struct CredentialsForm: View {
                 Text(CredentialsCopy.shared.submitLabel(mode: mode, signInLabel: "Sign in"))
             }
         }
-        .disabled(!enabled || submitting || email.trimmingCharacters(in: .whitespaces).isEmpty || password.isEmpty)
+        .disabled(!enabled || submitting || email.trimmingCharacters(in: .whitespaces).isEmpty || (passwordRequired && password.isEmpty))
         Button(CredentialsCopy.shared.switchLabel(mode: mode)) {
             mode = CredentialsCopy.shared.other(mode: mode)
+            password = ""
             message = nil
         }
         .disabled(!enabled || submitting)
@@ -82,4 +88,6 @@ struct CredentialsForm: View {
             confirmEmailMessage = outcome.confirmEmailMessage
         }
     }
+
+    private var passwordRequired: Bool { mode != .createAccount || !guestUpgrade }
 }

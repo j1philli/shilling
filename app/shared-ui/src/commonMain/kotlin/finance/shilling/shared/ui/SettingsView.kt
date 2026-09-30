@@ -8,6 +8,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -22,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.russhwolf.settings.Settings
 import finance.shilling.shared.presentation.DeveloperInfo
@@ -133,6 +135,8 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
 private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewModel) {
     val scope = rememberCoroutineScope()
     var confirming by remember { mutableStateOf(false) }
+    var password by remember { mutableStateOf("") }
+    var accountMessage by remember { mutableStateOf<String?>(null) }
 
     ShillingCard {
         when (account) {
@@ -148,9 +152,20 @@ private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewMode
                     enabled = account.authAvailable,
                     disabledReason = account.disabledReason,
                     initialMode = HostedCredentialsMode.CREATE_ACCOUNT,
+                    guestUpgrade = true,
                     onSubmit = viewModel::submitCredentials
                 )
-                account.pendingConfirmation?.let { PendingConfirmation(it) }
+                account.pendingConfirmation?.let {
+                    PendingConfirmation(it)
+                    OutlinedButton(onClick = {
+                        scope.launch {
+                            accountMessage = viewModel.refreshAccountStatus().fold(
+                                onSuccess = { "Account status checked." },
+                                onFailure = { error -> error.message ?: "Could not check account status." }
+                            )
+                        }
+                    }) { Text("Check confirmation") }
+                }
             }
             is SettingsAccount.SignedIn -> {
                 Text(account.title, style = MaterialTheme.typography.titleMedium)
@@ -160,8 +175,28 @@ private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewMode
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 account.pendingConfirmation?.let { PendingConfirmation(it) }
+                if (account.needsPasswordSetup) {
+                    Text("Email confirmed. Set a password to sign in on another device.")
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("New password") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Button(onClick = {
+                        scope.launch {
+                            accountMessage = viewModel.setPassword(password).fold(
+                                onSuccess = { password = ""; "Password set." },
+                                onFailure = { error -> error.message ?: "Could not set password." }
+                            )
+                        }
+                    }, enabled = password.isNotBlank()) { Text("Set password") }
+                }
             }
         }
+        accountMessage?.let { Text(it) }
         OutlinedButton(onClick = { confirming = true }) { Text(account.actionLabel) }
     }
 

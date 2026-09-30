@@ -36,6 +36,7 @@ fun HostedCredentialsForm(
     enabled: Boolean = authService != null,
     disabledReason: String? = null,
     initialMode: HostedCredentialsMode = HostedCredentialsMode.SIGN_IN,
+    guestUpgrade: Boolean = false,
     signInLabel: String = "Sign in",
     onSubmit: suspend (mode: HostedCredentialsMode, email: String, password: String) -> Result<HostedCredentialsSubmitResult>,
     onMessage: (String) -> Unit = {},
@@ -48,10 +49,11 @@ fun HostedCredentialsForm(
     var authMessage by remember { mutableStateOf("") }
     var isSubmitting by remember { mutableStateOf(false) }
     var emailConfirmationSheet by remember { mutableStateOf<EmailConfirmationSheetState?>(null) }
+    val passwordRequired = mode != HostedCredentialsMode.CREATE_ACCOUNT || !guestUpgrade
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            CredentialsCopy.prompt(mode),
+            CredentialsCopy.prompt(mode, guestUpgrade),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         disabledReason?.let {
@@ -68,14 +70,16 @@ fun HostedCredentialsForm(
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-        OutlinedTextField(
-            value = passwordText,
-            onValueChange = { passwordText = it; authMessage = "" },
-            label = { Text("Password") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (passwordRequired) {
+            OutlinedTextField(
+                value = passwordText,
+                onValueChange = { passwordText = it; authMessage = "" },
+                label = { Text("Password") },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         Button(
             onClick = {
                 scope.launch {
@@ -96,7 +100,7 @@ fun HostedCredentialsForm(
                     isSubmitting = false
                 }
             },
-            enabled = enabled && !isSubmitting && emailText.isNotBlank() && passwordText.isNotBlank()
+            enabled = enabled && !isSubmitting && emailText.isNotBlank() && (!passwordRequired || passwordText.isNotBlank())
         ) {
             if (isSubmitting) {
                 CircularProgressIndicator(
@@ -111,6 +115,7 @@ fun HostedCredentialsForm(
         TextButton(
             onClick = {
                 mode = CredentialsCopy.other(mode)
+                passwordText = ""
                 authMessage = ""
             },
             enabled = enabled && !isSubmitting

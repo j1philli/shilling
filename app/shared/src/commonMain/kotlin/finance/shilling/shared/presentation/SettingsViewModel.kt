@@ -87,7 +87,8 @@ sealed interface SettingsAccount {
     data class SignedIn(
         val title: String,
         val planLabel: String,
-        val pendingConfirmation: String?
+        val pendingConfirmation: String?,
+        val needsPasswordSetup: Boolean
     ) : SettingsAccount {
         override val actionLabel get() = "Sign out"
         override val confirm get() = ConfirmCopy(
@@ -199,6 +200,12 @@ class SettingsViewModel(
         }
     }
 
+    suspend fun refreshAccountStatus(): Result<Unit> =
+        authService?.refreshAccountStatus() ?: Result.failure(IllegalStateException("Not ready yet"))
+
+    suspend fun setPassword(password: String): Result<Unit> =
+        authService?.setPassword(password) ?: Result.failure(IllegalStateException("Not ready yet"))
+
     /** The Account section's confirmed action: reset (self-hosted, guest) or sign out. */
     suspend fun confirmAccountAction() {
         when (state.value.account) {
@@ -249,7 +256,8 @@ class SettingsViewModel(
             SettingsAccount.SignedIn(
                 title = authState.email ?: "Signed in",
                 planLabel = "${tierLabel(authState.tier)} plan",
-                pendingConfirmation = pending
+                pendingConfirmation = pending,
+                needsPasswordSetup = authState.needsPasswordSetup
             )
         }
     }

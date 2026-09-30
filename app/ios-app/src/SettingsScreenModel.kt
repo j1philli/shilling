@@ -43,6 +43,18 @@ class SettingsScreenModel : IosViewModelHost() {
     }
 
     @NativeCoroutines
+    suspend fun refreshAccountStatus(): String = viewModel.refreshAccountStatus().fold(
+        onSuccess = { "Account status checked." },
+        onFailure = { it.message ?: "Could not check account status." }
+    )
+
+    @NativeCoroutines
+    suspend fun setPassword(password: String): String = viewModel.setPassword(password).fold(
+        onSuccess = { "Password set." },
+        onFailure = { it.message ?: "Could not set password." }
+    )
+
+    @NativeCoroutines
     suspend fun confirmAccountAction(): Unit = viewModel.confirmAccountAction()
 
     @NativeCoroutines

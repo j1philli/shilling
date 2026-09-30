@@ -55,7 +55,15 @@ create table if not exists public.user_profiles (
 
 Each new `auth.users` row should also create a `public.user_profiles` row. Hosted bootstrap will fail by design if the authenticated user has no hosted household metadata.
 
-The production schema is managed by `supabase/migrations/`. Its metadata policy grants authenticated clients read access to only their own `user_id` and `tier`. No client can update `user_profiles`, and `waitlist` is inaccessible through the public Data API. The server's secret key performs the household lookup. The Auth trigger updates a profile's tier when an anonymous account gains an email address.
+The production schema is managed by `supabase/migrations/`. Its metadata policy grants authenticated clients read access to only their own `user_id` and `tier`. No client can update `user_profiles`, and `waitlist` is inaccessible through the public Data API. The server's secret key performs the household lookup. The Auth trigger in `supabase/migrations/20260928184917_secure_profile_tier_after_email_confirmation.sql` updates a profile's tier only after its email is confirmed. It preserves the user's ID and household during a guest upgrade.
+
+Guest upgrades request an email change on the anonymous session. The user confirms the email, returns to Account settings, checks confirmation, and sets a password. The account remains Guest until Supabase reports the email as confirmed. The password is not collected or cached while confirmation is pending. Manual identity linking and email confirmation must be enabled in Supabase Auth.
+
+## Guest signup abuse controls
+
+The `shilling.finance` project is configured for 10 anonymous sign-ins per IP per hour. Monitor Auth 429 responses and anonymous account creation to tune the limit. This rate limit reduces bulk creation but does not prove a request is human. If abuse warrants a CAPTCHA, Supabase can accept a Turnstile token for anonymous sign-in, but native clients still need a browser engine for the challenge.
+
+Anonymous users are not cleaned up automatically. Review activity and retained household data before deleting any guest; age alone does not show whether their budget is still in use.
 
 ## Environment
 
