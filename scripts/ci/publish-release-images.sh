@@ -30,6 +30,7 @@ for target in ${SHILLING_RELEASE_TARGETS//,/ }; do
     docker buildx build --builder "$builder" --platform linux/amd64,linux/arm64 --push \
         --label "org.opencontainers.image.revision=$SHILLING_RELEASE_COMMIT" \
         --label "org.opencontainers.image.version=$SHILLING_RELEASE_TAG" \
+        --metadata-file "release-output/$target-image.json" \
         --build-arg "VERSION=$SHILLING_RELEASE_TAG" \
         -t "ghcr.io/j1philli/shilling-$target:$SHILLING_RELEASE_TAG" "$context"
 done
