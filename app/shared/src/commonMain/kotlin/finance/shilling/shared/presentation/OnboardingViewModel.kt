@@ -89,9 +89,9 @@ class OnboardingViewModel(
                 OnboardingOption("Get Started", "Create a guest account and jump straight into the app.")
             },
             signIn = OnboardingOption(
-                "Sign in",
+                "Continue with email",
                 if (held) "Use the same account to keep your current budget."
-                else "Sign in to an existing account or create one with email and password."
+                else "Create an account or continue with one you already have."
             ),
             loginSubtitle = if (held) {
                 "Use the same account to keep the budget saved on this device."
@@ -137,7 +137,7 @@ class OnboardingViewModel(
     suspend fun submitCredentials(mode: HostedCredentialsMode, email: String, password: String): Result<HostedCredentialsSubmitResult> {
         val result = actions.submitCredentials(mode, email, password)
         result.fold(
-            onSuccess = { actions.completeSignIn(wipeHeldData = false) },
+            onSuccess = { if (it.signUpResult?.existingAccount != true) actions.completeSignIn(wipeHeldData = false) },
             onFailure = { error ->
                 if (error is NonMatchingAccountException) local.update { it.copy(pending = Pending.NON_MATCHING_AUTH) }
             }

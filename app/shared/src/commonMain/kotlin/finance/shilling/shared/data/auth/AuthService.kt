@@ -23,7 +23,10 @@ data class AuthState(
 @Serializable
 data class SignUpResult(
     val requiresEmailConfirmation: Boolean,
-    val upgradedAnonymousSession: Boolean
+    val upgradedAnonymousSession: Boolean,
+    val existingAccount: Boolean = false,
+    val existingAccountHasPassword: Boolean = false,
+    val signInLinkSent: Boolean = false
 )
 
 interface AuthService {

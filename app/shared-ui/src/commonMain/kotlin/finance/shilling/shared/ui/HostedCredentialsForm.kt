@@ -10,7 +10,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,9 +36,7 @@ fun HostedCredentialsForm(
     disabledReason: String? = null,
     initialMode: HostedCredentialsMode = HostedCredentialsMode.SIGN_IN,
     guestUpgrade: Boolean = false,
-    signInLabel: String = "Sign in",
     onSubmit: suspend (mode: HostedCredentialsMode, email: String, password: String) -> Result<HostedCredentialsSubmitResult>,
-    onSendSignInLink: (suspend (email: String) -> Result<Unit>)? = null,
     onMessage: (String) -> Unit = {},
     extraActions: @Composable (() -> Unit)? = null
 ) {
@@ -50,7 +47,6 @@ fun HostedCredentialsForm(
     var authMessage by remember { mutableStateOf("") }
     var isSubmitting by remember { mutableStateOf(false) }
     var emailConfirmationSheet by remember { mutableStateOf<EmailConfirmationSheetState?>(null) }
-    val passwordRequired = mode != HostedCredentialsMode.CREATE_ACCOUNT || !guestUpgrade
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
@@ -66,12 +62,12 @@ fun HostedCredentialsForm(
         }
         OutlinedTextField(
             value = emailText,
-            onValueChange = { emailText = it; authMessage = "" },
+            onValueChange = { emailText = it; authMessage = ""; mode = HostedCredentialsMode.CREATE_ACCOUNT; passwordText = "" },
             label = { Text("Email") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-        if (passwordRequired) {
+        if (mode == HostedCredentialsMode.SIGN_IN) {
             OutlinedTextField(
                 value = passwordText,
                 onValueChange = { passwordText = it; authMessage = "" },
@@ -85,23 +81,31 @@ fun HostedCredentialsForm(
             onClick = {
                 scope.launch {
                     isSubmitting = true
-                    val result = onSubmit(mode, emailText.trim(), passwordText)
-                    result.onSuccess { submit ->
-                        if (CredentialsCopy.needsEmailConfirmation(result)) {
-                            emailConfirmationSheet = EmailConfirmationSheetState(
-                                email = emailText.trim(),
-                                upgradedFromGuest = submit.signUpResult?.upgradedAnonymousSession == true
-                            )
+                    if (mode == HostedCredentialsMode.SIGN_IN && passwordText.isBlank()) {
+                        authMessage = "Enter your password."
+                    } else {
+                        val result = onSubmit(mode, emailText.trim(), passwordText)
+                        result.onSuccess { submit ->
+                            if (CredentialsCopy.needsEmailConfirmation(result)) {
+                                emailConfirmationSheet = EmailConfirmationSheetState(
+                                    email = emailText.trim(),
+                                    upgradedFromGuest = submit.signUpResult?.upgradedAnonymousSession == true
+                                )
+                            }
+                            if (submit.signUpResult?.existingAccountHasPassword == true) {
+                                mode = HostedCredentialsMode.SIGN_IN
+                            } else {
+                                emailText = ""
+                            }
+                            passwordText = ""
                         }
-                        emailText = ""
-                        passwordText = ""
+                        authMessage = CredentialsCopy.resultMessage(result)
                     }
-                    authMessage = CredentialsCopy.resultMessage(result)
                     onMessage(authMessage)
                     isSubmitting = false
                 }
             },
-            enabled = enabled && !isSubmitting && emailText.isNotBlank() && (!passwordRequired || passwordText.isNotBlank())
+            enabled = enabled && !isSubmitting && emailText.isNotBlank()
         ) {
             if (isSubmitting) {
                 CircularProgressIndicator(
@@ -111,32 +115,7 @@ fun HostedCredentialsForm(
                     strokeWidth = 2.dp
                 )
             }
-            Text(CredentialsCopy.submitLabel(mode, signInLabel))
-        }
-        TextButton(
-            onClick = {
-                mode = CredentialsCopy.other(mode)
-                passwordText = ""
-                authMessage = ""
-            },
-            enabled = enabled && !isSubmitting
-        ) {
-            Text(CredentialsCopy.switchLabel(mode))
-        }
-        if ((mode == HostedCredentialsMode.SIGN_IN || guestUpgrade) && onSendSignInLink != null) {
-            TextButton(
-                enabled = enabled && !isSubmitting && emailText.isNotBlank(),
-                onClick = {
-                    scope.launch {
-                        isSubmitting = true
-                        authMessage = onSendSignInLink(emailText.trim()).fold(
-                            onSuccess = { "Sign-in link sent. Open it on this device." },
-                            onFailure = { it.message ?: "Could not send a sign-in link." }
-                        )
-                        isSubmitting = false
-                    }
-                }
-            ) { Text(if (guestUpgrade && mode != HostedCredentialsMode.SIGN_IN) "Use existing account: email me a link" else "Email me a sign-in link") }
+            Text(CredentialsCopy.submitLabel(mode))
         }
         extraActions?.invoke()
         if (authMessage.isNotBlank()) {

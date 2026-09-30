@@ -13,6 +13,8 @@ import finance.shilling.shared.data.SETTINGS_KEY_AUTH_USER_ID
 import finance.shilling.shared.data.SETTINGS_KEY_PENDING_RESTORE_USER_ID
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.exception.AuthErrorCode
+import io.github.jan.supabase.auth.exception.AuthRestException
 import io.github.jan.supabase.auth.parseSessionFromUrl
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.providers.builtin.OTP
@@ -25,6 +27,10 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,6 +61,7 @@ class SupabaseAuthService(
     private val initializationComplete = CompletableDeferred<Unit>()
     private val guestSignInMutex = Mutex()
     private val profilesUrl = supabaseUrl.trimEnd('/') + "/rest/v1/user_profiles"
+    private val passwordLookupUrl = supabaseUrl.trimEnd('/') + "/rest/v1/rpc/existing_account_has_password"
     private val anonKey = supabaseAnonKey
 
     private val client = createSupabaseClient(
@@ -154,11 +161,23 @@ class SupabaseAuthService(
     }
 
     override suspend fun signUp(email: String, password: String): Result<SignUpResult> = runCatching {
+        if (!_authState.value.isAuthenticated) ensureAuthenticated().getOrThrow()
         if (_authState.value.isAnonymous && _authState.value.isAuthenticated) {
             val userId = requireNotNull(_authState.value.userId) { "Guest session has no user ID" }
             // Link the email to this UUID first. Supabase requires verification before setting a password.
-            val updatedUser = client.auth.updateUser(redirectUrl = authRedirectUrl) {
-                this.email = email
+            val updatedUser = try {
+                client.auth.updateUser(redirectUrl = authRedirectUrl) { this.email = email }
+            } catch (error: AuthRestException) {
+                if (!error.isExistingEmail()) throw error
+                val hasPassword = existingAccountHasPassword(email)
+                val linkSent = !hasPassword && sendSignInLink(email).isSuccess
+                return@runCatching SignUpResult(
+                    requiresEmailConfirmation = false,
+                    upgradedAnonymousSession = false,
+                    existingAccount = true,
+                    existingAccountHasPassword = hasPassword,
+                    signInLinkSent = linkSent
+                )
             }
             cachePendingEmailConfirmation(userId, email)
             if (updatedUser.emailConfirmedAt != null) {
@@ -184,17 +203,7 @@ class SupabaseAuthService(
                 requiresEmailConfirmation = updatedUser.emailConfirmedAt == null,
                 upgradedAnonymousSession = true
             )
-        } else {
-            client.auth.signUpWith(Email) {
-                this.email = email
-                this.password = password
-            }
-            log.i { "Signed up new user" }
-            SignUpResult(
-                requiresEmailConfirmation = true,
-                upgradedAnonymousSession = false
-            )
-        }
+        } else error("Already signed in")
     }
 
     override suspend fun signIn(email: String, password: String): Result<Unit> = runCatching {
@@ -213,6 +222,16 @@ class SupabaseAuthService(
             createUser = false
         }
         settings.putString(SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL, address)
+    }
+
+    private suspend fun existingAccountHasPassword(email: String): Boolean {
+        val token = client.auth.currentSessionOrNull()?.accessToken ?: error("No guest session")
+        return httpClient.post(passwordLookupUrl) {
+            header("apikey", anonKey)
+            header("Authorization", "Bearer $token")
+            contentType(ContentType.Application.Json)
+            setBody(PasswordLookupRequest(email.trim()))
+        }.body<Boolean>()
     }
 
     override suspend fun handleAuthCallback(url: String): Result<Unit> = runCatching {
@@ -274,8 +293,12 @@ class SupabaseAuthService(
             client.auth.signOut()
         } catch (e: Exception) {
             log.w { "Sign out error: ${e.message}" }
+        } finally {
+            // A failed remote revoke must not leave a restorable session on this device.
+            runCatching { client.auth.clearSession() }
+                .onFailure { log.w { "Could not clear local auth session: ${it.message}" } }
+            setUnauthenticatedState()
         }
-        setUnauthenticatedState()
     }
 
     override suspend fun deleteAccount(): Result<Unit> =
@@ -371,6 +394,14 @@ class SupabaseAuthService(
         settings.remove(SETTINGS_KEY_AUTH_PENDING_EMAIL)
     }
 }
+
+private fun AuthRestException.isExistingEmail(): Boolean =
+    errorCode == AuthErrorCode.EmailExists ||
+        errorCode == AuthErrorCode.UserAlreadyExists ||
+        errorCode == AuthErrorCode.IdentityAlreadyExists
+
+@Serializable
+private data class PasswordLookupRequest(val account_email: String)
 
 internal fun parseStoredTier(value: String?): UserTier? =
     when (value?.trim()?.uppercase()) {

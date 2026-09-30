@@ -224,7 +224,8 @@ class AppSession(
                 }
             }
             val userId = service.authState.value.userId
-            if (hasHeldLocalData(settings) && !matchesPendingRestore(settings, userId)) {
+            if (submit.signUpResult?.existingAccount != true &&
+                hasHeldLocalData(settings) && !matchesPendingRestore(settings, userId)) {
                 throw NonMatchingAccountException()
             }
             submit
@@ -273,7 +274,13 @@ class AppSession(
      */
     suspend fun startOver() = onMain {
         clearMainEffects(includeBootstrap = true)
-        listOfNotNull(startupIdentity?.authService, authRuntime?.authService, welcomeAuthService)
+        val activeServices = listOfNotNull(startupIdentity?.authService, authRuntime?.authService, welcomeAuthService)
+        val services = if (activeServices.isEmpty() && savedDeploymentSelection(settings) == DeploymentSelection.HOSTED) {
+            listOfNotNull(runCatching { ensureWelcomeAuthService() }.getOrNull())
+        } else {
+            activeServices
+        }
+        services
             .distinct()
             .forEach { service -> runCatching { service.signOut() } }
         localDataWiper.wipe()
@@ -296,7 +303,11 @@ class AppSession(
 
     /** Sign out to Welcome, keeping local data for a matching re-login. */
     suspend fun restartHostedLogin() = onMain {
+        clearMainEffects(includeBootstrap = true)
+        val services = listOfNotNull(startupIdentity?.authService, authRuntime?.authService, welcomeAuthService)
+            .distinct()
         softReturnToWelcome(settings, notice = "signed_out")
+        services.forEach { service -> runCatching { service.signOut() } }
         authScopeGeneration += 1
         authRuntime = null
         welcomeAuthService = null

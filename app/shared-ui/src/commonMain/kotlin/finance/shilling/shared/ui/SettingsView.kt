@@ -154,7 +154,6 @@ private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewMode
                     initialMode = HostedCredentialsMode.CREATE_ACCOUNT,
                     guestUpgrade = true,
                     onSubmit = viewModel::submitCredentials,
-                    onSendSignInLink = viewModel::sendSignInLink
                 )
                 account.pendingConfirmation?.let {
                     PendingConfirmation(it)

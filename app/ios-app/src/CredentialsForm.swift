@@ -8,7 +8,6 @@ struct CredentialsForm: View {
     let disabledReason: String?
     let guestUpgrade: Bool
     let submit: (HostedCredentialsMode, String, String) async -> CredentialsOutcome?
-    let sendSignInLink: ((String) async -> String?)?
 
     @State private var mode: HostedCredentialsMode
     @State private var email = ""
@@ -22,7 +21,6 @@ struct CredentialsForm: View {
         enabled: Bool,
         disabledReason: String?,
         guestUpgrade: Bool = false,
-        sendSignInLink: ((String) async -> String?)? = nil,
         submit: @escaping (HostedCredentialsMode, String, String) async -> CredentialsOutcome?
     ) {
         _mode = State(initialValue: initialMode)
@@ -30,7 +28,6 @@ struct CredentialsForm: View {
         self.disabledReason = disabledReason
         self.guestUpgrade = guestUpgrade
         self.submit = submit
-        self.sendSignInLink = sendSignInLink
     }
 
     var body: some View {
@@ -45,35 +42,24 @@ struct CredentialsForm: View {
             .keyboardType(.emailAddress)
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
-        if passwordRequired {
+            .onChange(of: email) { _, _ in
+                mode = .createAccount
+                password = ""
+                message = nil
+            }
+        if mode == .signIn {
             SecureField("Password", text: $password)
-                .textContentType(mode == .signIn ? .password : .newPassword)
+                .textContentType(.password)
         }
         Button {
             send()
         } label: {
             HStack {
                 if submitting { ProgressView() }
-                Text(CredentialsCopy.shared.submitLabel(mode: mode, signInLabel: "Sign in"))
+                Text("Continue")
             }
         }
-        .disabled(!enabled || submitting || email.trimmingCharacters(in: .whitespaces).isEmpty || (passwordRequired && password.isEmpty))
-        Button(CredentialsCopy.shared.switchLabel(mode: mode)) {
-            mode = CredentialsCopy.shared.other(mode: mode)
-            password = ""
-            message = nil
-        }
-        .disabled(!enabled || submitting)
-        if (mode == .signIn || guestUpgrade), let sendSignInLink {
-            Button(guestUpgrade && mode != .signIn ? "Use existing account: email me a link" : "Email me a sign-in link") {
-                submitting = true
-                Task {
-                    defer { submitting = false }
-                    message = await sendSignInLink(email.trimmingCharacters(in: .whitespaces))
-                }
-            }
-            .disabled(!enabled || submitting || email.trimmingCharacters(in: .whitespaces).isEmpty)
-        }
+        .disabled(!enabled || submitting || email.trimmingCharacters(in: .whitespaces).isEmpty)
         if let message {
             Text(message).font(.footnote)
         }
@@ -92,9 +78,16 @@ struct CredentialsForm: View {
         submitting = true
         Task {
             defer { submitting = false }
+            if mode == .signIn && password.isEmpty {
+                message = "Enter your password."
+                return
+            }
             guard let outcome = await submit(mode, email, password) else { return }
             message = outcome.message
-            if outcome.succeeded {
+            if outcome.showPasswordInput {
+                mode = .signIn
+                password = ""
+            } else if outcome.succeeded {
                 email = ""
                 password = ""
             }
@@ -102,5 +95,4 @@ struct CredentialsForm: View {
         }
     }
 
-    private var passwordRequired: Bool { mode != .createAccount || !guestUpgrade }
 }

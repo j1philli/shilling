@@ -74,7 +74,7 @@ sealed interface SettingsAccount {
         val pendingConfirmation: String?
     ) : SettingsAccount {
         val title get() = "Guest"
-        val body get() = "Create an account to keep this budget and use it on your other devices."
+        val body get() = "Continue with your email to keep this budget or use an existing account."
         override val actionLabel get() = "Start over"
         override val confirm get() = ConfirmCopy(
             title = "Start over?",
