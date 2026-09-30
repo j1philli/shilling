@@ -2,7 +2,6 @@ import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
-import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 
 version = "2024.12"
 
@@ -13,20 +12,26 @@ project {
     buildType(CI)
 
     // --- Phase 2: packages, runtime checks, and deployment ---
-    // The settings VCS root must include refs/tags/*; these trigger filters use
-    // the resulting logical names (v*), not the fully qualified Git refs.
     buildType(AndroidBuild)
     buildType(ServerBuild)
     buildType(WebDeploy)
     buildType(RuntimeSmoke)
-    buildType(HostedWebDeploy)
-    buildType(SelfHostRelease)
+    buildType(FullRelease)
+    buildType(SingleTargetRelease)
     buildType(IosBuild)
     buildType(DesktopLinux)
     buildType(DesktopMacOS)
     buildType(DesktopWindows)
     buildType(LinuxTargets)
     buildType(AllTargets)
+
+    features {
+        sharedResource {
+            id = "ShillingReleaseLock"
+            name = "shilling-release"
+            resourceType = infinite()
+        }
+    }
 
     // --- Parameters (secrets configured in TeamCity UI) ---
     params {
@@ -66,6 +71,10 @@ object CI : BuildType({
         script {
             name = "Architecture guard"
             scriptContent = "bash scripts/enforce-architecture.sh"
+        }
+        script {
+            name = "Release workflow checks"
+            scriptContent = "python3 -m unittest discover -s scripts/ci/tests -v"
         }
         script {
             name = "Product version guard"
@@ -313,103 +322,6 @@ object WebDeploy : BuildType({
     }
 })
 
-// Deploy only after the complete same-revision chain passes.
-object HostedWebDeploy : BuildType({
-    name = "Hosted Web Deploy"
-    description = "Promote the web artifact after every target and runtime smoke check passes"
-    params { param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%") }
-    vcs { root(DslContext.settingsRoot) }
-    triggers {
-        finishBuildTrigger {
-            buildType = "${AllTargets.id}"
-            successfulOnly = true
-            branchFilter = "+:<default>\n+:main"
-        }
-    }
-    dependencies {
-        snapshot(AllTargets) { onDependencyFailure = FailureAction.FAIL_TO_START }
-        artifacts(WebDeploy) {
-            buildRule = sameChain()
-            artifactRules = "web-app-dist.zip!** => web-app-dist"
-        }
-    }
-    steps {
-        script {
-            name = "Deploy to Cloudflare Pages"
-            scriptContent = """
-                #!/bin/bash
-                set -euo pipefail
-
-                # Pages rejects any individual asset above 25 MiB.
-                WASM_SIZE=$(wc -c < web-app-dist/web-app.wasm)
-                if [ "${'$'}WASM_SIZE" -gt 26214400 ]; then
-                    echo "ERROR: web-app.wasm is ${'$'}WASM_SIZE bytes; Cloudflare Pages allows at most 25 MiB per asset"
-                    exit 1
-                fi
-
-                DEPLOY_BRANCH="${'$'}{BUILD_VCS_BRANCH:-}"
-                if [ -z "${'$'}DEPLOY_BRANCH" ]; then
-                    DEPLOY_BRANCH="$(git branch --show-current 2>/dev/null || true)"
-                fi
-                if [ -z "${'$'}DEPLOY_BRANCH" ]; then
-                    DEPLOY_BRANCH="$(git name-rev --name-only HEAD 2>/dev/null | sed 's#^remotes/origin/##' || true)"
-                fi
-                if [ -z "${'$'}DEPLOY_BRANCH" ] || [ "${'$'}DEPLOY_BRANCH" = "undefined" ]; then
-                    echo "ERROR: Could not determine checkout branch for Cloudflare Pages deploy"
-                    exit 1
-                fi
-
-                case "${'$'}DEPLOY_BRANCH" in
-                    refs/heads/main|main)
-                        ;;
-                    *)
-                        echo "Skipping Cloudflare Pages deploy for branch ${'$'}DEPLOY_BRANCH"
-                        exit 0
-                        ;;
-                esac
-
-                CURRENT_MAIN=$(git ls-remote https://github.com/j1philli/shilling.git refs/heads/main | cut -f1)
-                if [ "$(git rev-parse HEAD)" != "${'$'}CURRENT_MAIN" ]; then
-                    echo "Skipping deployment: main has advanced since this build"
-                    exit 0
-                fi
-
-                if [ -z "${'$'}{CLOUDFLARE_API_TOKEN:-}" ] && [ -n "${'$'}{CF_API_TOKEN:-}" ]; then
-                    export CLOUDFLARE_API_TOKEN="${'$'}CF_API_TOKEN"
-                fi
-
-                if [ -z "${'$'}{CLOUDFLARE_API_TOKEN:-}" ]; then
-                    echo "ERROR: CLOUDFLARE_API_TOKEN is not set"
-                    exit 1
-                fi
-
-                if [ -z "${'$'}{CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-                    echo "ERROR: CLOUDFLARE_ACCOUNT_ID is not set"
-                    echo "Set TeamCity parameter env.CLOUDFLARE_ACCOUNT_ID to the Cloudflare account ID for the Pages project."
-                    exit 1
-                fi
-
-                if [ -z "${'$'}{CLOUDFLARE_PAGES_PROJECT:-}" ]; then
-                    echo "ERROR: CLOUDFLARE_PAGES_PROJECT is not set"
-                    echo "Set TeamCity parameter env.CLOUDFLARE_PAGES_PROJECT to the Cloudflare Pages project name."
-                    exit 1
-                fi
-
-                unset CF_API_TOKEN
-
-                echo "Deploying Cloudflare Pages project ${'$'}CLOUDFLARE_PAGES_PROJECT in account ${'$'}CLOUDFLARE_ACCOUNT_ID"
-
-                npx wrangler pages deploy web-app-dist/ \
-                    --project-name="${'$'}CLOUDFLARE_PAGES_PROJECT" \
-                    --branch=main
-
-                node scripts/ci/ensure-pages-domain.mjs
-            """.trimIndent()
-        }
-    }
-    requirements { equals("teamcity.agent.jvm.os.name", "Linux") }
-})
-
 object RuntimeSmoke : BuildType({
     name = "Web and Server Smoke"
     description = "Run packaged images, browser onboarding, hosted auth, and WebRTC data-channel checks"
@@ -473,55 +385,75 @@ object ServerBuild : BuildType({
 })
 
 // =============================================================================
-// Phase 2f: Publish self-hosted images from tested TeamCity artifacts, manually
+// Phase 2f: Two manual release entry points. Main only builds/tests.
 // =============================================================================
 
-object SelfHostRelease : BuildType({
-    name = "Self-hosted Release"
-    description = "Manually publish selected self-hosted images from a tested release tag"
-
+open class ReleaseBuild(buildId: String, title: String, singleTarget: Boolean) : BuildType({
+    id(buildId)
+    name = title
+    description = "Publish tested packages and selected images; deploy hosted web only when web is selected"
+    artifactRules = "release-output/** => release-output.zip"
+    maxRunningBuilds = 1
     params {
-        param("env.SHILLING_RELEASE_TARGETS", "server,web")
+        param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
+        param("env.SHILLING_RELEASE_MODE", if (singleTarget) "single" else "full")
+        if (singleTarget) {
+            select("env.SHILLING_RELEASE_TARGET", "web", label = "Target to release",
+                display = ParameterDisplay.PROMPT,
+                options = listOf("Web (hosted + image)" to "web", "Server image" to "server",
+                    "Android" to "android", "iOS" to "ios", "Linux desktop" to "linux",
+                    "Windows desktop" to "windows", "macOS desktop" to "macos"))
+        }
+        checkbox("env.SHILLING_RELEASE_DRY_RUN", "0", label = "Preview only (publish nothing)",
+            display = ParameterDisplay.PROMPT, checked = "1", unchecked = "0")
     }
-
-    vcs {
-        root(DslContext.settingsRoot)
-    }
-
+    vcs { root(DslContext.settingsRoot) }
+    features { sharedResources { writeLock("shilling-release") } }
     dependencies {
-        snapshot(RuntimeSmoke) { onDependencyFailure = FailureAction.FAIL_TO_START }
-        snapshot(ServerBuild) {
+        snapshot(AllTargets) {
             onDependencyFailure = FailureAction.FAIL_TO_START
+            onDependencyCancel = FailureAction.CANCEL
             reuseBuilds = ReuseBuilds.SUCCESSFUL
         }
         artifacts(ServerBuild) {
             buildRule = sameChain()
             artifactRules = "server-jvm-executable.jar => release-input/server"
-        }
-        snapshot(WebDeploy) {
-            onDependencyFailure = FailureAction.FAIL_TO_START
-            reuseBuilds = ReuseBuilds.SUCCESSFUL
+            cleanDestination = true
         }
         artifacts(WebDeploy) {
             buildRule = sameChain()
             artifactRules = "web-app-dist.zip!** => web-app-dist"
+            cleanDestination = true
+        }
+        for ((build, archive, target) in listOf(
+            Triple(AndroidBuild, "android.zip", "android"),
+            Triple(IosBuild, "ios.zip", "ios"),
+            Triple(DesktopLinux, "desktop-linux.zip", "linux"),
+            Triple(DesktopWindows, "desktop-windows.zip", "windows"),
+            Triple(DesktopMacOS, "desktop-macos.zip", "macos")
+        )) {
+            artifacts(build) {
+                buildRule = sameChain()
+                artifactRules = "$archive!** => release-input/clients/$target"
+                cleanDestination = true
+            }
         }
     }
-
     steps {
         script {
-            name = "Publish self-hosted release"
-            scriptContent = "bash scripts/ci/publish-self-host-release.sh"
+            name = "Release selected targets"
+            scriptContent = "python3 scripts/ci/release.py"
         }
     }
-
-    requirements {
-        equals("teamcity.agent.jvm.os.name", "Linux")
-    }
+    requirements { equals("teamcity.agent.jvm.os.name", "Linux") }
 })
 
+object FullRelease : ReleaseBuild("FullRelease", "Release — Full", false)
+object SingleTargetRelease : ReleaseBuild("SingleTargetRelease", "Release — Single Target", true)
+
 // Agentless orchestration jobs keep every package on one source revision.
-// Feature branches run the Linux matrix; main and release tags run every target.
+// Feature branches run the Linux matrix; main runs every target. Release tags
+// label already-tested revisions and do not trigger another build or deployment.
 object LinuxTargets : BuildType({
     name = "Build Linux-agent targets"
     description = "Build Android, Linux desktop, Windows desktop, web, and server at one revision"
@@ -551,15 +483,12 @@ object AllTargets : BuildType({
     description = "Build every target and run available runtime checks at one revision"
     type = BuildTypeSettings.Type.COMPOSITE
 
-    // A release tag usually points to a commit already built on main.
-    params { param("teamcity.vcsTrigger.runBuildInNewEmptyBranch", "true") }
-
     vcs {
         root(DslContext.settingsRoot)
     }
 
     triggers {
-        vcs { branchFilter = "+:<default>\n+:main\n+:v*" }
+        vcs { branchFilter = "+:<default>\n+:main" }
     }
 
     dependencies {

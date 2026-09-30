@@ -72,3 +72,6 @@ supabase/.temp/
 .entire/
 .context/
 .cache/
+
+release-output/
+__pycache__/
