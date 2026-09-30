@@ -357,7 +357,7 @@ class AppSession(
             if (onboardingComplete || config.selfHostedOnly) return@update
             launch {
                 runCatching { ensureWelcomeAuthService() }
-                    .onFailure { log.w { "Welcome auth bootstrap not ready yet: ${it.message}" } }
+                    .onFailure { finance.shilling.shared.data.auth.AuthErrors.logFailure("welcome_bootstrap", it) }
                 reconcile()
             }
         }

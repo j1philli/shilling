@@ -1,5 +1,7 @@
 package finance.shilling.shared.ui
 
+import finance.shilling.shared.data.auth.AuthErrors
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -161,7 +163,7 @@ private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewMode
                         scope.launch {
                             accountMessage = viewModel.refreshAccountStatus().fold(
                                 onSuccess = { "Account status checked." },
-                                onFailure = { error -> error.message ?: "Could not check account status." }
+                                onFailure = { error -> AuthErrors.message(error, "refresh_account") }
                             )
                         }
                     }) { Text("Check confirmation") }
@@ -189,7 +191,7 @@ private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewMode
                         scope.launch {
                             accountMessage = viewModel.setPassword(password).fold(
                                 onSuccess = { password = ""; "Password set." },
-                                onFailure = { error -> error.message ?: "Could not set password." }
+                                onFailure = { error -> AuthErrors.message(error, "set_password") }
                             )
                         }
                     }, enabled = password.isNotBlank()) { Text("Set password") }

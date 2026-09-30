@@ -1,5 +1,7 @@
 package finance.shilling.shared.presentation
 
+import finance.shilling.shared.data.auth.AuthErrors
+
 import finance.shilling.shared.session.HostedCredentialsMode
 import finance.shilling.shared.session.HostedCredentialsSubmitResult
 
@@ -42,7 +44,7 @@ object CredentialsCopy {
                 else -> "Account created."
             }
         },
-        onFailure = { "Error: ${it.message ?: "Unknown error"}" }
+        onFailure = { AuthErrors.message(it, "submit_credentials") }
     )
 
     /** Whether to show the "Confirm your email" sheet after [result]. */

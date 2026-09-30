@@ -1,5 +1,7 @@
 package finance.shilling.app
 
+import finance.shilling.shared.data.auth.AuthErrors
+
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutines
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutinesState
 import finance.shilling.shared.presentation.CredentialsCopy
@@ -32,7 +34,7 @@ object AppRoot {
     suspend fun handleAuthCallback(url: String): String = KoinPlatform.getKoin().get<AppSession>()
         .handleAuthCallback(url).fold(
             onSuccess = { "Account ready." },
-            onFailure = { it.message ?: "Could not open the sign-in link." }
+            onFailure = { AuthErrors.message(it, "auth_callback") }
         )
 
     private fun SessionPhase.toAppPhase(): AppPhase = when (this) {
@@ -66,6 +68,6 @@ class OnboardingScreenModel : IosViewModelHost() {
     @NativeCoroutines
     suspend fun sendSignInLink(email: String): String = viewModel.sendSignInLink(email).fold(
         onSuccess = { "Sign-in link sent. Open it on this device." },
-        onFailure = { it.message ?: "Could not send a sign-in link." }
+        onFailure = { AuthErrors.message(it, "send_sign_in_link") }
     )
 }

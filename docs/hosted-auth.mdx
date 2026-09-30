@@ -63,6 +63,16 @@ Auth startup must finish loading the saved Supabase session before `ensureAuthen
 
 Set Supabase Auth **Site URL** to `https://app.shilling.finance` for web and desktop confirmations. Add `shilling.finance://auth-callback` to **Additional Redirect URLs** for iOS and Android. The mobile apps pass that callback when requesting an email change, register it with the OS, and refresh their existing session when opened. They do not import callback tokens into a different account. A localhost Site URL lets verification succeed but sends the browser to a dead local page afterward.
 
+## Auth errors and email delivery
+
+Auth UI uses `AuthErrors` to translate provider codes into user-facing messages. Diagnostics record the operation, exception type, provider code, and HTTP status; they omit raw response bodies, credentials, and email addresses. Email delivery failures propagate to the form rather than being treated as successful submissions.
+
+### Resend setup (pending)
+
+The hosted project currently uses Supabase's built-in sender, limited to two auth emails per hour for the project. Create a Resend account, verify the sending domain using its DNS records, and create a sending API key. Configure Supabase Auth custom SMTP with `smtp.resend.com`, port `465`, username `resend`, and the API key as the password. Set the sender name to `Shilling` and choose a From address on the verified domain. Keep the key in server-side configuration, never in app code or committed files. Start with 30 auth emails per hour and retain the per-address resend cooldown; adjust against the Resend plan and observed usage. Verify delivery and mobile callbacks before treating this setup as complete.
+
+References: [Resend Supabase SMTP setup](https://resend.com/docs/send-with-supabase-smtp), [Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp).
+
 ## Guest signup abuse controls
 
 The `shilling.finance` project is configured for 10 anonymous sign-ins per IP per hour. Monitor Auth 429 responses and anonymous account creation to tune the limit. This rate limit reduces bulk creation but does not prove a request is human. If abuse warrants a CAPTCHA, Supabase can accept a Turnstile token for anonymous sign-in, but native clients still need a browser engine for the challenge.

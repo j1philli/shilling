@@ -122,7 +122,7 @@ class SupabaseAuthService(
                     is SessionStatus.RefreshFailure -> {
                         // Keep the saved identity through a temporary network or token refresh failure.
                         if (!initializationComplete.isCompleted) initializationComplete.complete(Unit)
-                        log.w { "Token refresh failed: ${status.cause}" }
+                        log.w { "operation=refresh_session result=failed" }
                     }
                 }
             }
@@ -156,7 +156,7 @@ class SupabaseAuthService(
                 true
             } == true) { "Auth did not reach an authenticated state before timeout" }
         }.onFailure { error ->
-            log.w { "Auth restoration or guest sign-in failed: ${error.message}" }
+            AuthErrors.logFailure("restore_session", error)
         }
     }
 
@@ -170,7 +170,8 @@ class SupabaseAuthService(
             } catch (error: AuthRestException) {
                 if (!error.isExistingEmail()) throw error
                 val hasPassword = existingAccountHasPassword(email)
-                val linkSent = !hasPassword && sendSignInLink(email).isSuccess
+                if (!hasPassword) sendSignInLink(email).getOrThrow()
+                val linkSent = !hasPassword
                 return@runCatching SignUpResult(
                     requiresEmailConfirmation = false,
                     upgradedAnonymousSession = false,
@@ -296,11 +297,11 @@ class SupabaseAuthService(
         try {
             client.auth.signOut()
         } catch (e: Exception) {
-            log.w { "Sign out error: ${e.message}" }
+            AuthErrors.logFailure("sign_out", e)
         } finally {
             // A failed remote revoke must not leave a restorable session on this device.
             runCatching { client.auth.clearSession() }
-                .onFailure { log.w { "Could not clear local auth session: ${it.message}" } }
+                .onFailure { AuthErrors.logFailure("clear_session", it) }
             setUnauthenticatedState()
         }
     }
@@ -311,7 +312,7 @@ class SupabaseAuthService(
     override suspend fun refreshTokenIfNeeded(): String? = try {
         client.auth.currentSessionOrNull()?.accessToken
     } catch (e: Exception) {
-        log.w { "Token refresh failed: ${e.message}" }
+        AuthErrors.logFailure("refresh_token", e)
         _authState.value.accessToken
     }
 
@@ -385,7 +386,7 @@ class SupabaseAuthService(
         }.body<List<UserProfileAuthRow>>()
             .firstOrNull()
     }.getOrElse { error ->
-        log.w { "Supabase profile auth state fetch failed: ${error.message}" }
+        AuthErrors.logFailure("fetch_auth_profile", error)
         null
     }
 

@@ -1,5 +1,7 @@
 package finance.shilling.app
 
+import finance.shilling.shared.data.auth.AuthErrors
+
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutines
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutinesState
 import finance.shilling.shared.presentation.CredentialsCopy
@@ -45,19 +47,19 @@ class SettingsScreenModel : IosViewModelHost() {
     @NativeCoroutines
     suspend fun refreshAccountStatus(): String = viewModel.refreshAccountStatus().fold(
         onSuccess = { "Account status checked." },
-        onFailure = { it.message ?: "Could not check account status." }
+        onFailure = { AuthErrors.message(it, "refresh_account") }
     )
 
     @NativeCoroutines
     suspend fun setPassword(password: String): String = viewModel.setPassword(password).fold(
         onSuccess = { "Password set." },
-        onFailure = { it.message ?: "Could not set password." }
+        onFailure = { AuthErrors.message(it, "set_password") }
     )
 
     @NativeCoroutines
     suspend fun sendSignInLink(email: String): String = viewModel.sendSignInLink(email).fold(
         onSuccess = { "Sign-in link sent. Open it on this device." },
-        onFailure = { it.message ?: "Could not send a sign-in link." }
+        onFailure = { AuthErrors.message(it, "send_sign_in_link") }
     )
 
     @NativeCoroutines

@@ -1,5 +1,7 @@
 package finance.shilling.shared.ui
 
+import finance.shilling.shared.data.auth.AuthErrors
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
@@ -133,7 +135,7 @@ private fun PasswordSetupPrompt(authService: AuthService) {
                         submitting = true
                         authService.setPassword(password).fold(
                             onSuccess = { password = ""; dismissed = true },
-                            onFailure = { error = it.message ?: "Could not set password." }
+                            onFailure = { error = AuthErrors.message(it, "set_password") }
                         )
                         submitting = false
                     }
