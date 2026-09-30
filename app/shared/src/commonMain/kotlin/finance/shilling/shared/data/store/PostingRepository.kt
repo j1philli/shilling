@@ -10,9 +10,12 @@ import finance.shilling.shared.data.ScheduleType
 import finance.shilling.shared.data.ScheduledTx
 import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.EntityType
+import kotlinx.coroutines.yield
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
@@ -37,7 +40,8 @@ class PostingRepository(
         ) { postings, accounts, categories, schedules ->
             postings.toPostingDetails(accounts, categories, schedules)
                 .sortedByDescending { it.posting.date }
-        }
+        // Keep the Store5 read and large projection off a native UI collector.
+        }.flowOn(Dispatchers.Default)
 
     fun watchById(id: String): Flow<PostingWithDetails?> =
         combine(
@@ -156,31 +160,27 @@ class PostingRepository(
         accountId: String,
         categoryId: String?
     ) {
-        val postings = items.map { (title, amount, date) ->
-            val id = idGenerator.newId()
-            val type = if (amount > 0) ScheduleType.INCOME else ScheduleType.EXPENSE
-            val catId = categoryId?.takeIf { it.isNotBlank() }
-            Posting(
-                id = id,
-                scheduleId = null,
-                type = type,
-                accountId = accountId,
-                date = date,
-                amount = kotlin.math.abs(amount),
-                pairId = null,
-                title = title,
-                categoryId = catId
-            )
+        // Bound transaction size and Store5 invalidations without retaining a second
+        // full import as Posting objects. Updaters still emit one P2P change per row.
+        try {
+            items.chunked(200).forEach { batch ->
+                val postings = batch.map { (title, amount, date) ->
+                    Posting(
+                        id = idGenerator.newId(), scheduleId = null,
+                        type = if (amount > 0) ScheduleType.INCOME else ScheduleType.EXPENSE,
+                        accountId = accountId, date = date, amount = kotlin.math.abs(amount),
+                        pairId = null, title = title,
+                        categoryId = categoryId?.takeIf { it.isNotBlank() }
+                    )
+                }
+                store.write(StoreWriteRequest.of<PostingKey, List<Posting>, Unit>(PostingKey.All, postings))
+                yield()
+            }
+
+        } finally {
+            // A cancelled import can already have committed earlier batches.
+            notifier.notifyChanged()
         }
-        postings.forEach { posting ->
-            store.write(
-                StoreWriteRequest.of<PostingKey, List<Posting>, Unit>(
-                    PostingKey.ById(posting.id),
-                    listOf(posting)
-                )
-            )
-        }
-        notifier.notifyChanged()
     }
 
     suspend fun recordFromOccurrence(

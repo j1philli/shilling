@@ -126,10 +126,13 @@ struct ReceiptEditorScreen: View {
     }
 
     private func open() {
-        if let path = screen.previewPath() {
-            preview = URL(fileURLWithPath: path)
-        } else {
-            toast = Toast("Couldn't open \(model.state.title)")
+        Task {
+            let result: String?? = try? await asyncFunction(for: screen.previewPath())
+            if let path = result ?? nil {
+                preview = URL(fileURLWithPath: path)
+            } else {
+                toast = Toast("Couldn't open \(model.state.title)")
+            }
         }
     }
 

@@ -21,6 +21,9 @@ SELECT * FROM postings WHERE space_id = :space_id ORDER BY date DESC;
 selectById:
 SELECT * FROM postings WHERE id = ? AND space_id = :space_id;
 
+selectRecent:
+SELECT * FROM postings WHERE space_id = :space_id ORDER BY date DESC LIMIT ?;
+
 selectBetween:
 SELECT * FROM postings
 WHERE date >= ? AND date < ? AND space_id = :space_id

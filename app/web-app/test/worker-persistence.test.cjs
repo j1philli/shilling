@@ -1,0 +1,136 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+const initSqlJs = require('sql.js');
+
+const workerSource = fs.readFileSync(path.join(__dirname, '..', 'sqldelight.worker.js'), 'utf8');
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+function createIndexedDB() {
+  let saved = null;
+  let writes = 0;
+  let writesStarted = 0;
+  const idb = {
+    createObjectStore() {},
+    transaction(_store, mode) {
+      const tx = {
+        error: null,
+        objectStore() {
+          return {
+            get() {
+              const request = { result: saved };
+              queueMicrotask(() => request.onsuccess());
+              return request;
+            },
+            put(data) {
+              assert.equal(mode, 'readwrite');
+              writesStarted++;
+              setTimeout(() => {
+                saved = data;
+                writes++;
+                tx.oncomplete();
+              }, 25);
+              return {};
+            }
+          };
+        }
+      };
+      return tx;
+    }
+  };
+  return {
+    get writes() { return writes; },
+    get writesStarted() { return writesStarted; },
+    get saved() { return saved; },
+    open() {
+      const request = { result: idb };
+      queueMicrotask(() => {
+        request.onupgradeneeded();
+        request.onsuccess();
+      });
+      return request;
+    }
+  };
+}
+
+async function main() {
+  const indexedDB = createIndexedDB();
+  const pending = new Map();
+  let nextId = 0;
+  const context = {
+    importScripts() {},
+    initSqlJs: () => initSqlJs({
+      locateFile: file => path.join(path.dirname(require.resolve('sql.js')), file)
+    }),
+    indexedDB,
+    setTimeout,
+    clearTimeout,
+    console,
+    self: {},
+    postMessage(message) {
+      const resolve = pending.get(message.id);
+      pending.delete(message.id);
+      resolve(message);
+    }
+  };
+  vm.runInNewContext(workerSource, context, { filename: 'sqldelight.worker.js' });
+  function send(action, sql) {
+    const id = ++nextId;
+    return new Promise(resolve => {
+      pending.set(id, resolve);
+      context.self.onmessage({ data: { id, action, sql } });
+    }).then(message => {
+      if (message.error) throw message.error;
+      return message.results;
+    });
+  }
+
+  await send('exec', 'CREATE TABLE items (id INTEGER PRIMARY KEY);');
+  await sleep(150);
+  const initialWrites = indexedDB.writes;
+  assert.equal(initialWrites, 1);
+
+  await send('exec', 'SELECT * FROM items;');
+  await sleep(150);
+  assert.equal(indexedDB.writes, initialWrites, 'reads must not persist the database');
+
+  await send('exec', 'INSERT INTO items (id) VALUES (1);');
+  for (let i = 0; i < 8; i++) {
+    await send('exec', 'SELECT * FROM items;');
+    await sleep(20);
+  }
+  assert.equal(indexedDB.writes, initialWrites + 1, 'frequent reads must not defer an earlier write');
+
+  await send('begin_transaction');
+  await send('exec', 'INSERT INTO items (id) VALUES (2);');
+  await send('rollback_transaction');
+  await sleep(150);
+  assert.equal(indexedDB.writes, initialWrites + 1, 'rolled-back writes must not persist');
+
+  await send('begin_transaction');
+  await send('exec', 'INSERT INTO items (id) VALUES (3);');
+  await send('end_transaction');
+  await sleep(150);
+  assert.equal(indexedDB.writes, initialWrites + 2, 'a committed transaction should persist once');
+  assert.deepEqual((await send('exec', 'SELECT id FROM items ORDER BY id;')).values, [[1], [3]]);
+
+  const startedBefore = indexedDB.writesStarted;
+  await send('exec', 'INSERT INTO items (id) VALUES (4);');
+  for (let i = 0; indexedDB.writesStarted === startedBefore && i < 50; i++) await sleep(5);
+  assert.equal(indexedDB.writesStarted, startedBefore + 1);
+  await send('exec', 'INSERT INTO items (id) VALUES (5);');
+  await sleep(170);
+  assert.equal(indexedDB.writes, initialWrites + 4, 'a write during persistence needs a second snapshot');
+  const SQL = await initSqlJs({ locateFile: file => path.join(path.dirname(require.resolve('sql.js')), file) });
+  const savedDatabase = new SQL.Database(indexedDB.saved);
+  assert.deepEqual(savedDatabase.exec('SELECT id FROM items ORDER BY id;')[0].values, [[1], [3], [4], [5]]);
+  savedDatabase.close();
+
+  await send('exec', 'PRAGMA user_version = 3;');
+  await sleep(150);
+  assert.equal(indexedDB.writes, initialWrites + 5, 'schema version changes must persist');
+  console.log('web worker persistence checks passed');
+}
+
+main().catch(error => { console.error(error); process.exitCode = 1; });

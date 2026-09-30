@@ -8,7 +8,7 @@
  * Android AAR variants, with project-specific integration changes.
  * See THIRD_PARTY_NOTICES.md and licenses/Apache-2.0.txt.
  */
-package finance.shilling.android
+package finance.shilling.shared.data.store
 
 import android.content.Context
 import android.database.AbstractWindowedCursor

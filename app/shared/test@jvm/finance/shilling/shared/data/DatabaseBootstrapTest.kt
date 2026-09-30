@@ -38,6 +38,21 @@ class DatabaseBootstrapTest {
     }
 
     @Test
+    fun missingPerformanceIndexIsAddedWithoutRebuildingData() = runBlocking {
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        ShillingDatabase.Schema.create(driver).await()
+        driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0)
+        driver.execute(null, "DROP INDEX idx_change_log_entity_latest;", 0)
+        val db = ShillingDatabase(driver)
+        db.accountQueries.upsert("acct-1", "Checking", 123.45)
+
+        ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
+
+        assertTrue(indexExists(driver, "idx_change_log_entity_latest"))
+        assertEquals(1L, rowCount(driver, "accounts"))
+    }
+
+    @Test
     fun versionMismatchPreservesExistingData() = runBlocking {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         ShillingDatabase.Schema.create(driver).await()
@@ -126,6 +141,19 @@ class DatabaseBootstrapTest {
             1
         ) {
             bindString(0, tableName)
+        }.value
+
+    private fun indexExists(driver: SqlDriver, indexName: String): Boolean =
+        driver.executeQuery(
+            null,
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'index' AND name = ?;",
+            { cursor ->
+                cursor.next()
+                QueryResult.Value((cursor.getLong(0) ?: 0L) > 0L)
+            },
+            1
+        ) {
+            bindString(0, indexName)
         }.value
 
     private fun rowCount(driver: SqlDriver, tableName: String): Long =

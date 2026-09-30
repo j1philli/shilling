@@ -42,8 +42,9 @@ class ReceiptEditorScreenModel(receiptId: String?) : IosViewModelHost() {
     suspend fun delete(): String? = viewModel.delete()
 
     /** A temporary copy of the receipt's file, named after the original, for Quick Look. */
-    fun previewPath(): String? {
+    @NativeCoroutines
+    suspend fun previewPath(): String? {
         val receipt = state.value.receipt ?: return null
-        return (fileStore as? IosReceiptFileStore)?.previewPath(receipt.id, receipt.originalName)
+        return fileStore.prepareIosReceiptPreview(receipt.id, receipt.originalName)
     }
 }

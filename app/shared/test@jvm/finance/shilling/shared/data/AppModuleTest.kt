@@ -89,6 +89,7 @@ class AppModuleTest {
         override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {}
 
         override suspend fun read(receiptId: String): ByteArray? = null
+        override suspend fun openReader(receiptId: String) = read(receiptId)?.asReceiptReader()
 
         override suspend fun hasFile(receiptId: String): Boolean = false
 

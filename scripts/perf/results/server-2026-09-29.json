@@ -1,0 +1,1722 @@
+{
+  "date": "2026-09-29",
+  "scope": "Private-based worktree at 73ace52 with local audit changes; not public-main measurements",
+  "environment": {
+    "os": "macOS 27.0",
+    "architecture": "ARM64",
+    "jdk": "Eclipse Adoptium 25.0.4.1",
+    "kotlin": "2.4.20",
+    "ktor": "3.6.0",
+    "serverJvmArgs": [
+      "-Xms128m",
+      "-Xmx512m"
+    ]
+  },
+  "fixture": {
+    "synthetic": true,
+    "userDataTransportsAdded": false,
+    "jwtAlgorithm": "RS256",
+    "rsaKeyBits": 2048,
+    "normalMembershipDelayMs": 25,
+    "jwksDelayMs": 200,
+    "httpConnectionsPreestablished": true,
+    "maxConcurrentWebSocketOpens": 25,
+    "metadataBatchSizes": [
+      10,
+      100,
+      500
+    ],
+    "signalingHouseholds": [
+      1,
+      10,
+      100
+    ],
+    "timedPeersPerHousehold": 5
+  },
+  "retainedLimits": {
+    "upstreamConcurrency": 128,
+    "upstreamConnectTimeoutMs": 3000,
+    "upstreamOperationTimeoutMs": 5000,
+    "jwksTtlSeconds": 600,
+    "unknownKidRefreshIntervalSeconds": 30,
+    "jwksFailureBackoffSeconds": 1,
+    "peerQueueMessages": 64,
+    "peerQueueUtf16CodeUnits": 262144,
+    "peerSendTimeoutMs": 5000
+  },
+  "limits": [
+    "Loopback mock upstream, no TLS or real Supabase.",
+    "Warm rounds share a JVM; timings include JIT and host variation.",
+    "Signaling timing includes client signing, upgrade queuing, authorization, Join and Offer/Answer echo.",
+    "Thread counts are single snapshots, not peaks or heap measurements.",
+    "Pre-strict harness completion only denotes workload completion; inspect status counts.",
+    "Hub content bounds exclude Ktor and socket buffers."
+  ],
+  "regressions": {
+    "emptyHouseholdMapsAfter1000Disconnects": {
+      "original": 1000,
+      "retained": 0
+    },
+    "healthyJoinAndRelayWithin250msWithStalledPeer": {
+      "original": false,
+      "retained": true
+    }
+  },
+  "verification": {
+    "sharedJvmTests": 89,
+    "serverJvmTests": 26,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "junitDiscoveryWarnings": 0
+  },
+  "runs": [
+    {
+      "id": "original_initial",
+      "description": "baseline",
+      "warmAndJoinRounds": 1,
+      "strictChecks": false,
+      "measurements": [
+        {
+          "workload": "cold_jwks_500",
+          "result": {
+            "count": 500,
+            "p50Ms": 2000.31,
+            "p95Ms": 2159.94,
+            "p99Ms": 2177.82,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 500,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 31.38,
+            "p95Ms": 31.71,
+            "p99Ms": 31.71,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 91.41,
+            "p95Ms": 119.32,
+            "p99Ms": 121.02,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_500",
+          "result": {
+            "count": 500,
+            "p50Ms": 256.79,
+            "p95Ms": 356.49,
+            "p99Ms": 372.02,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "authenticated_joins_1_households",
+          "result": {
+            "count": 5,
+            "p50Ms": 38.72,
+            "p95Ms": 38.99,
+            "p99Ms": 38.99,
+            "households": 1,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_10_households",
+          "result": {
+            "count": 50,
+            "p50Ms": 101.07,
+            "p95Ms": 109.29,
+            "p99Ms": 109.61,
+            "households": 10,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_100_households",
+          "result": {
+            "count": 500,
+            "p50Ms": 718.49,
+            "p95Ms": 1078.05,
+            "p99Ms": 1082.3,
+            "households": 100,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "threads_during_slow_upstream",
+          "result": {
+            "threads": 229,
+            "defaultDispatcherThreads": 75,
+            "blockingHttpStacks": 64
+          }
+        },
+        {
+          "workload": "slow_upstream_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 1557.25,
+            "p95Ms": 3054.01,
+            "p99Ms": 3056.06,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 1500,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "upstream_deadline_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 7008.07,
+            "p95Ms": 7008.24,
+            "p99Ms": 7008.24,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 7000,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "upstream_failure_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 52.14,
+            "p95Ms": 52.26,
+            "p99Ms": 52.26,
+            "statuses": {
+              "404": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "rotated_key_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 6.52,
+            "p95Ms": 8.44,
+            "p99Ms": 9.13,
+            "statuses": {
+              "401": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 0,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "complete",
+          "result": {
+            "synthetic": true,
+            "transport": "control-plane HTTP metadata and WebSocket signaling only",
+            "records": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "async_unbounded_rejected",
+      "description": "rejected: 256 of 500 warm requests failed",
+      "warmAndJoinRounds": 1,
+      "strictChecks": false,
+      "measurements": [
+        {
+          "workload": "cold_jwks_500",
+          "result": {
+            "count": 500,
+            "p50Ms": 507.21,
+            "p95Ms": 592.57,
+            "p99Ms": 608.81,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 1,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 32.13,
+            "p95Ms": 32.47,
+            "p99Ms": 32.47,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 50.48,
+            "p95Ms": 53.77,
+            "p99Ms": 55.39,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_500",
+          "result": {
+            "count": 500,
+            "p50Ms": 181.62,
+            "p95Ms": 219.74,
+            "p99Ms": 228.37,
+            "statuses": {
+              "200": 244,
+              "503": 256
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 244,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "authenticated_joins_1_households",
+          "result": {
+            "count": 5,
+            "p50Ms": 40.75,
+            "p95Ms": 41.08,
+            "p99Ms": 41.08,
+            "households": 1,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_10_households",
+          "result": {
+            "count": 50,
+            "p50Ms": 87.77,
+            "p95Ms": 98.81,
+            "p99Ms": 99.58,
+            "households": 10,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_100_households",
+          "result": {
+            "count": 500,
+            "p50Ms": 1025.73,
+            "p95Ms": 1698.72,
+            "p99Ms": 1725.9,
+            "households": 100,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "threads_during_slow_upstream",
+          "result": {
+            "threads": 101,
+            "defaultDispatcherThreads": 2,
+            "blockingHttpStacks": 0
+          }
+        },
+        {
+          "workload": "slow_upstream_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 1568.52,
+            "p95Ms": 1572.43,
+            "p99Ms": 1572.82,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 1500,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "upstream_deadline_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 5021.95,
+            "p95Ms": 5022.84,
+            "p99Ms": 5022.84,
+            "statuses": {
+              "503": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 7000,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "upstream_failure_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 38.79,
+            "p95Ms": 41.69,
+            "p99Ms": 41.69,
+            "statuses": {
+              "503": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "rotated_key_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 263.4,
+            "p95Ms": 265.26,
+            "p99Ms": 266.24,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 1,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "complete",
+          "result": {
+            "synthetic": true,
+            "transport": "control-plane HTTP metadata and WebSocket signaling only",
+            "records": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "async_bounded_initial",
+      "description": "retained production code; initial run",
+      "warmAndJoinRounds": 1,
+      "strictChecks": false,
+      "measurements": [
+        {
+          "workload": "cold_jwks_500",
+          "result": {
+            "count": 500,
+            "p50Ms": 476.85,
+            "p95Ms": 694.41,
+            "p99Ms": 699.28,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 1,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 60.92,
+            "p95Ms": 61.03,
+            "p99Ms": 61.03,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 77.64,
+            "p95Ms": 85.63,
+            "p99Ms": 86.48,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_500",
+          "result": {
+            "count": 500,
+            "p50Ms": 367.8,
+            "p95Ms": 563.08,
+            "p99Ms": 573.27,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "authenticated_joins_1_households",
+          "result": {
+            "count": 5,
+            "p50Ms": 59.66,
+            "p95Ms": 63.8,
+            "p99Ms": 63.8,
+            "households": 1,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_10_households",
+          "result": {
+            "count": 50,
+            "p50Ms": 273.19,
+            "p95Ms": 313.62,
+            "p99Ms": 313.89,
+            "households": 10,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_100_households",
+          "result": {
+            "count": 500,
+            "p50Ms": 917.26,
+            "p95Ms": 1761.23,
+            "p99Ms": 1787.22,
+            "households": 100,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "threads_during_slow_upstream",
+          "result": {
+            "threads": 113,
+            "defaultDispatcherThreads": 2,
+            "blockingHttpStacks": 0
+          }
+        },
+        {
+          "workload": "slow_upstream_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 1556.36,
+            "p95Ms": 1563.26,
+            "p99Ms": 1574.05,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 1500,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "upstream_deadline_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 5033.09,
+            "p95Ms": 5042.5,
+            "p99Ms": 5042.5,
+            "statuses": {
+              "503": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 7000,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "upstream_failure_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 29.8,
+            "p95Ms": 30.74,
+            "p99Ms": 30.74,
+            "statuses": {
+              "503": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "rotated_key_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 269.04,
+            "p95Ms": 270.93,
+            "p99Ms": 271.3,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 1,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "complete",
+          "result": {
+            "synthetic": true,
+            "transport": "control-plane HTTP metadata and WebSocket signaling only",
+            "records": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "original_three_rounds",
+      "description": "primary baseline, isolated original-source project",
+      "warmAndJoinRounds": 3,
+      "strictChecks": false,
+      "measurements": [
+        {
+          "workload": "cold_jwks_500",
+          "result": {
+            "count": 500,
+            "p50Ms": 2089.34,
+            "p95Ms": 2182.58,
+            "p99Ms": 2192.7,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 500,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_10_run1",
+          "result": {
+            "count": 10,
+            "p50Ms": 31.31,
+            "p95Ms": 32.18,
+            "p99Ms": 32.18,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_100_run1",
+          "result": {
+            "count": 100,
+            "p50Ms": 42.84,
+            "p95Ms": 115.15,
+            "p99Ms": 128.33,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_500_run1",
+          "result": {
+            "count": 500,
+            "p50Ms": 166.23,
+            "p95Ms": 270.64,
+            "p99Ms": 279.41,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "authenticated_joins_1_households",
+          "result": {
+            "count": 5,
+            "p50Ms": 38.48,
+            "p95Ms": 38.7,
+            "p99Ms": 38.7,
+            "households": 1,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_10_households",
+          "result": {
+            "count": 50,
+            "p50Ms": 94.95,
+            "p95Ms": 104.43,
+            "p99Ms": 105.09,
+            "households": 10,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_100_households",
+          "result": {
+            "count": 500,
+            "p50Ms": 595.39,
+            "p95Ms": 1118.86,
+            "p99Ms": 1132.66,
+            "households": 100,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "warm_membership_10_run2",
+          "result": {
+            "count": 10,
+            "p50Ms": 34.61,
+            "p95Ms": 34.87,
+            "p99Ms": 34.87,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_100_run2",
+          "result": {
+            "count": 100,
+            "p50Ms": 53.08,
+            "p95Ms": 70.32,
+            "p99Ms": 72.17,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_500_run2",
+          "result": {
+            "count": 500,
+            "p50Ms": 197.91,
+            "p95Ms": 334.06,
+            "p99Ms": 336.9,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "authenticated_joins_1_households",
+          "result": {
+            "count": 5,
+            "p50Ms": 32.34,
+            "p95Ms": 32.5,
+            "p99Ms": 32.5,
+            "households": 1,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_10_households",
+          "result": {
+            "count": 50,
+            "p50Ms": 58.16,
+            "p95Ms": 60.29,
+            "p99Ms": 60.61,
+            "households": 10,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_100_households",
+          "result": {
+            "count": 500,
+            "p50Ms": 579.89,
+            "p95Ms": 1011.6,
+            "p99Ms": 1014.04,
+            "households": 100,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "warm_membership_10_run3",
+          "result": {
+            "count": 10,
+            "p50Ms": 30.33,
+            "p95Ms": 30.42,
+            "p99Ms": 30.42,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_100_run3",
+          "result": {
+            "count": 100,
+            "p50Ms": 37.44,
+            "p95Ms": 61.69,
+            "p99Ms": 64.12,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_500_run3",
+          "result": {
+            "count": 500,
+            "p50Ms": 152.44,
+            "p95Ms": 238.41,
+            "p99Ms": 238.62,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "authenticated_joins_1_households",
+          "result": {
+            "count": 5,
+            "p50Ms": 56.83,
+            "p95Ms": 58.79,
+            "p99Ms": 58.79,
+            "households": 1,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_10_households",
+          "result": {
+            "count": 50,
+            "p50Ms": 72.82,
+            "p95Ms": 74.25,
+            "p99Ms": 74.44,
+            "households": 10,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_100_households",
+          "result": {
+            "count": 500,
+            "p50Ms": 564.1,
+            "p95Ms": 982.18,
+            "p99Ms": 1012.82,
+            "households": 100,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "threads_during_slow_upstream",
+          "result": {
+            "threads": 229,
+            "defaultDispatcherThreads": 75,
+            "blockingHttpStacks": 64
+          }
+        },
+        {
+          "workload": "slow_upstream_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 1534.72,
+            "p95Ms": 3034.89,
+            "p99Ms": 3035,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 1500,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "upstream_deadline_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 7012.95,
+            "p95Ms": 7015.28,
+            "p99Ms": 7015.28,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 7000,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "upstream_failure_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 75.3,
+            "p95Ms": 75.55,
+            "p99Ms": 75.55,
+            "statuses": {
+              "404": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "rotated_key_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 7.22,
+            "p95Ms": 8.35,
+            "p99Ms": 9,
+            "statuses": {
+              "401": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 0,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "complete",
+          "result": {
+            "synthetic": true,
+            "transport": "control-plane HTTP metadata and WebSocket signaling only",
+            "records": 24
+          }
+        }
+      ]
+    },
+    {
+      "id": "async_bounded_three_rounds",
+      "description": "retained production code, first repeated run",
+      "warmAndJoinRounds": 3,
+      "strictChecks": false,
+      "measurements": [
+        {
+          "workload": "cold_jwks_500",
+          "result": {
+            "count": 500,
+            "p50Ms": 491.91,
+            "p95Ms": 608.58,
+            "p99Ms": 612.72,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 1,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_10_run1",
+          "result": {
+            "count": 10,
+            "p50Ms": 39.3,
+            "p95Ms": 40.13,
+            "p99Ms": 40.13,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_100_run1",
+          "result": {
+            "count": 100,
+            "p50Ms": 39.9,
+            "p95Ms": 43.84,
+            "p99Ms": 44.22,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_500_run1",
+          "result": {
+            "count": 500,
+            "p50Ms": 180.54,
+            "p95Ms": 316.03,
+            "p99Ms": 320.72,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "authenticated_joins_1_households",
+          "result": {
+            "count": 5,
+            "p50Ms": 40.23,
+            "p95Ms": 43.85,
+            "p99Ms": 43.85,
+            "households": 1,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_10_households",
+          "result": {
+            "count": 50,
+            "p50Ms": 84.96,
+            "p95Ms": 94.07,
+            "p99Ms": 94.99,
+            "households": 10,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_100_households",
+          "result": {
+            "count": 500,
+            "p50Ms": 676.36,
+            "p95Ms": 1010,
+            "p99Ms": 1037.33,
+            "households": 100,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "warm_membership_10_run2",
+          "result": {
+            "count": 10,
+            "p50Ms": 31.6,
+            "p95Ms": 31.92,
+            "p99Ms": 31.92,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_100_run2",
+          "result": {
+            "count": 100,
+            "p50Ms": 35.88,
+            "p95Ms": 37.24,
+            "p99Ms": 38.74,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_500_run2",
+          "result": {
+            "count": 500,
+            "p50Ms": 98.08,
+            "p95Ms": 158.99,
+            "p99Ms": 159.75,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "authenticated_joins_1_households",
+          "result": {
+            "count": 5,
+            "p50Ms": 31.09,
+            "p95Ms": 31.29,
+            "p99Ms": 31.29,
+            "households": 1,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_10_households",
+          "result": {
+            "count": 50,
+            "p50Ms": 471.69,
+            "p95Ms": 473.19,
+            "p99Ms": 473.23,
+            "households": 10,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_100_households",
+          "result": {
+            "count": 500,
+            "p50Ms": 581.17,
+            "p95Ms": 881.76,
+            "p99Ms": 898.78,
+            "households": 100,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "warm_membership_10_run3",
+          "result": {
+            "count": 10,
+            "p50Ms": 30.87,
+            "p95Ms": 31.01,
+            "p99Ms": 31.01,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_100_run3",
+          "result": {
+            "count": 100,
+            "p50Ms": 37.02,
+            "p95Ms": 38.11,
+            "p99Ms": 38.47,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_500_run3",
+          "result": {
+            "count": 500,
+            "p50Ms": 89.64,
+            "p95Ms": 141.86,
+            "p99Ms": 142.03,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "authenticated_joins_1_households",
+          "result": {
+            "count": 5,
+            "p50Ms": 36.15,
+            "p95Ms": 36.57,
+            "p99Ms": 36.57,
+            "households": 1,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_10_households",
+          "result": {
+            "count": 50,
+            "p50Ms": 76.72,
+            "p95Ms": 79.12,
+            "p99Ms": 79.31,
+            "households": 10,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_100_households",
+          "result": {
+            "count": 500,
+            "p50Ms": 400.41,
+            "p95Ms": 676.57,
+            "p99Ms": 690.05,
+            "households": 100,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "threads_during_slow_upstream",
+          "result": {
+            "threads": 128,
+            "defaultDispatcherThreads": 2,
+            "blockingHttpStacks": 0
+          }
+        },
+        {
+          "workload": "slow_upstream_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 1529.96,
+            "p95Ms": 1544.59,
+            "p99Ms": 1545.38,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 1500,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "upstream_deadline_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 5047.28,
+            "p95Ms": 5049.73,
+            "p99Ms": 5049.73,
+            "statuses": {
+              "503": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 7000,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "upstream_failure_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 42.17,
+            "p95Ms": 49.83,
+            "p99Ms": 49.83,
+            "statuses": {
+              "503": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "rotated_key_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 306.76,
+            "p95Ms": 317.41,
+            "p99Ms": 318.31,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 1,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "complete",
+          "result": {
+            "synthetic": true,
+            "transport": "control-plane HTTP metadata and WebSocket signaling only",
+            "records": 24
+          }
+        }
+      ]
+    },
+    {
+      "id": "async_bounded_final",
+      "description": "retained production code, strict validation plus reconnects",
+      "warmAndJoinRounds": 3,
+      "strictChecks": true,
+      "measurements": [
+        {
+          "workload": "cold_jwks_500",
+          "result": {
+            "count": 500,
+            "p50Ms": 585.97,
+            "p95Ms": 731.3,
+            "p99Ms": 740.23,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 1,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_10_run1",
+          "result": {
+            "count": 10,
+            "p50Ms": 31.06,
+            "p95Ms": 31.32,
+            "p99Ms": 31.32,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_100_run1",
+          "result": {
+            "count": 100,
+            "p50Ms": 112.5,
+            "p95Ms": 118.74,
+            "p99Ms": 120.16,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_500_run1",
+          "result": {
+            "count": 500,
+            "p50Ms": 138.67,
+            "p95Ms": 217.8,
+            "p99Ms": 220.54,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "authenticated_joins_1_households",
+          "result": {
+            "count": 5,
+            "p50Ms": 37.85,
+            "p95Ms": 38.25,
+            "p99Ms": 38.25,
+            "households": 1,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_10_households",
+          "result": {
+            "count": 50,
+            "p50Ms": 74.41,
+            "p95Ms": 82.64,
+            "p99Ms": 84.43,
+            "households": 10,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_100_households",
+          "result": {
+            "count": 500,
+            "p50Ms": 571.5,
+            "p95Ms": 859.35,
+            "p99Ms": 863.63,
+            "households": 100,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "warm_membership_10_run2",
+          "result": {
+            "count": 10,
+            "p50Ms": 31.29,
+            "p95Ms": 31.42,
+            "p99Ms": 31.42,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_100_run2",
+          "result": {
+            "count": 100,
+            "p50Ms": 68.02,
+            "p95Ms": 88.34,
+            "p99Ms": 88.54,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_500_run2",
+          "result": {
+            "count": 500,
+            "p50Ms": 97.96,
+            "p95Ms": 180.43,
+            "p99Ms": 191.41,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "authenticated_joins_1_households",
+          "result": {
+            "count": 5,
+            "p50Ms": 66.01,
+            "p95Ms": 66.13,
+            "p99Ms": 66.13,
+            "households": 1,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_10_households",
+          "result": {
+            "count": 50,
+            "p50Ms": 161.74,
+            "p95Ms": 184.58,
+            "p99Ms": 184.68,
+            "households": 10,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_100_households",
+          "result": {
+            "count": 500,
+            "p50Ms": 485.34,
+            "p95Ms": 936.14,
+            "p99Ms": 960.73,
+            "households": 100,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "warm_membership_10_run3",
+          "result": {
+            "count": 10,
+            "p50Ms": 32.51,
+            "p95Ms": 32.71,
+            "p99Ms": 32.71,
+            "statuses": {
+              "200": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_100_run3",
+          "result": {
+            "count": 100,
+            "p50Ms": 35.95,
+            "p95Ms": 37.52,
+            "p99Ms": 37.74,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "warm_membership_500_run3",
+          "result": {
+            "count": 500,
+            "p50Ms": 140.89,
+            "p95Ms": 195.73,
+            "p99Ms": 199.8,
+            "statuses": {
+              "200": 500
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 500,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "authenticated_joins_1_households",
+          "result": {
+            "count": 5,
+            "p50Ms": 35.9,
+            "p95Ms": 36.05,
+            "p99Ms": 36.05,
+            "households": 1,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_10_households",
+          "result": {
+            "count": 50,
+            "p50Ms": 72.34,
+            "p95Ms": 73.93,
+            "p99Ms": 74.53,
+            "households": 10,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_joins_100_households",
+          "result": {
+            "count": 500,
+            "p50Ms": 573.63,
+            "p95Ms": 909.9,
+            "p99Ms": 934.93,
+            "households": 100,
+            "peersPerHouse": 5,
+            "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+          }
+        },
+        {
+          "workload": "authenticated_reconnects",
+          "result": {
+            "count": 30,
+            "p50Ms": 40.22,
+            "p95Ms": 44.09,
+            "p99Ms": 44.68,
+            "households": 10,
+            "rounds": 3,
+            "replacedClosedBeforeReply": 28,
+            "replacementSurvivedOldClose": 30
+          }
+        },
+        {
+          "workload": "threads_during_slow_upstream",
+          "result": {
+            "threads": 136,
+            "defaultDispatcherThreads": 2,
+            "blockingHttpStacks": 0
+          }
+        },
+        {
+          "workload": "slow_upstream_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 1537.64,
+            "p95Ms": 1586.78,
+            "p99Ms": 1608.9,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 100,
+            "membershipDelayMs": 1500,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "upstream_deadline_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 5038.93,
+            "p95Ms": 5040.49,
+            "p99Ms": 5040.49,
+            "statuses": {
+              "503": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 7000,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "upstream_failure_10",
+          "result": {
+            "count": 10,
+            "p50Ms": 40.49,
+            "p95Ms": 41.63,
+            "p99Ms": 41.63,
+            "statuses": {
+              "503": 10
+            },
+            "jwksRequests": 0,
+            "membershipRequests": 10,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "rotated_key_100",
+          "result": {
+            "count": 100,
+            "p50Ms": 335.45,
+            "p95Ms": 365.57,
+            "p99Ms": 365.99,
+            "statuses": {
+              "200": 100
+            },
+            "jwksRequests": 1,
+            "membershipRequests": 100,
+            "membershipDelayMs": 25,
+            "jwksDelayMs": 200
+          }
+        },
+        {
+          "workload": "complete",
+          "result": {
+            "synthetic": true,
+            "transport": "control-plane HTTP metadata and WebSocket signaling only",
+            "fixedChecks": true,
+            "records": 25
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -12,6 +12,7 @@ repositories:
 
 dependencies:
   - ../shared
+  - ../ios-platform
   - $libs.coroutines.core
   - $libs.datetime
   - $libs.sqldelight.native.driver

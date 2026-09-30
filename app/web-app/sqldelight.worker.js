@@ -41,21 +41,49 @@ let db = null;
 let idb = null;
 let saveTimer = null;
 let inTransaction = false;
+let transactionDirty = false;
+let dirty = false;
+let saving = false;
+
+function isReadOnlySql(sql) {
+  const statement = sql.replace(/^\s*(?:(?:--[^\n]*\n)|(?:\/\*[\s\S]*?\*\/))*/, "").trim();
+  const semicolon = statement.indexOf(";");
+  if (semicolon !== -1 && statement.slice(semicolon + 1).trim()) return false;
+  return /^(SELECT|EXPLAIN)\b/i.test(statement) ||
+    (/^PRAGMA\b/i.test(statement) && !statement.includes("="));
+}
+
+function armSave(delay = 100) {
+  if (saveTimer === null && !saving && !inTransaction) {
+    saveTimer = setTimeout(persistDatabase, delay);
+  }
+}
 
 function scheduleSave() {
-  if (inTransaction) return;
-  if (saveTimer !== null) clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => persistDatabase().catch(err => console.error("Failed to persist database:", err)), 100);
+  dirty = true;
+  armSave();
 }
 
 async function persistDatabase() {
   saveTimer = null;
-  if (!db || !idb || inTransaction) return;
-  const foreignKeys = db.exec("PRAGMA foreign_keys;")[0]?.values[0]?.[0] ?? 1;
-  const data = db.export();
-  // sql.js export closes/reopens the database and resets connection pragmas.
-  db.run(`PRAGMA foreign_keys = ${foreignKeys ? "ON" : "OFF"};`);
-  await saveToIndexedDB(idb, data);
+  if (!dirty || !db || !idb || inTransaction || saving) return;
+  dirty = false;
+  saving = true;
+  let retryDelay = 100;
+  try {
+    const foreignKeys = db.exec("PRAGMA foreign_keys;")[0]?.values[0]?.[0] ?? 1;
+    const data = db.export();
+    // sql.js export resets connection pragmas. Keep the scoped schema constraints active.
+    db.run(`PRAGMA foreign_keys = ${foreignKeys ? "ON" : "OFF"};`);
+    await saveToIndexedDB(idb, data);
+  } catch (err) {
+    dirty = true;
+    retryDelay = 1000;
+    console.error("Failed to persist database to IndexedDB:", err);
+  } finally {
+    saving = false;
+    if (dirty) armSave(retryDelay);
+  }
 }
 
 async function createDatabase() {
@@ -83,33 +111,43 @@ async function onModuleReady() {
       const sql = data.sql;
 
       const results = db.exec(sql, data.params)[0] ?? { values: [] };
-      scheduleSave();
+      if (!isReadOnlySql(sql)) {
+        if (inTransaction) transactionDirty = true;
+        else scheduleSave();
+      }
       return postMessage({
         id: data.id,
         results: results
       });
     case "begin_transaction":
-      if (saveTimer !== null) { clearTimeout(saveTimer); saveTimer = null; }
+      const beginResults = db.exec("BEGIN TRANSACTION;");
       inTransaction = true;
+      transactionDirty = false;
       return postMessage({
         id: data.id,
-        results: db.exec("BEGIN TRANSACTION;")
+        results: beginResults
       })
     case "end_transaction": {
       const txResults = db.exec("END TRANSACTION;");
       inTransaction = false;
-      await persistDatabase();
+      if (transactionDirty) scheduleSave();
+      else if (dirty) armSave();
+      transactionDirty = false;
       return postMessage({
         id: data.id,
         results: txResults
       })
     }
-    case "rollback_transaction":
+    case "rollback_transaction": {
+      const rollbackResults = db.exec("ROLLBACK TRANSACTION;");
       inTransaction = false;
+      transactionDirty = false;
+      if (dirty) armSave();
       return postMessage({
         id: data.id,
-        results: db.exec("ROLLBACK TRANSACTION;")
+        results: rollbackResults
       })
+    }
     default:
       throw new Error(`Unsupported action: ${data && data.action}`);
   }

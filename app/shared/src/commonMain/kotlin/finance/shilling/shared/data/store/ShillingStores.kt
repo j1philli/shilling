@@ -10,7 +10,10 @@ import finance.shilling.shared.data.*
 import finance.shilling.shared.data.sync.*
 import kotlin.concurrent.Volatile
 import finance.shilling.shared.db.ShillingDatabase
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
@@ -51,8 +54,15 @@ class PostingStore(delegate: MutableStore<PostingKey, List<Posting>>) :
     MutableStore<PostingKey, List<Posting>> by delegate
 
 @OptIn(ExperimentalStoreApi::class)
-class ReceiptStore(delegate: MutableStore<ReceiptKey, List<Receipt>>) :
-    MutableStore<ReceiptKey, List<Receipt>> by delegate
+class ReceiptStore(
+    delegate: MutableStore<ReceiptKey, List<Receipt>>,
+    private val listStore: Store<Unit, List<ReceiptWithPosting>>
+) : MutableStore<ReceiptKey, List<Receipt>> by delegate {
+    internal fun watchWithPostings(): Flow<List<ReceiptWithPosting>> =
+        listStore.stream(StoreReadRequest.localOnly(Unit))
+            .mapNotNull { (it as? StoreReadResponse.Data)?.value }
+            .distinctUntilChanged()
+}
 
 // --- Sync dependencies holder ---
 
@@ -138,8 +148,8 @@ fun createCategoryStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, space
                 when (key) {
                     CategoryKey.All -> db.categoryQueries.selectAll(space_id = spaceId).asFlow()
                         .map { it.awaitAsList().map { r -> r.toDomain() } }
-                    is CategoryKey.ById -> db.categoryQueries.selectAll(space_id = spaceId).asFlow()
-                        .map { it.awaitAsList().filter { r -> r.id == key.id }.map { r -> r.toDomain() } }
+                    is CategoryKey.ById -> db.categoryQueries.selectById(key.id, space_id = spaceId).asFlow()
+                        .map { it.awaitAsList().map { r -> r.toDomain() } }
                 }
             },
             writer = { _, categories -> lease.write {
@@ -270,6 +280,8 @@ fun createScheduleExceptionStore(db: ShillingDatabase, sync: StoreSyncDeps? = nu
                         .map { it.awaitAsList().map { r -> r.toDomain() } }
                     is ScheduleExceptionKey.ByScheduleId -> db.scheduleExceptionQueries.selectByScheduleId(key.scheduleId, space_id = spaceId).asFlow()
                         .map { it.awaitAsList().map { r -> r.toDomain() } }
+                    is ScheduleExceptionKey.ByScheduleIds -> db.scheduleExceptionQueries.selectByScheduleIds(key.scheduleIds, space_id = spaceId).asFlow()
+                        .map { it.awaitAsList().map { r -> r.toDomain() } }
                     is ScheduleExceptionKey.ByKey -> db.scheduleExceptionQueries.selectByKey(
                         schedule_id = key.scheduleId,
                         date = key.date.toEpochDays().toLong(),
@@ -296,6 +308,9 @@ fun createScheduleExceptionStore(db: ShillingDatabase, sync: StoreSyncDeps? = nu
                         db.scheduleExceptionQueries.deleteByKey(exception.schedule_id, exception.date, space_id = spaceId)
                     }
                     is ScheduleExceptionKey.ByScheduleId -> db.scheduleExceptionQueries.deleteByScheduleId(key.scheduleId, space_id = spaceId)
+                    is ScheduleExceptionKey.ByScheduleIds -> key.scheduleIds.forEach {
+                        db.scheduleExceptionQueries.deleteByScheduleId(it, space_id = spaceId)
+                    }
                     is ScheduleExceptionKey.ByKey -> db.scheduleExceptionQueries.deleteByKey(
                         key.scheduleId,
                         key.date.toEpochDays().toLong(),
@@ -331,18 +346,12 @@ fun createPostingStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
                         date_ = key.end.toEpochDays().toLong(),
                         space_id = spaceId
                     ).asFlow().map { it.awaitAsList().map { r -> r.toDomain() } }
-                    is PostingKey.Recent -> db.postingQueries.selectBetween(
-                        date = 0L,
-                        date_ = Long.MAX_VALUE,
-                        space_id = spaceId
-                    ).asFlow().map { q ->
-                        q.awaitAsList().map { r -> r.toDomain() }
-                            .sortedByDescending { it.date }
-                            .take(key.limit.toInt())
-                    }
+                    is PostingKey.Recent -> db.postingQueries.selectRecent(key.limit.coerceAtLeast(0L), space_id = spaceId)
+                        .asFlow().map { it.awaitAsList().map { r -> r.toDomain() } }
                 }
             },
             writer = { _, postings -> lease.write {
+                db.transaction {
                 postings.forEach { p ->
                     db.postingQueries.upsert(
                         id = p.id,
@@ -356,6 +365,7 @@ fun createPostingStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
                         category_id = p.categoryId,
                         space_id = spaceId
                     ).await()
+                }
                 }
             } },
             delete = { key -> lease.write {
@@ -371,14 +381,8 @@ fun createPostingStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
                     ).awaitAsList().forEach { posting ->
                         detachAndDeletePosting(db, spaceId, posting.id)
                     }
-                    is PostingKey.Recent -> db.postingQueries.selectBetween(
-                        date = 0L,
-                        date_ = Long.MAX_VALUE,
-                        space_id = spaceId
-                    ).awaitAsList()
-                        .map { it.toDomain() }
-                        .sortedByDescending { it.date }
-                        .take(key.limit.toInt())
+                    is PostingKey.Recent -> db.postingQueries.selectRecent(key.limit.coerceAtLeast(0L), space_id = spaceId)
+                        .awaitAsList()
                         .forEach { posting -> detachAndDeletePosting(db, spaceId, posting.id) }
                 }
             } }
@@ -438,7 +442,17 @@ fun createReceiptStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
         },
         bookkeeper = createBookkeeper(db, spaceId) { it.toBookkeepingKey() }
     )
-    return ReceiptStore(store)
+    // The list needs only attached posting titles/dates. Read the existing indexed
+    // join through Store5 instead of loading every posting and schedule into Kotlin.
+    val listStore = StoreBuilder.from<Unit, List<ReceiptWithPosting>, List<ReceiptWithPosting>>(
+        fetcher = Fetcher.of { _: Unit -> error("Receipt lists are local-only") },
+        sourceOfTruth = SourceOfTruth.of(
+            reader = { _: Unit -> db.receiptQueries.selectAllWithPostings(space_id = spaceId).asFlow()
+                .map { query -> query.awaitAsList().map { it.toDomain() } } },
+            writer = { _, _ -> error("Receipt list projection is read-only") }
+        )
+    ).disableCache().build()
+    return ReceiptStore(store, listStore)
 }
 
 // --- Sync broadcast helper (for repository delete/special operations) ---
@@ -503,9 +517,9 @@ private inline fun <Key : Any, reified Item : Any> createUpdater(
         val state = sync.state
         val peerSyncManager = state.peerSyncManager
         try {
-            items.forEach { item ->
+            val changes = items.map { item ->
                 val (payload, entityId) = toPayload(item)
-                val change = ChangeMessage(
+                ChangeMessage(
                     id = sync.idGenerator.newId(),
                     entityType = entityType,
                     op = ChangeOp.UPSERT,
@@ -514,8 +528,14 @@ private inline fun <Key : Any, reified Item : Any> createUpdater(
                     deviceId = state.deviceId,
                     payload = payload
                 )
-                // Always record locally for LWW, even when no peer is connected yet.
-                sync.db.recordEntityChange(change, sync.spaceId)
+            }
+            // Commit version metadata together; never hold a database transaction
+            // while waiting for a WebRTC peer.
+            sync.db.transaction {
+                changes.forEach { sync.db.recordEntityChange(it, sync.spaceId) }
+            }
+            changes.forEach { change ->
+                val entityId = change.entityId
                 if (peerSyncManager == null) {
                     log.w { "[STORE] peerSyncManager is NULL — $entityType/$entityId not broadcast (full-state backfill covers catch-up)" }
                 } else {

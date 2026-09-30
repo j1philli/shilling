@@ -66,26 +66,6 @@ private class IosMirrorLogWriter : LogWriter() {
 private val iosLogWriter = IosMirrorLogWriter()
 
 /**
- * Non-blocking delay for iOS — cooperative yield with cross-dispatcher throttling.
- *
- * kotlinx.coroutines delay() doesn't fire on Kotlin/Native in this Compose Multiplatform
- * iOS environment (DefaultExecutor doesn't run). This implementation uses
- * withContext(Dispatchers.Main) for natural throttling: each iteration context-switches
- * Default→Main→Default, which takes ~1-10ms of real wall time due to GCD dispatch overhead.
- */
-@OptIn(ExperimentalForeignApi::class)
-private val iosDelay: suspend (Long) -> Unit = { ms ->
-    val endSec = platform.posix.time(null) + (ms + 999) / 1000
-    while (platform.posix.time(null) < endSec) {
-        try {
-            withContext(Dispatchers.Main) { kotlinx.coroutines.yield() }
-        } catch (_: Exception) {
-            kotlinx.coroutines.yield()
-        }
-    }
-}
-
-/**
  * Starts logging and the app's Koin graph. Called from `App.init` in Swift so native code can
  * resolve dependencies before any UI exists; safe to call again (returns early).
  */
@@ -119,7 +99,9 @@ fun startIosKoin() {
                         defaultConnectionConfig = { iceServers = currentIceServers() }
                     }
                 },
-                delayFn = iosDelay
+                delayFn = iosDelay,
+                receiveMessage = iosReceiveMessage,
+                onChannelOpen = nativeChannelOpen
             )
         }
     }, sessionModule).get<AppSession>().start()

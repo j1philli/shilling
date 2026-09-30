@@ -10,6 +10,12 @@ import app.cash.sqldelight.db.SqlSchema
 import co.touchlab.kermit.Logger
 import finance.shilling.shared.data.IdGenerator
 import finance.shilling.shared.data.ReceiptFileStore
+import finance.shilling.shared.data.store.AndroidSqliteDriver
+import finance.shilling.shared.data.store.DirectoryReceiptFileStorage
+import finance.shilling.shared.data.store.RangedReceiptFileStorage
+import finance.shilling.shared.data.store.Store5ReceiptFileStore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 
@@ -33,53 +39,25 @@ private val noOpSchema = object : SqlSchema<QueryResult.Value<Unit>> {
 fun provideAndroidDriver(context: Context): SqlDriver =
     AndroidSqliteDriver(noOpSchema, context, "shilling.db")
 
-class AndroidReceiptFileStore(private val context: Context, private val spaceId: String? = null) : ReceiptFileStore {
+fun AndroidReceiptFileStore(context: Context, spaceId: String? = null): ReceiptFileStore {
+    val storage = AndroidReceiptFileStorage(context, spaceId)
+    return Store5ReceiptFileStore(storage, storage::openExternally, Dispatchers.IO)
+}
+
+private class AndroidReceiptFileStorage(private val context: Context, private val spaceId: String?) : RangedReceiptFileStorage by
+    DirectoryReceiptFileStorage(File(context.filesDir, spaceId?.let { "receipts-spaces/${receiptSpaceFolder(it)}" } ?: "receipts")) {
     private val log = Logger.withTag("AndroidReceiptStore")
 
-    private val receiptsDir: File by lazy {
-        File(context.filesDir, spaceId?.let { "receipts-spaces/" + it.encodeToByteArray().joinToString("") { b -> (b.toInt() and 255).toString(16).padStart(2, '0') } } ?: "receipts").also { it.mkdirs() }
-    }
-
-    private fun fileForReceipt(receiptId: String): File = File(receiptsDir, finance.shilling.shared.data.store.safeReceiptStorageId(receiptId))
-
-    override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {
-        val dest = fileForReceipt(receiptId)
-        dest.writeBytes(bytes)
-        log.i { "Stored receipt id=$receiptId name=$fileName bytes=${bytes.size}" }
-    }
-
-    override suspend fun read(receiptId: String): ByteArray? {
-        val file = fileForReceipt(receiptId)
-        if (!file.exists()) return null
-        return file.readBytes()
-    }
-
-    override suspend fun hasFile(receiptId: String): Boolean =
-        fileForReceipt(receiptId).exists()
-
-    override suspend fun delete(receiptId: String) {
-        fileForReceipt(receiptId).delete()
-    }
-
-    override suspend fun clearAll() {
-        receiptsDir.listFiles()?.forEach(File::delete)
-    }
-
-    override suspend fun openExternally(receiptId: String, originalName: String) {
+    suspend fun openExternally(receiptId: String, originalName: String, bytes: ByteArray) {
         runCatching {
-            val sourceFile = fileForReceipt(receiptId)
-            if (!sourceFile.exists()) {
-                log.w { "Open failed: file missing for id=$receiptId" }
-                return
+            val tempFile = withContext(Dispatchers.IO) {
+                val safeName = originalName.substringAfterLast('/').substringAfterLast('\\')
+                    .takeUnless { it.isBlank() || it == "." || it == ".." } ?: "$receiptId.bin"
+                val scope = spaceId?.let(::receiptSpaceFolder) ?: "legacy"
+                val safeId = finance.shilling.shared.data.store.safeReceiptStorageId(receiptId)
+                val cacheDir = File(context.cacheDir, "receipts_share/$scope/$safeId").also { it.mkdirs() }
+                File(cacheDir, safeName).also { it.writeBytes(bytes) }
             }
-            val safeName = originalName
-                .substringAfterLast('/')
-                .substringAfterLast('\\')
-                .takeUnless { it.isBlank() || it == "." || it == ".." } ?: "$receiptId.bin"
-            val scope = spaceId?.encodeToByteArray()?.joinToString("") { (it.toInt() and 255).toString(16).padStart(2, '0') } ?: "legacy"
-            val cacheDir = File(context.cacheDir, "receipts_share/$scope/${finance.shilling.shared.data.store.safeReceiptStorageId(receiptId)}").also { it.mkdirs() }
-            val tempFile = File(cacheDir, safeName)
-            sourceFile.copyTo(tempFile, overwrite = true)
 
             val uri = FileProvider.getUriForFile(
                 context,
@@ -109,3 +87,5 @@ class AndroidReceiptFileStore(private val context: Context, private val spaceId:
         }
     }
 }
+
+private fun receiptSpaceFolder(id: String): String = id.encodeToByteArray().joinToString("") { (it.toInt() and 255).toString(16).padStart(2, '0') }

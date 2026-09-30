@@ -1,0 +1,17 @@
+product:
+  type: ios/app
+  platforms: [iosArm64]
+
+dependencies:
+  - ../shared
+  - ../ios-platform
+  - $libs.coroutines.core
+  - $libs.sqldelight.native.driver
+  - $libs.ktor.client.darwin
+  - $libs.ktor.client.webrtc
+  - $libs.kermit
+
+settings:
+  kotlin:
+    version: "2.4.20"
+    compileIncrementally: true

@@ -1,6 +1,7 @@
 package finance.shilling.shared.data.sync
 
 import io.ktor.client.webrtc.WebRtc
+import io.ktor.client.webrtc.WebRtcDataChannel
 import io.ktor.client.webrtc.WebRtcClient
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -19,5 +20,7 @@ class WebRtcPlatform(
      * Emits when the app comes back to the foreground after the platform paused it (web: the
      * document became visible again). Sync uses it to cut a pending reconnect backoff short.
      */
-    val resumeSignals: Flow<Unit> = emptyFlow()
+    val resumeSignals: Flow<Unit> = emptyFlow(),
+    val receiveMessage: suspend (WebRtcDataChannel) -> WebRtc.DataChannel.Message = { it.receive() },
+    val onChannelOpen: (WebRtcDataChannel) -> Unit = {}
 )

@@ -2,12 +2,9 @@ package finance.shilling.shared.data.store
 
 import finance.shilling.shared.data.Receipt
 import finance.shilling.shared.data.ReceiptWithPosting
-import finance.shilling.shared.data.Schedule
 import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.EntityType
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.datetime.LocalDate
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
 
@@ -15,18 +12,10 @@ import org.mobilenativefoundation.store.store5.StoreWriteRequest
 class ReceiptRepository(
     private val notifier: ChangeNotifier,
     private val store: ReceiptStore,
-    private val postingStore: PostingStore,
-    private val scheduleStore: ScheduleStore,
     private val sync: StoreSyncDeps? = null
 ) {
     fun watchAll(): Flow<List<ReceiptWithPosting>> =
-        combine(
-            store.watchCached(ReceiptKey.All),
-            postingStore.watchCached(PostingKey.All),
-            scheduleStore.watchCached(ScheduleKey.All)
-        ) { receipts, postings, schedules ->
-            receipts.toReceiptWithPosting(postings, schedules)
-        }
+        store.watchWithPostings()
 
     fun watchByPosting(postingId: String): Flow<List<Receipt>> = store.watchCached(ReceiptKey.ByPosting(postingId))
 
@@ -77,21 +66,4 @@ class ReceiptRepository(
         )
     }
 
-    private fun List<Receipt>.toReceiptWithPosting(
-        postings: List<finance.shilling.shared.data.Posting>,
-        schedules: List<Schedule>
-    ): List<ReceiptWithPosting> {
-        val postingsById = postings.associateBy { it.id }
-        val schedulesById = schedules.associateBy { it.id }
-
-        return map { receipt ->
-            val posting = receipt.postingId?.let(postingsById::get)
-            val schedule = posting?.scheduleId?.let(schedulesById::get)
-            ReceiptWithPosting(
-                receipt = receipt,
-                postingTitle = posting?.title ?: schedule?.title,
-                postingDate = posting?.date?.let(LocalDate::toString)
-            )
-        }
-    }
 }

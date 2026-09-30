@@ -13,6 +13,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import kotlin.time.Duration.Companion.seconds
 
 private val log = Logger.withTag("Server")
@@ -49,6 +50,9 @@ fun Routing.configRoute(authConfig: AuthConfig) {
 }
 
 fun main() {
+    Logger.setMinSeverity(Severity.Info)
+    val port = System.getenv("SHILLING_PORT")?.toInt() ?: 8081
+    require(port in 1..65535) { "SHILLING_PORT must be between 1 and 65535" }
     val signalingHub = SignalingHub()
     val turnConfig = createTurnConfig()
     val authConfig = readAuthConfig()
@@ -65,7 +69,7 @@ fun main() {
     val spaces = if (authConfig.supabaseUrl != null && authConfig.supabaseServiceKey != null)
         SupabaseSpaceManagement(authConfig.supabaseUrl, authConfig.supabaseServiceKey) else null
 
-    log.i { "Shilling server starting on http://localhost:8081" }
+    log.i { "Shilling server starting on http://localhost:$port" }
     log.i { "Auth mode: ${authConfig.authMode}" }
     log.i { "Mode: signaling + discovery only (no user data stored or relayed)" }
     if (turnConfig.turnSecret != null) {
@@ -76,7 +80,7 @@ fun main() {
 
     val authEnabled = authConfig.authMode == "supabase"
 
-    embeddedServer(Netty, port = 8081, host = "0.0.0.0") {
+    embeddedServer(Netty, port = port, host = "0.0.0.0") {
         install(ContentNegotiation) { json() }
         install(WebSockets) {
             pingPeriod = 15.seconds

@@ -139,10 +139,13 @@ struct TransactionEditorScreen: View {
     }
 
     private func open(_ receipt: AttachedReceiptUi) {
-        if let path = screen.previewPath(receiptId: receipt.id) {
-            preview = URL(fileURLWithPath: path)
-        } else {
-            toast = Toast("Couldn't open \(receipt.name)")
+        Task {
+            let result: String?? = try? await asyncFunction(for: screen.previewPath(receiptId: receipt.id))
+            if let path = result ?? nil {
+                preview = URL(fileURLWithPath: path)
+            } else {
+                toast = Toast("Couldn't open \(receipt.name)")
+            }
         }
     }
 

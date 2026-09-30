@@ -1,0 +1,335 @@
+{
+  "device": "Pixel 6, Android 16, Release isolated synthetic fixture",
+  "receiptBytes": 52428800,
+  "peakCounter": "VmHWM is process-lifetime peak resident memory; PSS and Java heap are sampled",
+  "offlineCombinedFixture": [
+    {
+      "workload": "receipt_start_50MiB",
+      "milliseconds": null,
+      "memory": {
+        "vmHwmKiB": 245692,
+        "vmRssKiB": 245692,
+        "pssKiB": 140885,
+        "javaHeapBytes": 104442384,
+        "javaHeapLimitBytes": 268435456,
+        "nativeHeapBytes": 12105344
+      }
+    },
+    {
+      "workload": "receipt_write_50MiB",
+      "milliseconds": 18.911703,
+      "memory": {
+        "vmHwmKiB": 296900,
+        "vmRssKiB": 296900,
+        "pssKiB": 192117,
+        "javaHeapBytes": 156895760,
+        "javaHeapLimitBytes": 268435456,
+        "nativeHeapBytes": 12105808
+      }
+    },
+    {
+      "workload": "receipt_read_50MiB",
+      "milliseconds": 26.56368,
+      "memory": {
+        "vmHwmKiB": 348108,
+        "vmRssKiB": 348108,
+        "pssKiB": 243349,
+        "javaHeapBytes": 209381904,
+        "javaHeapLimitBytes": 268435456,
+        "nativeHeapBytes": 12106272
+      }
+    },
+    {
+      "workload": "receipt_prepare_50MiB",
+      "milliseconds": 25.305298,
+      "memory": {
+        "vmHwmKiB": 364984,
+        "vmRssKiB": 290508,
+        "pssKiB": 201323,
+        "javaHeapBytes": 108403072,
+        "javaHeapLimitBytes": 268435456,
+        "nativeHeapBytes": 12108336
+      }
+    },
+    {
+      "workload": "receipt_receive_50MiB",
+      "milliseconds": 67.615478,
+      "memory": {
+        "vmHwmKiB": 364984,
+        "vmRssKiB": 340068,
+        "pssKiB": 235344,
+        "javaHeapBytes": 200333696,
+        "javaHeapLimitBytes": 268435456,
+        "nativeHeapBytes": 12088336
+      }
+    },
+    {
+      "workload": "receipt_clear_50MiB",
+      "milliseconds": null,
+      "memory": {
+        "vmHwmKiB": 364984,
+        "vmRssKiB": 301792,
+        "pssKiB": 196868,
+        "javaHeapBytes": 160786784,
+        "javaHeapLimitBytes": 268435456,
+        "nativeHeapBytes": 12088608
+      }
+    }
+  ],
+  "liveReusedReceipt": {
+    "before": {
+      "nativeToBrowser50MiB": {
+        "readyVmHwmKiB": 152520,
+        "uploadStoredVmHwmKiB": null,
+        "sendEndVmHwmKiB": [
+          337596
+        ],
+        "peakVmHwmKiB": 337696,
+        "maxSampledPssKiB": 235526,
+        "maxSampledJavaHeapBytes": 177737904,
+        "browser": [
+          {
+            "workload": "connect",
+            "result": {
+              "connected": true,
+              "localCandidate": "host",
+              "remoteCandidate": "host",
+              "protocol": "udp",
+              "currentRoundTripTime": 0.009
+            }
+          },
+          {
+            "workload": "receive_50MiB_run1",
+            "result": {
+              "status": "complete",
+              "bytes": 52428800,
+              "chunks": 3200,
+              "binaryFrames": 3200,
+              "receiverProcessingMs": 72.50000131130219,
+              "milliseconds": 5311.900000095367
+            }
+          }
+        ]
+      },
+      "browserUploadAndNativeReadback50MiB": {
+        "readyVmHwmKiB": 152664,
+        "uploadStoredVmHwmKiB": 280152,
+        "sendEndVmHwmKiB": [
+          354232
+        ],
+        "peakVmHwmKiB": 354232,
+        "maxSampledPssKiB": 224023,
+        "maxSampledJavaHeapBytes": 165511344,
+        "browser": [
+          {
+            "workload": "connect",
+            "result": {
+              "connected": true,
+              "localCandidate": "host",
+              "remoteCandidate": "host",
+              "protocol": "udp",
+              "currentRoundTripTime": 0.007
+            }
+          },
+          {
+            "workload": "upload_and_readback_50MiB",
+            "result": {
+              "status": "complete",
+              "bytes": 52428800,
+              "chunks": 3200,
+              "binaryFrames": 3200,
+              "receiverProcessingMs": 107.29999887943268,
+              "milliseconds": 6813.199999928474
+            }
+          },
+          {
+            "workload": "browser_errors",
+            "result": []
+          }
+        ]
+      },
+      "nativeToBrowser50MiBThreeRuns": {
+        "readyVmHwmKiB": 152680,
+        "uploadStoredVmHwmKiB": null,
+        "sendEndVmHwmKiB": [
+          332780,
+          362220,
+          379332
+        ],
+        "peakVmHwmKiB": 379332,
+        "maxSampledPssKiB": 269127,
+        "maxSampledJavaHeapBytes": 211767472,
+        "browser": [
+          {
+            "workload": "connect",
+            "result": {
+              "connected": true
+            }
+          },
+          {
+            "workload": "receive_50MiB_run1",
+            "result": {
+              "status": "complete",
+              "bytes": 52428800,
+              "chunks": 3200,
+              "binaryFrames": 3200,
+              "receiverProcessingMs": 136.19999980926514,
+              "milliseconds": 7197.599999904633
+            }
+          },
+          {
+            "workload": "receive_50MiB_run2",
+            "result": {
+              "status": "complete",
+              "bytes": 52428800,
+              "chunks": 3200,
+              "binaryFrames": 3200,
+              "receiverProcessingMs": 142.89999902248383,
+              "milliseconds": 8128.600000023842
+            }
+          },
+          {
+            "workload": "receive_50MiB_run3",
+            "result": {
+              "status": "complete",
+              "bytes": 52428800,
+              "chunks": 3200,
+              "binaryFrames": 3200,
+              "receiverProcessingMs": 102.4999988079071,
+              "milliseconds": 6044.299999952316
+            }
+          }
+        ]
+      }
+    },
+    "after": {
+      "nativeToBrowser50MiB": {
+        "readyVmHwmKiB": 152140,
+        "uploadStoredVmHwmKiB": null,
+        "sendEndVmHwmKiB": [
+          286072
+        ],
+        "peakVmHwmKiB": 286072,
+        "maxSampledPssKiB": 180054,
+        "maxSampledJavaHeapBytes": 123916464,
+        "browser": [
+          {
+            "workload": "connect",
+            "result": {
+              "connected": true,
+              "localCandidate": "host",
+              "remoteCandidate": "host",
+              "protocol": "udp",
+              "currentRoundTripTime": 0.011
+            }
+          },
+          {
+            "workload": "receive_50MiB_run1",
+            "result": {
+              "status": "complete",
+              "bytes": 52428800,
+              "chunks": 3200,
+              "binaryFrames": 3200,
+              "receiverProcessingMs": 117.29999911785126,
+              "milliseconds": 6510.199999928474
+            }
+          }
+        ]
+      },
+      "browserUploadAndNativeReadback50MiB": {
+        "readyVmHwmKiB": 152984,
+        "uploadStoredVmHwmKiB": 252160,
+        "sendEndVmHwmKiB": [
+          303780
+        ],
+        "peakVmHwmKiB": 303780,
+        "maxSampledPssKiB": 191211,
+        "maxSampledJavaHeapBytes": 131977392,
+        "browser": [
+          {
+            "workload": "connect",
+            "result": {
+              "connected": true,
+              "localCandidate": "host",
+              "remoteCandidate": "host",
+              "protocol": "udp",
+              "currentRoundTripTime": 0.011
+            }
+          },
+          {
+            "workload": "upload_and_readback_50MiB",
+            "result": {
+              "status": "complete",
+              "bytes": 52428800,
+              "chunks": 3200,
+              "binaryFrames": 3200,
+              "receiverProcessingMs": 124.09999799728394,
+              "milliseconds": 7721.600000023842
+            }
+          },
+          {
+            "workload": "browser_errors",
+            "result": []
+          }
+        ]
+      },
+      "nativeToBrowser50MiBThreeRuns": {
+        "readyVmHwmKiB": 152816,
+        "uploadStoredVmHwmKiB": null,
+        "sendEndVmHwmKiB": [
+          296216,
+          342104,
+          345832
+        ],
+        "peakVmHwmKiB": 345832,
+        "maxSampledPssKiB": 239268,
+        "maxSampledJavaHeapBytes": 163340464,
+        "browser": [
+          {
+            "workload": "connect",
+            "result": {
+              "connected": true,
+              "localCandidate": "host",
+              "remoteCandidate": "host",
+              "protocol": "udp",
+              "currentRoundTripTime": 0.005
+            }
+          },
+          {
+            "workload": "receive_50MiB_run1",
+            "result": {
+              "status": "complete",
+              "bytes": 52428800,
+              "chunks": 3200,
+              "binaryFrames": 3200,
+              "receiverProcessingMs": 111.79999959468842,
+              "milliseconds": 6297
+            }
+          },
+          {
+            "workload": "receive_50MiB_run2",
+            "result": {
+              "status": "complete",
+              "bytes": 52428800,
+              "chunks": 3200,
+              "binaryFrames": 3200,
+              "receiverProcessingMs": 109.39999771118164,
+              "milliseconds": 7094.200000047684
+            }
+          },
+          {
+            "workload": "receive_50MiB_run3",
+            "result": {
+              "status": "complete",
+              "bytes": 52428800,
+              "chunks": 3200,
+              "binaryFrames": 3200,
+              "receiverProcessingMs": 110.50000095367432,
+              "milliseconds": 6836.800000071526
+            }
+          }
+        ]
+      }
+    }
+  }
+}

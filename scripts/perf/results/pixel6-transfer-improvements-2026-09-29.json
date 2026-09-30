@@ -1,0 +1,888 @@
+{
+  "date": "2026-09-29",
+  "scope": "Private-based worktree at 73ace52 with local audit changes. Not public-main performance measurements.",
+  "protocolState": "Historical measurements before the pre-GA cleanup. Binary framing is now mandatory; negotiation and legacy text chunks were subsequently removed. See pixel6-binary-only-2026-09-29.json for the current protocol regression.",
+  "sender": "Physical Pixel 6, Android 16, release benchmark APK with Ktor 3.6.0 for paired/regression runs.",
+  "receiver": "Fresh headless Chrome profiles, direct host/host UDP LAN; default data-only 64 KiB receive socket. No media-buffer probe or browser field trials.",
+  "changesRetained": [
+    "Ktor 3.5.2 to 3.6.0",
+    "Capability-negotiated 16 KiB binary receipt chunks with legacy JSON/Base64 support",
+    "iOS native adapter preserves binary flag and closes on receive overflow instead of dropping oldest message"
+  ],
+  "pairedSummary": {
+    "medianMilliseconds": {
+      "text": 8852.5,
+      "binary": 7127.9
+    },
+    "timeReductionPercent": 19.5,
+    "dataChannelBytesPer50MiB": {
+      "text": 70309539,
+      "binary": 52480249
+    },
+    "dataChannelByteReductionPercent": 25.4
+  },
+  "pairedTransfers": [
+    {
+      "pair": 1,
+      "format": "text",
+      "status": "complete",
+      "bytes": 52428800,
+      "chunks": 3200,
+      "receiverProcessingMs": 315.0,
+      "milliseconds": 8852.5,
+      "dataChannelBytes": 70309539
+    },
+    {
+      "pair": 1,
+      "format": "binary",
+      "status": "complete",
+      "bytes": 52428800,
+      "chunks": 3200,
+      "receiverProcessingMs": 127.1,
+      "milliseconds": 7500,
+      "dataChannelBytes": 52480249
+    },
+    {
+      "pair": 2,
+      "format": "binary",
+      "status": "complete",
+      "bytes": 52428800,
+      "chunks": 3200,
+      "receiverProcessingMs": 144.6,
+      "milliseconds": 7127.9,
+      "dataChannelBytes": 52480249
+    },
+    {
+      "pair": 2,
+      "format": "text",
+      "status": "complete",
+      "bytes": 52428800,
+      "chunks": 3200,
+      "receiverProcessingMs": 346.4,
+      "milliseconds": 9062.8,
+      "dataChannelBytes": 70309539
+    },
+    {
+      "pair": 3,
+      "format": "text",
+      "status": "complete",
+      "bytes": 52428800,
+      "chunks": 3200,
+      "receiverProcessingMs": 272.7,
+      "milliseconds": 7748.2,
+      "dataChannelBytes": 70309539
+    },
+    {
+      "pair": 3,
+      "format": "binary",
+      "status": "complete",
+      "bytes": 52428800,
+      "chunks": 3200,
+      "receiverProcessingMs": 133.5,
+      "milliseconds": 6822.3,
+      "dataChannelBytes": 52480249
+    }
+  ],
+  "verification": {
+    "jvmTests": 102,
+    "builds": [
+      "release Android benchmark",
+      "Android app debug compilation",
+      "iOS ARM64 debug compilation",
+      "WASM debug build"
+    ],
+    "live": [
+      "paired text/binary byte verification",
+      "slow-link 1 MiB",
+      "interrupt/reconnect/full 50 MiB retry",
+      "binary upload/native Store5 readback at 1 and 50 MiB",
+      "new receiver/old sender at 1 and 50 MiB"
+    ],
+    "guards": [
+      "architecture",
+      "git diff --check",
+      "JavaScript syntax"
+    ]
+  },
+  "limitations": [
+    "Per-chunk and grouped timer pacing reduced some drop counts but did not consistently improve elapsed time; neither is enabled in production.",
+    "Ktor baseline groups were separate runs with variable conditions. No isolated throughput gain is attributed to the dependency upgrade.",
+    "Paired measurements alternate format on one connection; only three pairs. Results vary between connections and sessions.",
+    "UDP-drop counters are system-wide; unrelated traffic can contribute.",
+    "Full regression run overlapped a final Android app compilation and is used for correctness, not the primary speed comparison.",
+    "Upload/readback result timing covers readback, not complete upload elapsed time.",
+    "Physical native throughput was measured on Pixel 6. iOS compilation passed; new iPhone binary transfer performance was not measured.",
+    "Chrome receive-buffer loss remains a limit; this does not claim TCP-like LAN throughput."
+  ],
+  "runs": {
+    "ktor352Baseline": [
+      {
+        "workload": "connect",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.02
+        }
+      },
+      {
+        "workload": "socket",
+        "sockets": [
+          {
+            "receiveBufferBytes": 65536,
+            "sendBufferBytes": 65536
+          }
+        ]
+      },
+      {
+        "workload": "idle_udp_counters",
+        "received": 75,
+        "fullSocketDrops": 1
+      },
+      {
+        "workload": "receive_50MiB_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 134.3,
+          "milliseconds": 7647
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_run1",
+        "received": 63974,
+        "fullSocketDrops": 298
+      },
+      {
+        "workload": "receive_50MiB_run2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 146.3,
+          "milliseconds": 7864.3
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_run2",
+        "received": 95196,
+        "fullSocketDrops": 151
+      },
+      {
+        "workload": "receive_50MiB_run3",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 149.4,
+          "milliseconds": 8173.4
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_run3",
+        "received": 62346,
+        "fullSocketDrops": 102
+      }
+    ],
+    "ktor360Baseline": [
+      {
+        "workload": "connect",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.007
+        }
+      },
+      {
+        "workload": "socket",
+        "sockets": [
+          {
+            "receiveBufferBytes": 65536,
+            "sendBufferBytes": 65536
+          }
+        ]
+      },
+      {
+        "workload": "idle_udp_counters",
+        "received": 59,
+        "fullSocketDrops": 0
+      },
+      {
+        "workload": "receive_50MiB_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 129.6,
+          "milliseconds": 5333.4
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_run1",
+        "received": 62312,
+        "fullSocketDrops": 108
+      },
+      {
+        "workload": "receive_50MiB_run2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 135.5,
+          "milliseconds": 7025.6
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_run2",
+        "received": 95348,
+        "fullSocketDrops": 137
+      },
+      {
+        "workload": "receive_50MiB_run3",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 139.1,
+          "milliseconds": 6714.2
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_run3",
+        "received": 62297,
+        "fullSocketDrops": 234
+      }
+    ],
+    "rejectedPerChunkPacing": [
+      {
+        "workload": "connect",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.007
+        }
+      },
+      {
+        "workload": "socket",
+        "sockets": [
+          {
+            "receiveBufferBytes": 65536,
+            "sendBufferBytes": 65536
+          }
+        ]
+      },
+      {
+        "workload": "idle_udp_counters",
+        "received": 68,
+        "fullSocketDrops": 0
+      },
+      {
+        "workload": "receive_50MiB_pace0ms_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 155.1,
+          "milliseconds": 14613.1
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace0ms_run1",
+        "received": 96164,
+        "fullSocketDrops": 230
+      },
+      {
+        "workload": "receive_50MiB_pace1ms_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 162.4,
+          "milliseconds": 15034.3
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace1ms_run1",
+        "received": 61580,
+        "fullSocketDrops": 18
+      },
+      {
+        "workload": "receive_50MiB_pace2ms_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 168.0,
+          "milliseconds": 21026.4
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace2ms_run1",
+        "received": 61359,
+        "fullSocketDrops": 9
+      },
+      {
+        "workload": "receive_50MiB_pace2ms_run2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 159.6,
+          "milliseconds": 20966
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace2ms_run2",
+        "received": 65915,
+        "fullSocketDrops": 13
+      },
+      {
+        "workload": "receive_50MiB_pace1ms_run2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 153.1,
+          "milliseconds": 13983.7
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace1ms_run2",
+        "received": 61450,
+        "fullSocketDrops": 3
+      },
+      {
+        "workload": "receive_50MiB_pace0ms_run2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 142.5,
+          "milliseconds": 6553.9
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace0ms_run2",
+        "received": 62465,
+        "fullSocketDrops": 96
+      }
+    ],
+    "rejectedBatchPacing": [
+      {
+        "workload": "connect",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.006
+        }
+      },
+      {
+        "workload": "socket",
+        "sockets": [
+          {
+            "receiveBufferBytes": 65536,
+            "sendBufferBytes": 65536
+          }
+        ]
+      },
+      {
+        "workload": "idle_udp_counters",
+        "received": 273,
+        "fullSocketDrops": 2
+      },
+      {
+        "workload": "receive_50MiB_pace0ms_every1_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 148.5,
+          "milliseconds": 7166.6
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace0ms_every1_run1",
+        "received": 63043,
+        "fullSocketDrops": 198
+      },
+      {
+        "workload": "receive_50MiB_pace1ms_every2_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 139.2,
+          "milliseconds": 7858.7
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace1ms_every2_run1",
+        "received": 94141,
+        "fullSocketDrops": 31
+      },
+      {
+        "workload": "receive_50MiB_pace1ms_every4_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 137.1,
+          "milliseconds": 7664.4
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace1ms_every4_run1",
+        "received": 62249,
+        "fullSocketDrops": 103
+      },
+      {
+        "workload": "receive_50MiB_pace1ms_every8_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 134.9,
+          "milliseconds": 6822.2
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace1ms_every8_run1",
+        "received": 62304,
+        "fullSocketDrops": 165
+      },
+      {
+        "workload": "receive_50MiB_pace1ms_every8_run2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 145.2,
+          "milliseconds": 7252.4
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace1ms_every8_run2",
+        "received": 62418,
+        "fullSocketDrops": 282
+      },
+      {
+        "workload": "receive_50MiB_pace1ms_every4_run2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 140.0,
+          "milliseconds": 7497
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace1ms_every4_run2",
+        "received": 61401,
+        "fullSocketDrops": 61
+      },
+      {
+        "workload": "receive_50MiB_pace1ms_every2_run2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 147.5,
+          "milliseconds": 8666.6
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace1ms_every2_run2",
+        "received": 62172,
+        "fullSocketDrops": 75
+      },
+      {
+        "workload": "receive_50MiB_pace0ms_every1_run2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 140.1,
+          "milliseconds": 6244.8
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_pace0ms_every1_run2",
+        "received": 62035,
+        "fullSocketDrops": 126
+      }
+    ],
+    "pairedFormats": [
+      {
+        "workload": "connect",
+        "result": {
+          "connected": true
+        }
+      },
+      {
+        "workload": "socket",
+        "sockets": [
+          {
+            "receiveBufferBytes": 65536,
+            "sendBufferBytes": 65536
+          }
+        ]
+      },
+      {
+        "workload": "idle_udp_counters",
+        "received": 41,
+        "fullSocketDrops": 0
+      },
+      {
+        "workload": "receive_50MiB_text_pair1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 315.0,
+          "milliseconds": 8852.5
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_text_pair1",
+        "received": 62844,
+        "fullSocketDrops": 449
+      },
+      {
+        "workload": "stats_text_pair1",
+        "result": {
+          "rtt": 0.014,
+          "bytesReceived": 76240336,
+          "bytesSent": 2181599,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 3202,
+              "bytesReceived": 70309539
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_binary_pair1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 127.1,
+          "milliseconds": 7500
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_binary_pair1",
+        "received": 79583,
+        "fullSocketDrops": 196
+      },
+      {
+        "workload": "stats_binary_pair1",
+        "result": {
+          "rtt": 0.009,
+          "bytesReceived": 133465082,
+          "bytesSent": 3797506,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 6404,
+              "bytesReceived": 122789788
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_binary_pair2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 144.6,
+          "milliseconds": 7127.9
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_binary_pair2",
+        "received": 46937,
+        "fullSocketDrops": 200
+      },
+      {
+        "workload": "stats_binary_pair2",
+        "result": {
+          "rtt": 0.014,
+          "bytesReceived": 190620662,
+          "bytesSent": 5438748,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 9606,
+              "bytesReceived": 175270037
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_text_pair2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 346.4,
+          "milliseconds": 9062.8
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_text_pair2",
+        "received": 62546,
+        "fullSocketDrops": 159
+      },
+      {
+        "workload": "stats_text_pair2",
+        "result": {
+          "rtt": 0.018,
+          "bytesReceived": 266904211,
+          "bytesSent": 7587488,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 12808,
+              "bytesReceived": 245579576
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_text_pair3",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 272.7,
+          "milliseconds": 7748.2
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_text_pair3",
+        "received": 62540,
+        "fullSocketDrops": 190
+      },
+      {
+        "workload": "stats_text_pair3",
+        "result": {
+          "rtt": 0.013,
+          "bytesReceived": 343017126,
+          "bytesSent": 9725462,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 16010,
+              "bytesReceived": 315889115
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_binary_pair3",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 133.5,
+          "milliseconds": 6822.3
+        }
+      },
+      {
+        "workload": "udp_counters_receive_50MiB_binary_pair3",
+        "received": 46438,
+        "fullSocketDrops": 219
+      },
+      {
+        "workload": "stats_binary_pair3",
+        "result": {
+          "rtt": 0.013,
+          "bytesReceived": 399562976,
+          "bytesSent": 11307492,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 19212,
+              "bytesReceived": 368369364
+            }
+          ]
+        }
+      }
+    ],
+    "binaryFullRegression": [
+      {
+        "workload": "connect",
+        "result": {
+          "connected": true
+        }
+      },
+      {
+        "workload": "receive_1MiB_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 1048576,
+          "chunks": 64,
+          "receiverProcessingMs": 3.5,
+          "milliseconds": 184.6
+        }
+      },
+      {
+        "workload": "receive_10MiB_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 10485760,
+          "chunks": 640,
+          "receiverProcessingMs": 15.1,
+          "milliseconds": 1459.7
+        }
+      },
+      {
+        "workload": "receive_50MiB_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 68.3,
+          "milliseconds": 5579.5
+        }
+      },
+      {
+        "workload": "reconnect_with_emulation",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.278
+        }
+      },
+      {
+        "workload": "receive_1MiB_emulated_slow_link",
+        "result": {
+          "status": "complete",
+          "bytes": 1048576,
+          "chunks": 64,
+          "receiverProcessingMs": 3.2,
+          "milliseconds": 14436.3
+        }
+      },
+      {
+        "workload": "reconnect_without_emulation",
+        "result": {
+          "connected": true
+        }
+      },
+      {
+        "workload": "interrupt_50MiB",
+        "result": {
+          "status": "interrupted",
+          "bytes": 1048576,
+          "milliseconds": 291.6
+        }
+      },
+      {
+        "workload": "reconnect",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.006
+        }
+      },
+      {
+        "workload": "retry_50MiB",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 92.1,
+          "milliseconds": 6141.2
+        }
+      },
+      {
+        "workload": "upload_and_readback_1MiB",
+        "result": {
+          "status": "complete",
+          "bytes": 1048576,
+          "chunks": 64,
+          "receiverProcessingMs": 1.7,
+          "milliseconds": 418.3
+        }
+      },
+      {
+        "workload": "browser_errors",
+        "result": []
+      }
+    ],
+    "binaryUpload50MiB": [
+      {
+        "workload": "connect",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.015
+        }
+      },
+      {
+        "workload": "upload_and_readback_50MiB",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 80.2,
+          "milliseconds": 6413.6
+        }
+      }
+    ],
+    "olderSenderCompatibility": [
+      {
+        "workload": "connect",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.015
+        }
+      },
+      {
+        "workload": "receive_1MiB_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 1048576,
+          "chunks": 64,
+          "binaryFrames": 0,
+          "receiverProcessingMs": 5.2,
+          "milliseconds": 224.8
+        }
+      },
+      {
+        "workload": "receive_50MiB_run1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 0,
+          "receiverProcessingMs": 157.9,
+          "milliseconds": 6956.2
+        }
+      }
+    ]
+  }
+}

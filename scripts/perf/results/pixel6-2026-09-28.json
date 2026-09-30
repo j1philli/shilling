@@ -1,0 +1,648 @@
+{
+  "device": "Pixel 6",
+  "build": "release, locally signed",
+  "scope": "isolated offline Store5 data workloads; no UI frame or actual network timing",
+  "logging": "Kermit minimum severity Error",
+  "receiptTiming": "With lazy chunks, prepare measures file read; receive includes encoding, decoding and persistence. Compare their sum across versions.",
+  "runs": {
+    "baseline": [
+      {
+        "workload": "csv_parse_1000",
+        "milliseconds": 6.930298,
+        "pssKiB": 34685,
+        "javaHeapBytes": 4092240
+      },
+      {
+        "workload": "store5_import_1000",
+        "milliseconds": 978.894694,
+        "pssKiB": 42995,
+        "javaHeapBytes": 11694416
+      },
+      {
+        "workload": "csv_parse_10000",
+        "milliseconds": 32.60022,
+        "pssKiB": 54345,
+        "javaHeapBytes": 23785808
+      },
+      {
+        "workload": "store5_import_10000",
+        "milliseconds": 10277.78744,
+        "pssKiB": 60576,
+        "javaHeapBytes": 27388944
+      },
+      {
+        "workload": "seed_1000_schedules",
+        "milliseconds": 1115.721681,
+        "pssKiB": 72205,
+        "javaHeapBytes": 39152912
+      },
+      {
+        "workload": "recent20_run0",
+        "milliseconds": 45.486369,
+        "pssKiB": 72861,
+        "javaHeapBytes": 39714064
+      },
+      {
+        "workload": "history11000_run0",
+        "milliseconds": 66.608154,
+        "pssKiB": 78445,
+        "javaHeapBytes": 45539024
+      },
+      {
+        "workload": "weekly1000_run0",
+        "milliseconds": 29.592814,
+        "pssKiB": 81942,
+        "javaHeapBytes": 46898896
+      },
+      {
+        "workload": "recent20_run1",
+        "milliseconds": 20.175985,
+        "pssKiB": 80686,
+        "javaHeapBytes": 47488720
+      },
+      {
+        "workload": "history11000_run1",
+        "milliseconds": 126.231404,
+        "pssKiB": 86034,
+        "javaHeapBytes": 53051184
+      },
+      {
+        "workload": "weekly1000_run1",
+        "milliseconds": 65.361003,
+        "pssKiB": 87358,
+        "javaHeapBytes": 54345520
+      },
+      {
+        "workload": "recent20_run2",
+        "milliseconds": 44.278728,
+        "pssKiB": 87930,
+        "javaHeapBytes": 54902576
+      },
+      {
+        "workload": "history11000_run2",
+        "milliseconds": 131.046956,
+        "pssKiB": 93246,
+        "javaHeapBytes": 60325680
+      },
+      {
+        "workload": "weekly1000_run2",
+        "milliseconds": 69.235474,
+        "pssKiB": 94638,
+        "javaHeapBytes": 61726512
+      },
+      {
+        "workload": "receipt_write_1MiB",
+        "milliseconds": 1.99178,
+        "pssKiB": 98439,
+        "javaHeapBytes": 62779184
+      },
+      {
+        "workload": "receipt_read_1MiB",
+        "milliseconds": 4.937174,
+        "pssKiB": 96739,
+        "javaHeapBytes": 63831856
+      },
+      {
+        "workload": "receipt_prepare_1MiB",
+        "milliseconds": 82.809571,
+        "pssKiB": 43508,
+        "javaHeapBytes": 8956944
+      },
+      {
+        "workload": "receipt_receive_1MiB",
+        "milliseconds": 6.551839,
+        "pssKiB": 48752,
+        "javaHeapBytes": 12893200
+      },
+      {
+        "workload": "receipt_write_10MiB",
+        "milliseconds": 5.819865,
+        "pssKiB": 58716,
+        "javaHeapBytes": 24435728
+      },
+      {
+        "workload": "receipt_read_10MiB",
+        "milliseconds": 8.514079,
+        "pssKiB": 68972,
+        "javaHeapBytes": 34958352
+      },
+      {
+        "workload": "receipt_prepare_10MiB",
+        "milliseconds": 50.150431,
+        "pssKiB": 122872,
+        "javaHeapBytes": 90045456
+      },
+      {
+        "workload": "receipt_receive_10MiB",
+        "milliseconds": 29.333048,
+        "pssKiB": 161344,
+        "javaHeapBytes": 129371152
+      },
+      {
+        "workload": "receipt_write_50MiB",
+        "milliseconds": 18.429159,
+        "pssKiB": 222816,
+        "javaHeapBytes": 192293904
+      },
+      {
+        "workload": "receipt_read_50MiB",
+        "milliseconds": 23.296183,
+        "pssKiB": 274032,
+        "javaHeapBytes": 244759568
+      },
+      {
+        "workload": "receipt_prepare_50MiB",
+        "milliseconds": 246.632813,
+        "pssKiB": 231540,
+        "javaHeapBytes": 200973328
+      },
+      {
+        "status": "failed",
+        "error": "java.lang.OutOfMemoryError: Failed to allocate a 52428816 byte allocation with 17081360 free bytes and 16MB until OOM, target footprint 268435456, growth limit 268435456"
+      }
+    ],
+    "fixed1": [
+      {
+        "workload": "csv_parse_1000",
+        "milliseconds": 8.258016,
+        "pssKiB": 32727,
+        "javaHeapBytes": 4059472
+      },
+      {
+        "workload": "store5_import_1000",
+        "milliseconds": 29.637898,
+        "pssKiB": 35636,
+        "javaHeapBytes": 6320464
+      },
+      {
+        "workload": "csv_parse_10000",
+        "milliseconds": 28.963501,
+        "pssKiB": 46929,
+        "javaHeapBytes": 18121040
+      },
+      {
+        "workload": "store5_import_10000",
+        "milliseconds": 685.145833,
+        "pssKiB": 70785,
+        "javaHeapBytes": 40603984
+      },
+      {
+        "workload": "seed_1000_schedules",
+        "milliseconds": 1014.399089,
+        "pssKiB": 38167,
+        "javaHeapBytes": 5835792
+      },
+      {
+        "workload": "recent20_run0",
+        "milliseconds": 47.357544,
+        "pssKiB": 38879,
+        "javaHeapBytes": 6458384
+      },
+      {
+        "workload": "history11000_run0",
+        "milliseconds": 45.834839,
+        "pssKiB": 44574,
+        "javaHeapBytes": 12209776
+      },
+      {
+        "workload": "weekly1000_run0",
+        "milliseconds": 69.04891,
+        "pssKiB": 48627,
+        "javaHeapBytes": 13602416
+      },
+      {
+        "workload": "recent20_run1",
+        "milliseconds": 19.028727,
+        "pssKiB": 46755,
+        "javaHeapBytes": 14167664
+      },
+      {
+        "workload": "history11000_run1",
+        "milliseconds": 117.558228,
+        "pssKiB": 52083,
+        "javaHeapBytes": 19754608
+      },
+      {
+        "workload": "weekly1000_run1",
+        "milliseconds": 48.442464,
+        "pssKiB": 53543,
+        "javaHeapBytes": 21147248
+      },
+      {
+        "workload": "recent20_run2",
+        "milliseconds": 55.881714,
+        "pssKiB": 54107,
+        "javaHeapBytes": 21737072
+      },
+      {
+        "workload": "history11000_run2",
+        "milliseconds": 94.641805,
+        "pssKiB": 59449,
+        "javaHeapBytes": 27188848
+      },
+      {
+        "workload": "weekly1000_run2",
+        "milliseconds": 43.037598,
+        "pssKiB": 60785,
+        "javaHeapBytes": 28483184
+      },
+      {
+        "workload": "receipt_write_1MiB",
+        "milliseconds": 1.459473,
+        "pssKiB": 64437,
+        "javaHeapBytes": 29568624
+      },
+      {
+        "workload": "receipt_read_1MiB",
+        "milliseconds": 2.140056,
+        "pssKiB": 62885,
+        "javaHeapBytes": 30621296
+      },
+      {
+        "workload": "receipt_prepare_1MiB",
+        "milliseconds": 1.898356,
+        "pssKiB": 63929,
+        "javaHeapBytes": 31673968
+      },
+      {
+        "workload": "receipt_receive_1MiB",
+        "milliseconds": 44.950317,
+        "pssKiB": 70877,
+        "javaHeapBytes": 38788720
+      },
+      {
+        "workload": "receipt_write_10MiB",
+        "milliseconds": 3.774129,
+        "pssKiB": 82189,
+        "javaHeapBytes": 50331248
+      },
+      {
+        "workload": "receipt_read_10MiB",
+        "milliseconds": 5.534383,
+        "pssKiB": 92445,
+        "javaHeapBytes": 60821104
+      },
+      {
+        "workload": "receipt_prepare_10MiB",
+        "milliseconds": 4.442789,
+        "pssKiB": 102705,
+        "javaHeapBytes": 71343728
+      },
+      {
+        "workload": "receipt_receive_10MiB",
+        "milliseconds": 59.552938,
+        "pssKiB": 171977,
+        "javaHeapBytes": 142126704
+      },
+      {
+        "workload": "receipt_write_50MiB",
+        "milliseconds": 17.813883,
+        "pssKiB": 97640,
+        "javaHeapBytes": 65301520
+      },
+      {
+        "workload": "receipt_read_50MiB",
+        "milliseconds": 24.538452,
+        "pssKiB": 148888,
+        "javaHeapBytes": 117734416
+      },
+      {
+        "workload": "receipt_prepare_50MiB",
+        "milliseconds": 18.925741,
+        "pssKiB": 200100,
+        "javaHeapBytes": 170167312
+      },
+      {
+        "workload": "receipt_receive_50MiB",
+        "milliseconds": 370.417522,
+        "pssKiB": 249036,
+        "javaHeapBytes": 220097552
+      },
+      {
+        "status": "complete"
+      }
+    ],
+    "fixed2": [
+      {
+        "workload": "csv_parse_1000",
+        "milliseconds": 11.464396,
+        "pssKiB": 32723,
+        "javaHeapBytes": 4059472
+      },
+      {
+        "workload": "store5_import_1000",
+        "milliseconds": 44.083741,
+        "pssKiB": 35661,
+        "javaHeapBytes": 6320464
+      },
+      {
+        "workload": "csv_parse_10000",
+        "milliseconds": 33.461304,
+        "pssKiB": 46955,
+        "javaHeapBytes": 18121040
+      },
+      {
+        "workload": "store5_import_10000",
+        "milliseconds": 586.38619,
+        "pssKiB": 70889,
+        "javaHeapBytes": 40603984
+      },
+      {
+        "workload": "seed_1000_schedules",
+        "milliseconds": 1068.565674,
+        "pssKiB": 73761,
+        "javaHeapBytes": 5491728
+      },
+      {
+        "workload": "recent20_run0",
+        "milliseconds": 17.450683,
+        "pssKiB": 38678,
+        "javaHeapBytes": 6179904
+      },
+      {
+        "workload": "history11000_run0",
+        "milliseconds": 44.131998,
+        "pssKiB": 44338,
+        "javaHeapBytes": 12099184
+      },
+      {
+        "workload": "weekly1000_run0",
+        "milliseconds": 101.665324,
+        "pssKiB": 41108,
+        "javaHeapBytes": 13405808
+      },
+      {
+        "workload": "recent20_run1",
+        "milliseconds": 36.02242,
+        "pssKiB": 46559,
+        "javaHeapBytes": 13995632
+      },
+      {
+        "workload": "history11000_run1",
+        "milliseconds": 92.717367,
+        "pssKiB": 51883,
+        "javaHeapBytes": 19578528
+      },
+      {
+        "workload": "weekly1000_run1",
+        "milliseconds": 114.514079,
+        "pssKiB": 53359,
+        "javaHeapBytes": 20938400
+      },
+      {
+        "workload": "recent20_run2",
+        "milliseconds": 38.713582,
+        "pssKiB": 53923,
+        "javaHeapBytes": 21462688
+      },
+      {
+        "workload": "history11000_run2",
+        "milliseconds": 95.675456,
+        "pssKiB": 59245,
+        "javaHeapBytes": 26918560
+      },
+      {
+        "workload": "weekly1000_run2",
+        "milliseconds": 64.690064,
+        "pssKiB": 60637,
+        "javaHeapBytes": 28245664
+      },
+      {
+        "workload": "receipt_write_1MiB",
+        "milliseconds": 1.508301,
+        "pssKiB": 61721,
+        "javaHeapBytes": 29298336
+      },
+      {
+        "workload": "receipt_read_1MiB",
+        "milliseconds": 2.699951,
+        "pssKiB": 62765,
+        "javaHeapBytes": 30351008
+      },
+      {
+        "workload": "receipt_prepare_1MiB",
+        "milliseconds": 2.751302,
+        "pssKiB": 63809,
+        "javaHeapBytes": 31403680
+      },
+      {
+        "workload": "receipt_receive_1MiB",
+        "milliseconds": 40.024862,
+        "pssKiB": 70757,
+        "javaHeapBytes": 38518432
+      },
+      {
+        "workload": "receipt_write_10MiB",
+        "milliseconds": 5.084228,
+        "pssKiB": 82061,
+        "javaHeapBytes": 50060960
+      },
+      {
+        "workload": "receipt_read_10MiB",
+        "milliseconds": 7.096191,
+        "pssKiB": 92321,
+        "javaHeapBytes": 60583584
+      },
+      {
+        "workload": "receipt_prepare_10MiB",
+        "milliseconds": 5.872111,
+        "pssKiB": 102577,
+        "javaHeapBytes": 71073440
+      },
+      {
+        "workload": "receipt_receive_10MiB",
+        "milliseconds": 63.206787,
+        "pssKiB": 171849,
+        "javaHeapBytes": 141856416
+      },
+      {
+        "workload": "receipt_write_50MiB",
+        "milliseconds": 15.815226,
+        "pssKiB": 233749,
+        "javaHeapBytes": 204844704
+      },
+      {
+        "workload": "receipt_read_50MiB",
+        "milliseconds": 29.282552,
+        "pssKiB": 194735,
+        "javaHeapBytes": 117668880
+      },
+      {
+        "workload": "receipt_prepare_50MiB",
+        "milliseconds": 19.77535,
+        "pssKiB": 200224,
+        "javaHeapBytes": 170134544
+      },
+      {
+        "workload": "receipt_receive_50MiB",
+        "milliseconds": 345.868327,
+        "pssKiB": 264688,
+        "javaHeapBytes": 235977744
+      },
+      {
+        "status": "complete"
+      }
+    ],
+    "fixed3": [
+      {
+        "workload": "csv_parse_1000",
+        "milliseconds": 7.40035,
+        "pssKiB": 32720,
+        "javaHeapBytes": 4059472
+      },
+      {
+        "workload": "store5_import_1000",
+        "milliseconds": 28.230916,
+        "pssKiB": 35653,
+        "javaHeapBytes": 6320464
+      },
+      {
+        "workload": "csv_parse_10000",
+        "milliseconds": 27.641968,
+        "pssKiB": 46943,
+        "javaHeapBytes": 18121040
+      },
+      {
+        "workload": "store5_import_10000",
+        "milliseconds": 585.749472,
+        "pssKiB": 70812,
+        "javaHeapBytes": 40603984
+      },
+      {
+        "workload": "seed_1000_schedules",
+        "milliseconds": 1534.16154,
+        "pssKiB": 39783,
+        "javaHeapBytes": 7531536
+      },
+      {
+        "workload": "recent20_run0",
+        "milliseconds": 15.165121,
+        "pssKiB": 40499,
+        "javaHeapBytes": 8219664
+      },
+      {
+        "workload": "history11000_run0",
+        "milliseconds": 107.693237,
+        "pssKiB": 46166,
+        "javaHeapBytes": 13971008
+      },
+      {
+        "workload": "weekly1000_run0",
+        "milliseconds": 135.604411,
+        "pssKiB": 49556,
+        "javaHeapBytes": 15334976
+      },
+      {
+        "workload": "recent20_run1",
+        "milliseconds": 32.882772,
+        "pssKiB": 48382,
+        "javaHeapBytes": 15896128
+      },
+      {
+        "workload": "history11000_run1",
+        "milliseconds": 121.638183,
+        "pssKiB": 53702,
+        "javaHeapBytes": 21425728
+      },
+      {
+        "workload": "weekly1000_run1",
+        "milliseconds": 88.274658,
+        "pssKiB": 55110,
+        "javaHeapBytes": 22793792
+      },
+      {
+        "workload": "recent20_run2",
+        "milliseconds": 35.409708,
+        "pssKiB": 55686,
+        "javaHeapBytes": 23359040
+      },
+      {
+        "workload": "history11000_run2",
+        "milliseconds": 96.876709,
+        "pssKiB": 61036,
+        "javaHeapBytes": 28855920
+      },
+      {
+        "workload": "weekly1000_run2",
+        "milliseconds": 50.908529,
+        "pssKiB": 62436,
+        "javaHeapBytes": 30199408
+      },
+      {
+        "workload": "receipt_write_1MiB",
+        "milliseconds": 2.119832,
+        "pssKiB": 63500,
+        "javaHeapBytes": 31252080
+      },
+      {
+        "workload": "receipt_read_1MiB",
+        "milliseconds": 3.061849,
+        "pssKiB": 64556,
+        "javaHeapBytes": 32337520
+      },
+      {
+        "workload": "receipt_prepare_1MiB",
+        "milliseconds": 2.55721,
+        "pssKiB": 65596,
+        "javaHeapBytes": 33390192
+      },
+      {
+        "workload": "receipt_receive_1MiB",
+        "milliseconds": 34.642375,
+        "pssKiB": 72544,
+        "javaHeapBytes": 40472176
+      },
+      {
+        "workload": "receipt_write_10MiB",
+        "milliseconds": 4.588582,
+        "pssKiB": 83860,
+        "javaHeapBytes": 52047472
+      },
+      {
+        "workload": "receipt_read_10MiB",
+        "milliseconds": 6.6545,
+        "pssKiB": 94116,
+        "javaHeapBytes": 62537328
+      },
+      {
+        "workload": "receipt_prepare_10MiB",
+        "milliseconds": 6.183187,
+        "pssKiB": 104372,
+        "javaHeapBytes": 73027184
+      },
+      {
+        "workload": "receipt_receive_10MiB",
+        "milliseconds": 62.543741,
+        "pssKiB": 150992,
+        "javaHeapBytes": 143875696
+      },
+      {
+        "workload": "receipt_write_50MiB",
+        "milliseconds": 17.945272,
+        "pssKiB": 128399,
+        "javaHeapBytes": 96738320
+      },
+      {
+        "workload": "receipt_read_50MiB",
+        "milliseconds": 25.661702,
+        "pssKiB": 179639,
+        "javaHeapBytes": 149171216
+      },
+      {
+        "workload": "receipt_prepare_50MiB",
+        "milliseconds": 19.100789,
+        "pssKiB": 230855,
+        "javaHeapBytes": 201636880
+      },
+      {
+        "workload": "receipt_receive_50MiB",
+        "milliseconds": 416.756877,
+        "pssKiB": 190007,
+        "javaHeapBytes": 159742992
+      },
+      {
+        "status": "complete"
+      }
+    ]
+  }
+}

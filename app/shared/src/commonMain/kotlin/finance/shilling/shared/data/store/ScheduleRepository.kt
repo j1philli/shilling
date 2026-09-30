@@ -25,14 +25,10 @@ class ScheduleRepository(
 
     suspend fun getExceptions(scheduleIds: List<String>): Map<String, List<ScheduleException>> {
         if (scheduleIds.isEmpty()) return emptyMap()
-        return buildMap {
-            scheduleIds.forEach { scheduleId ->
-                val exceptions = exceptionStore.readLocalSourceOfTruth(ScheduleExceptionKey.ByScheduleId(scheduleId))
-                if (exceptions.isNotEmpty()) {
-                    put(scheduleId, exceptions)
-                }
-            }
-        }
+        // Stay below SQLite bind limits, including older native SQLite versions.
+        return scheduleIds.distinct().sorted().chunked(400).flatMap { ids ->
+            exceptionStore.readLocalSourceOfTruth(ScheduleExceptionKey.ByScheduleIds(ids))
+        }.groupBy { it.scheduleId }
     }
 
     suspend fun upsert(schedule: Schedule) {

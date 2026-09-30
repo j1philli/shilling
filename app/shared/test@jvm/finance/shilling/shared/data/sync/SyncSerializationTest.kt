@@ -141,11 +141,10 @@ class SyncSerializationTest {
     // --- FileTransferMessage serialization ---
 
     @Test
-    fun fileTransferMessageRoundTrips() {
+    fun fileTransferControlMessagesRoundTripAsJson() {
         val messages: List<FileTransferMessage> = listOf(
             FileTransferMessage.FileRequest("r-1"),
             FileTransferMessage.FileHeader("r-1", 1024, 2, "image/jpeg"),
-            FileTransferMessage.FileChunk("r-1", 0, "base64data=="),
             FileTransferMessage.FileComplete("r-1"),
             FileTransferMessage.FileNotAvailable("r-1")
         )

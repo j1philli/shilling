@@ -10,8 +10,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Dispatchers
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -168,7 +169,7 @@ class SignalingHubTest {
         private val incomingChannel = Channel<Frame>(Channel.UNLIMITED)
         private val outgoingChannel = Channel<Frame>(Channel.UNLIMITED)
 
-        override val coroutineContext: CoroutineContext = EmptyCoroutineContext
+        override val coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.Unconfined
         override var masking: Boolean = false
         override var maxFrameSize: Long = Long.MAX_VALUE
         override val incoming: ReceiveChannel<Frame> = incomingChannel

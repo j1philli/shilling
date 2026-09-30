@@ -135,29 +135,18 @@ class SyncStoreFacade(
         entityType: EntityType,
         entityId: String,
         payload: ChangePayload
-    ): ChangeMessage =
-        ChangeMessage(
-            id = snapshotChangeId(entityType, entityId, deviceId),
+    ): ChangeMessage {
+        val version = db.latestEntityVersion(entityType, entityId, spaceId)
+        return ChangeMessage(
+            id = version?.changeId ?: "snapshot:$deviceId:${entityType.name}:$entityId",
             entityType = entityType,
             op = ChangeOp.UPSERT,
             entityId = entityId,
-            timestamp = snapshotTimestamp(entityType, entityId),
+            timestamp = version?.timestamp ?: 0L,
             deviceId = deviceId,
             payload = payload
         )
-
-    private suspend fun snapshotChangeId(
-        entityType: EntityType,
-        entityId: String,
-        deviceId: String
-    ): String =
-        db.latestEntityVersion(entityType, entityId, spaceId)?.changeId
-            ?: "snapshot:$deviceId:${entityType.name}:$entityId"
-
-    private suspend fun snapshotTimestamp(
-        entityType: EntityType,
-        entityId: String
-    ): Long = db.latestEntityVersion(entityType, entityId, spaceId)?.timestamp ?: 0L
+    }
 
     private suspend fun applyAccountChange(change: ChangeMessage) {
         when (change.op) {

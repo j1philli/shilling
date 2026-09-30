@@ -648,7 +648,8 @@ class AppSession(
             webRtcClient, signalingClient, syncConfig.deviceId,
             peerConnectionStatus = peerConnectionStatus,
             allowRelay = { cloudRelayEnabled },
-            delayFn = webRtcPlatform.delayFn
+            delayFn = webRtcPlatform.delayFn,
+            receiveMessageFn = webRtcPlatform.receiveMessage, onChannelOpen = webRtcPlatform.onChannelOpen
         )
         val incomingChangeRouter = IncomingChangeRouter(
             graphs.current.facade,
