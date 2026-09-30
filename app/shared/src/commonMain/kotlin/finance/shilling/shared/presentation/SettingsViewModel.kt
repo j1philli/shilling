@@ -11,6 +11,7 @@ import finance.shilling.shared.data.SETTINGS_KEY_HOSTED_HOUSEHOLD_ID
 import finance.shilling.shared.data.SETTINGS_KEY_LOCAL_HOUSEHOLD_ID
 import finance.shilling.shared.data.SETTINGS_KEY_SERVER_URL
 import finance.shilling.shared.data.ServerUrlCallback
+import finance.shilling.shared.data.analytics.ProductAnalytics
 import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.shared.data.auth.AuthState
 import finance.shilling.shared.data.auth.DependencyReachability
@@ -121,6 +122,8 @@ data class DeveloperInfo(
 )
 
 data class SettingsUiState(
+    val analyticsConfigured: Boolean = false,
+    val analyticsConsent: Boolean = false,
     val prefs: DisplayPrefs = DisplayPrefs(),
     val account: SettingsAccount? = null,
     /** Null when self-hosted (no managed sync status). */
@@ -145,8 +148,10 @@ class SettingsViewModel(
     private val accountRepository: AccountRepository,
     private val categoryRepository: CategoryRepository,
     private val scheduleRepository: ScheduleRepository,
-    private val windowUseCase: ComputeWindowUseCase
+    private val windowUseCase: ComputeWindowUseCase,
+    private val analytics: ProductAnalytics
 ) : ViewModel() {
+    private val analyticsState = MutableStateFlow(analytics.consent to analytics.configured)
     private val aboutTaps = MutableStateFlow(0)
     private val ready = sessionState.phase.filterIsInstance<SessionPhase.Ready>()
     private var authService: AuthService? = null
@@ -158,17 +163,35 @@ class SettingsViewModel(
         ready.flatMapLatest { phase -> phase.authService.authState.map { phase to it } },
         hostedBootstrapState.status,
         DisplayPreferences.state,
-        aboutTaps
-    ) { (phase, authState), status, prefs, taps ->
+        aboutTaps,
+        analyticsState
+    ) { (phase, authState), status, prefs, taps, analyticsStatus ->
         authService = phase.authService
         SettingsUiState(
+            analyticsConfigured = analyticsStatus.second,
+            analyticsConsent = analyticsStatus.first,
             prefs = prefs,
             account = account(phase, authState, status),
             sync = if (phase.selfHosted) null else syncStatus(status),
             developer = developerInfo(phase.selfHosted, authState, status),
             developerToolsUnlocked = taps >= DEVELOPER_UNLOCK_TAPS
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState(prefs = DisplayPreferences.state.value))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState(prefs = DisplayPreferences.state.value, analyticsConfigured = analytics.configured, analyticsConsent = analytics.consent))
+
+    fun setAnalyticsConsent(value: Boolean) {
+        analytics.consent = value
+        analyticsState.value = value to analytics.configured
+    }
+
+    fun saveAnalyticsConfig(host: String, projectToken: String): Boolean {
+        analytics.host = host
+        analytics.projectToken = projectToken
+        analyticsState.value = analytics.consent to analytics.configured
+        return analytics.configured
+    }
+
+    val analyticsHost: String get() = analytics.host
+    val analyticsProjectToken: String get() = analytics.projectToken
 
     fun setThemeMode(mode: ThemeMode) = DisplayPreferences.updateThemeMode(mode)
 

@@ -8,6 +8,8 @@ import finance.shilling.shared.data.Receipt
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.ReceiptWithPosting
 import finance.shilling.shared.data.ScheduleType
+import finance.shilling.shared.data.analytics.ProductAnalytics
+import finance.shilling.shared.data.analytics.ProductEvent
 import finance.shilling.shared.data.store.PostingRepository
 import finance.shilling.shared.data.store.ReceiptRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -77,7 +79,8 @@ class ReceiptEditorViewModel(
     private val receiptRepository: ReceiptRepository,
     postingRepository: PostingRepository,
     private val fileStore: ReceiptFileStore,
-    private val idGenerator: IdGenerator
+    private val idGenerator: IdGenerator,
+    private val analytics: ProductAnalytics
 ) : ViewModel() {
     private class PickedFile(val name: String, val bytes: ByteArray)
 
@@ -181,6 +184,7 @@ class ReceiptEditorViewModel(
             return null
         }
         receiptRepository.attach(receiptId, postingId)
+        viewModelScope.launch { analytics.capture(ProductEvent.RECEIPT_ATTACHED) }
         return "Attached to ${posting.title}"
     }
 
@@ -219,6 +223,7 @@ class ReceiptEditorViewModel(
                 amount = amount
             )
         )
+        if (pendingAttach.value != null) viewModelScope.launch { analytics.capture(ProductEvent.RECEIPT_ATTACHED) }
         return "Receipt saved"
     }
 

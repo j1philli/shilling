@@ -1,4 +1,6 @@
 package finance.shilling.shared.presentation
+import finance.shilling.shared.data.analytics.ProductAnalytics
+import finance.shilling.shared.data.analytics.ProductEvent
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +13,7 @@ import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.PostingRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -88,7 +91,8 @@ data class ImportUiState(
 class ImportViewModel(
     accountRepository: AccountRepository,
     categoryRepository: CategoryRepository,
-    private val postingRepository: PostingRepository
+    private val postingRepository: PostingRepository,
+    private val analytics: ProductAnalytics
 ) : ViewModel() {
     private data class Input(
         val content: String? = null,
@@ -265,6 +269,7 @@ class ImportViewModel(
         }
         val accountName = current.accounts.firstOrNull { it.id == target }?.label ?: "this account"
         input.value = Input(accountId = target)
+        viewModelScope.launch { analytics.capture(ProductEvent.CSV_IMPORT_COMPLETED) }
         return "Imported ${toImport.size} transactions into $accountName"
     }
 }
