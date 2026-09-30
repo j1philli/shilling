@@ -137,6 +137,31 @@ class ReleaseTests(unittest.TestCase):
         self.assertTrue(self.published())
         self.assertFalse(any(c[:3] == ("gh", "release", "create") for c in self.commands()))
 
+    def test_server_deploy_precedes_web_and_release_publication(self):
+        release.main()
+        commands = self.commands()
+        server_i = next(i for i,c in enumerate(commands) if c == ("python3", "scripts/ci/deploy-coolify.py"))
+        web_i = next(i for i,c in enumerate(commands) if "scripts/ci/deploy-hosted-web.sh" in c)
+        self.assertLess(server_i, web_i)
+        self.assertEqual(commands[-1][:3], ("gh", "release", "edit"))
+
+    def test_web_only_does_not_touch_coolify(self):
+        os.environ.update(SHILLING_RELEASE_MODE="single", SHILLING_RELEASE_TARGET="web")
+        release.main()
+        self.assertFalse(any("scripts/ci/deploy-coolify.py" in c for c in self.commands()))
+
+    def test_server_deployment_failure_blocks_web_and_publication(self):
+        original = self.fake_run
+        def fail_deploy(*args, **kwargs):
+            if args == ("python3", "scripts/ci/deploy-coolify.py"):
+                raise subprocess.CalledProcessError(1, args)
+            return original(*args, **kwargs)
+        with patch.object(release, "run", side_effect=fail_deploy):
+            with self.assertRaises(subprocess.CalledProcessError):
+                release.main()
+        self.assertFalse(self.published())
+        self.assertFalse(any("scripts/ci/deploy-hosted-web.sh" in c for c in self.commands()))
+
     def test_existing_tag_cannot_be_moved_to_another_commit(self):
         self.ref = {"object": {"sha": "b" * 40}}
         self.tag_commit = "b" * 40

@@ -350,7 +350,7 @@ object RuntimeSmoke : BuildType({
 })
 
 // =============================================================================
-// Phase 2e: Server package (Coolify's hosted deployment remains source-based)
+// Phase 2e: Server package (release promotes its published image to Coolify)
 // =============================================================================
 
 object ServerBuild : BuildType({
@@ -391,16 +391,17 @@ object ServerBuild : BuildType({
 open class ReleaseBuild(buildId: String, title: String, singleTarget: Boolean) : BuildType({
     id(buildId)
     name = title
-    description = "Publish tested packages and selected images; deploy hosted web only when web is selected"
+    description = "Publish tested packages/images and deploy the selected hosted web and server"
     artifactRules = "release-output/** => release-output.zip"
     maxRunningBuilds = 1
     params {
+        param("env.TEAMCITY_BUILD_ID", "%teamcity.build.id%")
         param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
         param("env.SHILLING_RELEASE_MODE", if (singleTarget) "single" else "full")
         if (singleTarget) {
             select("env.SHILLING_RELEASE_TARGET", "web", label = "Target to release",
                 display = ParameterDisplay.PROMPT,
-                options = listOf("Web (hosted + image)" to "web", "Server image" to "server",
+                options = listOf("Web (hosted + image)" to "web", "Server (hosted + image)" to "server",
                     "Android" to "android", "iOS" to "ios", "Linux desktop" to "linux",
                     "Windows desktop" to "windows", "macOS desktop" to "macos"))
         }

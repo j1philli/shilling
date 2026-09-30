@@ -92,7 +92,7 @@ def release_notes(manifest):
     }
     lines += ["- " + caveats[t] for t in targets if t in caveats]
     if "server" in targets:
-        lines.append("- Hosted Coolify server is managed separately; publishing this image does not deploy it.")
+        lines.append("- Hosted signaling server: https://api.shilling.finance (deployed by this release using the published image digest).")
     lines += ["", f"Source: `{manifest['commit']}`. Artifact hashes are in `release-manifest.json`."]
     return "\n".join(lines) + "\n", marker
 
@@ -129,6 +129,8 @@ def main():
     notes_path.write_text(notes)
     print(f"Release {tag} from {commit}: {', '.join(targets)}", flush=True)
     print(notes, flush=True)
+    if "server" in targets:
+        run("python3", "scripts/ci/deploy-coolify.py", "--check-only")
     if dry_run == "1":
         print("Preview complete: artifacts collected and validated; no tags, images, releases or deployments were changed.")
         return
@@ -177,6 +179,9 @@ def main():
                        SHILLING_RELEASE_TARGETS=",".join(images))
     if images:
         run("bash", "scripts/ci/publish-release-images.sh", env=release_env)
+    if "server" in targets:
+        run("python3", "scripts/ci/deploy-coolify.py", env=release_env)
+        run("gh", "release", "upload", tag, "release-output/server-deployment.json", "--repo", REPO, "--clobber")
     if "web" in targets:
         run("bash", "scripts/ci/deploy-hosted-web.sh", env=release_env)
     # Publish the release last. A failure above leaves a resumable draft.

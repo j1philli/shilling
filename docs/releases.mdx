@@ -52,7 +52,8 @@ In TeamCity, run **Release — Full** on `main`.
 
 It waits for all builds and checks, creates `vX.Y.Z` at that exact commit,
 collects all client packages, publishes server and web images for Linux
-amd64/arm64, deploys the tested hosted web bundle to Pages, and publishes the
+amd64/arm64, deploys the server image to Coolify by immutable digest, verifies its health and
+Supabase mode, deploys the tested hosted web bundle to Pages, and publishes the
 GitHub release with packages, Compose files and an artifact hash manifest.
 No manual tagging, image-target parameters or asset uploads are required.
 
@@ -63,7 +64,7 @@ the dropdown, and run it. The choices are Web, Server, Android, iOS, Linux,
 Windows and macOS.
 
 Only the selected target is published. Web publishes its self-hosted image and
-deploys hosted Pages. Server publishes its image and JAR. A client publishes
+deploys hosted Pages. Server publishes its image and JAR and deploys the image to Coolify. A client publishes
 its package files to GitHub. Other installed/published targets retain their
 previous version. A single-image release omits Compose files because the two
 image versions differ.
@@ -72,15 +73,16 @@ image versions differ.
 
 Both buttons offer **Preview only (publish nothing)**. This validates and
 collects real artifacts into `release-output.zip`, showing the target selection,
-release notes and hashes without creating tags, pushing images or deploying.
+release notes and hashes without creating tags, pushing images or deploying. If Server is included,
+preview also performs a read-only Coolify configuration/connectivity check.
 
 The release jobs share a lock so only one can publish at a time. The version
 is read from `VERSION`, and the tag must belong to the checked-out commit on
 `main`. The job refuses to reuse a tag for another commit or target selection.
 An already-completed release is a no-op. Publishing failures leave a GitHub
-draft that can be retried with the same revision and selection. Images and
+draft that can be retried with the same revision and selection. Images, Coolify and
 Pages cannot be published atomically; a failure can leave images uploaded or
-Pages deployed while the GitHub release is still a draft. Inspect the failed
+hosted targets deployed while the GitHub release is still a draft. Inspect the failed
 step and rerun that exact release to finish it.
 
 **These buttons currently publish development distributions, not app-store
@@ -92,15 +94,37 @@ Signing/notarization and Play/TestFlight/App Store uploads still need setup.
 Release notes state these limitations. A downloadable unsigned iOS archive
 is not an installable iPhone release.
 
-The hosted Coolify server is still managed separately from this pipeline.
-A Server release publishes a self-hosted image; it does not promote it into
-Coolify. The hosted web deployment is now exclusively part of a release that
-includes Web.
+### Hosted server deployment
 
-The Linux release agent needs Docker Buildx, `gh`, Node/npm and Python. TeamCity
-inherits `env.GITHUB_TOKEN`, `env.GHCR_TOKEN` (classic PAT with `write:packages`),
-and the existing Cloudflare account/token/Pages parameters. Keep credentials
-as TeamCity password parameters.
+Full and Server-only releases promote the exact multi-architecture image digest
+returned by Buildx into the Coolify Docker Image app. Coolify pulls it instead
+of compiling source. The job waits for that deployment to finish and for the
+container to be healthy, then checks the public `/health` and `/api/config`
+endpoints. Supabase authentication must remain enabled. Web deployment follows
+server health checks in a full release; other target releases do not touch Coolify.
+
+The first server release switches from the legacy source app to the prepared
+image app. Both use `api.shilling.finance`; the legacy app stays running until
+the new image is healthy, then is stopped. Both apps have Git auto-deployment
+disabled. The stopped legacy app is retained for recovery. If public checks fail
+after cutover, the job restores the legacy app (first release) or previous image
+(later releases), and fails with the GitHub release still a draft. A failed or
+timed-out Coolify rollout fails the release before web deploy; inspect/cancel a
+timed-out deployment in Coolify before retrying. Rollback failures also require
+operator attention. Promotion across hosted targets is not atomic.
+
+`server-deployment.json` records the deployed digest, deployment UUID, health
+result and previous image. It is attached to the GitHub release and retained in
+TeamCity artifacts. Supabase and telemetry values remain in Coolify shared
+variables/application configuration, not in the build artifacts.
+
+The Linux release agent needs Docker Buildx, `gh`, Node/npm, curl and Python.
+TeamCity inherits `env.GITHUB_TOKEN`, `env.GHCR_TOKEN` (classic PAT with
+`write:packages`), the Cloudflare parameters, and `env.COOLIFY_URL`,
+`env.COOLIFY_APP_UUID`, `env.COOLIFY_TOKEN` (password), plus
+`env.COOLIFY_LEGACY_APP_UUID` for the first cutover. The Coolify token needs read,
+write and deploy access. Sensitive-read access is not required: the preflight
+checks environment metadata, and the deployed API verifies Supabase mode.
 
 ### Runtime checks
 
