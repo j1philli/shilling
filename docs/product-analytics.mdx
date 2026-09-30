@@ -1,0 +1,24 @@
+# Product analytics
+
+Shilling has a small, opt-in PostHog funnel. It is disabled until a PostHog host and project token are saved in **Settings → Developer tools → PostHog project** and **Share usage events** is enabled on that device. Developer tools appear in debug builds or after tapping About seven times. Use the project token from PostHog project settings, not a personal API key. The host must be HTTPS. Shilling sends events directly to that host; it does not send them through the signaling server. Once a project exists, set the two empty `DEFAULT_POSTHOG_*` constants in `ProductAnalytics.kt` for release builds. Local settings can override those defaults. When configured, fresh installs see the analytics choice during onboarding, before the first funnel event.
+
+The sender is shared Kotlin and uses PostHog's event ingestion API. It works across the app's Android, iOS, and Wasm targets without a native SDK linkage step. Delivery is best effort; events are not queued while the host is unavailable. No events are backfilled from before consent or configuration.
+
+## Event contract
+
+| Event | Trigger | Properties |
+| --- | --- | --- |
+| `onboarding_completed` | First-launch choice completed | `mode`: `guest`, `hosted`, or `self_hosted` |
+| `account_created` | An account is saved from the account form | none |
+| `schedule_created` | A new schedule is saved | `type`: `expense`, `income`, or `transfer` |
+| `posting_created` | A one-off transaction is saved | none |
+| `csv_import_completed` | A CSV import succeeds | none |
+| `receipt_attached` | A receipt is attached to a posting | none |
+
+Only these event names and fixed property values are allowed. The sender creates a random installation ID separate from authentication, device, and household IDs. It requests no PostHog person profile. It never sends balances, amounts, transaction descriptions, account or category names, filenames, receipt content, CSV content, household IDs, or raw errors. Autocapture, session replay, and error capture are not installed.
+
+## PostHog reports
+
+After configuring a project, create a funnel with `onboarding_completed` → `account_created` → either `schedule_created` or `posting_created` as the activation step. Break down the first step by `mode`; `schedule_created` can also be broken down by `type`. The optional later actions `csv_import_completed` and `receipt_attached` work better as separate feature adoption trends, since many users will not use them in that order. Use `schedule_created` or `posting_created` for a weekly retention report.
+
+Development and production should use different PostHog projects when possible. If using PostHog Cloud's one-project free plan, leave development devices opted out to keep test events out of production reports.

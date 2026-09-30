@@ -1,6 +1,7 @@
 package finance.shilling.shared.data
 
 import finance.shilling.shared.data.auth.DeviceIdentity
+import finance.shilling.shared.data.analytics.ProductAnalytics
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.ChangeNotifier
@@ -60,6 +61,7 @@ fun initKoin(vararg modules: Module): Koin =
  * `ShillingDatabase`, `Settings`, `IdGenerator`, `ReceiptFileStore`, and `HttpClient`.
  */
 val dataModule: Module = module {
+    single { ProductAnalytics(get(), get(), get()) }
     single { DeviceIdentity(get(), get()) }
     single { ChangeNotifier() }
     // One StoreSyncDeps shared by every store and repository; the sync runtime swaps its
@@ -104,16 +106,16 @@ val dataModule: Module = module {
     viewModel { AccountsViewModel(get()) }
     // Editors take the item id (null = new) as a parameter.
     viewModel { params -> CategoryEditorViewModel(params.getOrNull(), get(), get()) }
-    viewModel { params -> AccountEditorViewModel(params.getOrNull(), get(), get()) }
+    viewModel { params -> AccountEditorViewModel(params.getOrNull(), get(), get(), get()) }
     // Parameters: schedule id (null = new), then the preset type for new schedules.
-    viewModel { ImportViewModel(get(), get(), get()) }
+    viewModel { ImportViewModel(get(), get(), get(), get()) }
     // OnboardingActions comes from sessionModule (AppSession).
-    viewModel { OnboardingViewModel(get(), get()) }
-    viewModel { params -> ReceiptEditorViewModel(params.getOrNull(), get(), get(), get(), get()) }
+    viewModel { OnboardingViewModel(get(), get(), get()) }
+    viewModel { params -> ReceiptEditorViewModel(params.getOrNull(), get(), get(), get(), get(), get()) }
     viewModel { params -> TransactionEditorViewModel(params.getOrNull(), get(), get(), get(), get(), get(), get()) }
-    viewModel { params -> ScheduleEditorViewModel(params.getOrNull(), params.getOrNull(), get(), get(), get(), get()) }
+    viewModel { params -> ScheduleEditorViewModel(params.getOrNull(), params.getOrNull(), get(), get(), get(), get(), get()) }
     // Needs SessionState and the Settings callbacks from sessionModule.
-    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 
     single {
         LocalDataWiper(

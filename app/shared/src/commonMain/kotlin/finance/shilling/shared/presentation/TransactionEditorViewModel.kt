@@ -8,6 +8,8 @@ import finance.shilling.shared.data.PostingWithDetails
 import finance.shilling.shared.data.Receipt
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.ScheduleType
+import finance.shilling.shared.data.analytics.ProductAnalytics
+import finance.shilling.shared.data.analytics.ProductEvent
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.PostingRepository
@@ -76,7 +78,8 @@ class TransactionEditorViewModel(
     categoryRepository: CategoryRepository,
     private val receiptRepository: ReceiptRepository,
     private val fileStore: ReceiptFileStore,
-    private val idGenerator: IdGenerator
+    private val idGenerator: IdGenerator,
+    private val analytics: ProductAnalytics
 ) : ViewModel() {
     private val form = EditorForm(TransactionFields(), if (postingId == null) EditorLoad.READY else EditorLoad.LOADING)
     private var existing: PostingWithDetails? = null
@@ -160,6 +163,7 @@ class TransactionEditorViewModel(
             } else {
                 postingRepository.recordAdHoc(f.title.trim(), amount, f.type, from, f.categoryId, date)
             }
+            viewModelScope.launch { analytics.capture(ProductEvent.POSTING_CREATED) }
             return "Transaction added"
         }
         val posting = details.posting
@@ -197,6 +201,7 @@ class TransactionEditorViewModel(
                 addedAt = Clock.System.now().toEpochMilliseconds()
             )
         )
+        viewModelScope.launch { analytics.capture(ProductEvent.RECEIPT_ATTACHED) }
         return "Receipt attached"
     }
 

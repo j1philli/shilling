@@ -88,6 +88,12 @@ struct OnboardingScreen: View {
                     .padding()
                     .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
+                if state.analyticsAvailable {
+                    Toggle("Share anonymous usage events", isOn: Binding(
+                        get: { state.analyticsConsent },
+                        set: { screen.setAnalyticsConsent(value: $0) }
+                    ))
+                }
                 OptionCard(option: state.getStarted) { screen.getStarted() }
                 OptionCard(option: state.signIn) { screen.open(route: .login) }
                 Button(state.selfHostedLabel) { screen.open(route: .selfHosted) }

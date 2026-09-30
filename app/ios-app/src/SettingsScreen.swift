@@ -42,6 +42,19 @@ struct SettingsScreen: View {
                 if let sync = state.sync {
                     syncSection(sync)
                 }
+                Section("Product analytics") {
+                    Toggle("Share usage events", isOn: Binding(
+                        get: { state.analyticsConsent },
+                        set: { model.screen.setAnalyticsConsent(value: $0) }
+                    ))
+                    .disabled(!state.analyticsConfigured)
+                    Text("No amounts, names, or receipt contents are sent.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                    if !state.analyticsConfigured {
+                        Text("Available after a PostHog project is configured.")
+                            .font(.footnote).foregroundStyle(.secondary)
+                    }
+                }
                 aboutSection
                 if let developer = state.developer,
                    model.screen.developerToolsAlwaysOn || state.developerToolsUnlocked {
@@ -181,6 +194,8 @@ private struct DeveloperSections: View {
 
     @State private var serverUrl = ""
     @State private var householdId = ""
+    @State private var analyticsHost = ""
+    @State private var analyticsProjectToken = ""
 
     var body: some View {
         Section {
@@ -211,6 +226,22 @@ private struct DeveloperSections: View {
         .onAppear {
             if serverUrl.isEmpty { serverUrl = developer.serverUrl }
             if householdId.isEmpty { householdId = developer.householdId }
+            if analyticsHost.isEmpty { analyticsHost = screen.analyticsHost }
+            if analyticsProjectToken.isEmpty { analyticsProjectToken = screen.analyticsProjectToken }
+        }
+
+        Section("PostHog project") {
+            TextField("HTTPS host", text: $analyticsHost)
+                .keyboardType(.URL)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            TextField("Project token", text: $analyticsProjectToken)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            Button("Save PostHog project") {
+                toast = Toast(screen.saveAnalyticsConfig(host: analyticsHost, projectToken: analyticsProjectToken)
+                    ? "PostHog project saved" : "Enter an HTTPS host and project token")
+            }
         }
 
         if !developer.bootstrapLines.isEmpty {
