@@ -100,13 +100,15 @@ Full and Server-only releases promote the exact multi-architecture image digest
 returned by Buildx into the Coolify Docker Image app. Coolify pulls it instead
 of compiling source. The job waits for that deployment to finish and for the
 container to be healthy, then checks the public `/health` and `/api/config`
-endpoints. Supabase authentication must remain enabled. Web deployment follows
+endpoints. The job explicitly sets Supabase mode before starting the public
+container, without reading the secret values. Web deployment follows
 server health checks in a full release; other target releases do not touch Coolify.
 
 The first server release switches from the legacy source app to the prepared
 image app. Both use `api.shilling.finance`; the legacy app stays running until
 the new image is healthy, then is stopped. Both apps have Git auto-deployment
-disabled. The stopped legacy app is retained for recovery. If public checks fail
+disabled. The legacy app is pinned to its last deployed source commit and
+retained for recovery after it is stopped. If public checks fail
 after cutover, the job restores the legacy app (first release) or previous image
 (later releases), and fails with the GitHub release still a draft. A failed or
 timed-out Coolify rollout fails the release before web deploy; inspect/cancel a

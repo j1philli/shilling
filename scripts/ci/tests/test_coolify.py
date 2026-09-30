@@ -77,6 +77,10 @@ class CoolifyTests(unittest.TestCase):
         finished = self.calls.index(('finished', 'deployment'))
         self.assertLess(finished, stop)
         self.public.assert_called_once()
+        auth_i = next(i for i,c in enumerate(self.calls) if c[:2] == ('PATCH', 'applications/new/envs/bulk'))
+        deploy_i = next(i for i,c in enumerate(self.calls) if c[:2] == ('POST', 'deploy'))
+        self.assertLess(auth_i, deploy_i)
+        self.assertEqual(self.calls[auth_i][2]['data'][0]['value'], 'supabase')
 
     def test_failed_rollout_does_not_stop_legacy(self):
         self.wait.side_effect = module.RolloutFailed('deployment failed')

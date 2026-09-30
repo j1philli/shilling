@@ -129,6 +129,12 @@ class Coolify:
         previous = self.check()
         old_running = bool(self.legacy and self.application(self.legacy).get('status', '').startswith('running'))
         reference = IMAGE + '@' + digest
+        # The API may mask environment values. Force the user-required auth
+        # mode before starting a public container, without reading secrets.
+        self.api('applications/' + self.app + '/envs/bulk', 'PATCH', {'data': [{
+            'key': 'SHILLING_AUTH_MODE', 'value': 'supabase', 'is_runtime': True,
+            'is_buildtime': False, 'is_preview': False,
+        }]})
         # Coolify represents a digest as image_name@sha256 + ':' + image_tag.
         self.api('applications/' + self.app, 'PATCH', {
             'docker_registry_image_name': IMAGE + '@sha256',
