@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -65,6 +66,9 @@ def collect_assets(targets, version, output):
             if not sources:
                 raise ValueError(f"Missing tested {target} packages")
             for source in sources:
+                match = re.match(r"^Shilling[_-](\d+\.\d+\.\d+)[_-]", source.name)
+                if not match or match.group(1) != version:
+                    raise ValueError(f"Unexpected {target} package for version {version}: {source.name}")
                 dest = output / source.name
                 if dest.exists():
                     raise ValueError(f"Duplicate release filename: {source.name}")

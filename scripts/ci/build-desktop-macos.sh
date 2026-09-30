@@ -16,6 +16,7 @@ done
 # The web bundle came from the Web Deploy build in this same TeamCity chain.
 # Tauri's DMG bundler skips Finder automation when CI=true. TeamCity does not
 # set this variable by default, and Finder automation blocks headless agents.
+rm -rf src-tauri/target/universal-apple-darwin/release/bundle
 CI=true cargo tauri build --bundles dmg --target universal-apple-darwin --no-sign \
     --config '{"build":{"beforeBuildCommand":""}}'
 
