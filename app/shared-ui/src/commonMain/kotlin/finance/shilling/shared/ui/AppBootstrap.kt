@@ -118,6 +118,8 @@ private class SyncRuntime(
 data class AppBootstrapScaffoldConfig(
     val onboardingTopPadding: Dp = 0.dp,
     val navRailTopPadding: Dp = 0.dp,
+    /** Overrides the navigation rail's width (desktop: room for the macOS traffic lights). */
+    val navRailWidth: Dp = Dp.Unspecified,
     val selfHostedOnly: Boolean = false,
     val defaultSelfHostedServerUrl: String = DEFAULT_SELF_HOSTED_SERVER_URL,
     val cameraButton: ReceiptPickerButton? = null,
@@ -627,6 +629,7 @@ private fun AppBootstrapContent(
                 selfHosted = selfHosted,
                 onRetryHostedBootstrap = hostedBootstrapRetryCallback.onRetry,
                 navRailTopPadding = scaffoldConfig.navRailTopPadding,
+                navRailWidth = scaffoldConfig.navRailWidth,
                 cameraButton = scaffoldConfig.cameraButton,
                 photoButton = scaffoldConfig.photoButton,
                 externalNavRequest = scaffoldConfig.externalNavRequest,
