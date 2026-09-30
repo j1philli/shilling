@@ -46,7 +46,18 @@ fun HostedCredentialsForm(
     var passwordText by remember { mutableStateOf("") }
     var authMessage by remember { mutableStateOf("") }
     var isSubmitting by remember { mutableStateOf(false) }
-    var emailConfirmationSheet by remember { mutableStateOf<EmailConfirmationSheetState?>(null) }
+    var emailNotice by remember { mutableStateOf<String?>(null) }
+
+    emailNotice?.let { notice ->
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Check your email", style = MaterialTheme.typography.titleMedium)
+            Text(notice)
+            Button(onClick = { emailNotice = null; authMessage = ""; mode = HostedCredentialsMode.CREATE_ACCOUNT }) {
+                Text("Use another email")
+            }
+        }
+        return
+    }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
@@ -65,6 +76,7 @@ fun HostedCredentialsForm(
             onValueChange = { emailText = it; authMessage = ""; mode = HostedCredentialsMode.CREATE_ACCOUNT; passwordText = "" },
             label = { Text("Email") },
             singleLine = true,
+            enabled = !isSubmitting,
             modifier = Modifier.fillMaxWidth()
         )
         if (mode == HostedCredentialsMode.SIGN_IN) {
@@ -86,16 +98,13 @@ fun HostedCredentialsForm(
                     } else {
                         val result = onSubmit(mode, emailText.trim(), passwordText)
                         result.onSuccess { submit ->
-                            if (CredentialsCopy.needsEmailConfirmation(result)) {
-                                emailConfirmationSheet = EmailConfirmationSheetState(
-                                    email = emailText.trim(),
-                                    upgradedFromGuest = submit.signUpResult?.upgradedAnonymousSession == true
-                                )
+                            val outcome = CredentialsCopy.outcome(result, emailText.trim())
+                            if (outcome.emailSent) {
+                                emailNotice = outcome.confirmEmailMessage
+                                    ?: "We sent a sign-in link to ${emailText.trim()}. Open it on this device to continue."
                             }
                             if (submit.signUpResult?.existingAccountHasPassword == true) {
                                 mode = HostedCredentialsMode.SIGN_IN
-                            } else {
-                                emailText = ""
                             }
                             passwordText = ""
                         }
@@ -115,7 +124,7 @@ fun HostedCredentialsForm(
                     strokeWidth = 2.dp
                 )
             }
-            Text(CredentialsCopy.submitLabel(mode))
+            Text(if (isSubmitting) "Please wait…" else CredentialsCopy.submitLabel(mode))
         }
         extraActions?.invoke()
         if (authMessage.isNotBlank()) {
@@ -123,11 +132,4 @@ fun HostedCredentialsForm(
         }
     }
 
-    emailConfirmationSheet?.let { sheet ->
-        EmailConfirmationBottomSheet(
-            email = sheet.email,
-            upgradedFromGuest = sheet.upgradedFromGuest,
-            onDismiss = { emailConfirmationSheet = null }
-        )
-    }
 }

@@ -14,7 +14,7 @@ struct CredentialsForm: View {
     @State private var password = ""
     @State private var submitting = false
     @State private var message: String?
-    @State private var confirmEmailMessage: String?
+    @State private var emailNotice: String?
 
     init(
         initialMode: HostedCredentialsMode,
@@ -31,47 +31,52 @@ struct CredentialsForm: View {
     }
 
     var body: some View {
-        Text(CredentialsCopy.shared.prompt(mode: mode, guestUpgrade: guestUpgrade))
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-        if let disabledReason {
-            Text(disabledReason).font(.footnote).foregroundStyle(.secondary)
-        }
-        TextField("Email", text: $email)
-            .textContentType(.emailAddress)
-            .keyboardType(.emailAddress)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            .onChange(of: email) { _, _ in
-                mode = .createAccount
-                password = ""
+        if let emailNotice {
+            Label("Check your email", systemImage: "envelope")
+                .font(.headline)
+            Text(emailNotice)
+                .font(.subheadline)
+            Button("Use another email") {
+                self.emailNotice = nil
                 message = nil
+                mode = .createAccount
             }
-        if mode == .signIn {
-            SecureField("Password", text: $password)
-                .textContentType(.password)
-        }
-        Button {
-            send()
-        } label: {
-            HStack {
-                if submitting { ProgressView() }
-                Text("Continue")
+        } else {
+            Text(CredentialsCopy.shared.prompt(mode: mode, guestUpgrade: guestUpgrade))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            if let disabledReason {
+                Text(disabledReason).font(.footnote).foregroundStyle(.secondary)
+            }
+            TextField("Email", text: $email)
+                .textContentType(.emailAddress)
+                .keyboardType(.emailAddress)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .disabled(submitting)
+                .onChange(of: email) { _, _ in
+                    mode = .createAccount
+                    password = ""
+                    message = nil
+                }
+            if mode == .signIn {
+                SecureField("Password", text: $password)
+                    .textContentType(.password)
+                    .disabled(submitting)
+            }
+            Button {
+                send()
+            } label: {
+                HStack {
+                    if submitting { ProgressView() }
+                    Text(submitting ? "Please wait…" : "Continue")
+                }
+            }
+            .disabled(!enabled || submitting || email.trimmingCharacters(in: .whitespaces).isEmpty)
+            if let message {
+                Text(message).font(.footnote)
             }
         }
-        .disabled(!enabled || submitting || email.trimmingCharacters(in: .whitespaces).isEmpty)
-        if let message {
-            Text(message).font(.footnote)
-        }
-        EmptyView()
-            .alert(CredentialsCopy.shared.CONFIRM_EMAIL_TITLE, isPresented: Binding(
-                get: { confirmEmailMessage != nil },
-                set: { if !$0 { confirmEmailMessage = nil } }
-            )) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(confirmEmailMessage ?? "")
-            }
     }
 
     private func send() {
@@ -82,16 +87,21 @@ struct CredentialsForm: View {
                 message = "Enter your password."
                 return
             }
-            guard let outcome = await submit(mode, email, password) else { return }
+            guard let outcome = await submit(mode, email, password) else {
+                message = "Could not complete the request. Please try again."
+                return
+            }
             message = outcome.message
             if outcome.showPasswordInput {
                 mode = .signIn
                 password = ""
+            } else if outcome.emailSent {
+                emailNotice = outcome.confirmEmailMessage
+                    ?? "We sent a sign-in link to \(email). Open it on this device to continue."
+                password = ""
             } else if outcome.succeeded {
-                email = ""
                 password = ""
             }
-            confirmEmailMessage = outcome.confirmEmailMessage
         }
     }
 

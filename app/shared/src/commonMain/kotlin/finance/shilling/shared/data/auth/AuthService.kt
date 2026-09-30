@@ -1,6 +1,8 @@
 package finance.shilling.shared.data.auth
 
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -41,4 +43,11 @@ interface AuthService {
     suspend fun signOut()
     suspend fun deleteAccount(): Result<Unit>
     suspend fun refreshTokenIfNeeded(): String?
+}
+
+/** Do not let callers inspect a previous identity while Auth processes its session event. */
+internal suspend fun StateFlow<AuthState>.awaitSessionIdentity(userId: String, accessToken: String) {
+    withTimeout(10_000) {
+        first { it.isAuthenticated && it.userId == userId && it.accessToken == accessToken }
+    }
 }

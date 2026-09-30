@@ -211,6 +211,10 @@ class SupabaseAuthService(
             this.email = email
             this.password = password
         }
+        val session = client.auth.currentSessionOrNull() ?: error("Sign-in did not return a session")
+        // Auth's session event is processed asynchronously (including a profile fetch).
+        // The caller must see the signed-in identity before checking the held budget.
+        authState.awaitSessionIdentity(requireNotNull(session.user?.id), session.accessToken)
         log.i { "Signed in" }
     }
 
@@ -345,6 +349,9 @@ class SupabaseAuthService(
         val pendingConfirmation = settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION) == "true"
         val passwordSetupUserId = settings.getStringOrNull(SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID)
         val profile = if (emailConfirmed) fetchUserProfile(userId, token) else null
+        // A profile request for an earlier session can finish after a sign-in or sign-out.
+        val currentSession = client.auth.currentSessionOrNull()
+        if (currentSession?.user?.id != userId || currentSession.accessToken != token) return
         val state = resolveAuthenticatedState(
             userId = userId,
             sessionEmail = sessionEmail,

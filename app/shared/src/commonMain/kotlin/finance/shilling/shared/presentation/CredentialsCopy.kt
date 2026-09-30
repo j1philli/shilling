@@ -9,7 +9,8 @@ data class CredentialsOutcome(
     val message: String,
     /** Non-null when a "Confirm your email" prompt should appear. */
     val confirmEmailMessage: String?,
-    val showPasswordInput: Boolean = false
+    val showPasswordInput: Boolean = false,
+    val emailSent: Boolean = false
 )
 
 /** Copy for the email/password form (Welcome and Settings), shared by every UI. */
@@ -64,11 +65,12 @@ object CredentialsCopy {
         succeeded = result.isSuccess,
         message = resultMessage(result),
         showPasswordInput = result.getOrNull()?.signUpResult?.existingAccountHasPassword == true,
+        emailSent = needsEmailConfirmation(result) || result.getOrNull()?.signUpResult?.signInLinkSent == true,
         confirmEmailMessage = if (needsEmailConfirmation(result)) {
             confirmEmailMessage(
                 email,
                 upgradedFromGuest = result.getOrNull()?.signUpResult?.upgradedAnonymousSession == true
-            ) + "\n\n" + CONFIRM_EMAIL_NOTE
+            )
         } else {
             null
         }

@@ -49,7 +49,7 @@ data class OnboardingUiState(
     val selfHostedMessage: String get() = "Connect to a server you operate yourself."
     val selfHostedHint: String get() = selfHostedError ?: "Enter the server URL for the instance you operate."
     val canContinueSelfHosted: Boolean get() = selfHostedUrl.isNotBlank() && !validatingSelfHosted
-    val keepLabel: String get() = "Keep it"
+    val keepLabel: String get() = "Keep budget and go back"
     /** The self-hosted screen has no way back when it's the only option. */
     val canLeaveSelfHosted: Boolean get() = !selfHostedOnly
 }
@@ -160,7 +160,7 @@ class OnboardingViewModel(
 
     fun dismissDestructive() {
         val pending = local.value.pending ?: return
-        local.update { it.copy(pending = null) }
+        local.update { it.copy(pending = null, route = OnboardingRoute.LANDING) }
         if (pending == Pending.NON_MATCHING_AUTH) viewModelScope.launch { actions.cancelDestructiveAuth() }
     }
 
