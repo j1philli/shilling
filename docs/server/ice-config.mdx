@@ -21,7 +21,7 @@ Returns a list of ICE server configurations with optional time-limited TURN cred
 {
   "iceServers": [
     {
-      "urls": ["stun:stun.l.google.com:19302"]
+      "urls": ["stun:stun.cloudflare.com:3478"]
     },
     {
       "urls": ["turn:turn.example.com:3478"],
@@ -36,7 +36,7 @@ Returns a list of ICE server configurations with optional time-limited TURN cred
 
 ## STUN Only (Default)
 
-When no `SHILLING_TURN_SECRET` is configured, the endpoint returns only STUN servers. This is sufficient for many home and LAN setups.
+When neither coturn nor Cloudflare TURN is configured, the endpoint returns only STUN servers. This is sufficient for many home and LAN setups.
 
 ## Hosted TURN Gating
 
@@ -56,6 +56,21 @@ When `SHILLING_TURN_SECRET` is set, the server generates time-limited TURN crede
 
 These credentials expire after the TTL period, after which clients should request fresh ones.
 
+## Cloudflare Realtime TURN
+
+Create a TURN key in Cloudflare and set `SHILLING_CLOUDFLARE_TURN_KEY_ID` and
+`SHILLING_CLOUDFLARE_TURN_API_TOKEN` on the server. The token stays server-side.
+Do not set `SHILLING_TURN_URLS` or `SHILLING_TURN_SECRET` in this mode.
+The server requests short-lived credentials from Cloudflare's
+`generate-ice-servers` endpoint and returns Cloudflare's ICE server list with
+`ttlSeconds`. `SHILLING_TURN_TTL` defaults to 86400 seconds and must be at most
+172800 seconds (48 hours). If Cloudflare is unavailable, the endpoint returns
+HTTP 502; clients use their STUN fallback.
+
+Clients fetch ICE configuration before opening peer connections. Before the TTL
+expires, they refresh credentials and recreate active peer connections so TURN
+allocations can continue using valid credentials.
+
 ## Client Fallback
 
-If the server is unreachable, clients fall back to Google's public STUN server (`stun:stun.l.google.com:19302`). TURN is not available in this case, and the app does not add a non-WebRTC fallback transport.
+If the server is unreachable, clients fall back to Cloudflare's public STUN server (`stun:stun.cloudflare.com:3478`). TURN is not available in this case, and the app does not add a non-WebRTC fallback transport.

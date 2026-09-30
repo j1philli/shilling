@@ -13,5 +13,7 @@ interface PeerSyncManager {
     suspend fun sendToPeer(peerId: String, change: ChangeMessage)
     suspend fun sendFileMessage(peerId: String, message: FileTransferMessage)
     suspend fun broadcastFileMessage(message: FileTransferMessage)
+    /** Recreate active peer connections after ICE credentials change. */
+    suspend fun refreshIceConnections() {}
     fun stop()
 }

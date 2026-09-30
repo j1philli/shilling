@@ -68,10 +68,11 @@ fun main() {
     log.i { "Shilling server starting on http://localhost:8081" }
     log.i { "Auth mode: ${authConfig.authMode}" }
     log.i { "Mode: signaling + discovery only (no user data stored or relayed)" }
-    if (turnConfig.turnSecret != null) {
-        log.i { "TURN: enabled (${turnConfig.turnUrls.size} server(s), TTL ${turnConfig.ttlSeconds}s)" }
-    } else {
-        log.i { "TURN: disabled (no SHILLING_TURN_SECRET set)" }
+    when {
+        turnConfig.cloudflareEnabled -> log.i { "TURN: Cloudflare enabled (TTL ${turnConfig.ttlSeconds}s)" }
+        turnConfig.turnSecret != null && turnConfig.turnUrls.isNotEmpty() ->
+            log.i { "TURN: coturn enabled (${turnConfig.turnUrls.size} server(s), TTL ${turnConfig.ttlSeconds}s)" }
+        else -> log.i { "TURN: disabled" }
     }
 
     val authEnabled = authConfig.authMode == "supabase"
@@ -103,7 +104,8 @@ fun main() {
             if (authEnabled) {
                 householdRoute(householdLookup, tokenVerifier)
                 hostedEntitlementRoute(tokenVerifier, householdLookup, entitlements, devices,
-                    turnConfigured = turnConfig.turnSecret != null && turnConfig.turnUrls.isNotEmpty())
+                    turnConfigured = turnConfig.cloudflareEnabled ||
+                        (turnConfig.turnSecret != null && turnConfig.turnUrls.isNotEmpty()))
                 hostedDevicesRoute(tokenVerifier, householdLookup, devices, signalingHub)
                 billingConfigRoute(tokenVerifier)
                 hostedSpacesRoute(tokenVerifier,

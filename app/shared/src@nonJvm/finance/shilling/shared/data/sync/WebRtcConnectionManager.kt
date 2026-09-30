@@ -261,6 +261,20 @@ class WebRtcConnectionManager(
         peersWithInboundTraffic.clear()
     }
 
+    override suspend fun refreshIceConnections() {
+        val connectedPeerIds = peers.keys.toList()
+        if (connectedPeerIds.isEmpty()) return
+        log.i { "[RTC] Refreshing ${connectedPeerIds.size} peer connection(s) with current ICE credentials" }
+        connectedPeerIds.forEach { peerId ->
+            cleanupPeer(peerId)
+            if (shouldBeOfferer(deviceId, peerId)) {
+                initiateConnection(peerId)
+            } else {
+                scheduleRetryOffer(peerId)
+            }
+        }
+    }
+
     private suspend fun drainPendingChanges() {
         val outboundPeers = peers.keys.filter { outboundChannel(it) != null }
         if (pendingChanges.isEmpty() || outboundPeers.isEmpty()) return
