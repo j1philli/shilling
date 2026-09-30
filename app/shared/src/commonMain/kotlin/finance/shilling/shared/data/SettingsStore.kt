@@ -2,6 +2,7 @@ package finance.shilling.shared.data
 
 class ServerUrlCallback(val onChange: (String) -> Unit)
 class HouseholdIdCallback(val onChange: (String) -> Unit)
+class CloudRelayCallback(val onChange: (Boolean) -> Unit)
 class ResetOnboardingCallback(val onReset: suspend () -> Unit)
 class RestartHostedLoginCallback(val onRestart: suspend () -> Unit)
 
@@ -29,6 +30,7 @@ const val SETTINGS_KEY_HELD_LOCAL_DATA = "shilling_held_local_data"
 const val SETTINGS_KEY_PENDING_RESTORE_USER_ID = "shilling_pending_restore_user_id"
 const val SETTINGS_KEY_WELCOME_NOTICE = "shilling_welcome_notice"
 const val SETTINGS_KEY_TAB_ORDER = "shilling_tab_order"
+const val SETTINGS_KEY_CLOUD_RELAY_ENABLED = "shilling_cloud_relay_enabled"
 
 // Display preferences
 const val SETTINGS_KEY_THEME_MODE = "shilling_theme_mode"

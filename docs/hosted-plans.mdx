@@ -25,6 +25,8 @@ Space owners and admins can manage registered devices. Side-business spaces will
 
 The hosted device list shows all registrations in the active finance space and labels the account that registered each new device as yours, another member's, or unknown for legacy registrations. Legacy registrations remain unknown until an owner or admin removes them and the device registers again; a peer cannot claim an old device ID merely by reconnecting. Connection badges are computed locally from open WebRTC data channels on the device viewing the list; "not connected" does not mean unregistered or offline. The server does not record P2P connection status. The owner metadata migration must be applied before deploying the server version that uses it.
 
+Settings exposes the device list, relay switch, and subscription controls in the native SwiftUI iOS app and the shared Android, web, and desktop UI. Removing a registration is available to a space owner or admin. The displayed connection status always describes the device currently showing Settings.
+
 ## RevenueCat setup
 
 1. Create Silver and Gold entitlements in one RevenueCat project and attach the iOS, Android, and web products to them. Use the Supabase user ID as the identified RevenueCat App User ID on every surface.

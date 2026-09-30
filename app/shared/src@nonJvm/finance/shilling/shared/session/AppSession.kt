@@ -10,6 +10,7 @@ import finance.shilling.shared.data.IdGenerator
 import finance.shilling.shared.data.LocalDataWiper
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.SETTINGS_KEY_SERVER_URL
+import finance.shilling.shared.data.SETTINGS_KEY_CLOUD_RELAY_ENABLED
 import finance.shilling.shared.data.auth.AuthRuntime
 import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.shared.data.auth.DeviceIdentity
@@ -41,6 +42,7 @@ import finance.shilling.shared.data.store.StoreSyncDeps
 import finance.shilling.shared.data.store.SyncState
 import finance.shilling.shared.data.store.SyncStoreFacade
 import finance.shilling.shared.data.sync.FileTransferManager
+import finance.shilling.shared.data.sync.PeerConnectionStatus
 import finance.shilling.shared.data.sync.IncomingChangeRouter
 import finance.shilling.shared.data.sync.ServerApi
 import finance.shilling.shared.data.sync.SignalingClient
@@ -104,6 +106,7 @@ class AppSession(
     private val fileStore: ReceiptFileStore,
     private val notifier: ChangeNotifier,
     private val syncStoreFacade: SyncStoreFacade,
+    private val peerConnectionStatus: PeerConnectionStatus,
     private val config: AppSessionConfig = AppSessionConfig()
 ) : SessionState, OnboardingActions {
     private val log = Logger.withTag(config.logTag)
@@ -134,7 +137,9 @@ class AppSession(
 
     /** Read by the WebRTC client per connection, so ICE updates apply to new peers. */
     private var iceServers = listOf(WebRtc.IceServer("stun:stun.l.google.com:19302"))
-    private val webRtcClient by lazy { webRtcPlatform.createClient { iceServers } }
+    private var directIceServers = iceServers
+    private var cloudRelayEnabled = settings.getBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, false)
+    private val webRtcClient by lazy { webRtcPlatform.createClient { if (cloudRelayEnabled) iceServers else directIceServers } }
 
     // Settings-derived values, re-read when settingsRevision changes.
     private var derivedRevision = -1
@@ -297,6 +302,14 @@ class AppSession(
         }
     }
 
+    fun changeCloudRelay(enabled: Boolean) {
+        settings.putBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, enabled)
+        scope.launch {
+            cloudRelayEnabled = enabled
+            reconcile()
+        }
+    }
+
     // ── State machine ────────────────────────────────────────────────────────
 
     private fun reconcile() {
@@ -402,21 +415,25 @@ class AppSession(
             authoritativeStatus = startup.bootstrapStatus,
             liveStatus = statusFlow.value
         )
-        syncEffect.update(listOf(effectiveStatus.syncReady, serverUrl, activeHousehold, deviceId, runtime)) {
+        syncEffect.update(listOf(effectiveStatus.syncReady, serverUrl, activeHousehold, deviceId, runtime, cloudRelayEnabled)) {
             if (!effectiveStatus.syncReady) {
                 log.w { "Hosted bootstrap is not ready; signaling remains disabled until auth and household metadata are available" }
                 return@update
             }
             val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + syncExceptionHandler)
             log.i { "Starting sync services (device=$deviceId, server=$serverUrl, ws=$wsUrl, household=$activeHousehold)" }
-            runtime.signalingClient.connect(syncScope)
-            runtime.peerSyncManager.start(syncScope)
-            runtime.incomingChangeRouter.start(syncScope)
             val serverApi = ServerApi(httpClient, serverUrl, authService)
             syncScope.launch {
                 try {
-                    val fetched = serverApi.fetchIceServers().iceServers
-                        .flatMap { cfg -> cfg.urls.map { WebRtc.IceServer(it) } }
+                    iceServers = directIceServers
+                    val response = serverApi.fetchIceServers(allowRelay = cloudRelayEnabled)
+                    val fetched = response.iceServers.map { cfg ->
+                        WebRtc.IceServer(cfg.urls, cfg.username.orEmpty(), cfg.credential.orEmpty())
+                    }
+                    val direct = response.iceServers.filter { cfg ->
+                        cfg.urls.none { it.startsWith("turn:", ignoreCase = true) || it.startsWith("turns:", ignoreCase = true) }
+                    }.map { cfg -> WebRtc.IceServer(cfg.urls, cfg.username.orEmpty(), cfg.credential.orEmpty()) }
+                    if (direct.isNotEmpty()) directIceServers = direct
                     if (fetched.isNotEmpty()) {
                         iceServers = fetched
                         log.i { "ICE servers updated: ${fetched.size} entries" }
@@ -424,6 +441,9 @@ class AppSession(
                 } catch (e: Exception) {
                     log.w { "ICE server fetch failed: ${e.message}" }
                 }
+                runtime.signalingClient.connect(syncScope)
+                runtime.peerSyncManager.start(syncScope)
+                runtime.incomingChangeRouter.start(syncScope)
             }
             syncScope.launch {
                 webRtcPlatform.resumeSignals.collect {
@@ -556,7 +576,10 @@ class AppSession(
             httpClient, syncConfig.serverUrl, syncConfig.deviceId, syncConfig.householdId, authService
         )
         val webRtcManager = WebRtcConnectionManager(
-            webRtcClient, signalingClient, syncConfig.deviceId, delayFn = webRtcPlatform.delayFn
+            webRtcClient, signalingClient, syncConfig.deviceId,
+            peerConnectionStatus = peerConnectionStatus,
+            allowRelay = { cloudRelayEnabled },
+            delayFn = webRtcPlatform.delayFn
         )
         val incomingChangeRouter = IncomingChangeRouter(
             syncStoreFacade,
@@ -592,6 +615,7 @@ class AppSession(
             heldLocalData = hasHeldLocalData(settings)
             notice = welcomeNotice(settings)
             hadAccountSession = hadPersistedAccountSession(settings)
+            cloudRelayEnabled = settings.getBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, false)
             derivedOnboarding = onboardingComplete
         } else if (derivedOnboarding != onboardingComplete) {
             derivedOnboarding = onboardingComplete

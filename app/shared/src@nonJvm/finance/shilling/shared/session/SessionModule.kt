@@ -1,6 +1,7 @@
 package finance.shilling.shared.session
 
 import finance.shilling.shared.data.HouseholdIdCallback
+import finance.shilling.shared.data.CloudRelayCallback
 import finance.shilling.shared.data.ResetOnboardingCallback
 import finance.shilling.shared.data.RestartHostedLoginCallback
 import finance.shilling.shared.data.ServerUrlCallback
@@ -25,6 +26,7 @@ val sessionModule: Module = module {
             fileStore = get(),
             notifier = get(),
             syncStoreFacade = get(),
+            peerConnectionStatus = get(),
             config = getOrNull() ?: AppSessionConfig()
         )
     }
@@ -38,4 +40,5 @@ val sessionModule: Module = module {
     single { RestartHostedLoginCallback(get<AppSession>()::restartHostedLogin) }
     single { ServerUrlCallback(get<AppSession>()::changeServerUrl) }
     single { HouseholdIdCallback(get<AppSession>()::changeHouseholdId) }
+    single { CloudRelayCallback(get<AppSession>()::changeCloudRelay) }
 }

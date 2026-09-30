@@ -6,6 +6,8 @@ import finance.shilling.shared.presentation.CredentialsCopy
 import finance.shilling.shared.presentation.CredentialsOutcome
 import finance.shilling.shared.presentation.SettingsUiState
 import finance.shilling.shared.presentation.SettingsViewModel
+import finance.shilling.shared.presentation.HostedDevicesViewModel
+import finance.shilling.shared.presentation.HostedDevicesUiState
 import finance.shilling.shared.presentation.ThemeMode
 import finance.shilling.shared.presentation.fullLabel
 import finance.shilling.shared.session.HostedCredentialsMode
@@ -15,9 +17,13 @@ import kotlinx.datetime.DayOfWeek
 /** Swift-facing Settings. Week days and results are flattened to Swift-friendly types. */
 class SettingsScreenModel : IosViewModelHost() {
     private val viewModel = viewModel<SettingsViewModel>()
+    private val devicesViewModel = viewModel<HostedDevicesViewModel>()
 
     @NativeCoroutinesState
     val state: StateFlow<SettingsUiState> = viewModel.state
+
+    @NativeCoroutinesState
+    val devicesState: StateFlow<HostedDevicesUiState> = devicesViewModel.state
 
     /** Show developer tools without the About-tap unlock. */
     val developerToolsAlwaysOn: Boolean = isDebugBuild()
@@ -33,6 +39,61 @@ class SettingsScreenModel : IosViewModelHost() {
     fun setWeekStart(index: Int) = viewModel.setWeekStart(DayOfWeek.entries[index])
     fun aboutTapped(): Boolean = viewModel.aboutTapped()
     fun retrySync() = viewModel.retrySync()
+    fun refreshDevices() = devicesViewModel.refresh()
+    fun setCloudRelay(enabled: Boolean) = devicesViewModel.setCloudRelay(enabled)
+
+    @NativeCoroutines
+    suspend fun removeDevice(deviceId: String): String = devicesViewModel.removeDevice(deviceId)
+
+    @NativeCoroutines
+    suspend fun silverOffers(): List<IosBillingOffer> = billingOffers(gold = false)
+
+    @NativeCoroutines
+    suspend fun goldOffers(): List<IosBillingOffer> = billingOffers(gold = true)
+
+    @NativeCoroutines
+    suspend fun purchaseSilver(packageId: String): Boolean = purchase(gold = false, packageId = packageId)
+
+    @NativeCoroutines
+    suspend fun purchaseGold(packageId: String): Boolean = purchase(gold = true, packageId = packageId)
+
+    @NativeCoroutines
+    suspend fun restorePurchases() {
+        requireBillingIdentity()
+        IosBilling.restore()
+        devicesViewModel.refresh()
+    }
+
+    @NativeCoroutines
+    suspend fun subscriptionManagementUrl(): String? {
+        requireBillingIdentity()
+        return IosBilling.managementUrl()
+    }
+
+    private suspend fun billingOffers(gold: Boolean): List<IosBillingOffer> {
+        val config = requireBillingIdentity()
+        val offeringId = if (gold) config.goldOfferingId else config.silverOfferingId
+        return offeringId?.let { IosBilling.offers(it) }.orEmpty()
+    }
+
+    private suspend fun purchase(gold: Boolean, packageId: String): Boolean {
+        val config = requireBillingIdentity()
+        val offeringId = (if (gold) config.goldOfferingId else config.silverOfferingId)
+            ?: error("Subscription offering unavailable")
+        val purchased = IosBilling.purchase(offeringId, packageId)
+        if (purchased) devicesViewModel.refresh()
+        return purchased
+    }
+
+    private suspend fun requireBillingIdentity(): finance.shilling.core.auth.HostedBillingConfig {
+        val state = devicesViewModel.state.value
+        check(state.canPurchase) { "Sign in to manage subscriptions" }
+        val config = state.billingConfig ?: error("Subscription setup unavailable")
+        val userId = state.userId ?: error("Account unavailable")
+        val key = config.iosPublicKey ?: error("iOS subscription key unavailable")
+        IosBilling.configure(key, userId)
+        return config
+    }
     fun saveServerUrl(url: String): String = viewModel.saveServerUrl(url)
     fun saveHouseholdId(id: String): String = viewModel.saveHouseholdId(id)
 
