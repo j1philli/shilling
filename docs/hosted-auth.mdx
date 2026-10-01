@@ -55,7 +55,7 @@ create table if not exists public.user_profiles (
 
 Each new `auth.users` row should also create a `public.user_profiles` row. Hosted bootstrap will fail by design if the authenticated user has no hosted household metadata.
 
-The production schema is managed by `supabase/migrations/`. Its metadata policy grants authenticated clients read access to only their own `user_id`, `tier`, and `has_password`. No client can update `user_profiles`, and `waitlist` is inaccessible through the public Data API. The server's secret key performs the household lookup. The Auth trigger in `supabase/migrations/20260928184917_secure_profile_tier_after_email_confirmation.sql` updates a profile's tier only after its email is confirmed. It preserves the user's ID and household during a guest upgrade.
+The production schema is managed by `supabase/migrations/`. Its metadata policy grants authenticated clients read access to only their own `user_id`, `tier`, and `has_password`. No client can update `user_profiles`, and `waitlist` is inaccessible through the public Data API. The server's secret key performs the household lookup. The Auth trigger in `supabase/migrations/20260928184917_secure_profile_tier_after_email_confirmation.sql` updates a profile's tier only after its email is confirmed. It preserves the user's ID and household during a guest upgrade. Legacy profile tiers do not grant paid access; paid capabilities come from server-verified RevenueCat entitlements. The hosted space migration backfills memberships and assigns an owner to each existing space.
 
 Guest upgrades request an email change on the anonymous session. The account remains Guest until Supabase reports the email as confirmed. After confirmation, the app refreshes the same session and prompts for a password; it never collects or caches that password while confirmation is pending. The profile trigger in `supabase/migrations/20260930173234_track_profile_password_setup.sql` tracks whether a password has been set so the prompt survives an app restart. Manual identity linking and email confirmation must be enabled in Supabase Auth.
 
@@ -95,8 +95,9 @@ For modern Supabase projects using asymmetric signing keys such as `ECC P-256`, 
 
 ## What Is Not Implemented Yet
 
-- dedicated sign-in and account-management screens outside the developer settings surface
-- tier/device metadata endpoints such as `/api/tier` or `/api/devices`
+- dedicated sign-in and account-management screens outside the settings surface
+- finance-space invitations and multiple-space management
+- configured RevenueCat products and hosted purchase deployment
 - backup peer and hosted backup storage
 - hosted abuse controls beyond the current join authorization path
 - full Store5 boundary cleanup in sync and projection code

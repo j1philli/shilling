@@ -1,5 +1,6 @@
 package finance.shilling.server
 
+import finance.shilling.core.auth.turnEnabled
 import finance.shilling.core.sync.IceServerConfig
 import finance.shilling.core.sync.IceServersResponse
 import io.ktor.server.application.call
@@ -44,7 +45,9 @@ fun generateTurnCredentials(secret: String, ttlSeconds: Int): Pair<String, Strin
 fun Routing.iceServerRoute(
     turnConfig: TurnConfig,
     authEnabled: Boolean = false,
-    tokenVerifier: SupabaseTokenVerifier? = null
+    tokenVerifier: SupabaseTokenVerifier? = null,
+    householdLookup: HouseholdMembershipLookup? = null,
+    entitlements: HostedEntitlementLookup? = null
 ) {
     get("/api/ice-servers") {
         val servers = mutableListOf<IceServerConfig>()
@@ -54,16 +57,23 @@ fun Routing.iceServerRoute(
             servers.add(IceServerConfig(urls = turnConfig.stunUrls))
         }
 
-        // TURN only for authenticated users (when auth enabled) or always (self-hosted)
-        val includeTurn = if (!authEnabled) {
+        // Hosted TURN is a household entitlement; authentication alone does not grant it.
+        val relayRequested = call.request.queryParameters["allowRelay"] == "true"
+        val includeTurn = if (!relayRequested) {
+            false
+        } else if (!authEnabled) {
             true
         } else {
-            tokenVerifier?.verifyUserToken(
+            val user = tokenVerifier?.verifyUserToken(
                 call.request.headers[io.ktor.http.HttpHeaders.Authorization]
                     ?.removePrefix("Bearer ")
                     ?.trim()
                     .orEmpty()
-            ) != null
+            )
+            val householdId = user?.userId?.let { householdLookup?.householdIdForUser(it) }
+            if (householdId == null) false else runCatching {
+                entitlements?.householdPlan(householdId)?.turnEnabled() == true
+            }.getOrDefault(false)
         }
 
         if (includeTurn && turnConfig.turnUrls.isNotEmpty() && turnConfig.turnSecret != null) {

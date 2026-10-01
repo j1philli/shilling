@@ -315,6 +315,42 @@ class AuthBootstrapTest {
     }
 
     @Test
+    fun differentHostedHouseholdCannotStartSyncWithExistingLocalData() = runBlocking {
+        val settings = hostedSettings().also {
+            it.putString(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID, "old-household")
+        }
+        val authService = FakeAuthService("device-1", accountAuthenticatedState("device-1"))
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val httpClient = mockHttpClient { request ->
+            when (request.url.encodedPath) {
+                "/api/config" -> jsonResponse("""{"authMode":"SUPABASE","supabaseUrl":"https://supabase.test","supabaseAnonKey":"anon-key"}""")
+                "/api/household" -> jsonResponse("""{"householdId":"new-household"}""")
+                else -> error("Unexpected path: ${request.url.encodedPath}")
+            }
+        }
+
+        try {
+            val resolution = resolveStartupIdentity(
+                httpClient = httpClient,
+                serverUrl = "https://example.test",
+                settings = settings,
+                idGenerator = TestIdGenerator(),
+                deviceId = "device-1",
+                scope = scope,
+                authServiceFactory = { _, _, _, _, _ -> authService }
+            )
+
+            assertEquals(HostedBootstrapPhase.WAITING_FOR_HOUSEHOLD, resolution.identity.bootstrapStatus.phase)
+            assertFalse(resolution.identity.bootstrapStatus.syncReady)
+            assertEquals("old-household", resolution.identity.activeHouseholdId)
+            assertEquals("old-household", settings.getStringOrNull(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID))
+        } finally {
+            httpClient.close()
+            scope.cancel()
+        }
+    }
+
+    @Test
     fun authRuntimeIsReusedWhileConfigStaysTheSame() = runBlocking {
         val settings = isolatedSettings()
         val authService = FakeAuthService(

@@ -26,6 +26,9 @@ class SignalingClient(
     private val _incomingMessages = MutableSharedFlow<SignalingMessage>(extraBufferCapacity = 64)
     val incomingMessages: SharedFlow<SignalingMessage> = _incomingMessages
 
+    private val _policyRejected = MutableStateFlow(false)
+    val policyRejected: StateFlow<Boolean> = _policyRejected.asStateFlow()
+
     private var session: WebSocketSession? = null
     private var connectionJob: Job? = null
     private val backoff = ReconnectBackoff()
@@ -42,6 +45,7 @@ class SignalingClient(
             it.cancel()
         }
         session = null
+        _policyRejected.value = false
         connectionJob = scope.launch {
             backoff.reset()
             while (isActive) {
@@ -69,6 +73,9 @@ class SignalingClient(
                                 }
                             }
                             log.w { "[SIG] Incoming frame loop ended (server closed connection)" }
+                            if (closeReason.await()?.code == CloseReason.Codes.VIOLATED_POLICY.code) {
+                                _policyRejected.value = true
+                            }
                         } finally {
                             log.i { "[SIG] Frame loop exited — sending Close frame" }
                             withContext(NonCancellable) {
@@ -92,6 +99,9 @@ class SignalingClient(
                     }
                 }
                 session = null
+                // Do not silently re-register a removed device or retry a rejected join.
+                // An explicit sync restart may attempt registration again.
+                if (_policyRejected.value) break
                 if (!isActive) break
                 log.i { "[SIG] Reconnecting in ${backoff.currentMs}ms..." }
                 if (backoff.await()) log.i { "[SIG] Woken early — reconnecting now" }

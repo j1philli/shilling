@@ -8,6 +8,24 @@ import kotlin.test.assertTrue
 
 class SupabaseAuthServiceStateTest {
     @Test
+    fun legacyPaidProfileDoesNotGrantPaidAccess() {
+        val authState = resolveAuthenticatedState(
+            userId = "user-1",
+            sessionEmail = "user@example.com",
+            emailConfirmed = true,
+            token = "token-1",
+            deviceId = "device-1",
+            profileTier = UserTier.PAID,
+            pendingEmail = null,
+            pendingEmailConfirmation = false,
+            needsPasswordSetup = false
+        )
+
+        assertEquals(UserTier.FREE, authState.tier)
+        assertFalse(authState.isAnonymous)
+    }
+
+    @Test
     fun pendingEmailConfirmationKeepsGuestTier() {
         val authState = resolveAuthenticatedState(
             userId = "user-1",

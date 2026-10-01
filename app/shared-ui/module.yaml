@@ -10,6 +10,9 @@ repositories:
   - id: google-canonical
     url: https://dl.google.com/dl/android/maven2
 
+aliases:
+  - nativeBilling: [android, iosArm64, iosSimulatorArm64]
+
 dependencies:
   - ../shared
   - ../../core
@@ -35,6 +38,9 @@ dependencies:
   - $libs.compose.material3.adaptive
   - $libs.navigation.compose
   - $libs.navigationevent.compose
+
+dependencies@nativeBilling:
+  - $libs.revenuecat.kmp.core
 
 settings:
   compose:

@@ -10,7 +10,7 @@ The server provides a dynamic ICE server configuration endpoint so clients do no
 ## Endpoint
 
 ```
-GET /api/ice-servers
+GET /api/ice-servers?allowRelay=true
 ```
 
 Returns a list of ICE server configurations with optional time-limited TURN credentials.
@@ -40,10 +40,10 @@ When no `SHILLING_TURN_SECRET` is configured, the endpoint returns only STUN ser
 
 ## Hosted TURN Gating
 
-TURN access is gated by auth mode:
+TURN access requires an explicit `allowRelay=true` request from the device. Omitted or false requests receive STUN only. With consent, access is gated by auth mode:
 
-- self-hosted mode: TURN is returned whenever TURN is configured
-- hosted mode: TURN is returned only for requests with a valid authenticated bearer token
+- self-hosted mode: TURN is returned when TURN is configured
+- hosted mode: TURN is returned only when the authenticated user's household has an active Silver or Gold entitlement
 
 STUN is always returned.
 

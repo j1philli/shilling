@@ -60,6 +60,8 @@ fun main() {
         require(householdLookup != null) { "Hosted auth requires Supabase URL and server key" }
         require(!authConfig.supabaseAnonKey.isNullOrBlank()) { "Hosted auth requires a publishable key" }
     }
+    val entitlements = createHostedEntitlementLookup(authConfig)
+    val devices = createHostedDeviceRegistry(authConfig)
 
     log.i { "Shilling server starting on http://localhost:8081" }
     log.i { "Auth mode: ${authConfig.authMode}" }
@@ -94,11 +96,16 @@ fun main() {
         routing {
             get("/health") { call.respondText("ok") }
             configRoute(authConfig)
-            iceServerRoute(turnConfig, authEnabled = authEnabled, tokenVerifier = tokenVerifier)
+            iceServerRoute(turnConfig, authEnabled = authEnabled, tokenVerifier = tokenVerifier,
+                householdLookup = householdLookup, entitlements = entitlements)
             if (authEnabled) {
                 householdRoute(householdLookup, tokenVerifier)
+                hostedEntitlementRoute(tokenVerifier, householdLookup, entitlements, devices,
+                    turnConfigured = turnConfig.turnSecret != null && turnConfig.turnUrls.isNotEmpty())
+                hostedDevicesRoute(tokenVerifier, householdLookup, devices, signalingHub)
+                billingConfigRoute(tokenVerifier)
             }
-            signalingRoute(signalingHub, tokenVerifier, householdLookup)
+            signalingRoute(signalingHub, tokenVerifier, householdLookup, entitlements, devices)
         }
     }.start(wait = true)
 }

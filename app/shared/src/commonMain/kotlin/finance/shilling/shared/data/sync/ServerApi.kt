@@ -2,6 +2,9 @@ package finance.shilling.shared.data.sync
 
 import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.core.auth.HostedHouseholdResponse
+import finance.shilling.core.auth.HostedEntitlementsResponse
+import finance.shilling.core.auth.HostedBillingConfig
+import finance.shilling.core.auth.RegisteredDevice
 import finance.shilling.core.auth.ServerConfig
 import finance.shilling.core.sync.IceServersResponse
 import io.ktor.client.*
@@ -9,6 +12,7 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.http.encodeURLPathPart
 import io.ktor.client.plugins.websocket.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
@@ -26,8 +30,8 @@ class ServerApi(
         }
     }
 
-    suspend fun fetchIceServers(): IceServersResponse =
-        httpClient.get("$baseUrl/api/ice-servers") {
+    suspend fun fetchIceServers(allowRelay: Boolean = false): IceServersResponse =
+        httpClient.get("$baseUrl/api/ice-servers?allowRelay=$allowRelay") {
             expectSuccess = true
             withAuth()
         }.body()
@@ -42,6 +46,37 @@ class ServerApi(
             expectSuccess = true
             withAuth()
         }.body()
+
+    suspend fun fetchEntitlements(): HostedEntitlementsResponse =
+        httpClient.get("$baseUrl/api/tier?refresh=true") {
+            expectSuccess = true
+            withAuth()
+        }.body()
+
+    suspend fun fetchBillingConfig(): HostedBillingConfig =
+        httpClient.get("$baseUrl/api/billing/config") {
+            expectSuccess = true
+            withAuth()
+        }.body()
+
+    suspend fun fetchDevices(): List<String> =
+        httpClient.get("$baseUrl/api/devices") {
+            expectSuccess = true
+            withAuth()
+        }.body()
+
+    suspend fun fetchDeviceDetails(): List<RegisteredDevice> =
+        httpClient.get("$baseUrl/api/devices/details") {
+            expectSuccess = true
+            withAuth()
+        }.body()
+
+    suspend fun removeDevice(deviceId: String) {
+        httpClient.delete("$baseUrl/api/devices/${deviceId.encodeURLPathPart()}") {
+            expectSuccess = true
+            withAuth()
+        }
+    }
 }
 
 fun createSyncHttpClient(): HttpClient = HttpClient {

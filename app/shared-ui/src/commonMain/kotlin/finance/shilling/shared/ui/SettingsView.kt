@@ -14,8 +14,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -32,11 +35,15 @@ import finance.shilling.shared.presentation.DeveloperInfo
 import finance.shilling.shared.presentation.SettingsAccount
 import finance.shilling.shared.presentation.SettingsUiState
 import finance.shilling.shared.presentation.SettingsViewModel
+import finance.shilling.shared.presentation.HostedDevicesViewModel
+import finance.shilling.shared.presentation.HostedDevicesUiState
+import finance.shilling.core.auth.HostedPlan
 import finance.shilling.shared.presentation.SyncStatusUi
 import finance.shilling.shared.presentation.fullLabel
 import finance.shilling.shared.presentation.label
 import finance.shilling.shared.session.HostedCredentialsMode
 import kotlinx.coroutines.launch
+import io.ktor.http.encodeURLPathPart
 import kotlinx.datetime.DayOfWeek
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -44,9 +51,11 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun SettingsView(
     developerToolsEnabled: Boolean,
-    viewModel: SettingsViewModel = koinViewModel()
+    viewModel: SettingsViewModel = koinViewModel(),
+    devicesViewModel: HostedDevicesViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val devicesState by devicesViewModel.state.collectAsState()
     val snackbar = LocalSnackbarController.current
     val showDeveloperTools = developerToolsEnabled || state.developerToolsUnlocked
 
@@ -62,6 +71,14 @@ fun SettingsView(
             state.sync?.let { sync ->
                 ListSectionHeader("Sync")
                 SyncStatusSection(sync, onRetry = viewModel::retrySync)
+            }
+            if (devicesState.visible) {
+                ListSectionHeader("Devices & relay")
+                DevicesSection(devicesState, devicesViewModel)
+                if (!devicesState.selfHosted) {
+                    ListSectionHeader("Subscription")
+                    HostedBillingSection(devicesState, devicesViewModel)
+                }
             }
 
             ListSectionHeader("About")
@@ -86,6 +103,121 @@ fun SettingsView(
                 DeveloperToolsSection(developer, viewModel)
             }
         }
+    }
+}
+
+@Composable
+private fun HostedBillingSection(state: HostedDevicesUiState, viewModel: HostedDevicesViewModel) {
+    val config = state.billingConfig
+    val scope = rememberCoroutineScope()
+    val uriHandler = LocalUriHandler.current
+    var silverOffers by remember { mutableStateOf<List<BillingOffer>>(emptyList()) }
+    var goldOffers by remember { mutableStateOf<List<BillingOffer>>(emptyList()) }
+    var managementUrl by remember { mutableStateOf<String?>(null) }
+    var status by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(config, state.userId) {
+        silverOffers = emptyList()
+        goldOffers = emptyList()
+        managementUrl = null
+        val userId = state.userId ?: return@LaunchedEffect
+        val key = config?.let { PlatformBilling.publicKey(it) } ?: return@LaunchedEffect
+        if (!state.canPurchase || !PlatformBilling.usesNativeStore) return@LaunchedEffect
+        runCatching {
+            PlatformBilling.configure(key, userId)
+            silverOffers = config.silverOfferingId?.let { PlatformBilling.offers(it) }.orEmpty()
+            goldOffers = config.goldOfferingId?.let { PlatformBilling.offers(it) }.orEmpty()
+            managementUrl = PlatformBilling.managementUrl()
+        }.onFailure { status = it.message ?: "Could not load subscription offers" }
+    }
+
+    ShillingCard {
+        Text("Hosted plan", style = MaterialTheme.typography.titleMedium)
+        Text("Your plan: ${state.accountPlan?.name?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "Loading"}")
+        Text(if (state.bankReadingEnabled) "Bank reading is included when available" else "Bank reading requires Silver")
+        if (!state.canPurchase) {
+            Text("Create an account to subscribe and restore purchases on other devices.")
+        } else if (PlatformBilling.usesNativeStore) {
+            listOf(HostedPlan.SILVER to silverOffers, HostedPlan.GOLD to goldOffers).forEach { (plan, offers) ->
+                offers.forEach { offer ->
+                    Button(onClick = {
+                        val offeringId = if (plan == HostedPlan.SILVER) config?.silverOfferingId else config?.goldOfferingId
+                        if (offeringId != null) scope.launch {
+                            runCatching { PlatformBilling.purchase(offeringId, offer.packageId) }
+                                .onSuccess { if (it) { status = "Purchase complete. Refreshing plan..."; viewModel.refresh() } }
+                                .onFailure { status = it.message ?: "Purchase failed" }
+                        }
+                    }) { Text("${plan.name.lowercase().replaceFirstChar { it.uppercase() }}: ${offer.title} — ${offer.price}") }
+                }
+            }
+            if (config != null) OutlinedButton(onClick = {
+                scope.launch {
+                    runCatching { PlatformBilling.restore() }
+                        .onSuccess { status = "Purchases restored. Refreshing plan..."; viewModel.refresh() }
+                        .onFailure { status = it.message ?: "Restore failed" }
+                }
+            }) { Text("Restore purchases") }
+        } else {
+            listOf(HostedPlan.SILVER to config?.silverWebPurchaseUrl, HostedPlan.GOLD to config?.goldWebPurchaseUrl)
+                .forEach { (plan, link) ->
+                    val userId = state.userId
+                    if (link != null && userId != null) Button(onClick = {
+                        PlatformBilling.openCheckout("${link.trimEnd('/')}/${userId.encodeURLPathPart()}")
+                        status = "Complete checkout in your browser, then refresh your plan."
+                    }) { Text("Explore ${plan.name.lowercase().replaceFirstChar { it.uppercase() }}") }
+                }
+        }
+        val accountPlan = state.accountPlan
+        if (accountPlan != null && accountPlan >= HostedPlan.SILVER) {
+            if (managementUrl != null) {
+                OutlinedButton(onClick = { uriHandler.openUri(managementUrl!!) }) { Text("Manage subscription") }
+            } else {
+                Text("Manage your subscription from the portal link in your billing email or your app store settings.")
+            }
+        }
+        status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+        OutlinedButton(onClick = viewModel::refresh) { Text("Refresh plan") }
+    }
+}
+
+@Composable
+private fun DevicesSection(state: HostedDevicesUiState, viewModel: HostedDevicesViewModel) {
+    val scope = rememberCoroutineScope()
+    val snackbar = LocalSnackbarController.current
+    ShillingCard {
+        Text("Cloud relay", style = MaterialTheme.typography.titleMedium)
+        Text("Allow this device to use a TURN server when direct WebRTC cannot connect. The relay carries encrypted traffic.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Switch(
+            checked = state.relayEnabled,
+            enabled = state.relayAvailable || state.relayEnabled,
+            onCheckedChange = viewModel::setCloudRelay
+        )
+        if (!state.selfHosted && !state.relayAvailable) {
+            Text("Cloud relay requires Silver or Gold and a configured TURN server.",
+                style = MaterialTheme.typography.bodySmall)
+        }
+    }
+    if (!state.selfHosted) ShillingCard {
+        Text("Devices in this finance space", style = MaterialTheme.typography.titleMedium)
+        state.planLabel?.let { Text("$it plan · ${state.deviceAllowance ?: ""}") }
+        Text("Connection status is measured from this device's WebRTC data channels.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (state.loading) CircularProgressIndicator(modifier = Modifier.size(20.dp))
+        state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        state.devices.forEach { device ->
+            Text(device.deviceId, style = MaterialTheme.typography.bodySmall)
+            Text("${device.ownerLabel} · ${device.connectionLabel}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (device.canRemove) {
+                OutlinedButton(onClick = {
+                    scope.launch { snackbar.show(viewModel.removeDevice(device.deviceId)) }
+                }) { Text("Remove device") }
+            }
+        }
+        OutlinedButton(onClick = viewModel::refresh) { Text("Refresh devices") }
     }
 }
 
@@ -171,11 +303,6 @@ private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewMode
             }
             is SettingsAccount.SignedIn -> {
                 Text(account.title, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    account.planLabel,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
                 account.pendingConfirmation?.let { PendingConfirmation(it) }
                 if (account.needsPasswordSetup) {
                     Text("Email confirmed. Set a password to sign in on another device.")

@@ -448,7 +448,7 @@ internal fun resolveAuthenticatedState(
     val effectiveEmail = if (keepPendingConfirmation) pendingEmail else sessionEmail
     val effectiveTier = when {
         !emailConfirmed -> UserTier.ANONYMOUS
-        profileTier == UserTier.PAID -> UserTier.PAID
+        // Legacy profile tier cannot grant paid access; /api/tier verifies RevenueCat.
         else -> UserTier.FREE
     }
     return AuthState(
