@@ -122,6 +122,8 @@ Two fresh anonymous users will get different households. To test shared hosted s
 
 ## Confirmation email branding
 
-`supabase/templates/confirm-email.html` is the source for both hosted signup and email-change confirmation templates. Both use the subject **Confirm your email address — Shilling**. Guest upgrades use Supabase's email-change operation internally, but the email asks users to confirm their address. The template uses Shilling's gold palette, inline styles, a mobile-friendly table layout, and `{{ .ConfirmationURL }}` for the button and fallback link. It does not reconstruct verification tokens or change mobile redirect behavior.
+`supabase/templates/confirm-email.html` is the source for both hosted signup and email-change confirmation templates. Both use the subject **Confirm your email address — Shilling**. Guest upgrades use Supabase's email-change operation internally, but the email asks users to confirm their address. The template uses the website's actual coin asset, dark palette, bright gold (`#eab308`), and Inter/system font stack with inline styles and a mobile-friendly table layout, and `{{ .ConfirmationURL }}` for the button and fallback link. It does not reconstruct verification tokens or change mobile redirect behavior.
 
 Deploy through the Auth Management API using `mailer_subjects_confirmation`, `mailer_subjects_email_change`, `mailer_templates_confirmation_content`, and `mailer_templates_email_change_content`. The production settings were updated and read back on 2026-10-01.
+
+Brand source: `j1philli/shilling.finance` commit `4179e4a974f774724fbde5db3d453b2f7a52bed7`, `src/index.css` and `src/assets/logo.png`. An unchanged logo copy is versioned at `supabase/templates/assets/shilling-logo.png` and served publicly from the Supabase `brand-assets` bucket, so email images do not depend on the website's access checks. Custom fonts fall back to system fonts in clients that block web fonts.

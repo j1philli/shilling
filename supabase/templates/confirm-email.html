@@ -3,30 +3,35 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <title>Confirm your email address</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f4f4f4;color:#1c1c1c;font-family:Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background-color:#060606;color:#fafafa;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;">One quick step to confirm your email address for Shilling.</div>
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f4f4f4;table-layout:fixed;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#060606;table-layout:fixed;">
     <tr><td align="center" style="padding:32px 16px;">
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;table-layout:fixed;">
-        <tr><td style="padding:0 0 24px;font-size:26px;font-weight:700;letter-spacing:-1px;color:#1c1c1c;">Shilling<span style="color:#a16207;">.</span></td></tr>
-        <tr><td style="background-color:#ffffff;border:1px solid #e5e5e5;border-top:4px solid #a16207;border-radius:12px;padding:32px 24px;">
-          <h1 style="margin:0 0 20px;font-size:28px;line-height:1.2;letter-spacing:-0.6px;color:#1c1c1c;">Confirm your email address</h1>
-          <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#5e5e5e;">Confirm this email address for your Shilling account.</p>
-          <p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#5e5e5e;">Open this email on the device where you started, then tap below to continue.</p>
+        <tr><td align="center" style="padding:8px 0 28px;">
+          <img src="https://rjzjwibztzaovgwkdmlg.supabase.co/storage/v1/object/public/brand-assets/shilling-logo.png" width="80" height="80" alt="Shilling" style="display:block;border:0;border-radius:50%;">
+          <p style="margin:14px 0 0;font-size:22px;font-weight:600;letter-spacing:-0.5px;color:#fafafa;">Shilling</p>
+        </td></tr>
+        <tr><td style="background-color:#0d0d0d;border:1px solid #262626;border-radius:16px;padding:36px 24px;">
+          <p style="margin:0 0 12px;font-size:12px;font-weight:600;letter-spacing:1.5px;color:#eab308;">YOUR SHILLING ACCOUNT</p>
+          <h1 style="margin:0 0 20px;font-size:28px;line-height:1.2;letter-spacing:-0.6px;color:#fafafa;">Confirm your email address</h1>
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#8f8f8f;">Confirm this email address for your Shilling account.</p>
+          <p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#8f8f8f;">Open this email on the device where you started, then tap below to continue.</p>
           <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-            <tr><td bgcolor="#a16207" style="border-radius:8px;text-align:center;mso-padding-alt:16px 24px;">
-              <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 24px;border:1px solid #a16207;border-radius:8px;color:#ffffff;font-size:16px;font-weight:700;line-height:20px;text-decoration:none;">Confirm email address</a>
+            <tr><td bgcolor="#eab308" style="border-radius:12px;text-align:center;mso-padding-alt:16px 24px;">
+              <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 24px;border:1px solid #eab308;border-radius:12px;color:#0d0d0d;font-size:16px;font-weight:700;line-height:20px;text-decoration:none;">Confirm email address</a>
             </td></tr>
           </table>
-          <p style="margin:28px 0 0;font-size:14px;line-height:1.6;color:#5e5e5e;">If you didn't request this email, you can safely ignore it.</p>
-          <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e5e5e5;">
-            <p style="margin:0 0 8px;font-size:12px;line-height:1.5;color:#5e5e5e;">Button not working? Copy and paste this link into your browser:</p>
-            <a href="{{ .ConfirmationURL }}" style="display:block;font-size:12px;line-height:1.5;color:#854d0e;word-break:break-all;overflow-wrap:anywhere;">{{ .ConfirmationURL }}</a>
+          <p style="margin:28px 0 0;font-size:14px;line-height:1.6;color:#8f8f8f;">If you didn't request this email, you can safely ignore it.</p>
+          <div style="margin-top:28px;padding-top:20px;border-top:1px solid #262626;">
+            <p style="margin:0 0 8px;font-size:12px;line-height:1.5;color:#8f8f8f;">Button not working? Copy and paste this link into your browser:</p>
+            <a href="{{ .ConfirmationURL }}" style="display:block;font-size:12px;line-height:1.5;color:#fde047;word-break:break-all;overflow-wrap:anywhere;">{{ .ConfirmationURL }}</a>
           </div>
         </td></tr>
-        <tr><td style="padding:20px 0;font-size:12px;line-height:1.5;color:#5e5e5e;">shilling.finance</td></tr>
+        <tr><td style="padding:20px 0;font-size:12px;line-height:1.5;color:#8f8f8f;">shilling.finance</td></tr>
       </table>
     </td></tr>
   </table>
