@@ -164,16 +164,20 @@ class LocalDataWiper(
     private val categoryRepository: CategoryRepository,
     private val scheduleRepository: ScheduleRepository,
     private val postingRepository: PostingRepository,
-    private val receiptRepository: ReceiptRepository
+    private val receiptRepository: ReceiptRepository,
+    private val graphs: finance.shilling.shared.data.store.FinanceSpaceGraphs? = null
 ) {
-    suspend fun wipe() = wipeLocalAppState(
-        db = db,
-        settings = settings,
-        fileStore = fileStore,
-        accountRepository = accountRepository,
-        categoryRepository = categoryRepository,
-        scheduleRepository = scheduleRepository,
-        postingRepository = postingRepository,
-        receiptRepository = receiptRepository
-    )
+    suspend fun wipe() {
+        if (graphs != null) { graphs.wipeAll(); return }
+        wipeLocalAppState(
+            db = db,
+            settings = settings,
+            fileStore = fileStore,
+            accountRepository = accountRepository,
+            categoryRepository = categoryRepository,
+            scheduleRepository = scheduleRepository,
+            postingRepository = postingRepository,
+            receiptRepository = receiptRepository
+        )
+    }
 }

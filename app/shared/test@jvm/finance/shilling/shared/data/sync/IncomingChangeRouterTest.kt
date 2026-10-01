@@ -1,5 +1,7 @@
 package finance.shilling.shared.data.sync
 
+import app.cash.sqldelight.async.coroutines.await
+
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import finance.shilling.shared.data.Account
 import finance.shilling.shared.data.IdGenerator
@@ -120,8 +122,9 @@ class IncomingChangeRouterTest {
             added_at = 1L,
             receipt_date = null,
             amount = null,
-            notes = null
-        )
+            notes = null,
+            space_id = "__local__"
+        ).await()
 
         val notifier = ChangeNotifier()
         val peerSync = FakePeerSyncManager()

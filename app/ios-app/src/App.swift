@@ -33,7 +33,7 @@ struct ShillingApp: App {
                     }
                 default:
                     // Rebuilt on each return to the main app (e.g. after Start over).
-                    TabBarView().ignoresSafeArea(.all)
+                    TabBarView().id(appPhase.spaceId).ignoresSafeArea(.all)
                 }
 
                 ReceiptShortcutLaunchView()
@@ -44,6 +44,7 @@ struct ShillingApp: App {
             }
             .preferredColorScheme(appearance.colorScheme)
             .task { await appPhase.observe() }
+            .task { await appPhase.observeSpace() }
             .task { await account.observe() }
             .onChange(of: needsPasswordSetup) { _, needed in
                 if needed { showPasswordSetup = true }

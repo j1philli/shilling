@@ -13,7 +13,7 @@ import platform.Foundation.NSData
 /** Swift-facing receipt editor; [receiptId] null adds one. */
 class ReceiptEditorScreenModel(receiptId: String?) : IosViewModelHost() {
     private val viewModel = viewModel<ReceiptEditorViewModel>(receiptId)
-    private val fileStore = KoinPlatform.getKoin().get<ReceiptFileStore>()
+    private val fileStore = KoinPlatform.getKoin().get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.files
 
     @NativeCoroutinesState
     val state: StateFlow<ReceiptEditorUiState> = viewModel.state

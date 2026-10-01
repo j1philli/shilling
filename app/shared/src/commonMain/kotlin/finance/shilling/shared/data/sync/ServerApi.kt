@@ -13,6 +13,7 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.encodeURLPathPart
+import io.ktor.http.contentType
 import io.ktor.client.plugins.websocket.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
@@ -57,6 +58,16 @@ class ServerApi(
         httpClient.get("$baseUrl/api/billing/config") {
             expectSuccess = true
             withAuth()
+        }.body()
+
+    suspend fun fetchSpaces(): finance.shilling.core.auth.HostedSpacesResponse =
+        httpClient.get("$baseUrl/api/spaces") { expectSuccess = true; withAuth() }.body()
+
+    suspend fun spaceCommand(command: finance.shilling.core.auth.HostedSpaceCommand): finance.shilling.core.auth.HostedSpacesResponse =
+        httpClient.post("$baseUrl/api/spaces") {
+            expectSuccess = true; withAuth()
+            contentType(io.ktor.http.ContentType.Application.Json)
+            setBody(command)
         }.body()
 
     suspend fun fetchDevices(): List<String> =

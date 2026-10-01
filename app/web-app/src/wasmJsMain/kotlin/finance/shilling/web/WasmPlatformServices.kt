@@ -1,5 +1,7 @@
 package finance.shilling.web
 
+import app.cash.sqldelight.async.coroutines.await
+
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import co.touchlab.kermit.Logger
 import finance.shilling.shared.data.IdGenerator
@@ -18,17 +20,17 @@ class WasmIdGenerator : IdGenerator {
     override fun newId(): String = Uuid.random().toString()
 }
 
-class WasmReceiptFileStore(private val db: ShillingDatabase) : ReceiptFileStore {
+class WasmReceiptFileStore(private val db: ShillingDatabase, private val spaceId: String = "__local__") : ReceiptFileStore {
     private val log = Logger.withTag("WebReceiptOpen")
 
     override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {
         val mimeType = mimeTypeForName(fileName)
-        db.receiptFileQueries.upsert(receiptId, bytes, bytes.size.toLong(), mimeType)
+        db.receiptFileQueries.upsert(receiptId, bytes, bytes.size.toLong(), mimeType, space_id = spaceId).await()
         log.i { "Stored file bytes: id=$receiptId name=$fileName bytes=${bytes.size} mime=$mimeType" }
     }
 
     override suspend fun read(receiptId: String): ByteArray? {
-        val row = db.receiptFileQueries.selectByReceiptId(receiptId).awaitAsOneOrNull()
+        val row = db.receiptFileQueries.selectByReceiptId(receiptId, space_id = spaceId).awaitAsOneOrNull()
         if (row == null) {
             log.d { "Read miss: id=$receiptId" }
             return null
@@ -38,19 +40,19 @@ class WasmReceiptFileStore(private val db: ShillingDatabase) : ReceiptFileStore 
     }
 
     override suspend fun hasFile(receiptId: String): Boolean {
-        val count = db.receiptFileQueries.hasFile(receiptId).awaitAsOneOrNull() ?: 0L
+        val count = db.receiptFileQueries.hasFile(receiptId, space_id = spaceId).awaitAsOneOrNull() ?: 0L
         val exists = count > 0
         log.d { "Has file: id=$receiptId exists=$exists" }
         return exists
     }
 
     override suspend fun delete(receiptId: String) {
-        db.receiptFileQueries.deleteByReceiptId(receiptId)
+        db.receiptFileQueries.deleteByReceiptId(receiptId, space_id = spaceId)
         log.d { "Deleted file bytes: id=$receiptId" }
     }
 
     override suspend fun clearAll() {
-        db.receiptFileQueries.deleteAll()
+        db.receiptFileQueries.deleteAll(space_id = spaceId)
         log.d { "Cleared all receipt file bytes" }
     }
 
@@ -58,7 +60,7 @@ class WasmReceiptFileStore(private val db: ShillingDatabase) : ReceiptFileStore 
     override suspend fun openExternally(receiptId: String, originalName: String) {
         log.i { "Open requested: id=$receiptId, name=$originalName" }
         runCatching {
-            val row = db.receiptFileQueries.selectByReceiptId(receiptId).awaitAsOneOrNull()
+            val row = db.receiptFileQueries.selectByReceiptId(receiptId, space_id = spaceId).awaitAsOneOrNull()
             if (row == null) {
                 log.w { "Open failed: file bytes missing for id=$receiptId" }
                 return

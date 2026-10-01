@@ -16,7 +16,6 @@ import kotlinx.coroutines.withContext
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
 
-private const val LOCAL_CHANGE_LOG_HOUSEHOLD = "__local_sync__"
 
 internal data class EntityChangeVersion(
     val changeId: String,
@@ -41,12 +40,13 @@ internal data class SyncFullStateSnapshot(
 @OptIn(ExperimentalStoreApi::class)
 class SyncStoreFacade(
     private val db: ShillingDatabase,
-    private val accountStore: AccountStore = createAccountStore(db),
-    private val categoryStore: CategoryStore = createCategoryStore(db),
-    private val scheduleStore: ScheduleStore = createScheduleStore(db),
-    private val scheduleExceptionStore: ScheduleExceptionStore = createScheduleExceptionStore(db),
-    private val postingStore: PostingStore = createPostingStore(db),
-    private val receiptStore: ReceiptStore = createReceiptStore(db)
+    val spaceId: String = LOCAL_SPACE_ID,
+    private val accountStore: AccountStore = createAccountStore(db, spaceId = spaceId),
+    private val categoryStore: CategoryStore = createCategoryStore(db, spaceId = spaceId),
+    private val scheduleStore: ScheduleStore = createScheduleStore(db, spaceId = spaceId),
+    private val scheduleExceptionStore: ScheduleExceptionStore = createScheduleExceptionStore(db, spaceId = spaceId),
+    private val postingStore: PostingStore = createPostingStore(db, spaceId = spaceId),
+    private val receiptStore: ReceiptStore = createReceiptStore(db, spaceId = spaceId)
 ) {
     internal suspend fun buildFullStateSnapshot(deviceId: String): SyncFullStateSnapshot {
         val accounts = accountStore.readLocalSourceOfTruth(AccountKey.All)
@@ -112,7 +112,7 @@ class SyncStoreFacade(
 
     internal suspend fun applyIncomingChange(change: ChangeMessage): ApplyIncomingChangeResult =
         withContext(SuppressStoreBroadcast()) {
-            val current = db.latestEntityVersion(change.entityType, change.entityId)
+            val current = db.latestEntityVersion(change.entityType, change.entityId, spaceId)
             if (change.isStaleComparedTo(current)) {
                 return@withContext ApplyIncomingChangeResult.IgnoredStale(current)
             }
@@ -126,7 +126,7 @@ class SyncStoreFacade(
                 EntityType.RECEIPT -> applyReceiptChange(change)
             }
 
-            db.recordEntityChange(change)
+            db.recordEntityChange(change, spaceId)
             ApplyIncomingChangeResult.Applied
         }
 
@@ -151,13 +151,13 @@ class SyncStoreFacade(
         entityId: String,
         deviceId: String
     ): String =
-        db.latestEntityVersion(entityType, entityId)?.changeId
+        db.latestEntityVersion(entityType, entityId, spaceId)?.changeId
             ?: "snapshot:$deviceId:${entityType.name}:$entityId"
 
     private suspend fun snapshotTimestamp(
         entityType: EntityType,
         entityId: String
-    ): Long = db.latestEntityVersion(entityType, entityId)?.timestamp ?: 0L
+    ): Long = db.latestEntityVersion(entityType, entityId, spaceId)?.timestamp ?: 0L
 
     private suspend fun applyAccountChange(change: ChangeMessage) {
         when (change.op) {
@@ -263,10 +263,11 @@ class SyncStoreFacade(
 
 internal suspend fun ShillingDatabase.latestEntityVersion(
     entityType: EntityType,
-    entityId: String
+    entityId: String,
+    spaceId: String = LOCAL_SPACE_ID
 ): EntityChangeVersion? =
     changeLogQueries.selectLatestForEntity(
-        household_id = LOCAL_CHANGE_LOG_HOUSEHOLD,
+        household_id = spaceId,
         entity_type = entityType.name,
         entity_id = entityId
     ).awaitAsOneOrNull()?.let { row ->
@@ -276,9 +277,9 @@ internal suspend fun ShillingDatabase.latestEntityVersion(
         )
     }
 
-internal suspend fun ShillingDatabase.recordEntityChange(change: ChangeMessage) {
+internal suspend fun ShillingDatabase.recordEntityChange(change: ChangeMessage, spaceId: String = LOCAL_SPACE_ID) {
     changeLogQueries.insert(
-        household_id = LOCAL_CHANGE_LOG_HOUSEHOLD,
+        household_id = spaceId,
         change_id = change.id,
         entity_type = change.entityType.name,
         entity_id = change.entityId,
@@ -293,9 +294,9 @@ internal suspend fun ShillingDatabase.recordEntityChange(change: ChangeMessage) 
  * they track sync state and retry state. Declared here in the `store` package because the
  * SourceOfTruth and Bookkeeper own these tables; no other layer may touch them directly.
  */
-suspend fun ShillingDatabase.clearAllSyncMetadata() {
-    bookkeepingQueries.deleteAll()
-    changeLogQueries.deleteAll()
+suspend fun ShillingDatabase.clearAllSyncMetadata(spaceId: String = LOCAL_SPACE_ID) {
+    bookkeepingQueries.deleteAll(spaceId)
+    changeLogQueries.deleteForSpace(spaceId)
 }
 
 internal fun ChangeMessage.isStaleComparedTo(current: EntityChangeVersion?): Boolean =

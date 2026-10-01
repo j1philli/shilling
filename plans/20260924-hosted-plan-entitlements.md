@@ -1,7 +1,7 @@
 # Hosted Plan Entitlements
 
 Date: 2026-09-24
-Status: policy defined; hosted entitlement, device, TURN, purchase entry points, and space membership roles implemented; invitations, isolated space switching, linked transfers, and bank provider pending
+Status: hosted entitlement/device/purchase code, invitations/membership, isolated Store5 switching, and paired linked transfers implemented; launch configuration, bank integration, and physical-device acceptance checks remain
 
 Free, Silver, and Gold are hosted subscription plans. Self-hosted is an explicit deployment edition with operator-controlled infrastructure, not a RevenueCat product. Local budgeting and access to existing local data remain available in every edition.
 
@@ -24,7 +24,7 @@ The user-facing container is a **finance space**: a home, side business, rental,
 - Purchases belong to the purchasing account. For a household's shared sync capabilities, its effective plan is the highest active plan among its current members. One Silver or Gold member therefore grants every member of that household unlimited registered devices and hosted TURN access while that membership and subscription remain active.
 - The number of households an account can join or create follows **that account's own plan**: Free and Silver may each belong to one; Gold may belong to unlimited households. A Gold member's sponsorship of a household does not give every other member unlimited household memberships. This avoids one subscription spreading through a chain of households.
 - Removing or leaving the subscribing member causes the remaining household to use the next-highest active member plan for new connections and TURN credentials. A person can sponsor every household of which they are a current member.
-- Space owners/admins manage invitations, members, and devices. Existing profiles are backfilled into server-owned space membership metadata; owners and admins can remove devices. Invitation, member removal, and last-owner transfer flows still need UI and transactional server actions.
+- Space owners/admins manage invitations, members, and devices through implemented UI and transactional server actions. Existing profiles are backfilled into server-owned space membership metadata. Removing the last owner is blocked; a sole owner may close a space with no other members while retaining local records.
 - A Silver or Gold sponsor unlocks live bank reading for members of that household. Bank connections, provider credentials, consent, and imported transaction ownership need a separate provider-specific design. This policy does not authorize bank data to traverse signaling or bypass Store5; bank provider transport is an explicit third-party integration and must be reviewed separately from device-to-device sync.
 
 ## Devices and downgrades
@@ -52,7 +52,7 @@ The user-facing container is a **finance space**: a home, side business, rental,
 
 ## Data-preserving finance-space cutover
 
-The current SQLDelight entity tables, receipt files, and Store5 keys are global to one local database. `ensureLocalSchemaReady` now stops on an unknown schema version or missing table while preserving existing data. A real migration must be written before adding a space column, and it must preserve the existing database as the first home space.
+SQLDelight entity tables, receipt files, and Store5 keys are now scoped to an immutable finance-space identity. The versioned migration preserves the published legacy database as the first local space, then adopts it into the first hosted space. `ensureLocalSchemaReady` rejects unknown schemas and invalid references without discarding existing data. The implemented cutover follows these requirements:
 
 1. Add a `space_id` to each local entity, receipt-file, bookkeeping, and change-log key. Migrate existing rows to the device's cached active hosted space (or the local self-hosted space) inside one SQLite transaction. Rebuild primary and foreign keys around `(space_id, id)` without dropping user data. The web worker's IndexedDB-backed SQLDelight bootstrap needs the same versioned migration path.
 2. Make every Store5 repository query, writer, and delete scope to its space. Recreate the repository graph and WebRTC runtime when a member switches spaces; stop the old runtime before the new space's stores are visible. Keep receipts and their binary files in the same scope.
@@ -72,15 +72,15 @@ Pricing approved on 2026-10-01: Silver USD $5/month or $50/year; Gold USD $20/mo
 
 ## Launch follow-up (2026-10-01)
 
-- Hosted Supabase project: `shilling.finance` (`rjzjwibztzaovgwkdmlg`). Applied `20260926120000`, `20260926121000`, and `20260926122000` successfully. Restored the three already-applied later migration files unchanged from public main; preserve migration history rather than marking remote migrations reverted.
+- Hosted Supabase project: `shilling.finance` (`rjzjwibztzaovgwkdmlg`). Applied `20260926120000`, `20260926121000`, `20260926122000`, and the verified `20261001183000` space-management migration successfully. Restored the three already-applied later migration files unchanged from public main; preserve migration history rather than marking remote migrations reverted.
 - Device removal implementation now closes existing connections on updated clients. JVM regression tests cover household-scoped removal notification, signaling target removal, and removal after the device already lost signaling. Native/browser channel closure, badges, self-removal, explicit re-registration, and queued file transfers still require runtime validation.
-- RevenueCat project is `shilling.finance` (`projbb574ddb`). Created Silver entitlement `entle617697949` and Gold entitlement `entl80b0ac903f`, offerings `silver` (`ofrnge8a3e01c14`) and `gold` (`ofrngb3511cb42a`), and monthly/annual packages in each. No products are attached. Neither native store app is registered. Creating the web billing app failed because no Stripe account is linked. This session exposes no project/app/catalog listing or public-key retrieval MCP tools; product setup in the existing automatic Test Store requires its app ID.
+- RevenueCat project is `shilling.finance` (`projbb574ddb`). Created Silver entitlement `entle617697949` and Gold entitlement `entl80b0ac903f`, offerings `silver` (`ofrnge8a3e01c14`) and `gold` (`ofrngb3511cb42a`), and monthly/annual packages in each. Both native RevenueCat app records and eight subscription product records are now created and attached to their entitlement and monthly/annual package. The actual store apps are not registered. Creating the web billing app failed because no Stripe account is linked. This session exposes no project/app/catalog listing or public-key retrieval MCP tools; the existing automatic Test Store still requires its app ID for a sandbox catalog.
 
 ### Billing setup remaining
 
-1. Verify App Store Connect and Google Play apps and credentials. The repository identifiers are `finance.shilling.app` on iOS and `finance.shilling.android` on Android. Confirm those match the registered store apps.
-2. Configure monthly and yearly products at the approved USD prices. Register each platform product in RevenueCat; product registration alone does not create a sellable store product. Configure a supported web billing engine and payment provider.
-3. Create or reuse entitlements `silver` and `gold`. Attach Silver products to Silver and Gold products to Gold; the server grants Gold the Silver capabilities. Create offerings `silver` and `gold`, each with `$rc_monthly` and `$rc_annual` packages containing the matching platform products.
+1. Register App Store Connect and Google Play apps and credentials; neither store app is registered yet. The repository identifiers are `finance.shilling.app` on iOS and `finance.shilling.android` on Android.
+2. Create the native store subscriptions at the approved USD prices using the identifiers recorded below; RevenueCat product registration alone does not create a sellable store product. Configure a supported web billing engine and payment provider.
+3. Verify the created entitlements, offerings, packages, and native product mappings against the actual store catalog. Silver products are attached to Silver and Gold products to Gold; the server grants Gold the Silver capabilities. Both offerings already contain monthly and annual packages with their matching native products.
 4. Put the project ID, secret API v2 key, entitlement resource IDs, native public SDK keys, offering identifiers, and production web purchase links into the hosted server's runtime variables listed in `.env.example`. Secret keys belong only in the deployment secret store. No billing secrets or production links have been configured by this session. The confirmed non-secret values are:
 
    ```dotenv
@@ -94,14 +94,30 @@ Pricing approved on 2026-10-01: Silver USD $5/month or $50/year; Gold USD $20/mo
 
 ### Infrastructure and runtime validation remaining
 
-1. Review and merge the public branch through its required `guard` check. Build and deploy the server in Coolify after the migrations and runtime configuration are ready, then deploy the web client and distribute the updated native clients. No server deployment has been performed by this session.
+1. Review and merge the finance-space branch through its required `guard` check. Build and deploy the server in Coolify after the migrations and runtime configuration are ready, then deploy the web client and distribute the updated native clients. No server deployment has been performed by this session.
 2. Select an existing TURN deployment or provision one; configure URLs, shared secret, and TTL. Test two actual networks with relay off and on, inspect selected ICE candidate pairs, verify Free receives no hosted TURN credentials, and verify paid relay remains opt-in. TURN relays encrypted WebRTC only.
 3. Remove a connected device from each supported settings surface. Confirm both ends close their channel, badges update, local data survives, and the removed app does not silently re-register. Repeat with signaling temporarily disconnected and during receipt transfer. Document the behavior of older clients and any deployment with more than one signaling instance.
 4. Test concurrent Free registrations, downgrade with more than two registered devices, subscription lookup failure, and sponsor departure. Existing device selection after downgrade still needs a clear end-to-end acceptance check.
 
 ### Broader plan dependencies
 
-1. Complete versioned, data-preserving SQLite and web IndexedDB migration to space-scoped entity, receipt, bookkeeping, and change-log keys. Scope every Store5 reader/writer/delete before exposing a second space; test equal entity IDs in different spaces, existing-user migration, and interrupted migration recovery.
-2. Recreate and stop repository/sync graphs during space switching. Then add transactional invitations, accept/decline/expiry, owner/admin membership management, membership quotas, and last-owner transfer protection. Validate one sponsor grants the space shared capabilities without granting other accounts unlimited memberships.
-3. Implement linked transfers at the Store5 boundary after isolation: atomic paired postings, stable link ID, idempotent retry, paired edits/deletes, and independent P2P sync of each space's entry.
-4. Choose bank provider and launch region, then design consent, credential storage, reconnect/revocation, read-only import, deduplication, and ownership. Silver currently grants the entitlement only. Resolve the provider transport design against the architecture invariants before implementation.
+1. Local space isolation/migration is implemented. JVM tests cover published-v1 upgrades, receipt bytes, invalid-reference rollback, identical IDs in different spaces, stale editor retirement, and scoped snapshots. The real sql.js worker test covers rollback, IndexedDB commit failure/retry/reload, and foreign-key enforcement. SQLite 3.22 compatibility is verified with the actual old engine, including parent updates and foreign-key cascades during first-space adoption; grouped writes are awaited explicitly. Still run physical existing-user upgrades on iOS/Android and browser acceptance.
+2. Switching and membership management are implemented. `20261001183000_hosted_space_management.sql` is applied to the hosted project; deploy the new server and clients together after review. Isolated PostgreSQL tests cover quotas, invited-email enforcement, role permissions, revoked codes, last-owner protection, and removed-member device registration, and fresh explicit space selection after Gold downgrade. Test real sponsor departure and multi-device switching after deployment.
+3. Linked transfer Store5 aggregate and UI are implemented: atomic paired postings/version records, stable IDs, idempotent retry/deletion, paired edits/deletes, and space-private snapshots. JVM tests verify rollback when the destination account is missing. Remote delivery is independent per space, so peers can temporarily see one side. Test concurrent offline edits and receipt detachment on actual devices.
+4. Canada and United States are selected; client HTTPS bank-provider ingestion is authorized. Proposed provider and remaining authentication/currency/consent/import decisions are in `plans/20261001-bank-connection.md`. Silver currently grants the entitlement only.
+
+
+### Native RevenueCat catalog created October 1, 2026
+
+| Platform/app | Plan | Store identifier | RevenueCat product | USD price to configure in store |
+| --- | --- | --- | --- | --- |
+| iOS `app6e8c06929e` | Silver monthly | `finance.shilling.silver.monthly` | `prodaddd63ef97` | $5/month |
+| iOS | Silver annual | `finance.shilling.silver.annual` | `prod8d28c99542` | $50/year |
+| iOS | Gold monthly | `finance.shilling.gold.monthly` | `prodb15382504c` | $20/month |
+| iOS | Gold annual | `finance.shilling.gold.annual` | `prod7242d2b85f` | $200/year |
+| Android `appf42a31ccc7` | Silver monthly | `silver:monthly` | `prod6f342ab445` | $5/month |
+| Android | Silver annual | `silver:annual` | `prodf720ba0839` | $50/year |
+| Android | Gold monthly | `gold:monthly` | `prod6983741b58` | $20/month |
+| Android | Gold annual | `gold:annual` | `prod8affb6a040` | $200/year |
+
+Use one Apple subscription group and two Google subscriptions (`silver`, `gold`) with monthly/annual base plans; configure crossgrades/downgrades in the stores and verify them in sandbox. App Store Connect subscription/API keys and Google service-account credentials are not configured. Public SDK keys still require retrieval from the RevenueCat dashboard because the exposed MCP app response does not contain them.

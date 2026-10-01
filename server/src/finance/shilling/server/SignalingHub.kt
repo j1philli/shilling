@@ -3,9 +3,12 @@ package finance.shilling.server
 import co.touchlab.kermit.Logger
 import finance.shilling.core.sync.SignalingMessage
 import finance.shilling.core.auth.HostedPlan
+import finance.shilling.core.auth.householdLimit
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.concurrent.ConcurrentHashMap
@@ -13,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap
 private val log = Logger.withTag("Signaling")
 
 class SignalingHub {
+    private val membershipPolicy = Mutex()
+    suspend fun <T> withMembershipPolicy(action: suspend () -> T): T = membershipPolicy.withLock { action() }
     private val households = ConcurrentHashMap<String, MutableMap<String, WebSocketSession>>()
 
     private val json = Json {
@@ -126,7 +131,8 @@ fun Routing.signalingRoute(
     tokenVerifier: SupabaseTokenVerifier? = null,
     householdLookup: HouseholdMembershipLookup? = null,
     entitlements: HostedEntitlementLookup? = null,
-    devices: HostedDeviceRegistry? = null
+    devices: HostedDeviceRegistry? = null,
+    spaces: SupabaseSpaceManagement? = null
 ) {
     val json = Json {
         ignoreUnknownKeys = true
@@ -153,38 +159,37 @@ fun Routing.signalingRoute(
                                 close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Already joined"))
                                 return@webSocket
                             }
-                            if (tokenVerifier != null) {
-                                when (val result = authorizeHostedJoin(
-                                    tokenVerifier = tokenVerifier,
-                                    lookup = householdLookup,
-                                    accessToken = msg.accessToken,
-                                    requestedHouseholdId = msg.householdId
-                                )) {
-                                    is JoinAuthorizationResult.Authorized -> {
-                                        log.i { "[WS] Hosted join authorized" }
-                                        val admitted = runCatching {
-                                            val plan = entitlements?.householdPlan(msg.householdId) ?: HostedPlan.FREE
-                                            devices?.register(msg.householdId, msg.deviceId, result.userId, plan) ?: false
-                                        }.getOrElse { error ->
-                                            log.w { "[WS] Device registration unavailable: ${error.message}" }
-                                            false
+                            val joined = hub.withMembershipPolicy {
+                                if (tokenVerifier != null) {
+                                    when (val result = authorizeHostedJoin(tokenVerifier, householdLookup, msg.accessToken, msg.householdId)) {
+                                        is JoinAuthorizationResult.Authorized -> {
+                                            val admitted = runCatching {
+                                                val ownPlan = entitlements?.accountPlan(result.userId) ?: HostedPlan.FREE
+                                                val access = spaces?.execute(result.userId, finance.shilling.core.auth.HostedSpaceCommand("list"), ownPlan.householdLimit())
+                                                if (access?.activeSpaceId != msg.householdId || access?.requiresSpaceSelection != false) return@runCatching false
+                                                val plan = entitlements?.householdPlan(msg.householdId) ?: HostedPlan.FREE
+                                                devices?.register(msg.householdId, msg.deviceId, result.userId, plan) ?: false
+                                            }.getOrDefault(false)
+                                            if (!admitted) {
+                                                close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Device allowance or active space selection unavailable"))
+                                                return@withMembershipPolicy false
+                                            }
                                         }
-                                        if (!admitted) {
-                                            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Device limit or registration unavailable"))
-                                            return@webSocket
+                                        is JoinAuthorizationResult.Rejected -> {
+                                            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, result.reason))
+                                            return@withMembershipPolicy false
                                         }
-                                    }
-                                    is JoinAuthorizationResult.Rejected -> {
-                                        log.w { "[WS] Join rejected: ${result.reason}" }
-                                        close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, result.reason))
-                                        return@webSocket
                                     }
                                 }
+                                deviceId = msg.deviceId
+                                householdId = msg.householdId
+                                hub.register(msg.householdId, msg.deviceId, this)
+                                true
                             }
+                            if (!joined) return@webSocket
                             deviceId = msg.deviceId
                             householdId = msg.householdId
                             log.i { "[WS] JOIN" }
-                            hub.register(msg.householdId, msg.deviceId, this)
                         }
                         else -> {
                             if (deviceId == null || !isValidClientSignal(msg, deviceId)) {

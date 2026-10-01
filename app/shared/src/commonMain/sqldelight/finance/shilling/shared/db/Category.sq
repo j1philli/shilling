@@ -1,24 +1,30 @@
 CREATE TABLE categories(
-    id TEXT NOT NULL PRIMARY KEY,
+    space_id TEXT NOT NULL,
+    id TEXT NOT NULL,
     name TEXT NOT NULL,
-    color TEXT
+    color TEXT,
+    PRIMARY KEY(space_id, id)
 );
 
 selectAll:
-SELECT * FROM categories ORDER BY name ASC;
+SELECT * FROM categories WHERE space_id = :space_id ORDER BY name ASC;
 
 selectById:
-SELECT * FROM categories WHERE id = ?;
+SELECT * FROM categories WHERE id = ? AND space_id = :space_id;
 
-upsert:
-INSERT OR REPLACE INTO categories(id, name, color)
-VALUES (?, ?, ?);
+upsert {
+  INSERT OR IGNORE INTO categories(id, name, color, space_id) VALUES (:id, :name, :color, :space_id);
+  UPDATE categories SET name = :name, color = :color WHERE space_id = :space_id AND id = :id;
+}
 
 deleteById:
-DELETE FROM categories WHERE id = ?;
+DELETE FROM categories WHERE id = ? AND space_id = :space_id;
 
 deleteAll:
-DELETE FROM categories;
+DELETE FROM categories WHERE space_id = :space_id;
 
 nullifyCategoryInSchedules:
-UPDATE schedules SET category_id = NULL WHERE category_id = ?;
+UPDATE schedules SET category_id = NULL WHERE category_id = ? AND space_id = :space_id;
+
+claimLegacy:
+UPDATE categories SET space_id = ? WHERE space_id = '__local__';

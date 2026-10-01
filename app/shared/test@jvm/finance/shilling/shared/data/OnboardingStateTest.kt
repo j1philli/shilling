@@ -160,7 +160,7 @@ class OnboardingStateTest {
         val receiptRepository = ReceiptRepository(notifier, receiptStore, postingStore, scheduleStore, syncDeps)
 
         accountRepository.upsert(Account(id = "a1", name = "Checking", balance = 10.0))
-        assertEquals(1, db.accountQueries.selectAll().awaitAsList().size)
+        assertEquals(1, db.accountQueries.selectAll(space_id = "__local__").awaitAsList().size)
 
         wipeLocalAppState(
             db = db,
@@ -180,7 +180,7 @@ class OnboardingStateTest {
             receiptRepository = receiptRepository
         )
 
-        assertEquals(0, db.accountQueries.selectAll().awaitAsList().size)
+        assertEquals(0, db.accountQueries.selectAll(space_id = "__local__").awaitAsList().size)
         assertNull(settings.getStringOrNull(SETTINGS_KEY_ONBOARDING_COMPLETED))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_HELD_LOCAL_DATA))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_PENDING_RESTORE_USER_ID))

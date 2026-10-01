@@ -20,6 +20,18 @@ import kotlinx.datetime.DayOfWeek
 class SettingsScreenModel : IosViewModelHost() {
     private val viewModel = viewModel<SettingsViewModel>()
     private val devicesViewModel = viewModel<HostedDevicesViewModel>()
+    private val spacesViewModel = viewModel<finance.shilling.shared.presentation.HostedSpacesViewModel>()
+    @NativeCoroutinesState
+    val spacesState: StateFlow<finance.shilling.shared.presentation.HostedSpacesUiState> = spacesViewModel.state
+    val transferToday: String get() = spacesViewModel.transferToday
+    fun createTransferId(): String = spacesViewModel.newTransferId()
+    @NativeCoroutines
+    suspend fun transferAction(linkId: String, fromSpace: String, fromAccount: String, toSpace: String, toAccount: String, title: String, amount: String, date: String, delete: Boolean): String =
+        spacesViewModel.transferAction(linkId, fromSpace, fromAccount, toSpace, toAccount, title, amount, date, delete)
+    fun refreshSpaces() = spacesViewModel.refresh()
+    @NativeCoroutines
+    suspend fun spaceAction(action: String, spaceId: String?, name: String?, kind: String?, email: String?, role: String?, userId: String?, invitationId: String?, code: String?): String =
+        spacesViewModel.execute(finance.shilling.core.auth.HostedSpaceCommand(action, spaceId, name, kind, email, role, userId, invitationId, code))
 
     @NativeCoroutinesState
     val state: StateFlow<SettingsUiState> = viewModel.state

@@ -20,12 +20,9 @@ val sessionModule: Module = module {
             idGenerator = get(),
             httpClient = get(),
             deviceIdentity = get(),
-            syncDeps = get(),
-            localDataWiper = get(),
+            graphs = get(),
             webRtcPlatform = get(),
-            fileStore = get(),
             notifier = get(),
-            syncStoreFacade = get(),
             peerConnectionStatus = get(),
             config = getOrNull() ?: AppSessionConfig()
         )
@@ -40,5 +37,6 @@ val sessionModule: Module = module {
     single { RestartHostedLoginCallback(get<AppSession>()::restartHostedLogin) }
     single { ServerUrlCallback(get<AppSession>()::changeServerUrl) }
     single { HouseholdIdCallback(get<AppSession>()::changeHouseholdId) }
+    single { finance.shilling.shared.presentation.SpaceSelectionCallback(get<AppSession>()::applyHostedSpaces) }
     single { CloudRelayCallback(get<AppSession>()::changeCloudRelay) }
 }

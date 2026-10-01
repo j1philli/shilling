@@ -1,5 +1,6 @@
 CREATE TABLE postings(
-    id TEXT NOT NULL PRIMARY KEY,
+    space_id TEXT NOT NULL,
+    id TEXT NOT NULL,
     schedule_id TEXT,
     type TEXT NOT NULL,
     account_id TEXT NOT NULL,
@@ -8,20 +9,21 @@ CREATE TABLE postings(
     pair_id TEXT,
     title TEXT,
     category_id TEXT,
-    FOREIGN KEY(schedule_id) REFERENCES schedules(id)
+    FOREIGN KEY(space_id, schedule_id) REFERENCES schedules(space_id, id) ON UPDATE CASCADE,
+    PRIMARY KEY(space_id, id)
 );
 
-CREATE INDEX postings_date_idx ON postings(date);
+CREATE INDEX postings_date_idx ON postings(space_id, date);
 
 selectAll:
-SELECT * FROM postings ORDER BY date DESC;
+SELECT * FROM postings WHERE space_id = :space_id ORDER BY date DESC;
 
 selectById:
-SELECT * FROM postings WHERE id = ?;
+SELECT * FROM postings WHERE id = ? AND space_id = :space_id;
 
 selectBetween:
 SELECT * FROM postings
-WHERE date >= ? AND date < ?
+WHERE date >= ? AND date < ? AND space_id = :space_id
 ORDER BY date ASC;
 
 selectWithDetails:
@@ -31,11 +33,11 @@ SELECT p.id, p.schedule_id, p.type, p.account_id, p.date, p.amount, p.pair_id, p
        COALESCE(c2.name, c1.name) AS cat_name,
        COALESCE(c2.color, c1.color) AS cat_color
 FROM postings p
-LEFT JOIN schedules s ON p.schedule_id = s.id
-LEFT JOIN accounts a ON p.account_id = a.id
-LEFT JOIN categories c1 ON s.category_id = c1.id
-LEFT JOIN categories c2 ON p.category_id = c2.id
-WHERE p.date >= ? AND p.date < ?
+LEFT JOIN schedules s ON p.schedule_id = s.id AND s.space_id = p.space_id
+LEFT JOIN accounts a ON p.account_id = a.id AND a.space_id = p.space_id
+LEFT JOIN categories c1 ON s.category_id = c1.id AND c1.space_id = p.space_id
+LEFT JOIN categories c2 ON p.category_id = c2.id AND c2.space_id = p.space_id
+WHERE p.date >= ? AND p.date < ? AND p.space_id = :space_id
 ORDER BY p.date DESC;
 
 selectRecentWithDetails:
@@ -45,29 +47,39 @@ SELECT p.id, p.schedule_id, p.type, p.account_id, p.date, p.amount, p.pair_id, p
        COALESCE(c2.name, c1.name) AS cat_name,
        COALESCE(c2.color, c1.color) AS cat_color
 FROM postings p
-LEFT JOIN schedules s ON p.schedule_id = s.id
-LEFT JOIN accounts a ON p.account_id = a.id
-LEFT JOIN categories c1 ON s.category_id = c1.id
-LEFT JOIN categories c2 ON p.category_id = c2.id
+LEFT JOIN schedules s ON p.schedule_id = s.id AND s.space_id = p.space_id
+LEFT JOIN accounts a ON p.account_id = a.id AND a.space_id = p.space_id
+LEFT JOIN categories c1 ON s.category_id = c1.id AND c1.space_id = p.space_id
+LEFT JOIN categories c2 ON p.category_id = c2.id AND c2.space_id = p.space_id WHERE p.space_id = :space_id
 ORDER BY p.date DESC
 LIMIT ?;
 
-upsert:
-INSERT OR REPLACE INTO postings(id, schedule_id, type, account_id, date, amount, pair_id, title, category_id)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+upsert {
+  INSERT OR IGNORE INTO postings(id, schedule_id, type, account_id, date, amount, pair_id, title, category_id, space_id) VALUES (:id, :schedule_id, :type, :account_id, :date, :amount, :pair_id, :title, :category_id, :space_id);
+  UPDATE postings SET schedule_id = :schedule_id, type = :type, account_id = :account_id, date = :date, amount = :amount, pair_id = :pair_id, title = :title, category_id = :category_id WHERE space_id = :space_id AND id = :id;
+}
 
 insertIgnore:
-INSERT OR IGNORE INTO postings(id, schedule_id, type, account_id, date, amount, pair_id, title, category_id)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT OR IGNORE INTO postings(id, schedule_id, type, account_id, date, amount, pair_id, title, category_id, space_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, :space_id);
 
 deleteById:
-DELETE FROM postings WHERE id = ?;
+DELETE FROM postings WHERE id = ? AND space_id = :space_id;
 
 deleteByScheduleId:
-DELETE FROM postings WHERE schedule_id = ?;
+DELETE FROM postings WHERE schedule_id = ? AND space_id = :space_id;
 
 deleteByAccountId:
-DELETE FROM postings WHERE account_id = ?;
+DELETE FROM postings WHERE account_id = ? AND space_id = :space_id;
 
 deleteAll:
-DELETE FROM postings;
+DELETE FROM postings WHERE space_id = :space_id;
+
+claimLegacy:
+UPDATE postings SET space_id = ? WHERE space_id = '__local__';
+
+selectByPair:
+SELECT * FROM postings WHERE space_id = :space_id AND pair_id = :pair_id;
+
+selectLinkedByAccount:
+SELECT * FROM postings WHERE space_id = :space_id AND account_id = :account_id AND pair_id LIKE 'space-transfer:%';

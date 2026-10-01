@@ -1,5 +1,6 @@
 CREATE TABLE schedules(
-    id TEXT NOT NULL PRIMARY KEY,
+    space_id TEXT NOT NULL,
+    id TEXT NOT NULL,
     title TEXT NOT NULL,
     amount REAL NOT NULL,
     type TEXT NOT NULL,
@@ -15,37 +16,42 @@ CREATE TABLE schedules(
     nth_weekday INTEGER,
     last_day_flag INTEGER NOT NULL DEFAULT 0,
     auto_pay INTEGER NOT NULL DEFAULT 0,
-    notes TEXT
+    notes TEXT,
+    PRIMARY KEY(space_id, id)
 );
 
-CREATE INDEX schedules_date_idx ON schedules(start_date, end_date);
+CREATE INDEX schedules_date_idx ON schedules(space_id, start_date, end_date);
 
 selectAll:
-SELECT * FROM schedules ORDER BY start_date DESC;
+SELECT * FROM schedules WHERE space_id = :space_id ORDER BY start_date DESC;
 
 selectById:
-SELECT * FROM schedules WHERE id = ?;
+SELECT * FROM schedules WHERE id = ? AND space_id = :space_id;
 
 selectIntersecting:
 SELECT * FROM schedules
-WHERE start_date <= ? AND (end_date IS NULL OR end_date >= ?)
+WHERE start_date <= ? AND (end_date IS NULL OR end_date >= ?) AND space_id = :space_id
 ORDER BY start_date ASC;
 
-upsert:
-INSERT OR REPLACE INTO schedules(
+upsert {
+  INSERT OR IGNORE INTO schedules(
     id, title, amount, type, account_id, counter_account_id, category_id,
     start_date, end_date, freq, interval_, by_day_mask, by_month_day,
-    nth_weekday, last_day_flag, auto_pay, notes
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    nth_weekday, last_day_flag, auto_pay, notes, space_id) VALUES (:id, :title, :amount, :type, :account_id, :counter_account_id, :category_id, :start_date, :end_date, :freq, :interval_, :by_day_mask, :by_month_day, :nth_weekday, :last_day_flag, :auto_pay, :notes, :space_id);
+  UPDATE schedules SET title = :title, amount = :amount, type = :type, account_id = :account_id, counter_account_id = :counter_account_id, category_id = :category_id, start_date = :start_date, end_date = :end_date, freq = :freq, interval_ = :interval_, by_day_mask = :by_day_mask, by_month_day = :by_month_day, nth_weekday = :nth_weekday, last_day_flag = :last_day_flag, auto_pay = :auto_pay, notes = :notes WHERE space_id = :space_id AND id = :id;
+}
 
 deleteById:
-DELETE FROM schedules WHERE id = ?;
+DELETE FROM schedules WHERE id = ? AND space_id = :space_id;
 
 deleteAll:
-DELETE FROM schedules;
+DELETE FROM schedules WHERE space_id = :space_id;
 
 nullifyAccountId:
-UPDATE schedules SET account_id = NULL WHERE account_id = ?;
+UPDATE schedules SET account_id = NULL WHERE account_id = ? AND space_id = :space_id;
 
 nullifyCounterAccountId:
-UPDATE schedules SET counter_account_id = NULL WHERE counter_account_id = ?;
+UPDATE schedules SET counter_account_id = NULL WHERE counter_account_id = ? AND space_id = :space_id;
+
+claimLegacy:
+UPDATE schedules SET space_id = ? WHERE space_id = '__local__';

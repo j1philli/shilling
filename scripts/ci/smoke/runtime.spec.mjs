@@ -36,7 +36,7 @@ test('hosted web bundle renders welcome and sign-in form', async ({ page }) => {
   });
   await page.goto('http://hosted-web');
   await expect(page.getByText('Welcome to Shilling', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: /^Sign in Sign in/ }).click({ force: true });
+  await page.getByRole('button', { name: /^Continue with email/ }).click({ force: true });
   await expect(page.getByText('Sign in or create an account to continue.', { exact: true })).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -50,6 +50,10 @@ test('packaged server enforces hosted authentication', async ({ request, page })
   const household = await request.get('http://hosted-web/api/household', { headers: { Authorization: `Bearer ${token}` } });
   expect(household.status()).toBe(200);
   expect(await household.json()).toEqual({ householdId: 'smoke-household' });
+  expect((await request.get('http://hosted-web/api/spaces')).status()).toBe(401);
+  const spaces = await request.get('http://hosted-web/api/spaces', { headers: { Authorization: `Bearer ${token}` } });
+  expect(spaces.status()).toBe(200);
+  expect((await spaces.json()).spaces).toEqual([{ id: 'smoke-household', name: 'Home', kind: 'home', role: 'owner' }]);
   await page.goto('http://hosted-web/api/config');
   for (const [accessToken, householdId] of [[null, 'smoke-household'], ['invalid', 'smoke-household'], [token, 'another-household']]) {
     const code = await page.evaluate(({ accessToken, householdId }) => new Promise((resolve, reject) => {
