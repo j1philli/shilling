@@ -1,5 +1,7 @@
 package finance.shilling.shared.ui
 
+import finance.shilling.shared.session.HostedCredentialsMode
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -123,8 +125,8 @@ fun FirstLaunchOnboardingView(
                                     authService = authService,
                                     enabled = state.authReady,
                                     disabledReason = state.authDisabledReason,
-                                    signInLabel = "Sign in",
-                                    onSubmit = viewModel::submitCredentials
+                                    initialMode = HostedCredentialsMode.CREATE_ACCOUNT,
+                                    onSubmit = viewModel::submitCredentials,
                                 )
                             }
                         }

@@ -1,6 +1,8 @@
 package finance.shilling.shared.data.auth
 
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -16,13 +18,17 @@ data class AuthState(
     val isAnonymous: Boolean,
     val deviceId: String,
     val pendingEmailConfirmation: Boolean = false,
-    val pendingEmail: String? = null
+    val pendingEmail: String? = null,
+    val needsPasswordSetup: Boolean = false
 )
 
 @Serializable
 data class SignUpResult(
     val requiresEmailConfirmation: Boolean,
-    val upgradedAnonymousSession: Boolean
+    val upgradedAnonymousSession: Boolean,
+    val existingAccount: Boolean = false,
+    val existingAccountHasPassword: Boolean = false,
+    val signInLinkSent: Boolean = false
 )
 
 interface AuthService {
@@ -30,7 +36,18 @@ interface AuthService {
     suspend fun ensureAuthenticated(): Result<Unit>
     suspend fun signUp(email: String, password: String): Result<SignUpResult>
     suspend fun signIn(email: String, password: String): Result<Unit>
+    suspend fun sendSignInLink(email: String): Result<Unit>
+    suspend fun handleAuthCallback(url: String): Result<Unit>
+    suspend fun refreshAccountStatus(): Result<Unit>
+    suspend fun setPassword(password: String): Result<Unit>
     suspend fun signOut()
     suspend fun deleteAccount(): Result<Unit>
     suspend fun refreshTokenIfNeeded(): String?
+}
+
+/** Do not let callers inspect a previous identity while Auth processes its session event. */
+internal suspend fun StateFlow<AuthState>.awaitSessionIdentity(userId: String, accessToken: String) {
+    withTimeout(10_000) {
+        first { it.isAuthenticated && it.userId == userId && it.accessToken == accessToken }
+    }
 }

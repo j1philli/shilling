@@ -81,7 +81,15 @@ Pricing approved on 2026-10-01: Silver USD $5/month or $50/year; Gold USD $20/mo
 1. Verify App Store Connect and Google Play apps and credentials. The repository identifiers are `finance.shilling.app` on iOS and `finance.shilling.android` on Android. Confirm those match the registered store apps.
 2. Configure monthly and yearly products at the approved USD prices. Register each platform product in RevenueCat; product registration alone does not create a sellable store product. Configure a supported web billing engine and payment provider.
 3. Create or reuse entitlements `silver` and `gold`. Attach Silver products to Silver and Gold products to Gold; the server grants Gold the Silver capabilities. Create offerings `silver` and `gold`, each with `$rc_monthly` and `$rc_annual` packages containing the matching platform products.
-4. Put the project ID, secret API v2 key, entitlement resource IDs, native public SDK keys, offering identifiers, and production web purchase links into the hosted server's runtime variables listed in `.env.example`. Secret keys belong only in the deployment secret store. No billing secrets or production links have been configured by this session.
+4. Put the project ID, secret API v2 key, entitlement resource IDs, native public SDK keys, offering identifiers, and production web purchase links into the hosted server's runtime variables listed in `.env.example`. Secret keys belong only in the deployment secret store. No billing secrets or production links have been configured by this session. The confirmed non-secret values are:
+
+   ```dotenv
+   SHILLING_REVENUECAT_PROJECT_ID=projbb574ddb
+   SHILLING_REVENUECAT_SILVER_ENTITLEMENT_ID=entle617697949
+   SHILLING_REVENUECAT_GOLD_ENTITLEMENT_ID=entl80b0ac903f
+   SHILLING_REVENUECAT_SILVER_OFFERING_ID=silver
+   SHILLING_REVENUECAT_GOLD_OFFERING_ID=gold
+   ```
 5. Validate hosted account ID continuity through guest upgrade, native restore, web checkout, desktop browser return, and cross-platform sign-in. Test purchase success/cancellation, pending payment, restore, renewal, expiry/refund, Silver downgrade, and Gold downgrade with multiple memberships. Sandbox checks precede any real charge.
 
 ### Infrastructure and runtime validation remaining

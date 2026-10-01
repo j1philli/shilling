@@ -74,7 +74,7 @@ sealed interface SettingsAccount {
         val pendingConfirmation: String?
     ) : SettingsAccount {
         val title get() = "Guest"
-        val body get() = "Create an account to keep this budget and use it on your other devices."
+        val body get() = "Continue with your email to keep this budget or use an existing account."
         override val actionLabel get() = "Start over"
         override val confirm get() = ConfirmCopy(
             title = "Start over?",
@@ -87,7 +87,8 @@ sealed interface SettingsAccount {
     data class SignedIn(
         val title: String,
         val planLabel: String,
-        val pendingConfirmation: String?
+        val pendingConfirmation: String?,
+        val needsPasswordSetup: Boolean
     ) : SettingsAccount {
         override val actionLabel get() = "Sign out"
         override val confirm get() = ConfirmCopy(
@@ -133,7 +134,7 @@ data class SettingsUiState(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModel(
-    sessionState: SessionState,
+    private val sessionState: SessionState,
     hostedBootstrapState: HostedBootstrapState,
     private val settings: Settings,
     private val retryCallback: HostedBootstrapRetryCallback,
@@ -199,6 +200,16 @@ class SettingsViewModel(
         }
     }
 
+    suspend fun refreshAccountStatus(): Result<Unit> =
+        ((sessionState.phase.value as? SessionPhase.Ready)?.authService ?: authService)
+            ?.refreshAccountStatus() ?: Result.failure(IllegalStateException("Not ready yet"))
+
+    suspend fun setPassword(password: String): Result<Unit> =
+        authService?.setPassword(password) ?: Result.failure(IllegalStateException("Not ready yet"))
+
+    suspend fun sendSignInLink(email: String): Result<Unit> =
+        authService?.sendSignInLink(email.trim()) ?: Result.failure(IllegalStateException("Not ready yet"))
+
     /** The Account section's confirmed action: reset (self-hosted, guest) or sign out. */
     suspend fun confirmAccountAction() {
         when (state.value.account) {
@@ -249,7 +260,8 @@ class SettingsViewModel(
             SettingsAccount.SignedIn(
                 title = authState.email ?: "Signed in",
                 planLabel = "${tierLabel(authState.tier)} plan",
-                pendingConfirmation = pending
+                pendingConfirmation = pending,
+                needsPasswordSetup = authState.needsPasswordSetup
             )
         }
     }

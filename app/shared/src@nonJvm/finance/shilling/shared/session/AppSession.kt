@@ -22,6 +22,7 @@ import finance.shilling.shared.data.auth.NoOpAuthService
 import finance.shilling.shared.data.auth.StartupIdentity
 import finance.shilling.shared.data.auth.StartupStateResolution
 import finance.shilling.shared.data.auth.createPlaceholderStartupIdentity
+import finance.shilling.shared.data.auth.createAuthServiceWithRedirect
 import finance.shilling.shared.data.auth.hostedBootstrapRetryDelay
 import finance.shilling.shared.data.auth.resolveEffectiveHostedBootstrapStatus
 import finance.shilling.shared.data.auth.resolveStartupIdentity
@@ -76,6 +77,8 @@ data class AppSessionConfig(
     val selfHostedOnly: Boolean = false,
     val defaultSelfHostedServerUrl: String = DEFAULT_SELF_HOSTED_SERVER_URL,
     val logTag: String = "AppSession",
+    /** Mobile callback URL for email verification. Web and desktop use the Supabase Site URL. */
+    val authRedirectUrl: String? = null,
     /** Runs the session state machine. Main everywhere: `delay` works there on iOS. */
     val dispatcher: CoroutineDispatcher = Dispatchers.Main
 )
@@ -116,6 +119,12 @@ class AppSession(
     private val scope = CoroutineScope(SupervisorJob() + config.dispatcher)
     private val deviceId: String get() = deviceIdentity.deviceId
     private val hostedBootstrapLoop = HostedBootstrapLoop(::hostedBootstrapRetryDelay)
+    private val authServiceFactory: finance.shilling.shared.data.auth.AuthServiceFactory =
+        { serverConfig, authSettings, authDeviceId, authScope, authHttpClient ->
+            createAuthServiceWithRedirect(
+                serverConfig, authSettings, authDeviceId, authScope, authHttpClient, config.authRedirectUrl
+            )
+        }
 
     // ── State ────────────────────────────────────────────────────────────────
     private var started = false
@@ -220,10 +229,28 @@ class AppSession(
                 }
             }
             val userId = service.authState.value.userId
-            if (hasHeldLocalData(settings) && !matchesPendingRestore(settings, userId)) {
+            if (submit.signUpResult?.existingAccount != true &&
+                hasHeldLocalData(settings) && !matchesPendingRestore(settings, userId)) {
                 throw NonMatchingAccountException()
             }
             submit
+        }
+    }
+
+    override suspend fun sendSignInLink(email: String): Result<Unit> = onMain {
+        ensureWelcomeAuthService().sendSignInLink(email)
+    }
+
+    suspend fun handleAuthCallback(url: String): Result<Unit> = onMain {
+        val service = (phase.value as? SessionPhase.Ready)?.authService
+            ?: welcomeAuthService ?: ensureWelcomeAuthService()
+        service.handleAuthCallback(url).onSuccess {
+            if (phase.value is SessionPhase.Onboarding && !service.authState.value.isAnonymous) {
+                completeHostedOnboarding(wipeHeldData = false)
+            } else {
+                startupRetryToken += 1
+                reconcile()
+            }
         }
     }
 
@@ -252,7 +279,13 @@ class AppSession(
      */
     suspend fun startOver() = onMain {
         clearMainEffects(includeBootstrap = true)
-        listOfNotNull(startupIdentity?.authService, authRuntime?.authService, welcomeAuthService)
+        val activeServices = listOfNotNull(startupIdentity?.authService, authRuntime?.authService, welcomeAuthService)
+        val services = if (activeServices.isEmpty() && savedDeploymentSelection(settings) == DeploymentSelection.HOSTED) {
+            listOfNotNull(runCatching { ensureWelcomeAuthService() }.getOrNull())
+        } else {
+            activeServices
+        }
+        services
             .distinct()
             .forEach { service -> runCatching { service.signOut() } }
         localDataWiper.wipe()
@@ -275,7 +308,11 @@ class AppSession(
 
     /** Sign out to Welcome, keeping local data for a matching re-login. */
     suspend fun restartHostedLogin() = onMain {
+        clearMainEffects(includeBootstrap = true)
+        val services = listOfNotNull(startupIdentity?.authService, authRuntime?.authService, welcomeAuthService)
+            .distinct()
         softReturnToWelcome(settings, notice = "signed_out")
+        services.forEach { service -> runCatching { service.signOut() } }
         authScopeGeneration += 1
         authRuntime = null
         welcomeAuthService = null
@@ -333,7 +370,7 @@ class AppSession(
             if (onboardingComplete || config.selfHostedOnly) return@update
             launch {
                 runCatching { ensureWelcomeAuthService() }
-                    .onFailure { log.w { "Welcome auth bootstrap not ready yet: ${it.message}" } }
+                    .onFailure { finance.shilling.shared.data.auth.AuthErrors.logFailure("welcome_bootstrap", it) }
                 reconcile()
             }
         }
@@ -375,8 +412,14 @@ class AppSession(
         val selfHosted = startup.serverConfig.authMode == AuthMode.NONE
         authWatchEffect.update(listOf(authService, selfHosted)) {
             if (selfHosted) return@update
+            var observedUserId = authService.authState.value.userId
             launch {
                 authService.authState.collect { authState ->
+                    if (authState.isAuthenticated && authState.userId != observedUserId) {
+                        observedUserId = authState.userId
+                        startupRetryToken += 1
+                        reconcile()
+                    }
                     if (authState.isAuthenticated && !authState.isAnonymous) {
                         sawAccountSession = true
                     } else if (sawAccountSession) {
@@ -484,7 +527,8 @@ class AppSession(
                     scope = authScope,
                     deploymentSelection = deploymentSelection,
                     sessionRequirement = sessionRequirement,
-                    currentAuthRuntime = currentAuthRuntime
+                    currentAuthRuntime = currentAuthRuntime,
+                    authServiceFactory = authServiceFactory
                 )
             },
             onResolution = { resolution ->
@@ -533,7 +577,8 @@ class AppSession(
             scope = authScope,
             deploymentSelection = DeploymentSelection.HOSTED,
             sessionRequirement = HostedSessionRequirement.ACCOUNT_REQUIRED,
-            currentAuthRuntime = authRuntime
+            currentAuthRuntime = authRuntime,
+            authServiceFactory = authServiceFactory
         )
         authRuntime = resolution.authRuntime
         welcomeAuthService = resolution.authRuntime.authService

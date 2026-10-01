@@ -1,5 +1,7 @@
 package finance.shilling.shared.presentation
 
+import finance.shilling.shared.data.auth.AuthErrors
+
 import finance.shilling.shared.session.HostedCredentialsMode
 import finance.shilling.shared.session.HostedCredentialsSubmitResult
 
@@ -8,42 +10,41 @@ data class CredentialsOutcome(
     val succeeded: Boolean,
     val message: String,
     /** Non-null when a "Confirm your email" prompt should appear. */
-    val confirmEmailMessage: String?
+    val confirmEmailMessage: String?,
+    val showPasswordInput: Boolean = false,
+    val emailSent: Boolean = false
 )
 
 /** Copy for the email/password form (Welcome and Settings), shared by every UI. */
 object CredentialsCopy {
-    fun prompt(mode: HostedCredentialsMode): String = when (mode) {
-        HostedCredentialsMode.SIGN_IN -> "Sign in to an existing account."
-        HostedCredentialsMode.CREATE_ACCOUNT -> "Create a new account with email and password."
+    fun prompt(mode: HostedCredentialsMode, guestUpgrade: Boolean = false): String = when (mode) {
+        HostedCredentialsMode.SIGN_IN -> "Enter your password to sign in."
+        HostedCredentialsMode.CREATE_ACCOUNT -> if (guestUpgrade) {
+            "Enter your email to continue with this guest budget."
+        } else {
+            "Enter your email to create or find your account."
+        }
     }
 
-    fun submitLabel(mode: HostedCredentialsMode, signInLabel: String = "Sign in"): String = when (mode) {
-        HostedCredentialsMode.SIGN_IN -> signInLabel
-        HostedCredentialsMode.CREATE_ACCOUNT -> "Create account"
-    }
-
-    fun switchLabel(mode: HostedCredentialsMode): String = when (mode) {
-        HostedCredentialsMode.SIGN_IN -> "Create a new account instead"
-        HostedCredentialsMode.CREATE_ACCOUNT -> "Already have an account? Sign in"
-    }
-
-    fun other(mode: HostedCredentialsMode): HostedCredentialsMode = when (mode) {
-        HostedCredentialsMode.SIGN_IN -> HostedCredentialsMode.CREATE_ACCOUNT
-        HostedCredentialsMode.CREATE_ACCOUNT -> HostedCredentialsMode.SIGN_IN
-    }
+    fun submitLabel(mode: HostedCredentialsMode): String = "Continue"
 
     /** Status line after a submit. */
     fun resultMessage(result: Result<HostedCredentialsSubmitResult>): String = result.fold(
         onSuccess = { submit ->
             when {
+                submit.signUpResult?.existingAccountHasPassword == true -> "Enter your password to sign in."
+                submit.signUpResult?.existingAccount == true && submit.signUpResult?.signInLinkSent == true ->
+                    "Check your email for a sign-in link. Open it on this device."
+                submit.signUpResult?.existingAccount == true -> "Could not send a sign-in link. Try again."
                 submit.mode == HostedCredentialsMode.SIGN_IN -> "Signed in."
                 submit.signUpResult?.requiresEmailConfirmation == true ->
                     "Check your email to confirm this account change."
+                submit.signUpResult?.upgradedAnonymousSession == true ->
+                    "Email linked. Set a password in Account settings."
                 else -> "Account created."
             }
         },
-        onFailure = { "Error: ${it.message ?: "Unknown error"}" }
+        onFailure = { AuthErrors.message(it, "submit_credentials") }
     )
 
     /** Whether to show the "Confirm your email" sheet after [result]. */
@@ -54,7 +55,7 @@ object CredentialsCopy {
 
     fun confirmEmailMessage(email: String, upgradedFromGuest: Boolean): String =
         if (upgradedFromGuest) {
-            "We sent a confirmation email to $email. Open it to finish upgrading this guest account to Free."
+            "We sent a confirmation email to $email. Open it on this device, then the app will ask you to set a password. Your guest data stays with this account."
         } else {
             "We sent a confirmation email to $email. Open it to finish creating your account."
         }
@@ -65,11 +66,13 @@ object CredentialsCopy {
     fun outcome(result: Result<HostedCredentialsSubmitResult>, email: String): CredentialsOutcome = CredentialsOutcome(
         succeeded = result.isSuccess,
         message = resultMessage(result),
+        showPasswordInput = result.getOrNull()?.signUpResult?.existingAccountHasPassword == true,
+        emailSent = needsEmailConfirmation(result) || result.getOrNull()?.signUpResult?.signInLinkSent == true,
         confirmEmailMessage = if (needsEmailConfirmation(result)) {
             confirmEmailMessage(
                 email,
                 upgradedFromGuest = result.getOrNull()?.signUpResult?.upgradedAnonymousSession == true
-            ) + "\n\n" + CONFIRM_EMAIL_NOTE
+            )
         } else {
             null
         }

@@ -6,6 +6,7 @@ import KotlinModules
 struct CredentialsForm: View {
     let enabled: Bool
     let disabledReason: String?
+    let guestUpgrade: Bool
     let submit: (HostedCredentialsMode, String, String) async -> CredentialsOutcome?
 
     @State private var mode: HostedCredentialsMode
@@ -13,73 +14,95 @@ struct CredentialsForm: View {
     @State private var password = ""
     @State private var submitting = false
     @State private var message: String?
-    @State private var confirmEmailMessage: String?
+    @State private var emailNotice: String?
 
     init(
         initialMode: HostedCredentialsMode,
         enabled: Bool,
         disabledReason: String?,
+        guestUpgrade: Bool = false,
         submit: @escaping (HostedCredentialsMode, String, String) async -> CredentialsOutcome?
     ) {
         _mode = State(initialValue: initialMode)
         self.enabled = enabled
         self.disabledReason = disabledReason
+        self.guestUpgrade = guestUpgrade
         self.submit = submit
     }
 
     var body: some View {
-        Text(CredentialsCopy.shared.prompt(mode: mode))
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-        if let disabledReason {
-            Text(disabledReason).font(.footnote).foregroundStyle(.secondary)
-        }
-        TextField("Email", text: $email)
-            .textContentType(.emailAddress)
-            .keyboardType(.emailAddress)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-        SecureField("Password", text: $password)
-            .textContentType(mode == .signIn ? .password : .newPassword)
-        Button {
-            send()
-        } label: {
-            HStack {
-                if submitting { ProgressView() }
-                Text(CredentialsCopy.shared.submitLabel(mode: mode, signInLabel: "Sign in"))
+        if let emailNotice {
+            Label("Check your email", systemImage: "envelope")
+                .font(.headline)
+            Text(emailNotice)
+                .font(.subheadline)
+            Button("Use another email") {
+                self.emailNotice = nil
+                message = nil
+                mode = .createAccount
+            }
+        } else {
+            Text(CredentialsCopy.shared.prompt(mode: mode, guestUpgrade: guestUpgrade))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            if let disabledReason {
+                Text(disabledReason).font(.footnote).foregroundStyle(.secondary)
+            }
+            TextField("Email", text: $email)
+                .textContentType(.emailAddress)
+                .keyboardType(.emailAddress)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .disabled(submitting)
+                .onChange(of: email) { _, _ in
+                    mode = .createAccount
+                    password = ""
+                    message = nil
+                }
+            if mode == .signIn {
+                SecureField("Password", text: $password)
+                    .textContentType(.password)
+                    .disabled(submitting)
+            }
+            Button {
+                send()
+            } label: {
+                HStack {
+                    if submitting { ProgressView() }
+                    Text(submitting ? "Please wait…" : "Continue")
+                }
+            }
+            .disabled(!enabled || submitting || email.trimmingCharacters(in: .whitespaces).isEmpty)
+            if let message {
+                Text(message).font(.footnote)
             }
         }
-        .disabled(!enabled || submitting || email.trimmingCharacters(in: .whitespaces).isEmpty || password.isEmpty)
-        Button(CredentialsCopy.shared.switchLabel(mode: mode)) {
-            mode = CredentialsCopy.shared.other(mode: mode)
-            message = nil
-        }
-        .disabled(!enabled || submitting)
-        if let message {
-            Text(message).font(.footnote)
-        }
-        EmptyView()
-            .alert(CredentialsCopy.shared.CONFIRM_EMAIL_TITLE, isPresented: Binding(
-                get: { confirmEmailMessage != nil },
-                set: { if !$0 { confirmEmailMessage = nil } }
-            )) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(confirmEmailMessage ?? "")
-            }
     }
 
     private func send() {
         submitting = true
         Task {
             defer { submitting = false }
-            guard let outcome = await submit(mode, email, password) else { return }
+            if mode == .signIn && password.isEmpty {
+                message = "Enter your password."
+                return
+            }
+            guard let outcome = await submit(mode, email, password) else {
+                message = "Could not complete the request. Please try again."
+                return
+            }
             message = outcome.message
-            if outcome.succeeded {
-                email = ""
+            if outcome.showPasswordInput {
+                mode = .signIn
+                password = ""
+            } else if outcome.emailSent {
+                emailNotice = outcome.confirmEmailMessage
+                    ?? "We sent a sign-in link to \(email). Open it on this device to continue."
+                password = ""
+            } else if outcome.succeeded {
                 password = ""
             }
-            confirmEmailMessage = outcome.confirmEmailMessage
         }
     }
+
 }

@@ -102,7 +102,7 @@ fun startIosKoin() {
         ensureLocalSchemaReady(driver, logTag = "iOS")
     }
     initKoin(module {
-        single { AppSessionConfig(logTag = "iOS") }
+        single { AppSessionConfig(logTag = "iOS", authRedirectUrl = "shilling.finance://auth-callback") }
         single { ShillingDatabase(driver) }
         single { Settings() }
         single<IdGenerator> { IosIdGenerator() }
