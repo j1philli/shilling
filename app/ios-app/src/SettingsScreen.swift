@@ -387,9 +387,7 @@ struct SettingsScreen: View {
     private func subscriptionSection(_ devices: HostedDevicesUiState) -> some View {
         Section("Subscription") {
             Text("Your plan: \(devices.accountPlanLabel ?? "Loading")")
-            Text(devices.bankReadingEnabled
-                 ? "Bank reading is included when available"
-                 : "Bank reading requires Silver")
+            Text("Live bank connections are deferred and unavailable")
                 .font(.footnote).foregroundStyle(.secondary)
             if !devices.canPurchase {
                 Text("Create an account to subscribe and restore purchases on other devices.")
