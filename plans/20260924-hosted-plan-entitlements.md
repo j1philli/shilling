@@ -45,7 +45,7 @@ The user-facing container is a **finance space**: a home, side business, rental,
 
 ## Enforcement boundaries
 
-- Server: authorize household membership and registered devices at signaling `Join`; issue TURN credentials only for households with an effective Silver/Gold plan; recheck when connections or credentials renew. An established direct WebRTC data channel cannot be forcibly shut down by a control-plane-only server, so entitlement changes are enforced at reconnection rather than promising instant cutoff. Keep signaling messages limited to `Join`, `PeerList`, `Offer`, `Answer`, and `IceCandidate`.
+- Server: authorize household membership and registered devices at signaling `Join`; issue TURN credentials only for households with an effective Silver/Gold plan; recheck when connections or credentials renew. Device removal sends `PeerList.removedDeviceIds` to remaining signaling clients; updated clients close that peer's channels and cancel retries. A signaling policy rejection closes all channels on the rejected client and stops automatic re-registration until an explicit sync restart. This requires updated clients connected to the same signaling instance: older clients, missed notifications, and multiple signaling instances still need release testing or additional control-plane coordination. An established direct WebRTC data channel cannot be forcibly shut down by a control-plane-only server, so do not promise instant cutoff for arbitrary clients. Entitlement changes are enforced at reconnection. Keep signaling messages limited to `Join`, `PeerList`, `Offer`, `Answer`, and `IceCandidate`.
 - Client: present plan/device/household status, upgrade and manage-subscription actions, and actionable states for full device slots and downgrade selection. The client may hide controls for usability but is not the enforcement authority.
 - Application data stays in Store5/repository code and moves between devices only over WebRTC data channels. No server entity sync or backup fallback is introduced by this policy.
 - Model self-hosted as a separate deployment policy, not an extra RevenueCat entitlement. `/api/config` selects hosted versus self-hosted behavior; the self-hosted server does not contact RevenueCat or impose hosted device and household quotas.
@@ -68,4 +68,32 @@ The current SQLDelight entity tables, receipt files, and Store5 keys are global 
 5. Add household switching and management UI, plan surfaces, and public copy matching actual direct-connection behavior.
 6. Run `just guard-architecture` for implementation changes touching sync, server, or data flows.
 
-Pricing, billing periods, and free trials are not fixed by this policy. A household may have multiple paid sponsors; each subscription remains owned and managed by its purchaser.
+Pricing approved on 2026-10-01: Silver USD $5/month or $50/year; Gold USD $20/month or $200/year. Free trials are not specified. A household may have multiple paid sponsors; each subscription remains owned and managed by its purchaser.
+
+## Launch follow-up (2026-10-01)
+
+- Hosted Supabase project: `shilling.finance` (`rjzjwibztzaovgwkdmlg`). Applied `20260926120000`, `20260926121000`, and `20260926122000` successfully. Restored the three already-applied later migration files unchanged from public main; preserve migration history rather than marking remote migrations reverted.
+- Device removal implementation now closes existing connections on updated clients. JVM regression tests cover household-scoped removal notification, signaling target removal, and removal after the device already lost signaling. Native/browser channel closure, badges, self-removal, explicit re-registration, and queued file transfers still require runtime validation.
+- RevenueCat project is `shilling.finance` (`projbb574ddb`). Created Silver entitlement `entle617697949` and Gold entitlement `entl80b0ac903f`, offerings `silver` (`ofrnge8a3e01c14`) and `gold` (`ofrngb3511cb42a`), and monthly/annual packages in each. No products are attached. Neither native store app is registered. Creating the web billing app failed because no Stripe account is linked. This session exposes no project/app/catalog listing or public-key retrieval MCP tools; product setup in the existing automatic Test Store requires its app ID.
+
+### Billing setup remaining
+
+1. Verify App Store Connect and Google Play apps and credentials. The repository identifiers are `finance.shilling.app` on iOS and `finance.shilling.android` on Android. Confirm those match the registered store apps.
+2. Configure monthly and yearly products at the approved USD prices. Register each platform product in RevenueCat; product registration alone does not create a sellable store product. Configure a supported web billing engine and payment provider.
+3. Create or reuse entitlements `silver` and `gold`. Attach Silver products to Silver and Gold products to Gold; the server grants Gold the Silver capabilities. Create offerings `silver` and `gold`, each with `$rc_monthly` and `$rc_annual` packages containing the matching platform products.
+4. Put the project ID, secret API v2 key, entitlement resource IDs, native public SDK keys, offering identifiers, and production web purchase links into the hosted server's runtime variables listed in `.env.example`. Secret keys belong only in the deployment secret store. No billing secrets or production links have been configured by this session.
+5. Validate hosted account ID continuity through guest upgrade, native restore, web checkout, desktop browser return, and cross-platform sign-in. Test purchase success/cancellation, pending payment, restore, renewal, expiry/refund, Silver downgrade, and Gold downgrade with multiple memberships. Sandbox checks precede any real charge.
+
+### Infrastructure and runtime validation remaining
+
+1. Review and merge the public branch through its required `guard` check. Build and deploy the server in Coolify after the migrations and runtime configuration are ready, then deploy the web client and distribute the updated native clients. No server deployment has been performed by this session.
+2. Select an existing TURN deployment or provision one; configure URLs, shared secret, and TTL. Test two actual networks with relay off and on, inspect selected ICE candidate pairs, verify Free receives no hosted TURN credentials, and verify paid relay remains opt-in. TURN relays encrypted WebRTC only.
+3. Remove a connected device from each supported settings surface. Confirm both ends close their channel, badges update, local data survives, and the removed app does not silently re-register. Repeat with signaling temporarily disconnected and during receipt transfer. Document the behavior of older clients and any deployment with more than one signaling instance.
+4. Test concurrent Free registrations, downgrade with more than two registered devices, subscription lookup failure, and sponsor departure. Existing device selection after downgrade still needs a clear end-to-end acceptance check.
+
+### Broader plan dependencies
+
+1. Complete versioned, data-preserving SQLite and web IndexedDB migration to space-scoped entity, receipt, bookkeeping, and change-log keys. Scope every Store5 reader/writer/delete before exposing a second space; test equal entity IDs in different spaces, existing-user migration, and interrupted migration recovery.
+2. Recreate and stop repository/sync graphs during space switching. Then add transactional invitations, accept/decline/expiry, owner/admin membership management, membership quotas, and last-owner transfer protection. Validate one sponsor grants the space shared capabilities without granting other accounts unlimited memberships.
+3. Implement linked transfers at the Store5 boundary after isolation: atomic paired postings, stable link ID, idempotent retry, paired edits/deletes, and independent P2P sync of each space's entry.
+4. Choose bank provider and launch region, then design consent, credential storage, reconnect/revocation, read-only import, deduplication, and ownership. Silver currently grants the entitlement only. Resolve the provider transport design against the architecture invariants before implementation.
