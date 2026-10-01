@@ -15,6 +15,7 @@ import finance.shilling.shared.data.store.createPostingStore
 import finance.shilling.shared.data.store.createReceiptStore
 import finance.shilling.shared.data.store.createScheduleExceptionStore
 import finance.shilling.shared.data.store.createScheduleStore
+import finance.shilling.shared.data.sync.PeerConnectionStatus
 import finance.shilling.shared.data.usecase.ComputeBudgetUseCase
 import finance.shilling.shared.data.usecase.ComputeWindowUseCase
 import finance.shilling.shared.presentation.DisplayPreferences
@@ -35,6 +36,7 @@ import finance.shilling.shared.presentation.PlanOverviewViewModel
 import finance.shilling.shared.presentation.PlanRequests
 import finance.shilling.shared.presentation.ReceiptsViewModel
 import finance.shilling.shared.presentation.SettingsViewModel
+import finance.shilling.shared.presentation.HostedDevicesViewModel
 import org.koin.core.Koin
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -65,6 +67,7 @@ val dataModule: Module = module {
     // One StoreSyncDeps shared by every store and repository; the sync runtime swaps its
     // peer manager in and out as sync starts and stops.
     single { StoreSyncDeps(get(), null, get<DeviceIdentity>().deviceId, get()) }
+    single { PeerConnectionStatus() }
 
     single { createAccountStore(get(), get()) }
     single { createCategoryStore(get(), get()) }
@@ -114,6 +117,7 @@ val dataModule: Module = module {
     viewModel { params -> ScheduleEditorViewModel(params.getOrNull(), params.getOrNull(), get(), get(), get(), get()) }
     // Needs SessionState and the Settings callbacks from sessionModule.
     viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { HostedDevicesViewModel(get(), get(), get(), get(), get()) }
 
     single {
         LocalDataWiper(

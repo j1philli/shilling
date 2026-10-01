@@ -43,6 +43,7 @@ class OnboardingStateTest {
             it.putString(SETTINGS_KEY_AUTH_TIER, "FREE")
             it.putString(SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION, "true")
             it.putString(SETTINGS_KEY_AUTH_PENDING_EMAIL, "user@example.com")
+            it.putBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, true)
         }
 
         clearHostedAuthSessionState(settings)
@@ -59,6 +60,7 @@ class OnboardingStateTest {
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_REFRESH_TOKEN))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_USER_ID))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_TIER))
+        assertFalse(settings.getBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, false))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_EMAIL))
     }
@@ -73,6 +75,7 @@ class OnboardingStateTest {
             it.putString(SETTINGS_KEY_AUTH_USER_ID, "user-1")
             it.putString(SETTINGS_KEY_AUTH_TIER, "FREE")
             it.putString(SETTINGS_KEY_AUTH_ACCESS_TOKEN, "access-token")
+            it.putBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, true)
         }
 
         softReturnToWelcome(settings, notice = "session_expired")
@@ -85,6 +88,7 @@ class OnboardingStateTest {
         assertEquals("hosted-household", settings.getStringOrNull(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_ACCESS_TOKEN))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_USER_ID))
+        assertFalse(settings.getBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, false))
         assertTrue(matchesPendingRestore(settings, "user-1"))
         assertFalse(matchesPendingRestore(settings, "other-user"))
     }

@@ -22,7 +22,13 @@ private val hostedMetadataLog = co.touchlab.kermit.Logger.withTag("HostedMetadat
 
 interface HouseholdMembershipLookup {
     suspend fun householdIdForUser(userId: String): String?
+    suspend fun roleForUser(userId: String, householdId: String): HostedSpaceRole? = null
 }
+
+enum class HostedSpaceRole { OWNER, ADMIN, MEMBER }
+
+internal fun HostedSpaceRole?.canManageSpace(): Boolean =
+    this == HostedSpaceRole.OWNER || this == HostedSpaceRole.ADMIN
 
 sealed class JoinAuthorizationResult {
     data class Authorized(val userId: String) : JoinAuthorizationResult()
@@ -37,6 +43,7 @@ class SupabaseHouseholdMembershipLookup(
         .connectTimeout(Duration.ofSeconds(3))
         .build()
     private val profilesUrl = supabaseUrl.trimEnd('/') + "/rest/v1/user_profiles"
+    private val membershipsUrl = supabaseUrl.trimEnd('/') + "/rest/v1/hosted_space_memberships"
     private val json = Json { ignoreUnknownKeys = true }
 
     override suspend fun householdIdForUser(userId: String): String? = withContext(Dispatchers.IO) {
@@ -44,6 +51,7 @@ class SupabaseHouseholdMembershipLookup(
             .uri(URI.create("$profilesUrl?select=household_id&user_id=eq.$userId"))
             .timeout(Duration.ofSeconds(5))
             .header("apikey", serviceKey)
+            .header("Authorization", "Bearer $serviceKey")
             .header("Accept", "application/json")
             .GET()
             .build()
@@ -61,8 +69,23 @@ class SupabaseHouseholdMembershipLookup(
             return@withContext null
         }
 
-        rows.firstOrNull()?.householdId
+        val activeSpace = rows.firstOrNull()?.householdId ?: return@withContext null
+        if (roleForUser(userId, activeSpace) == null) null else activeSpace
     }
+
+    override suspend fun roleForUser(userId: String, householdId: String): HostedSpaceRole? =
+        withContext(Dispatchers.IO) {
+            val request = HttpRequest.newBuilder()
+                .uri(URI.create("$membershipsUrl?select=role&user_id=eq.$userId&space_id=eq.$householdId"))
+                .header("apikey", serviceKey)
+                .header("Authorization", "Bearer $serviceKey")
+                .header("Accept", "application/json")
+                .GET().build()
+            val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+            check(response.statusCode() in 200..299) { "Hosted space role lookup failed: ${response.statusCode()}" }
+            json.decodeFromString<List<SpaceRoleRow>>(response.body()).firstOrNull()?.role
+                ?.uppercase()?.let { runCatching { HostedSpaceRole.valueOf(it) }.getOrNull() }
+        }
 }
 
 fun createHouseholdMembershipLookup(authConfig: AuthConfig): HouseholdMembershipLookup? {
@@ -130,3 +153,6 @@ private data class UserProfileRow(
     @SerialName("household_id")
     val householdId: String
 )
+
+@Serializable
+private data class SpaceRoleRow(val role: String)

@@ -16,8 +16,11 @@ class WebRtcConnectionManager(
     private val webRtcClient: WebRtcClient,
     private val signalingClient: SignalingClient,
     private val deviceId: String,
+    private val peerConnectionStatus: PeerConnectionStatus,
+    private val allowRelay: () -> Boolean = { false },
     private val delayFn: suspend (Long) -> Unit = { kotlinx.coroutines.delay(it) }
 ) : PeerSyncManager {
+    private fun allowedRemoteSdp(sdp: String): String = if (allowRelay()) sdp else withoutRelayCandidates(sdp)
     private val _incomingChanges = MutableSharedFlow<ChangeMessage>(extraBufferCapacity = 256)
     override val incomingChanges: SharedFlow<ChangeMessage> = _incomingChanges
 
@@ -47,6 +50,10 @@ class WebRtcConnectionManager(
     /** Extra peerConnected re-emits to recover from startup/listener races. */
     private val peerConnectedRetryJobs = mutableMapOf<String, Job>()
     private var scope: CoroutineScope? = null
+    private val removedPeers = mutableSetOf<String>()
+
+    private fun canConnect(peerId: String): Boolean =
+        !signalingClient.policyRejected.value && peerId !in removedPeers
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -57,15 +64,27 @@ class WebRtcConnectionManager(
         this.scope = scope
         log.i { "[RTC] start() — device=$deviceId, collecting signaling messages..." }
         scope.launch {
+            signalingClient.policyRejected.collect { rejected ->
+                if (rejected) stop()
+            }
+        }
+        scope.launch {
             signalingClient.incomingMessages.collect { msg ->
+                if (signalingClient.policyRejected.value) return@collect
                 when (msg) {
                     is SignalingMessage.PeerList -> {
+                        msg.removedDeviceIds.forEach { peerId ->
+                            removedPeers.add(peerId)
+                            retryJobs.remove(peerId)?.cancel()
+                            cleanupPeer(peerId)
+                        }
                         log.i { "[RTC] PeerList received: ${msg.deviceIds} (we are $deviceId, existing peers=${peers.keys})" }
                         msg.deviceIds.forEach { peerId ->
                             if (peerId == deviceId) {
                                 log.d { "[RTC] Ignoring self in PeerList" }
                                 return@forEach
                             }
+                            removedPeers.remove(peerId)
                             // PeerList means the peer just (re-)registered with the signaling
                             // server. Any existing connection is potentially stale — the peer
                             // may have restarted its sync scope, closing its side of the channel
@@ -87,6 +106,7 @@ class WebRtcConnectionManager(
                         }
                     }
                     is SignalingMessage.Offer -> {
+                        if (!canConnect(msg.fromDeviceId)) return@collect
                         if (msg.toDeviceId != deviceId) {
                             log.d { "[RTC] Ignoring Offer from ${msg.fromDeviceId} addressed to ${msg.toDeviceId}" }
                             return@collect
@@ -95,6 +115,7 @@ class WebRtcConnectionManager(
                         handleOffer(msg)
                     }
                     is SignalingMessage.Answer -> {
+                        if (!canConnect(msg.fromDeviceId)) return@collect
                         if (msg.toDeviceId != deviceId) {
                             log.d { "[RTC] Ignoring Answer from ${msg.fromDeviceId} addressed to ${msg.toDeviceId}" }
                             return@collect
@@ -103,6 +124,7 @@ class WebRtcConnectionManager(
                         handleAnswer(msg)
                     }
                     is SignalingMessage.IceCandidate -> {
+                        if (!canConnect(msg.fromDeviceId)) return@collect
                         if (msg.toDeviceId != deviceId) return@collect
                         log.d { "[RTC] <<< ICE from ${msg.fromDeviceId}: ${msg.candidate.take(60)}" }
                         handleIceCandidate(msg)
@@ -235,6 +257,7 @@ class WebRtcConnectionManager(
         listenersByPeerAndLabel.values.forEach { it.job.cancel() }
         listenersByPeerAndLabel.clear()
         readyPeers.clear()
+        peerConnectionStatus.setConnected(emptySet())
         peersWithInboundTraffic.clear()
     }
 
@@ -339,6 +362,7 @@ class WebRtcConnectionManager(
             .filter { it.first == peerId }
             .forEach { key -> listenersByPeerAndLabel.remove(key)?.job?.cancel() }
         readyPeers.remove(peerId)
+        peerConnectionStatus.setConnected(readyPeers)
         peersWithInboundTraffic.remove(peerId)
         peerConnectedRetryJobs.remove(peerId)?.cancel()
         pendingDirectFileMessages.remove(peerId)?.let { dropped ->
@@ -385,6 +409,7 @@ class WebRtcConnectionManager(
      * ICE failed, or the peer was too slow.
      */
     private fun scheduleRetryOffer(peerId: String) {
+        if (!canConnect(peerId)) return
         retryJobs[peerId]?.cancel()
         retryJobs[peerId] = (scope?.launch {
             delayFn(RETRY_DELAY_MS)
@@ -403,15 +428,24 @@ class WebRtcConnectionManager(
     }
 
     private suspend fun initiateConnection(peerId: String) {
+        if (!canConnect(peerId)) return
         try {
             log.i { "[RTC] Creating PeerConnection for $peerId (offerer path)" }
             val connection = webRtcClient.createPeerConnection()
+            if (!canConnect(peerId)) {
+                connection.close()
+                return
+            }
             peers[peerId] = connection
             collectIceCandidates(connection, peerId)
             collectConnectionState(connection, peerId)
             collectDataChannelEvents(connection, peerId)
 
             val channel = connection.createDataChannel("data")
+            if (!canConnect(peerId)) {
+                connection.close()
+                return
+            }
             dataChannels[peerId] = channel
             log.i { "[RTC] Created 'data' channel for $peerId (${channelId(channel)}, state=${channel.state})" }
             attachListener(peerId, channel, replace = true, reason = "offerer createDataChannel")
@@ -437,6 +471,10 @@ class WebRtcConnectionManager(
 
             log.i { "[RTC] Creating PeerConnection for ${msg.fromDeviceId} (answerer path)" }
             val connection = webRtcClient.createPeerConnection()
+            if (!canConnect(msg.fromDeviceId)) {
+                connection.close()
+                return
+            }
             peers[msg.fromDeviceId] = connection
             collectIceCandidates(connection, msg.fromDeviceId)
             collectConnectionState(connection, msg.fromDeviceId)
@@ -444,7 +482,7 @@ class WebRtcConnectionManager(
 
             log.i { "[RTC] Setting remote description (offer) from ${msg.fromDeviceId}" }
             connection.setRemoteDescription(
-                WebRtc.SessionDescription(WebRtc.SessionDescriptionType.OFFER, msg.sdp)
+                WebRtc.SessionDescription(WebRtc.SessionDescriptionType.OFFER, allowedRemoteSdp(msg.sdp))
             )
             log.i { "[RTC] Creating answer for ${msg.fromDeviceId}..." }
             val answer = connection.createAnswer()
@@ -467,7 +505,7 @@ class WebRtcConnectionManager(
             }
             log.i { "[RTC] Setting remote description (answer) from ${msg.fromDeviceId}" }
             conn.setRemoteDescription(
-                WebRtc.SessionDescription(WebRtc.SessionDescriptionType.ANSWER, msg.sdp)
+                WebRtc.SessionDescription(WebRtc.SessionDescriptionType.ANSWER, allowedRemoteSdp(msg.sdp))
             )
             log.i { "[RTC] Remote answer set for ${msg.fromDeviceId} — draining pending..." }
             drainPendingChanges()
@@ -485,6 +523,7 @@ class WebRtcConnectionManager(
                 log.d { "[RTC] Ignoring empty end-of-candidates from ${msg.fromDeviceId}" }
                 return
             }
+            if (!allowRelay() && isRelayCandidate(msg.candidate)) return
             val conn = peers[msg.fromDeviceId]
             if (conn == null) {
                 // Buffer the candidate — the Offer for this peer may not have been processed yet
@@ -507,6 +546,7 @@ class WebRtcConnectionManager(
         val conn = peers[peerId] ?: return
         log.i { "[RTC] Applying ${buffered.size} buffered ICE candidate(s) for $peerId" }
         for (candidate in buffered) {
+            if (!allowRelay() && isRelayCandidate(candidate.candidate)) continue
             try {
                 conn.addIceCandidate(
                     WebRtc.IceCandidate(candidate.candidate, candidate.sdpMid ?: "", candidate.sdpMLineIndex ?: 0)
@@ -520,6 +560,7 @@ class WebRtcConnectionManager(
     private fun collectIceCandidates(connection: WebRtcPeerConnection, peerId: String) {
         val job = scope?.launch {
             connection.iceCandidates.collect { ice ->
+                if (!allowRelay() && isRelayCandidate(ice.candidate)) return@collect
                 log.d { "[RTC] ICE gathered for $peerId: ${ice.candidate.take(60)}" }
                 signalingClient.send(
                     SignalingMessage.IceCandidate(
@@ -547,13 +588,19 @@ class WebRtcConnectionManager(
                     }
                     WebRtc.IceConnectionState.FAILED -> {
                         log.e { "[RTC] ICE FAILED for $peerId — P2P unavailable" }
+                        readyPeers.remove(peerId)
+                        peerConnectionStatus.setConnected(readyPeers)
                         handleIceFailed(peerId, connection)
                     }
                     WebRtc.IceConnectionState.DISCONNECTED -> {
                         log.w { "[RTC] ICE DISCONNECTED for $peerId — may recover" }
+                        readyPeers.remove(peerId)
+                        peerConnectionStatus.setConnected(readyPeers)
                     }
                     WebRtc.IceConnectionState.CLOSED -> {
                         log.i { "[RTC] ICE CLOSED for $peerId" }
+                        readyPeers.remove(peerId)
+                        peerConnectionStatus.setConnected(readyPeers)
                     }
                     else -> {}
                 }
@@ -611,6 +658,7 @@ class WebRtcConnectionManager(
             return
         }
         val firstReady = readyPeers.add(peerId)
+        peerConnectionStatus.setConnected(readyPeers)
         retryJobs.remove(peerId)?.cancel()
         drainPendingChanges()
         drainPendingDirectFileMessages(peerId)

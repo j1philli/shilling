@@ -5,6 +5,7 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.WebSocketExtension
 import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.readText
+import io.ktor.websocket.readReason
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
@@ -107,6 +108,48 @@ class SignalingHubTest {
     }
 
     @Test
+    fun evictionNotifiesOnlyRemainingHouseholdPeersAndBlocksRelay() = runBlocking {
+        val hub = SignalingHub()
+        val remaining = FakeWebSocketSession()
+        val removed = FakeWebSocketSession()
+        val otherHousehold = FakeWebSocketSession()
+        hub.register("house-1", "peer-a", remaining)
+        hub.register("house-1", "peer-b", removed)
+        hub.register("house-2", "peer-c", otherHousehold)
+        remaining.clear()
+        removed.clear()
+
+        hub.evict("house-1", "peer-b")
+
+        assertEquals(
+            listOf(SignalingMessage.PeerList(emptyList(), removedDeviceIds = listOf("peer-b"))),
+            remaining.sentMessages().map(::decode)
+        )
+        assertTrue(removed.receivedPolicyClose())
+        hub.relay("house-1", "peer-a", SignalingMessage.Offer("peer-a", "peer-b", "sdp"))
+        assertTrue(removed.sentMessages().isEmpty())
+        assertTrue(otherHousehold.sentMessages().isEmpty())
+    }
+
+    @Test
+    fun evictionNotifiesPeersWhenRemovedDeviceAlreadyLostSignaling() = runBlocking {
+        val hub = SignalingHub()
+        val remaining = FakeWebSocketSession()
+        val removed = FakeWebSocketSession()
+        hub.register("house-1", "peer-a", remaining)
+        hub.register("house-1", "peer-b", removed)
+        hub.unregister("house-1", "peer-b", removed)
+        remaining.clear()
+
+        hub.evict("house-1", "peer-b")
+
+        assertEquals(
+            listOf(SignalingMessage.PeerList(emptyList(), removedDeviceIds = listOf("peer-b"))),
+            remaining.sentMessages().map(::decode)
+        )
+    }
+
+    @Test
     fun replacedSessionCannotUnregisterCurrentPeer() = runBlocking {
         val hub = SignalingHub()
         val old = FakeWebSocketSession()
@@ -137,6 +180,12 @@ class SignalingHubTest {
         override fun terminate() {
             incomingChannel.close()
             outgoingChannel.close()
+        }
+
+        fun receivedPolicyClose(): Boolean {
+            val frame = outgoingChannel.tryReceive().getOrNull() as? Frame.Close ?: return false
+            return io.ktor.websocket.CloseReason.Codes.VIOLATED_POLICY.code ==
+                frame.readReason()?.code
         }
 
         fun sentMessages(): List<String> {

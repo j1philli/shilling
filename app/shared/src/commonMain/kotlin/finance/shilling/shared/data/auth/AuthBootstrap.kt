@@ -305,9 +305,7 @@ suspend fun resolveStartupIdentity(
 
     val authenticatedApi = ServerApi(httpClient, serverUrl, authService)
     val householdId = runCatching {
-        authenticatedApi.fetchHousehold().householdId.also {
-            settings.putString(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID, it)
-        }
+        authenticatedApi.fetchHousehold().householdId
     }.getOrElse { error ->
         AuthErrors.logFailure("household_lookup", error)
         return StartupStateResolution(
@@ -332,6 +330,27 @@ suspend fun resolveStartupIdentity(
             authRuntime = authRuntime
         )
     }
+
+    if (cachedHostedHouseholdId != null && cachedHostedHouseholdId != householdId) {
+        return StartupStateResolution(
+            identity = StartupIdentity(
+                serverConfig = configResolution.serverConfig,
+                authService = authService,
+                activeHouseholdId = cachedHostedHouseholdId,
+                localHouseholdId = localHouseholdId,
+                hostedHouseholdId = cachedHostedHouseholdId,
+                bootstrapStatus = HostedBootstrapStatus(
+                    phase = HostedBootstrapPhase.WAITING_FOR_HOUSEHOLD,
+                    serverReachability = DependencyReachability.REACHABLE,
+                    supabaseReachability = DependencyReachability.REACHABLE,
+                    syncReady = false,
+                    lastError = "This device has local data for another hosted household. Household switching requires separate local data spaces."
+                )
+            ),
+            authRuntime = authRuntime
+        )
+    }
+    settings.putString(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID, householdId)
 
     return StartupStateResolution(
         identity = StartupIdentity(

@@ -24,6 +24,7 @@ dependencies:
   - $libs.lifecycle.viewmodel
   - $libs.kmp.nativecoroutines.core
   - $libs.kmp.nativecoroutines.annotations
+  - $libs.revenuecat.kmp.core
   # Swift side of KMP-NativeCoroutines (async/await + AsyncSequence); keep in sync with the Kotlin version.
   - swiftPackage:
       repository:

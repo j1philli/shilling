@@ -2,6 +2,7 @@ package finance.shilling.server
 
 import co.touchlab.kermit.Logger
 import finance.shilling.core.sync.SignalingMessage
+import finance.shilling.core.auth.HostedPlan
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
@@ -21,7 +22,10 @@ class SignalingHub {
 
     suspend fun register(householdId: String, deviceId: String, session: WebSocketSession) {
         val peers = households.getOrPut(householdId) { ConcurrentHashMap() }
-        peers[deviceId] = session
+        val previous = peers.put(deviceId, session)
+        if (previous != null && previous !== session) {
+            runCatching { previous.close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Device reconnected")) }
+        }
         log.i { "[HUB] REGISTER (household peers=${peers.size})" }
 
         val existingPeerIds = peers.keys.filter { it != deviceId }
@@ -48,6 +52,23 @@ class SignalingHub {
         households[householdId]?.remove(deviceId, session)
         val remaining = households[householdId]?.keys ?: emptySet()
         log.i { "[HUB] UNREGISTER (household peers=${remaining.size})" }
+    }
+
+    suspend fun evict(householdId: String, deviceId: String) {
+        val peers = households[householdId] ?: return
+        val session = peers.remove(deviceId)
+        if (session != null) {
+            runCatching { session.close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Device removed")) }
+        }
+        // Notify remaining clients even if the removed device lost signaling while its
+        // data channel stayed open. This is control-plane metadata, never entity data.
+        peers.values.forEach { peer ->
+            runCatching {
+                peer.send(json.encodeToString<SignalingMessage>(
+                    SignalingMessage.PeerList(emptyList(), removedDeviceIds = listOf(deviceId))
+                ))
+            }.onFailure { log.w { "[HUB] Failed to notify device removal: ${it::class.simpleName}" } }
+        }
     }
 
     suspend fun relay(householdId: String, fromDeviceId: String, message: SignalingMessage) {
@@ -103,7 +124,9 @@ class SignalingHub {
 fun Routing.signalingRoute(
     hub: SignalingHub,
     tokenVerifier: SupabaseTokenVerifier? = null,
-    householdLookup: HouseholdMembershipLookup? = null
+    householdLookup: HouseholdMembershipLookup? = null,
+    entitlements: HostedEntitlementLookup? = null,
+    devices: HostedDeviceRegistry? = null
 ) {
     val json = Json {
         ignoreUnknownKeys = true
@@ -139,6 +162,17 @@ fun Routing.signalingRoute(
                                 )) {
                                     is JoinAuthorizationResult.Authorized -> {
                                         log.i { "[WS] Hosted join authorized" }
+                                        val admitted = runCatching {
+                                            val plan = entitlements?.householdPlan(msg.householdId) ?: HostedPlan.FREE
+                                            devices?.register(msg.householdId, msg.deviceId, result.userId, plan) ?: false
+                                        }.getOrElse { error ->
+                                            log.w { "[WS] Device registration unavailable: ${error.message}" }
+                                            false
+                                        }
+                                        if (!admitted) {
+                                            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Device limit or registration unavailable"))
+                                            return@webSocket
+                                        }
                                     }
                                     is JoinAuthorizationResult.Rejected -> {
                                         log.w { "[WS] Join rejected: ${result.reason}" }
