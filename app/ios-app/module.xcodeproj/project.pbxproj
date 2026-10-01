@@ -245,7 +245,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Extract the right WebRTC.xcframework slice for the current platform\nXCFW_DIR=\"${SRCROOT}/Frameworks/WebRTC.xcframework\"\nOUT_DIR=\"${TARGET_BUILD_DIR}/WebRTCFramework\"\nmkdir -p \"${OUT_DIR}\"\n\nif [ \"${PLATFORM_NAME}\" = \"iphoneos\" ]; then\n  SLICE_DIR=\"${XCFW_DIR}/ios-arm64\"\nelif [ \"${PLATFORM_NAME}\" = \"iphonesimulator\" ]; then\n  SLICE_DIR=\"${XCFW_DIR}/ios-arm64_x86_64-simulator\"\nelse\n  echo \"warning: Unknown platform ${PLATFORM_NAME}, skipping WebRTC framework copy\"\n  exit 0\nfi\n\nif [ -d \"${SLICE_DIR}/WebRTC.framework\" ]; then\n  # Copy for linking\n  rsync -av --delete \"${SLICE_DIR}/WebRTC.framework\" \"${OUT_DIR}/\"\n  # Embed in app bundle for runtime\n  EMBED_DIR=\"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\n  mkdir -p \"${EMBED_DIR}\"\n  rsync -av --delete \"${SLICE_DIR}/WebRTC.framework\" \"${EMBED_DIR}/\"\n  # Device installs require a code signature on embedded frameworks\n  if [ -n \"${EXPANDED_CODE_SIGN_IDENTITY}\" ] && [ \"${EXPANDED_CODE_SIGN_IDENTITY}\" != \"-\" ]; then\n    codesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY}\" --timestamp=none \"${EMBED_DIR}/WebRTC.framework\"\n  fi\nelse\n  echo \"error: WebRTC.framework not found at ${SLICE_DIR}\"\n  exit 1\nfi\n";
+			shellScript = "# Extract the right WebRTC.xcframework slice for the current platform\nXCFW_DIR=\"${SRCROOT}/Frameworks/WebRTC.xcframework\"\nOUT_DIR=\"${TARGET_TEMP_DIR}/WebRTCFramework\"\nmkdir -p \"${OUT_DIR}\"\n\nif [ \"${PLATFORM_NAME}\" = \"iphoneos\" ]; then\n  SLICE_DIR=\"${XCFW_DIR}/ios-arm64\"\nelif [ \"${PLATFORM_NAME}\" = \"iphonesimulator\" ]; then\n  SLICE_DIR=\"${XCFW_DIR}/ios-arm64_x86_64-simulator\"\nelse\n  echo \"warning: Unknown platform ${PLATFORM_NAME}, skipping WebRTC framework copy\"\n  exit 0\nfi\n\nif [ -d \"${SLICE_DIR}/WebRTC.framework\" ]; then\n  # Copy for linking\n  rsync -av --delete \"${SLICE_DIR}/WebRTC.framework\" \"${OUT_DIR}/\"\n  # Embed in app bundle for runtime\n  EMBED_DIR=\"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\n  mkdir -p \"${EMBED_DIR}\"\n  rsync -av --delete \"${SLICE_DIR}/WebRTC.framework\" \"${EMBED_DIR}/\"\n  # Device installs require a code signature on embedded frameworks\n  if [ -n \"${EXPANDED_CODE_SIGN_IDENTITY}\" ] && [ \"${EXPANDED_CODE_SIGN_IDENTITY}\" != \"-\" ]; then\n    codesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY}\" --timestamp=none \"${EMBED_DIR}/WebRTC.framework\"\n  fi\nelse\n  echo \"error: WebRTC.framework not found at ${SLICE_DIR}\"\n  exit 1\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -297,7 +297,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(TARGET_BUILD_DIR)/AmperFrameworks",
-					"$(TARGET_BUILD_DIR)/WebRTCFramework",
+					"$(TARGET_TEMP_DIR)/WebRTCFramework",
 				);
 				INFOPLIST_FILE = src/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -335,7 +335,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(TARGET_BUILD_DIR)/AmperFrameworks",
-					"$(TARGET_BUILD_DIR)/WebRTCFramework",
+					"$(TARGET_TEMP_DIR)/WebRTCFramework",
 				);
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = src/Info.plist;
