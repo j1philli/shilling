@@ -149,6 +149,9 @@ object IosBuild : BuildType({
     name = "iOS Build"
     description = "Archive the iOS app on macOS; export an IPA when signing is configured"
     artifactRules = "mobile-artifacts/ios/** => ios.zip"
+    params {
+        param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
+    }
 
     vcs {
         root(DslContext.settingsRoot)

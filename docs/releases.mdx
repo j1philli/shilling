@@ -128,6 +128,39 @@ TeamCity inherits `env.GITHUB_TOKEN`, `env.GHCR_TOKEN` (classic PAT with
 write and deploy access. Sensitive-read access is not required: the preflight
 checks environment metadata, and the deployed API verifies Supabase mode.
 
+### iOS signing setup
+
+The iOS archive must contain only the app under `Products/Applications` and
+include Xcode's `ApplicationProperties`. CI validates this and checks that the
+app and its extensions have matching versions/build numbers before exporting.
+Temporary framework linking copies live in Xcode's temporary directory.
+
+For signed builds, configure these environment parameters on the **iOS Build**
+configuration after installing the key on the Mac runner:
+
+- `SHILLING_IOS_SIGNED=1`
+- `IOS_TEAM_ID`: the Apple Developer Program team ID
+- `ASC_KEY_PATH`: absolute path to the App Store Connect team `.p8` key on the Mac
+- `ASC_KEY_ID` and `ASC_ISSUER_ID`: identifiers from App Store Connect
+- `IOS_KEYCHAIN_PATH` and `IOS_KEYCHAIN_PASSWORD_FILE`: dedicated signing keychain
+  and its runner-local password file, to unlock signing for unattended builds
+
+Store the key outside the checkout and artifact directories, readable only by
+`shillin-ci` (directory mode 700, file mode 600). Do not put its contents in an
+environment parameter: Xcode prints environment variables in build logs. The
+runner needs an unlocked signing keychain for locally created signing keys.
+
+Signed TeamCity builds are restricted to `main`. Xcode uses the API key with
+`-allowProvisioningUpdates` for automatic provisioning and App Store export.
+Export preserves the repository's version and build number. The app and widget
+need their bundle IDs and `group.finance.shilling.app` App Group configured in
+the same Apple Developer team.
+
+This exports a signed IPA; it does **not** upload to App Store Connect or submit
+an app for review. The Full/Single Target release buttons publish the IPA as a
+GitHub asset when a signed iOS build is available. Apple upload automation is a
+separate release step and must not run on an ordinary merge to main.
+
 ### Runtime checks
 
 `Web and Server Smoke` starts disposable containers built from the exact JAR
