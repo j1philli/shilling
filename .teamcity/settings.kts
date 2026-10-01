@@ -85,6 +85,14 @@ object CI : BuildType({
             scriptContent = "bash scripts/ci/run-jvm-tests.sh"
         }
         script {
+            name = "Web database migration and persistence"
+            scriptContent = "node scripts/ci/test-web-database.cjs"
+        }
+        script {
+            name = "Hosted space membership policies"
+            scriptContent = "bash scripts/ci/test-hosted-spaces.sh"
+        }
+        script {
             name = "Compile server"
             scriptContent = "bash scripts/ci/retry.sh ./kotlin build -m server"
         }
