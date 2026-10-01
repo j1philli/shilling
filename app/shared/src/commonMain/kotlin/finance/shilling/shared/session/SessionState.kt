@@ -24,6 +24,8 @@ interface OnboardingActions {
     /** Fails with [NonMatchingAccountException] when the account doesn't match held local data. */
     suspend fun submitCredentials(mode: HostedCredentialsMode, email: String, password: String): Result<HostedCredentialsSubmitResult>
 
+    suspend fun sendSignInLink(email: String): Result<Unit>
+
     suspend fun continueSelfHosted(selectedUrl: String): Result<Unit>
 
     /** The user kept their held budget after signing in to a non-matching account. */

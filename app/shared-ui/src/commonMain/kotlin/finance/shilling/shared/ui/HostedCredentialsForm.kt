@@ -10,7 +10,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,7 +35,7 @@ fun HostedCredentialsForm(
     enabled: Boolean = authService != null,
     disabledReason: String? = null,
     initialMode: HostedCredentialsMode = HostedCredentialsMode.SIGN_IN,
-    signInLabel: String = "Sign in",
+    guestUpgrade: Boolean = false,
     onSubmit: suspend (mode: HostedCredentialsMode, email: String, password: String) -> Result<HostedCredentialsSubmitResult>,
     onMessage: (String) -> Unit = {},
     extraActions: @Composable (() -> Unit)? = null
@@ -47,11 +46,22 @@ fun HostedCredentialsForm(
     var passwordText by remember { mutableStateOf("") }
     var authMessage by remember { mutableStateOf("") }
     var isSubmitting by remember { mutableStateOf(false) }
-    var emailConfirmationSheet by remember { mutableStateOf<EmailConfirmationSheetState?>(null) }
+    var emailNotice by remember { mutableStateOf<String?>(null) }
+
+    emailNotice?.let { notice ->
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Check your email", style = MaterialTheme.typography.titleMedium)
+            Text(notice)
+            Button(onClick = { emailNotice = null; authMessage = ""; mode = HostedCredentialsMode.CREATE_ACCOUNT }) {
+                Text("Use another email")
+            }
+        }
+        return
+    }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            CredentialsCopy.prompt(mode),
+            CredentialsCopy.prompt(mode, guestUpgrade),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         disabledReason?.let {
@@ -63,40 +73,48 @@ fun HostedCredentialsForm(
         }
         OutlinedTextField(
             value = emailText,
-            onValueChange = { emailText = it; authMessage = "" },
+            onValueChange = { emailText = it; authMessage = ""; mode = HostedCredentialsMode.CREATE_ACCOUNT; passwordText = "" },
             label = { Text("Email") },
             singleLine = true,
+            enabled = !isSubmitting,
             modifier = Modifier.fillMaxWidth()
         )
-        OutlinedTextField(
-            value = passwordText,
-            onValueChange = { passwordText = it; authMessage = "" },
-            label = { Text("Password") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
+        if (mode == HostedCredentialsMode.SIGN_IN) {
+            OutlinedTextField(
+                value = passwordText,
+                onValueChange = { passwordText = it; authMessage = "" },
+                label = { Text("Password") },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         Button(
             onClick = {
                 scope.launch {
                     isSubmitting = true
-                    val result = onSubmit(mode, emailText.trim(), passwordText)
-                    result.onSuccess { submit ->
-                        if (CredentialsCopy.needsEmailConfirmation(result)) {
-                            emailConfirmationSheet = EmailConfirmationSheetState(
-                                email = emailText.trim(),
-                                upgradedFromGuest = submit.signUpResult?.upgradedAnonymousSession == true
-                            )
+                    if (mode == HostedCredentialsMode.SIGN_IN && passwordText.isBlank()) {
+                        authMessage = "Enter your password."
+                    } else {
+                        val result = onSubmit(mode, emailText.trim(), passwordText)
+                        result.onSuccess { submit ->
+                            val outcome = CredentialsCopy.outcome(result, emailText.trim())
+                            if (outcome.emailSent) {
+                                emailNotice = outcome.confirmEmailMessage
+                                    ?: "We sent a sign-in link to ${emailText.trim()}. Open it on this device to continue."
+                            }
+                            if (submit.signUpResult?.existingAccountHasPassword == true) {
+                                mode = HostedCredentialsMode.SIGN_IN
+                            }
+                            passwordText = ""
                         }
-                        emailText = ""
-                        passwordText = ""
+                        authMessage = CredentialsCopy.resultMessage(result)
                     }
-                    authMessage = CredentialsCopy.resultMessage(result)
                     onMessage(authMessage)
                     isSubmitting = false
                 }
             },
-            enabled = enabled && !isSubmitting && emailText.isNotBlank() && passwordText.isNotBlank()
+            enabled = enabled && !isSubmitting && emailText.isNotBlank()
         ) {
             if (isSubmitting) {
                 CircularProgressIndicator(
@@ -106,16 +124,7 @@ fun HostedCredentialsForm(
                     strokeWidth = 2.dp
                 )
             }
-            Text(CredentialsCopy.submitLabel(mode, signInLabel))
-        }
-        TextButton(
-            onClick = {
-                mode = CredentialsCopy.other(mode)
-                authMessage = ""
-            },
-            enabled = enabled && !isSubmitting
-        ) {
-            Text(CredentialsCopy.switchLabel(mode))
+            Text(if (isSubmitting) "Please wait…" else CredentialsCopy.submitLabel(mode))
         }
         extraActions?.invoke()
         if (authMessage.isNotBlank()) {
@@ -123,11 +132,4 @@ fun HostedCredentialsForm(
         }
     }
 
-    emailConfirmationSheet?.let { sheet ->
-        EmailConfirmationBottomSheet(
-            email = sheet.email,
-            upgradedFromGuest = sheet.upgradedFromGuest,
-            onDismiss = { emailConfirmationSheet = null }
-        )
-    }
 }

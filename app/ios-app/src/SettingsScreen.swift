@@ -30,6 +30,8 @@ struct SettingsScreen: View {
     @StateObject private var model = SettingsModel()
     @State private var confirmingAccountAction = false
     @State private var toast: Toast?
+    @State private var password = ""
+    @State private var accountMessage: String?
 
     var body: some View {
         let state = model.state
@@ -103,11 +105,16 @@ struct SettingsScreen: View {
                     Text(guest.body).font(.subheadline).foregroundStyle(.secondary)
                 }
                 CredentialsForm(initialMode: .createAccount, enabled: guest.authAvailable,
-                                disabledReason: guest.disabledReason) { mode, email, password in
+                                disabledReason: guest.disabledReason, guestUpgrade: true) { mode, email, password in
                     try? await asyncFunction(for: model.screen.submitCredentials(mode: mode, email: email, password: password))
                 }
                 if let pending = guest.pendingConfirmation {
                     Text(pending).font(.footnote).foregroundStyle(.secondary)
+                    Button("Check confirmation") {
+                        Task {
+                            accountMessage = try? await asyncFunction(for: model.screen.refreshAccountStatus())
+                        }
+                    }
                 }
             } else if let signedIn = account as? SettingsAccountSignedIn {
                 VStack(alignment: .leading, spacing: 4) {
@@ -117,11 +124,27 @@ struct SettingsScreen: View {
                 if let pending = signedIn.pendingConfirmation {
                     Text(pending).font(.footnote).foregroundStyle(.secondary)
                 }
+                if signedIn.needsPasswordSetup {
+                    Text("Email confirmed. Set a password to sign in on another device.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                    SecureField("New password", text: $password)
+                        .textContentType(.newPassword)
+                    Button("Set password") {
+                        Task {
+                            accountMessage = try? await asyncFunction(for: model.screen.setPassword(password: password))
+                            if accountMessage == "Password set." { password = "" }
+                        }
+                    }
+                    .disabled(password.isEmpty)
+                }
             } else if let selfHosted = account as? SettingsAccountSelfHosted {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(selfHosted.TITLE).font(.headline)
                     Text(selfHosted.BODY).font(.subheadline).foregroundStyle(.secondary)
                 }
+            }
+            if let accountMessage {
+                Text(accountMessage).font(.footnote).foregroundStyle(.secondary)
             }
             Button(account.actionLabel, role: account.confirm.destructive ? .destructive : nil) {
                 confirmingAccountAction = true

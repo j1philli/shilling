@@ -5,12 +5,19 @@ import com.russhwolf.settings.Settings
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_ACCESS_TOKEN
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_PENDING_EMAIL
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION
+import finance.shilling.shared.data.SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL
+import finance.shilling.shared.data.SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_REFRESH_TOKEN
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_TIER
 import finance.shilling.shared.data.SETTINGS_KEY_AUTH_USER_ID
+import finance.shilling.shared.data.SETTINGS_KEY_PENDING_RESTORE_USER_ID
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.exception.AuthErrorCode
+import io.github.jan.supabase.auth.exception.AuthRestException
+import io.github.jan.supabase.auth.parseSessionFromUrl
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.auth.providers.builtin.OTP
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.createSupabaseClient
@@ -20,7 +27,7 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
-import io.ktor.client.request.patch
+import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -31,6 +38,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -46,10 +55,13 @@ class SupabaseAuthService(
     private val deviceId: String,
     private val settings: Settings,
     scope: CoroutineScope,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val authRedirectUrl: String? = null
 ) : AuthService {
     private val initializationComplete = CompletableDeferred<Unit>()
+    private val guestSignInMutex = Mutex()
     private val profilesUrl = supabaseUrl.trimEnd('/') + "/rest/v1/user_profiles"
+    private val passwordLookupUrl = supabaseUrl.trimEnd('/') + "/rest/v1/rpc/existing_account_has_password"
     private val anonKey = supabaseAnonKey
 
     private val client = createSupabaseClient(
@@ -87,114 +99,112 @@ class SupabaseAuthService(
             client.auth.sessionStatus.collect { status ->
                 when (status) {
                     is SessionStatus.Authenticated -> {
-                        if (!initializationComplete.isCompleted) initializationComplete.complete(Unit)
                         val session = status.session
                         val user = session.user
                         val userId = user?.id ?: return@collect
-                        val token = session.accessToken
-                        val storedTier = parseStoredTier(settings.getStringOrNull(SETTINGS_KEY_AUTH_TIER))
-                        val pendingEmail = settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_EMAIL)
-                        val pendingConfirmation = settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION) == "true"
-                        val profileTier = if (user.email.isNullOrBlank() && !pendingConfirmation) {
-                            null
-                        } else {
-                            fetchProfileTier(userId, token)
-                        }
-                        val authState = resolveAuthenticatedState(
+                        updateAuthenticatedState(
                             userId = userId,
                             sessionEmail = user.email,
-                            token = token,
-                            deviceId = deviceId,
-                            storedTier = storedTier,
-                            profileTier = profileTier,
-                            pendingEmail = pendingEmail,
-                            pendingEmailConfirmation = pendingConfirmation
+                            emailConfirmed = user.emailConfirmedAt != null,
+                            token = session.accessToken,
+                            refreshToken = session.refreshToken
                         )
-
-                        settings.putString(SETTINGS_KEY_AUTH_ACCESS_TOKEN, token)
-                        settings.putString(SETTINGS_KEY_AUTH_REFRESH_TOKEN, session.refreshToken)
-                        settings.putString(SETTINGS_KEY_AUTH_USER_ID, userId)
-                        settings.putString(SETTINGS_KEY_AUTH_TIER, authState.tier.name)
-                        if (authState.pendingEmailConfirmation) {
-                            settings.putString(SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION, "true")
-                            authState.pendingEmail?.let { settings.putString(SETTINGS_KEY_AUTH_PENDING_EMAIL, it) }
-                        } else {
-                            clearPendingEmailConfirmation()
-                        }
-
-                        _authState.value = authState
-                        log.i {
-                            "Authenticated: userId=$userId, anon=${authState.isAnonymous}, tier=${authState.tier}, pendingEmailConfirmation=${authState.pendingEmailConfirmation}"
-                        }
+                        if (!initializationComplete.isCompleted) initializationComplete.complete(Unit)
                     }
                     is SessionStatus.NotAuthenticated -> {
+                        if (status.isSignOut) setUnauthenticatedState()
                         if (!initializationComplete.isCompleted) initializationComplete.complete(Unit)
-                        setUnauthenticatedState()
                         log.i { "Not authenticated" }
                     }
                     is SessionStatus.Initializing -> {
                         log.d { "Auth initializing..." }
                     }
                     is SessionStatus.RefreshFailure -> {
+                        // Keep the saved identity through a temporary network or token refresh failure.
                         if (!initializationComplete.isCompleted) initializationComplete.complete(Unit)
-                        setUnauthenticatedState()
-                        log.w { "Token refresh failed: ${status.cause}" }
+                        log.w { "operation=refresh_session result=failed" }
                     }
                 }
             }
         }
     }
 
-    override suspend fun ensureAuthenticated(): Result<Unit> = runCatching {
-        withTimeoutOrNull(5_000) { initializationComplete.await() }
-        if (_authState.value.isAuthenticated) return@runCatching
-        client.auth.signInAnonymously()
-        withTimeoutOrNull(10_000) {
-            authState
-                .filter { it.isAuthenticated }
-                .first()
+    override suspend fun ensureAuthenticated(): Result<Unit> = guestSignInMutex.withLock {
+        runCatching {
+            check(withTimeoutOrNull(10_000) { initializationComplete.await(); true } == true) {
+                "Timed out restoring the saved account"
+            }
+            val session = client.auth.currentSessionOrNull()
+            if (_authState.value.isAuthenticated && session?.user?.id == _authState.value.userId) {
+                return@runCatching
+            }
+            val savedRefreshToken = settings.getStringOrNull(SETTINGS_KEY_AUTH_REFRESH_TOKEN)
+            if (savedRefreshToken != null) {
+                client.auth.refreshSession(refreshToken = savedRefreshToken)
+            } else {
+                check(settings.getStringOrNull(SETTINGS_KEY_AUTH_USER_ID) == null) {
+                    "Saved account is missing its refresh token"
+                }
+                client.auth.signInAnonymously()
+            }
+            check(withTimeoutOrNull(10_000) {
+                authState.filter { state ->
+                    state.isAuthenticated &&
+                        state.userId == client.auth.currentSessionOrNull()?.user?.id &&
+                        state.accessToken == client.auth.currentSessionOrNull()?.accessToken
+                }.first()
+                true
+            } == true) { "Auth did not reach an authenticated state before timeout" }
+        }.onFailure { error ->
+            AuthErrors.logFailure("restore_session", error)
         }
-        if (_authState.value.isAuthenticated) {
-            log.i { "Anonymous sign-in successful" }
-        } else {
-            log.w { "Anonymous sign-in did not reach authenticated state before timeout" }
-            error("Anonymous sign-in did not complete before timeout")
-        }
-    }.onFailure { error ->
-        log.w { "Anonymous sign-in failed: ${error.message}" }
     }
 
     override suspend fun signUp(email: String, password: String): Result<SignUpResult> = runCatching {
+        if (!_authState.value.isAuthenticated) ensureAuthenticated().getOrThrow()
         if (_authState.value.isAnonymous && _authState.value.isAuthenticated) {
-            // Upgrade anonymous user — preserves UUID
-            client.auth.updateUser {
-                this.email = email
-                this.password = password
+            val userId = requireNotNull(_authState.value.userId) { "Guest session has no user ID" }
+            // Link the email to this UUID first. Supabase requires verification before setting a password.
+            val updatedUser = try {
+                client.auth.updateUser(redirectUrl = authRedirectUrl) { this.email = email }
+            } catch (error: AuthRestException) {
+                if (!error.isExistingEmail()) throw error
+                val hasPassword = existingAccountHasPassword(email)
+                if (!hasPassword) sendSignInLink(email).getOrThrow()
+                val linkSent = !hasPassword
+                return@runCatching SignUpResult(
+                    requiresEmailConfirmation = false,
+                    upgradedAnonymousSession = false,
+                    existingAccount = true,
+                    existingAccountHasPassword = hasPassword,
+                    signInLinkSent = linkSent
+                )
             }
-            cachePendingEmailConfirmation(email)
-            _authState.value = _authState.value.copy(
-                email = email,
-                tier = UserTier.FREE,
-                isAnonymous = false,
-                pendingEmailConfirmation = true,
-                pendingEmail = email
-            )
-            log.i { "Upgraded anonymous user to email account" }
+            cachePendingEmailConfirmation(userId, email)
+            if (updatedUser.emailConfirmedAt != null) {
+                val session = client.auth.currentSessionOrNull() ?: error("No active session")
+                updateAuthenticatedState(
+                    userId = userId,
+                    sessionEmail = updatedUser.email,
+                    emailConfirmed = true,
+                    token = session.accessToken,
+                    refreshToken = session.refreshToken
+                )
+            } else {
+                _authState.value = _authState.value.copy(
+                    tier = UserTier.ANONYMOUS,
+                    isAnonymous = true,
+                    pendingEmailConfirmation = true,
+                    pendingEmail = email,
+                    needsPasswordSetup = false
+                )
+            }
+            log.i { "Requested email verification for anonymous account" }
             SignUpResult(
-                requiresEmailConfirmation = true,
+                requiresEmailConfirmation = updatedUser.emailConfirmedAt == null,
                 upgradedAnonymousSession = true
             )
-        } else {
-            client.auth.signUpWith(Email) {
-                this.email = email
-                this.password = password
-            }
-            log.i { "Signed up new user" }
-            SignUpResult(
-                requiresEmailConfirmation = true,
-                upgradedAnonymousSession = false
-            )
-        }
+        } else error("Already signed in")
     }
 
     override suspend fun signIn(email: String, password: String): Result<Unit> = runCatching {
@@ -202,16 +212,98 @@ class SupabaseAuthService(
             this.email = email
             this.password = password
         }
+        val session = client.auth.currentSessionOrNull() ?: error("Sign-in did not return a session")
+        // Auth's session event is processed asynchronously (including a profile fetch).
+        // The caller must see the signed-in identity before checking the held budget.
+        authState.awaitSessionIdentity(requireNotNull(session.user?.id), session.accessToken)
         log.i { "Signed in" }
+    }
+
+    override suspend fun sendSignInLink(email: String): Result<Unit> = runCatching {
+        val address = email.trim()
+        require(address.isNotBlank()) { "Enter your email address" }
+        client.auth.signInWith(OTP, redirectUrl = authRedirectUrl) {
+            this.email = address
+            createUser = false
+        }
+        settings.putString(SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL, address)
+    }
+
+    private suspend fun existingAccountHasPassword(email: String): Boolean {
+        val token = client.auth.currentSessionOrNull()?.accessToken ?: error("No guest session")
+        return httpClient.post(passwordLookupUrl) {
+            header("apikey", anonKey)
+            header("Authorization", "Bearer $token")
+            contentType(ContentType.Application.Json)
+            setBody(PasswordLookupRequest(email.trim()))
+        }.body<Boolean>()
+    }
+
+    override suspend fun handleAuthCallback(url: String): Result<Unit> = runCatching {
+        if (!url.startsWith("shilling.finance://auth-callback") || "access_token=" !in url) {
+            refreshAccountStatus().getOrThrow()
+            return@runCatching
+        }
+        val sessionFromLink = client.auth.parseSessionFromUrl(url)
+        val linkUser = client.auth.retrieveUser(sessionFromLink.accessToken)
+        val currentUserId = client.auth.currentSessionOrNull()?.user?.id
+        val requestedEmail = settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL)
+        val heldAccountId = settings.getStringOrNull(SETTINGS_KEY_PENDING_RESTORE_USER_ID)
+        check(mayImportAuthCallback(linkUser.id, linkUser.email, currentUserId, requestedEmail, heldAccountId)) {
+            "This link is for a different account"
+        }
+        client.auth.importSession(sessionFromLink.copy(user = linkUser))
+        val imported = client.auth.currentSessionOrNull() ?: error("Could not open the sign-in link")
+        updateAuthenticatedState(
+            userId = linkUser.id,
+            sessionEmail = linkUser.email,
+            emailConfirmed = linkUser.emailConfirmedAt != null,
+            token = imported.accessToken,
+            refreshToken = imported.refreshToken
+        )
+        settings.remove(SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL)
+    }
+
+    override suspend fun refreshAccountStatus(): Result<Unit> = runCatching {
+        val originalUserId = client.auth.currentSessionOrNull()?.user?.id ?: error("No active session")
+        val user = client.auth.retrieveUserForCurrentSession(updateSession = true)
+        val session = client.auth.currentSessionOrNull() ?: error("No active session")
+        if (user.id != originalUserId || user.id != session.user?.id) {
+            error("Account changed while checking confirmation")
+        }
+        updateAuthenticatedState(
+            userId = user.id,
+            sessionEmail = user.email,
+            emailConfirmed = user.emailConfirmedAt != null,
+            token = session.accessToken,
+            refreshToken = session.refreshToken
+        )
+    }
+
+    override suspend fun setPassword(password: String): Result<Unit> = runCatching {
+        require(password.isNotBlank()) { "Enter a password" }
+        refreshAccountStatus().getOrThrow()
+        val state = _authState.value
+        check(state.isAuthenticated && !state.isAnonymous && state.needsPasswordSetup) {
+            "Confirm your email before setting a password"
+        }
+        client.auth.updateUser { this.password = password }
+        settings.remove(SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID)
+        settings.remove(SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL)
+        _authState.value = _authState.value.copy(needsPasswordSetup = false)
     }
 
     override suspend fun signOut() {
         try {
             client.auth.signOut()
         } catch (e: Exception) {
-            log.w { "Sign out error: ${e.message}" }
+            AuthErrors.logFailure("sign_out", e)
+        } finally {
+            // A failed remote revoke must not leave a restorable session on this device.
+            runCatching { client.auth.clearSession() }
+                .onFailure { AuthErrors.logFailure("clear_session", it) }
+            setUnauthenticatedState()
         }
-        setUnauthenticatedState()
     }
 
     override suspend fun deleteAccount(): Result<Unit> =
@@ -220,7 +312,7 @@ class SupabaseAuthService(
     override suspend fun refreshTokenIfNeeded(): String? = try {
         client.auth.currentSessionOrNull()?.accessToken
     } catch (e: Exception) {
-        log.w { "Token refresh failed: ${e.message}" }
+        AuthErrors.logFailure("refresh_token", e)
         _authState.value.accessToken
     }
 
@@ -229,7 +321,9 @@ class SupabaseAuthService(
         settings.remove(SETTINGS_KEY_AUTH_REFRESH_TOKEN)
         settings.remove(SETTINGS_KEY_AUTH_USER_ID)
         settings.remove(SETTINGS_KEY_AUTH_TIER)
+        settings.remove(SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL)
         clearPendingEmailConfirmation()
+        settings.remove(SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID)
     }
 
     private fun setUnauthenticatedState() {
@@ -245,25 +339,62 @@ class SupabaseAuthService(
         )
     }
 
-    private suspend fun fetchProfileTier(userId: String, token: String): UserTier? = runCatching {
+    private suspend fun updateAuthenticatedState(
+        userId: String,
+        sessionEmail: String?,
+        emailConfirmed: Boolean,
+        token: String,
+        refreshToken: String
+    ) {
+        val pendingEmail = settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_EMAIL)
+        val pendingConfirmation = settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION) == "true"
+        val passwordSetupUserId = settings.getStringOrNull(SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID)
+        val profile = if (emailConfirmed) fetchUserProfile(userId, token) else null
+        // A profile request for an earlier session can finish after a sign-in or sign-out.
+        val currentSession = client.auth.currentSessionOrNull()
+        if (currentSession?.user?.id != userId || currentSession.accessToken != token) return
+        val state = resolveAuthenticatedState(
+            userId = userId,
+            sessionEmail = sessionEmail,
+            emailConfirmed = emailConfirmed,
+            token = token,
+            deviceId = deviceId,
+            profileTier = profile?.tier?.let(::parseStoredTier),
+            pendingEmail = pendingEmail,
+            pendingEmailConfirmation = pendingConfirmation,
+            needsPasswordSetup = when (profile?.hasPassword) {
+                true -> false
+                false -> true
+                null -> passwordSetupUserId == userId
+            }
+        )
+        settings.putString(SETTINGS_KEY_AUTH_ACCESS_TOKEN, token)
+        settings.putString(SETTINGS_KEY_AUTH_REFRESH_TOKEN, refreshToken)
+        settings.putString(SETTINGS_KEY_AUTH_USER_ID, userId)
+        settings.putString(SETTINGS_KEY_AUTH_TIER, state.tier.name)
+        if (!state.pendingEmailConfirmation) clearPendingEmailConfirmation()
+        _authState.value = state
+        log.i { "Authenticated: userId=$userId, anon=${state.isAnonymous}, tier=${state.tier}, pendingEmailConfirmation=${state.pendingEmailConfirmation}" }
+    }
+
+    private suspend fun fetchUserProfile(userId: String, token: String): UserProfileAuthRow? = runCatching {
         httpClient.get(profilesUrl) {
             header("apikey", anonKey)
             header("Authorization", "Bearer $token")
-            parameter("select", "tier")
+            parameter("select", "tier,has_password")
             parameter("user_id", "eq.$userId")
-        }.body<List<UserProfileTierRow>>()
+        }.body<List<UserProfileAuthRow>>()
             .firstOrNull()
-            ?.tier
-            ?.let(::parseStoredTier)
     }.getOrElse { error ->
-        log.w { "Supabase profile tier fetch failed: ${error.message}" }
+        AuthErrors.logFailure("fetch_auth_profile", error)
         null
     }
 
-    private fun cachePendingEmailConfirmation(email: String) {
+    private fun cachePendingEmailConfirmation(userId: String, email: String) {
         settings.putString(SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION, "true")
         settings.putString(SETTINGS_KEY_AUTH_PENDING_EMAIL, email)
-        settings.putString(SETTINGS_KEY_AUTH_TIER, UserTier.FREE.name)
+        settings.putString(SETTINGS_KEY_AUTH_TIER, UserTier.ANONYMOUS.name)
+        settings.putString(SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID, userId)
     }
 
     private fun clearPendingEmailConfirmation() {
@@ -271,6 +402,14 @@ class SupabaseAuthService(
         settings.remove(SETTINGS_KEY_AUTH_PENDING_EMAIL)
     }
 }
+
+private fun AuthRestException.isExistingEmail(): Boolean =
+    errorCode == AuthErrorCode.EmailExists ||
+        errorCode == AuthErrorCode.UserAlreadyExists ||
+        errorCode == AuthErrorCode.IdentityAlreadyExists
+
+@Serializable
+private data class PasswordLookupRequest(val account_email: String)
 
 internal fun parseStoredTier(value: String?): UserTier? =
     when (value?.trim()?.uppercase()) {
@@ -280,26 +419,36 @@ internal fun parseStoredTier(value: String?): UserTier? =
         else -> null
     }
 
+internal fun mayImportAuthCallback(
+    linkUserId: String,
+    linkEmail: String?,
+    currentUserId: String?,
+    requestedEmail: String?,
+    heldAccountId: String?
+): Boolean =
+    (heldAccountId == null || heldAccountId == linkUserId) &&
+        (linkUserId == currentUserId ||
+            (!requestedEmail.isNullOrBlank() && linkEmail?.equals(requestedEmail, ignoreCase = true) == true))
+
 internal fun resolveAuthenticatedState(
     userId: String,
     sessionEmail: String?,
+    emailConfirmed: Boolean,
     token: String,
     deviceId: String,
-    storedTier: UserTier?,
     profileTier: UserTier?,
     pendingEmail: String?,
-    pendingEmailConfirmation: Boolean
+    pendingEmailConfirmation: Boolean,
+    needsPasswordSetup: Boolean
 ): AuthState {
     val keepPendingConfirmation =
         pendingEmailConfirmation &&
             !pendingEmail.isNullOrBlank() &&
-            sessionEmail.isNullOrBlank()
+            !emailConfirmed
     val effectiveEmail = if (keepPendingConfirmation) pendingEmail else sessionEmail
     val effectiveTier = when {
-        keepPendingConfirmation -> UserTier.FREE
-        profileTier != null -> profileTier
-        sessionEmail.isNullOrBlank() -> UserTier.ANONYMOUS
-        storedTier == UserTier.PAID -> UserTier.PAID
+        !emailConfirmed -> UserTier.ANONYMOUS
+        profileTier == UserTier.PAID -> UserTier.PAID
         else -> UserTier.FREE
     }
     return AuthState(
@@ -308,15 +457,18 @@ internal fun resolveAuthenticatedState(
         email = effectiveEmail,
         tier = effectiveTier,
         accessToken = token,
-        isAnonymous = sessionEmail.isNullOrBlank() && !keepPendingConfirmation,
+        isAnonymous = !emailConfirmed,
         deviceId = deviceId,
         pendingEmailConfirmation = keepPendingConfirmation,
-        pendingEmail = if (keepPendingConfirmation) pendingEmail else null
+        pendingEmail = if (keepPendingConfirmation) pendingEmail else null,
+        needsPasswordSetup = emailConfirmed && needsPasswordSetup
     )
 }
 
 @Serializable
-private data class UserProfileTierRow(
+private data class UserProfileAuthRow(
     @SerialName("tier")
-    val tier: String? = null
+    val tier: String? = null,
+    @SerialName("has_password")
+    val hasPassword: Boolean? = null
 )

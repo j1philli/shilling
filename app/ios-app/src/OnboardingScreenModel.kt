@@ -1,5 +1,7 @@
 package finance.shilling.app
 
+import finance.shilling.shared.data.auth.AuthErrors
+
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutines
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutinesState
 import finance.shilling.shared.presentation.CredentialsCopy
@@ -10,6 +12,7 @@ import finance.shilling.shared.presentation.OnboardingViewModel
 import finance.shilling.shared.session.HostedCredentialsMode
 import finance.shilling.shared.session.SessionPhase
 import finance.shilling.shared.session.SessionState
+import finance.shilling.shared.session.AppSession
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +29,13 @@ object AppRoot {
     val phase: StateFlow<AppPhase> = KoinPlatform.getKoin().get<SessionState>().phase
         .map { it.toAppPhase() }
         .stateIn(MainScope(), SharingStarted.Eagerly, KoinPlatform.getKoin().get<SessionState>().phase.value.toAppPhase())
+
+    @NativeCoroutines
+    suspend fun handleAuthCallback(url: String): String = KoinPlatform.getKoin().get<AppSession>()
+        .handleAuthCallback(url).fold(
+            onSuccess = { "Account ready." },
+            onFailure = { AuthErrors.message(it, "auth_callback") }
+        )
 
     private fun SessionPhase.toAppPhase(): AppPhase = when (this) {
         is SessionPhase.Onboarding -> AppPhase.ONBOARDING
@@ -54,4 +64,10 @@ class OnboardingScreenModel : IosViewModelHost() {
         val trimmed = email.trim()
         return CredentialsCopy.outcome(viewModel.submitCredentials(mode, trimmed, password), trimmed)
     }
+
+    @NativeCoroutines
+    suspend fun sendSignInLink(email: String): String = viewModel.sendSignInLink(email).fold(
+        onSuccess = { "Sign-in link sent. Open it on this device." },
+        onFailure = { AuthErrors.message(it, "send_sign_in_link") }
+    )
 }

@@ -49,7 +49,7 @@ data class OnboardingUiState(
     val selfHostedMessage: String get() = "Connect to a server you operate yourself."
     val selfHostedHint: String get() = selfHostedError ?: "Enter the server URL for the instance you operate."
     val canContinueSelfHosted: Boolean get() = selfHostedUrl.isNotBlank() && !validatingSelfHosted
-    val keepLabel: String get() = "Keep it"
+    val keepLabel: String get() = "Keep budget and go back"
     /** The self-hosted screen has no way back when it's the only option. */
     val canLeaveSelfHosted: Boolean get() = !selfHostedOnly
 }
@@ -89,9 +89,9 @@ class OnboardingViewModel(
                 OnboardingOption("Get Started", "Create a guest account and jump straight into the app.")
             },
             signIn = OnboardingOption(
-                "Sign in",
+                "Continue with email",
                 if (held) "Use the same account to keep your current budget."
-                else "Sign in to an existing account or create one with email and password."
+                else "Create an account or continue with one you already have."
             ),
             loginSubtitle = if (held) {
                 "Use the same account to keep the budget saved on this device."
@@ -137,13 +137,15 @@ class OnboardingViewModel(
     suspend fun submitCredentials(mode: HostedCredentialsMode, email: String, password: String): Result<HostedCredentialsSubmitResult> {
         val result = actions.submitCredentials(mode, email, password)
         result.fold(
-            onSuccess = { actions.completeSignIn(wipeHeldData = false) },
+            onSuccess = { if (it.signUpResult?.existingAccount != true) actions.completeSignIn(wipeHeldData = false) },
             onFailure = { error ->
                 if (error is NonMatchingAccountException) local.update { it.copy(pending = Pending.NON_MATCHING_AUTH) }
             }
         )
         return result
     }
+
+    suspend fun sendSignInLink(email: String): Result<Unit> = actions.sendSignInLink(email.trim())
 
     fun confirmDestructive() {
         val pending = local.value.pending ?: return
@@ -158,7 +160,7 @@ class OnboardingViewModel(
 
     fun dismissDestructive() {
         val pending = local.value.pending ?: return
-        local.update { it.copy(pending = null) }
+        local.update { it.copy(pending = null, route = OnboardingRoute.LANDING) }
         if (pending == Pending.NON_MATCHING_AUTH) viewModelScope.launch { actions.cancelDestructiveAuth() }
     }
 

@@ -1,24 +1,37 @@
 package finance.shilling.shared.ui
 
+import finance.shilling.shared.data.auth.AuthErrors
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.shared.data.initKoin
 import finance.shilling.shared.session.AppSession
 import finance.shilling.shared.session.SessionPhase
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 data class AppBootstrapScaffoldConfig(
@@ -83,8 +96,54 @@ fun ShillingAppBootstrap(
                     navControllerHook = scaffoldConfig.navControllerHook
                 )
             }
+            PasswordSetupPrompt(current.authService)
         }
     }
+}
+
+@Composable
+private fun PasswordSetupPrompt(authService: AuthService) {
+    val authState by authService.authState.collectAsState()
+    var dismissed by remember(authService) { mutableStateOf(false) }
+    var password by remember(authService) { mutableStateOf("") }
+    var error by remember(authService) { mutableStateOf<String?>(null) }
+    var submitting by remember(authService) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    if (!authState.needsPasswordSetup || dismissed) return
+
+    AlertDialog(
+        onDismissRequest = { dismissed = true },
+        title = { Text("Set your password") },
+        text = {
+            androidx.compose.foundation.layout.Column {
+                Text("Your email is confirmed. Set a password to sign in on another device.")
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it; error = null },
+                    label = { Text("Password") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation()
+                )
+                error?.let { Text(it) }
+            }
+        },
+        confirmButton = {
+            Button(
+                enabled = password.isNotBlank() && !submitting,
+                onClick = {
+                    scope.launch {
+                        submitting = true
+                        authService.setPassword(password).fold(
+                            onSuccess = { password = ""; dismissed = true },
+                            onFailure = { error = AuthErrors.message(it, "set_password") }
+                        )
+                        submitting = false
+                    }
+                }
+            ) { Text("Set password") }
+        },
+        dismissButton = { TextButton(onClick = { dismissed = true }) { Text("Later") } }
+    )
 }
 
 @Composable
