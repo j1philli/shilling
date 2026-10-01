@@ -88,6 +88,12 @@ struct OnboardingScreen: View {
                     .padding()
                     .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
+                if state.analyticsAvailable {
+                    Toggle("Share anonymous usage events", isOn: Binding(
+                        get: { state.analyticsConsent },
+                        set: { screen.setAnalyticsConsent(value: $0) }
+                    ))
+                }
                 OptionCard(option: state.getStarted) { screen.getStarted() }
                 OptionCard(option: state.signIn) { screen.open(route: .login) }
                 Button(state.selfHostedLabel) { screen.open(route: .selfHosted) }
@@ -160,6 +166,14 @@ private struct SelfHostedForm: View {
                 Text(state.selfHostedMessage).textCase(nil)
             } footer: {
                 Text(state.selfHostedHint).foregroundStyle(state.selfHostedError == nil ? Color.secondary : Color.red)
+            }
+            if state.analyticsAvailable {
+                Section {
+                    Toggle("Share anonymous usage events", isOn: Binding(
+                        get: { state.analyticsConsent },
+                        set: { screen.setAnalyticsConsent(value: $0) }
+                    ))
+                }
             }
             Section {
                 Button {

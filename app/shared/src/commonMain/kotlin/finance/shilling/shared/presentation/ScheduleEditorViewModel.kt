@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import finance.shilling.shared.data.Frequency
 import finance.shilling.shared.data.IdGenerator
+import finance.shilling.shared.data.analytics.ProductAnalytics
+import finance.shilling.shared.data.analytics.ProductEvent
 import finance.shilling.shared.data.Schedule
 import finance.shilling.shared.data.ScheduleType
 import finance.shilling.shared.data.generateOccurrences
@@ -93,7 +95,8 @@ class ScheduleEditorViewModel(
     private val scheduleRepository: ScheduleRepository,
     accountRepository: AccountRepository,
     categoryRepository: CategoryRepository,
-    private val idGenerator: IdGenerator
+    private val idGenerator: IdGenerator,
+    private val analytics: ProductAnalytics
 ) : ViewModel() {
     private val form = EditorForm(
         ScheduleFields(type = presetType ?: ScheduleType.EXPENSE),
@@ -185,6 +188,7 @@ class ScheduleEditorViewModel(
     suspend fun save(): String? {
         if (!state.value.saveEnabled) return null
         scheduleRepository.upsert(draft(form.fields).copy(id = existing?.id ?: idGenerator.newId()))
+        if (existing == null) analytics.captureAsync(ProductEvent.SCHEDULE_CREATED, form.fields.type.name.lowercase())
         return if (existing == null) "Schedule added" else "Schedule updated"
     }
 

@@ -8,6 +8,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -60,6 +62,17 @@ fun SettingsView(
                 SyncStatusSection(sync, onRetry = viewModel::retrySync)
             }
 
+            ListSectionHeader("Product analytics")
+            ShillingCard {
+                Text("Share usage events to help improve Shilling. No amounts, names, or receipt contents are sent.")
+                Switch(
+                    checked = state.analyticsConsent,
+                    onCheckedChange = viewModel::setAnalyticsConsent,
+                    enabled = state.analyticsConfigured
+                )
+                if (!state.analyticsConfigured) Text("Available after a PostHog project is configured.")
+            }
+
             ListSectionHeader("About")
             ShillingCard(
                 modifier = Modifier.clickable {
@@ -80,8 +93,25 @@ fun SettingsView(
             if (showDeveloperTools && developer != null) {
                 ListSectionHeader("Developer tools")
                 DeveloperToolsSection(developer, viewModel)
+                AnalyticsConfigSection(viewModel)
             }
         }
+    }
+}
+
+@Composable
+private fun AnalyticsConfigSection(viewModel: SettingsViewModel) {
+    var host by remember { mutableStateOf(viewModel.analyticsHost) }
+    var token by remember { mutableStateOf(viewModel.analyticsProjectToken) }
+    val snackbar = LocalSnackbarController.current
+    ShillingCard {
+        Text("PostHog project", style = MaterialTheme.typography.titleMedium)
+        OutlinedTextField(value = host, onValueChange = { host = it }, label = { Text("HTTPS host") })
+        OutlinedTextField(value = token, onValueChange = { token = it }, label = { Text("Project token") })
+        Button(onClick = {
+            val valid = viewModel.saveAnalyticsConfig(host, token)
+            snackbar.show(if (valid) "PostHog project saved" else "Enter an HTTPS host and project token")
+        }) { Text("Save PostHog project") }
     }
 }
 

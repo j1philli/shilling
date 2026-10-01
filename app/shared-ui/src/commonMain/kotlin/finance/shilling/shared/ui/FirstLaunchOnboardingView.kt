@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -89,6 +90,13 @@ fun FirstLaunchOnboardingView(
                                 action = state.heldDataAction,
                                 onRelogin = { viewModel.open(OnboardingRoute.LOGIN) }
                             )
+                        }
+
+                        if (state.analyticsAvailable) {
+                            Row {
+                                Text("Share anonymous usage events", modifier = Modifier.weight(1f))
+                                Switch(checked = state.analyticsConsent, onCheckedChange = viewModel::setAnalyticsConsent)
+                            }
                         }
 
                         OnboardingActionCard(state.getStarted, onClick = viewModel::getStarted)
@@ -160,6 +168,12 @@ fun FirstLaunchOnboardingView(
                                     singleLine = true,
                                     modifier = Modifier.fillMaxWidth()
                                 )
+                                if (state.analyticsAvailable) {
+                                    Row {
+                                        Text("Share anonymous usage events", modifier = Modifier.weight(1f))
+                                        Switch(checked = state.analyticsConsent, onCheckedChange = viewModel::setAnalyticsConsent)
+                                    }
+                                }
                                 Button(onClick = viewModel::continueSelfHosted, enabled = state.canContinueSelfHosted) {
                                     if (state.validatingSelfHosted) {
                                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
