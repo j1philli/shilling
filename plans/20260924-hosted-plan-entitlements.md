@@ -1,7 +1,7 @@
 # Hosted Plan Entitlements
 
 Date: 2026-09-24
-Status: hosted entitlement/device/purchase code, invitations/membership, isolated Store5 switching, and paired linked transfers implemented; launch configuration, bank integration, and physical-device acceptance checks remain
+Status: hosted entitlement/device/purchase code, invitations/membership, isolated Store5 switching, and paired linked transfers implemented; launch configuration and physical-device acceptance checks remain; live bank connections deferred
 
 Free, Silver, and Gold are hosted subscription plans. Self-hosted is an explicit deployment edition with operator-controlled infrastructure, not a RevenueCat product. Local budgeting and access to existing local data remain available in every edition.
 
@@ -14,7 +14,7 @@ The user-facing container is a **finance space**: a home, side business, rental,
 | Registered sync devices per household | 2 | Unlimited | Unlimited | Operator controlled |
 | WebRTC sync | Direct connections; no hosted TURN allocation | Direct connections plus hosted TURN | Direct connections plus hosted TURN | Direct connections plus operator-configured TURN |
 | Household memberships per account | 1 | 1 | Unlimited | Operator controlled |
-| Live bank account connection and read-only transaction sync | No | Included | Included | Available when the operator configures a supported provider |
+| Live bank account connection and read-only transaction sync | No | Deferred; unavailable | Deferred; unavailable | Deferred; unavailable |
 
 "Same network" is product shorthand for the expected Free experience, not a guaranteed restriction: withholding TURN does not prevent WebRTC from connecting across different networks through direct ICE candidates and STUN. Product copy must say that Free sync works best when devices are on the same local network, while Silver provides the hosted relay needed when direct connection fails. Do not promise that Free can *only* sync on one network. All user data still traverses WebRTC P2P data channels; TURN, when used, relays encrypted WebRTC traffic and is never an application-data endpoint.
 
@@ -25,7 +25,7 @@ The user-facing container is a **finance space**: a home, side business, rental,
 - The number of households an account can join or create follows **that account's own plan**: Free and Silver may each belong to one; Gold may belong to unlimited households. A Gold member's sponsorship of a household does not give every other member unlimited household memberships. This avoids one subscription spreading through a chain of households.
 - Removing or leaving the subscribing member causes the remaining household to use the next-highest active member plan for new connections and TURN credentials. A person can sponsor every household of which they are a current member.
 - Space owners/admins manage invitations, members, and devices through implemented UI and transactional server actions. Existing profiles are backfilled into server-owned space membership metadata. Removing the last owner is blocked; a sole owner may close a space with no other members while retaining local records.
-- A Silver or Gold sponsor unlocks live bank reading for members of that household. Bank connections, provider credentials, consent, and imported transaction ownership need a separate provider-specific design. This policy does not authorize bank data to traverse signaling or bypass Store5; bank provider transport is an explicit third-party integration and must be reviewed separately from device-to-device sync.
+- Silver and Gold retain a reserved bank entitlement, but live bank reading is deferred and unavailable. Bank data must stay off Shilling servers, including transient forwarding. Any future client/provider integration requires separate review and must keep imported records inside Store5 and device sync on WebRTC.
 
 ## Devices and downgrades
 
@@ -104,7 +104,7 @@ Pricing approved on 2026-10-01: Silver USD $5/month or $50/year; Gold USD $20/mo
 1. Local space isolation/migration is implemented. JVM tests cover published-v1 upgrades, receipt bytes, invalid-reference rollback, identical IDs in different spaces, stale editor retirement, and scoped snapshots. The real sql.js worker test covers rollback, IndexedDB commit failure/retry/reload, and foreign-key enforcement. SQLite 3.22 compatibility is verified with the actual old engine, including parent updates and foreign-key cascades during first-space adoption; grouped writes are awaited explicitly. Still run physical existing-user upgrades on iOS/Android and browser acceptance.
 2. Switching and membership management are implemented. `20261001183000_hosted_space_management.sql` is applied to the hosted project; deploy the new server and clients together after review. Isolated PostgreSQL tests cover quotas, invited-email enforcement, role permissions, revoked codes, last-owner protection, and removed-member device registration, and fresh explicit space selection after Gold downgrade. Test real sponsor departure and multi-device switching after deployment.
 3. Linked transfer Store5 aggregate and UI are implemented: atomic paired postings/version records, stable IDs, idempotent retry/deletion, paired edits/deletes, and space-private snapshots. JVM tests verify rollback when the destination account is missing. Remote delivery is independent per space, so peers can temporarily see one side. Test concurrent offline edits and receipt detachment on actual devices.
-4. Canada and United States are selected; client HTTPS bank-provider ingestion is authorized. Proposed provider and remaining authentication/currency/consent/import decisions are in `plans/20261001-bank-connection.md`. Silver currently grants the entitlement only.
+4. Live bank connections are deferred by the user. Canada and United States remain the intended regions, and direct client HTTPS bank-provider ingestion remains authorized. Bank data must stay off Shilling servers; the proposed Plaid forwarding endpoint is rejected. Future requirements are retained in `plans/20261001-bank-connection.md`. Silver currently grants the reserved entitlement only; live banking is not a launch feature or launch blocker.
 
 
 ### Native RevenueCat catalog created October 1, 2026

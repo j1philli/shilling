@@ -18,6 +18,7 @@ These rules are mandatory for any change in this repo.
 - This exception applies only to bank-provider ingestion. Device sync remains WebRTC P2P only.
 - Imported records must enter through Store5/repositories. Do not put provider secrets in client apps.
 - This exception does not authorize a hosted bank-data proxy, server transaction ledger, or REST entity sync.
+- Bank data must stay off Shilling servers, including transient forwarding, logging, and storage (confirmed October 1, 2026). Live bank connections are deferred; do not implement the proposed Plaid proxy.
 
 ## Data Rules
 
