@@ -89,7 +89,9 @@ def release_notes(manifest):
     lines += ["", "Package status:"]
     caveats = {
         "android": "Android: debug-signed APK and unsigned release AAB; no Play upload.",
-        "ios": "iOS: development archive, unsigned unless signing was configured; no TestFlight/App Store upload.",
+        "ios": ("iOS: App Store-signed IPA for App Store Connect upload; not directly installable from GitHub. No automatic TestFlight/App Store upload."
+                if any(name.endswith("_ios.ipa") for name in manifest.get("assets", {}))
+                else "iOS: unsigned development app archive; not installable on an iPhone. No TestFlight/App Store upload."),
         "macos": "macOS: unsigned universal DMG; not notarized.",
         "windows": "Windows: unsigned x86_64 NSIS installer.",
         "linux": "Linux: x86_64 AppImage, Debian and RPM packages.",

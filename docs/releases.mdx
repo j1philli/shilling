@@ -87,12 +87,14 @@ step and rerun that exact release to finish it.
 
 **These buttons currently publish development distributions, not app-store
 releases.** Versions `0.x` are marked as GitHub prereleases. Android includes a
-debug APK and unsigned AAB; iOS is an unsigned app ZIP unless signing was
-configured; macOS is an unsigned universal DMG; Windows is an unsigned x86_64
+debug APK and unsigned AAB; iOS exports an App Store-signed IPA when signing is
+enabled (an unsigned app ZIP otherwise); macOS is an unsigned universal DMG; Windows is an unsigned x86_64
 NSIS installer; Linux includes x86_64 AppImage, Debian and RPM packages.
-Signing/notarization and Play/TestFlight/App Store uploads still need setup.
-Release notes state these limitations. A downloadable unsigned iOS archive
-is not an installable iPhone release.
+Android/desktop signing, macOS notarization, and automated Play/TestFlight/App Store
+uploads still need setup.
+Release notes state these limitations. An App Store-signed IPA is intended for
+App Store Connect upload; downloading it from GitHub does not install it on an
+iPhone. An unsigned iOS archive is also not an installable iPhone release.
 
 ### Hosted server deployment
 
@@ -135,8 +137,9 @@ include Xcode's `ApplicationProperties`. CI validates this and checks that the
 app and its extensions have matching versions/build numbers before exporting.
 Temporary framework linking copies live in Xcode's temporary directory.
 
-For signed builds, configure these environment parameters on the **iOS Build**
-configuration after installing the key on the Mac runner:
+Signing is enabled on the hosted Mac runner. These environment parameters are
+configured on the parent **Shilling** TeamCity project (the versioned build
+configuration is read-only):
 
 - `SHILLING_IOS_SIGNED=1`
 - `IOS_TEAM_ID`: the Apple Developer Program team ID
