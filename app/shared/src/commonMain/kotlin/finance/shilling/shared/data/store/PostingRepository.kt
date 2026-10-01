@@ -101,6 +101,7 @@ class PostingRepository(
     }
 
     suspend fun record(posting: Posting) {
+        require(posting.pairId?.startsWith(SPACE_TRANSFER_PREFIX) != true && getById(posting.id)?.pairId?.startsWith(SPACE_TRANSFER_PREFIX) != true) { "Edit a linked space transfer from Finance spaces in Settings." }
         store.write(
             StoreWriteRequest.of<PostingKey, List<Posting>, Unit>(
                 PostingKey.ById(posting.id),
@@ -111,6 +112,7 @@ class PostingRepository(
     }
 
     suspend fun delete(id: String) {
+        require(getById(id)?.pairId?.startsWith(SPACE_TRANSFER_PREFIX) != true) { "Delete both sides from Finance spaces in Settings." }
         store.clear(PostingKey.ById(id))
         broadcastChange(sync, EntityType.POSTING, ChangeOp.DELETE, id)
         notifier.notifyChanged()

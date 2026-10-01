@@ -32,3 +32,9 @@ WHERE household_id = ? AND timestamp < ?;
 
 deleteAll:
 DELETE FROM change_log;
+
+deleteForSpace:
+DELETE FROM change_log WHERE household_id = ?;
+
+claimLegacy:
+UPDATE change_log SET household_id = ? WHERE household_id = '__local__';

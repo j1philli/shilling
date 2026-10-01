@@ -33,6 +33,7 @@ import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
@@ -315,7 +316,7 @@ class AuthBootstrapTest {
     }
 
     @Test
-    fun differentHostedHouseholdCannotStartSyncWithExistingLocalData() = runBlocking {
+    fun verifiedActiveHostedSpaceCanChangeForIsolatedStoreGraphs() = runBlocking {
         val settings = hostedSettings().also {
             it.putString(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID, "old-household")
         }
@@ -340,10 +341,10 @@ class AuthBootstrapTest {
                 authServiceFactory = { _, _, _, _, _ -> authService }
             )
 
-            assertEquals(HostedBootstrapPhase.WAITING_FOR_HOUSEHOLD, resolution.identity.bootstrapStatus.phase)
-            assertFalse(resolution.identity.bootstrapStatus.syncReady)
-            assertEquals("old-household", resolution.identity.activeHouseholdId)
-            assertEquals("old-household", settings.getStringOrNull(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID))
+            assertEquals(HostedBootstrapPhase.READY, resolution.identity.bootstrapStatus.phase)
+            assertTrue(resolution.identity.bootstrapStatus.syncReady)
+            assertEquals("new-household", resolution.identity.activeHouseholdId)
+            assertEquals("new-household", settings.getStringOrNull(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID))
         } finally {
             httpClient.close()
             scope.cancel()

@@ -29,7 +29,7 @@ class UndoHandle(private val undoable: Undoable) {
 /** Swift-facing transaction editor; [postingId] null creates one. */
 class TransactionEditorScreenModel(postingId: String?) : IosViewModelHost() {
     private val viewModel = viewModel<TransactionEditorViewModel>(postingId)
-    private val fileStore = KoinPlatform.getKoin().get<ReceiptFileStore>()
+    private val fileStore = KoinPlatform.getKoin().get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.files
 
     @NativeCoroutinesState
     val state: StateFlow<TransactionEditorUiState> = viewModel.state

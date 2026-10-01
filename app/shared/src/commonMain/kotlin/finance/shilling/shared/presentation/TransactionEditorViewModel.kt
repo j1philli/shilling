@@ -215,6 +215,7 @@ class TransactionEditorViewModel(
     ): TransactionEditorUiState {
         val details = existing
         val isScheduled = details?.posting?.scheduleId != null
+        val linkedSpaceTransfer = details?.posting?.pairId?.startsWith(finance.shilling.shared.data.store.SPACE_TRANSFER_PREFIX) == true
         val isTransfer = f.type == ScheduleType.TRANSFER
         val amount = parseAmountInput(f.amountText)
         val transferValid = !isTransfer || (f.toAccountId != null && f.toAccountId != f.accountId)
@@ -222,7 +223,7 @@ class TransactionEditorViewModel(
             load = l,
             isNew = details == null,
             title = details?.title ?: if (postingId == null) "New transaction" else "Transaction",
-            subtitle = details?.let { if (isScheduled) "Recorded from a schedule" else "One-off ${f.type.label.lowercase()}" },
+            subtitle = details?.let { if (linkedSpaceTransfer) "Linked space transfer. Edit both sides in Settings → Finance spaces." else if (isScheduled) "Recorded from a schedule" else "One-off ${f.type.label.lowercase()}" },
             fields = f,
             accounts = accounts,
             categories = categories,
@@ -235,7 +236,7 @@ class TransactionEditorViewModel(
             // Scheduled postings without their own category inherit the schedule's.
             categoryNoneLabel = if (isScheduled) "Same as schedule" else "Uncategorized",
             dateHint = if (isScheduled) "Changing the date may show the original occurrence as due again." else null,
-            deleteConfirm = details?.let {
+            deleteConfirm = details?.takeUnless { linkedSpaceTransfer }?.let {
                 ConfirmCopy(
                     title = "Delete transaction?",
                     message = if (isScheduled) {
@@ -249,7 +250,7 @@ class TransactionEditorViewModel(
             },
             showsReceipts = details != null,
             receipts = attached.map { AttachedReceiptUi(it, "Added ${formatTimestamp(it.addedAt)}") },
-            saveEnabled = l == EditorLoad.READY && f.title.isNotBlank() && amount != null && amount > 0 &&
+            saveEnabled = !linkedSpaceTransfer && l == EditorLoad.READY && f.title.isNotBlank() && amount != null && amount > 0 &&
                 f.accountId != null && transferValid
         )
     }

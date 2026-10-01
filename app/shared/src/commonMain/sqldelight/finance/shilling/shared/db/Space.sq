@@ -1,0 +1,25 @@
+CREATE TABLE local_spaces (
+    space_id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    legacy_files INTEGER NOT NULL DEFAULT 0
+);
+
+INSERT INTO local_spaces(space_id, name, kind, legacy_files) VALUES ('__local__', 'Home', 'home', 1);
+
+selectAll:
+SELECT * FROM local_spaces ORDER BY name, space_id;
+
+selectById:
+SELECT * FROM local_spaces WHERE space_id = ?;
+
+upsert {
+  INSERT OR IGNORE INTO local_spaces(space_id, name, kind, legacy_files) VALUES (:space_id, :name, :kind, :legacy_files);
+  UPDATE local_spaces SET name = :name, kind = :kind WHERE space_id = :space_id;
+}
+
+claimLegacy:
+UPDATE local_spaces SET space_id = ?, name = ?, kind = ? WHERE space_id = '__local__';
+
+deleteById:
+DELETE FROM local_spaces WHERE space_id = ?;

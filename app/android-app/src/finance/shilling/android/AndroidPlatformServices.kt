@@ -18,7 +18,7 @@ class AndroidIdGenerator : IdGenerator {
 }
 
 private val noOpSchema = object : SqlSchema<QueryResult.Value<Unit>> {
-    override val version: Long = 1
+    override val version: Long = finance.shilling.shared.db.ShillingDatabase.Schema.version
 
     override fun create(driver: SqlDriver) = QueryResult.Value(Unit)
 
@@ -33,14 +33,14 @@ private val noOpSchema = object : SqlSchema<QueryResult.Value<Unit>> {
 fun provideAndroidDriver(context: Context): SqlDriver =
     AndroidSqliteDriver(noOpSchema, context, "shilling.db")
 
-class AndroidReceiptFileStore(private val context: Context) : ReceiptFileStore {
+class AndroidReceiptFileStore(private val context: Context, private val spaceId: String? = null) : ReceiptFileStore {
     private val log = Logger.withTag("AndroidReceiptStore")
 
     private val receiptsDir: File by lazy {
-        File(context.filesDir, "receipts").also { it.mkdirs() }
+        File(context.filesDir, spaceId?.let { "receipts-spaces/" + it.encodeToByteArray().joinToString("") { b -> (b.toInt() and 255).toString(16).padStart(2, '0') } } ?: "receipts").also { it.mkdirs() }
     }
 
-    private fun fileForReceipt(receiptId: String): File = File(receiptsDir, receiptId)
+    private fun fileForReceipt(receiptId: String): File = File(receiptsDir, finance.shilling.shared.data.store.safeReceiptStorageId(receiptId))
 
     override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {
         val dest = fileForReceipt(receiptId)
@@ -75,8 +75,9 @@ class AndroidReceiptFileStore(private val context: Context) : ReceiptFileStore {
             val safeName = originalName
                 .substringAfterLast('/')
                 .substringAfterLast('\\')
-                .ifBlank { "$receiptId.bin" }
-            val cacheDir = File(context.cacheDir, "receipts_share").also { it.mkdirs() }
+                .takeUnless { it.isBlank() || it == "." || it == ".." } ?: "$receiptId.bin"
+            val scope = spaceId?.encodeToByteArray()?.joinToString("") { (it.toInt() and 255).toString(16).padStart(2, '0') } ?: "legacy"
+            val cacheDir = File(context.cacheDir, "receipts_share/$scope/${finance.shilling.shared.data.store.safeReceiptStorageId(receiptId)}").also { it.mkdirs() }
             val tempFile = File(cacheDir, safeName)
             sourceFile.copyTo(tempFile, overwrite = true)
 

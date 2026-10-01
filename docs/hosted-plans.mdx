@@ -41,7 +41,8 @@ The server reads current active entitlements from RevenueCat's API with a 30-sec
 
 ## Current implementation limits
 
-- Space invitations, Gold multiple-space switching, linked cross-space transfers, and downgrade selection are not yet implemented. Existing shared `household_id` values are backfilled as space memberships, but there is no invitation UI yet.
-- A device that has cached one hosted household will refuse to start hosted sync after signing into a different household. Its current Store5 database is not household-scoped yet, so switching must wait for local data isolation.
-- The bank provider, consent flow, and transaction mapping are undecided. Silver/Gold entitlement is represented in the server response; no live bank data is fetched yet.
+- Settings includes space creation/selection, email-bound invitation codes, acceptance/decline, invitation revocation, owner/admin roles, removal, and last-owner protection. Free/Silver can hold one membership; Gold can hold multiple. A downgraded account can select its one active space without deleting local books.
+- Every Store5 entity query, receipt file, change-log version, and bookkeeping entry is space-scoped. Switching stops the old WebRTC runtime and retires its repository writers before exposing the next graph. Versioned local migration preserves existing books.
+- Gold linked transfers write paired postings atomically in the local database. Retry uses a stable transfer ID; paired edit/delete controls are in Finance spaces. Ordinary transaction editors cannot mutate one leg. Each space synchronizes only its own posting, and an inactive space catches up when opened over WebRTC. Both spaces must be locally synchronized to edit a complete pair. Currency conversion is not supported.
+- Bank launch regions are Canada and the United States. Client HTTPS ingestion is approved; device sync stays WebRTC. Plaid is the proposed provider, but its server-secret requirement, credentials, currency model, consent, and import mapping remain to be resolved. No live bank data is fetched yet.
 - Store products, RevenueCat keys, Web Purchase Links, and Supabase schema must be configured in the hosted environment before paid checkout works.

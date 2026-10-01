@@ -62,6 +62,8 @@ fun main() {
     }
     val entitlements = createHostedEntitlementLookup(authConfig)
     val devices = createHostedDeviceRegistry(authConfig)
+    val spaces = if (authConfig.supabaseUrl != null && authConfig.supabaseServiceKey != null)
+        SupabaseSpaceManagement(authConfig.supabaseUrl, authConfig.supabaseServiceKey) else null
 
     log.i { "Shilling server starting on http://localhost:8081" }
     log.i { "Auth mode: ${authConfig.authMode}" }
@@ -104,8 +106,11 @@ fun main() {
                     turnConfigured = turnConfig.turnSecret != null && turnConfig.turnUrls.isNotEmpty())
                 hostedDevicesRoute(tokenVerifier, householdLookup, devices, signalingHub)
                 billingConfigRoute(tokenVerifier)
+                hostedSpacesRoute(tokenVerifier,
+                    spaces,
+                    entitlements, devices, signalingHub)
             }
-            signalingRoute(signalingHub, tokenVerifier, householdLookup, entitlements, devices)
+            signalingRoute(signalingHub, tokenVerifier, householdLookup, entitlements, devices, spaces)
         }
     }.start(wait = true)
 }

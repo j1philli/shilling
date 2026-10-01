@@ -30,7 +30,7 @@ class IosIdGenerator : IdGenerator {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-class IosReceiptFileStore : ReceiptFileStore {
+class IosReceiptFileStore(private val spaceId: String? = null) : ReceiptFileStore {
     private val log = Logger.withTag("IosReceiptOpen")
 
     private val receiptsDir: String by lazy {
@@ -39,7 +39,8 @@ class IosReceiptFileStore : ReceiptFileStore {
         )
         @Suppress("UNCHECKED_CAST")
         val documentsDir = (paths as List<String>).first()
-        val receiptsPath = "$documentsDir/receipts"
+        val folder = spaceId?.let { "receipts-spaces/" + it.encodeToByteArray().joinToString("") { b -> (b.toInt() and 255).toString(16).padStart(2, '0') } } ?: "receipts"
+        val receiptsPath = "$documentsDir/$folder"
         NSFileManager.defaultManager.createDirectoryAtPath(
             receiptsPath,
             withIntermediateDirectories = true,
@@ -49,7 +50,7 @@ class IosReceiptFileStore : ReceiptFileStore {
         receiptsPath
     }
 
-    private fun pathForReceipt(receiptId: String): String = "$receiptsDir/$receiptId"
+    private fun pathForReceipt(receiptId: String): String = "$receiptsDir/${finance.shilling.shared.data.store.safeReceiptStorageId(receiptId)}"
 
     override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {
         val destPath = pathForReceipt(receiptId)
@@ -110,9 +111,10 @@ class IosReceiptFileStore : ReceiptFileStore {
         val safeName = originalName
             .substringAfterLast('/')
             .substringAfterLast('\\')
-            .ifBlank { "$receiptId.bin" }
+            .takeUnless { it.isBlank() || it == "." || it == ".." } ?: "$receiptId.bin"
         // A folder per receipt keeps the original file name (Quick Look shows it as the title).
-        val tempDir = NSTemporaryDirectory().trimEnd('/') + "/receipts/$receiptId"
+        val scope = spaceId?.encodeToByteArray()?.joinToString("") { (it.toInt() and 255).toString(16).padStart(2, '0') } ?: "legacy"
+        val tempDir = NSTemporaryDirectory().trimEnd('/') + "/receipts/$scope/${finance.shilling.shared.data.store.safeReceiptStorageId(receiptId)}"
         NSFileManager.defaultManager.createDirectoryAtPath(tempDir, withIntermediateDirectories = true, attributes = null, error = null)
         val tempPath = "$tempDir/$safeName"
         return if (data.writeToFile(tempPath, atomically = true)) tempPath else null
@@ -137,7 +139,7 @@ class IosReceiptFileStore : ReceiptFileStore {
 }
 
 private val noOpSchema = object : SqlSchema<QueryResult.Value<Unit>> {
-    override val version: Long = 1
+    override val version: Long = finance.shilling.shared.db.ShillingDatabase.Schema.version
     override fun create(driver: SqlDriver) = QueryResult.Value(Unit)
     override fun migrate(
         driver: SqlDriver,

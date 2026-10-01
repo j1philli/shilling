@@ -1,0 +1,161 @@
+CREATE TABLE accounts_new(
+    space_id TEXT NOT NULL,
+    id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    balance REAL NOT NULL,
+    PRIMARY KEY(space_id, id)
+);
+
+INSERT INTO accounts_new(space_id, id, name, balance) SELECT '__local__', id, name, balance FROM accounts;
+
+CREATE TABLE categories_new(
+    space_id TEXT NOT NULL,
+    id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    color TEXT,
+    PRIMARY KEY(space_id, id)
+);
+
+INSERT INTO categories_new(space_id, id, name, color) SELECT '__local__', id, name, color FROM categories;
+
+CREATE TABLE schedules_new(
+    space_id TEXT NOT NULL,
+    id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    amount REAL NOT NULL,
+    type TEXT NOT NULL,
+    account_id TEXT,
+    counter_account_id TEXT,
+    category_id TEXT,
+    start_date INTEGER NOT NULL,
+    end_date INTEGER,
+    freq TEXT NOT NULL,
+    interval_ INTEGER NOT NULL DEFAULT 1,
+    by_day_mask INTEGER,
+    by_month_day INTEGER,
+    nth_weekday INTEGER,
+    last_day_flag INTEGER NOT NULL DEFAULT 0,
+    auto_pay INTEGER NOT NULL DEFAULT 0,
+    notes TEXT,
+    PRIMARY KEY(space_id, id)
+);
+
+INSERT INTO schedules_new(space_id, id, title, amount, type, account_id, counter_account_id, category_id, start_date, end_date, freq, interval_, by_day_mask, by_month_day, nth_weekday, last_day_flag, auto_pay, notes) SELECT '__local__', id, title, amount, type, account_id, counter_account_id, category_id, start_date, end_date, freq, interval_, by_day_mask, by_month_day, nth_weekday, last_day_flag, auto_pay, notes FROM schedules;
+
+CREATE TABLE schedule_exceptions_new(
+    space_id TEXT NOT NULL,
+    schedule_id TEXT NOT NULL,
+    date INTEGER NOT NULL,
+    skip INTEGER NOT NULL DEFAULT 0,
+    override_amount REAL,
+    override_account_id TEXT,
+    override_counter_account_id TEXT,
+    PRIMARY KEY(space_id, schedule_id, date),
+    FOREIGN KEY(space_id, schedule_id) REFERENCES schedules(space_id, id) ON UPDATE CASCADE ON DELETE CASCADE
+
+);
+
+INSERT INTO schedule_exceptions_new(space_id, schedule_id, date, skip, override_amount, override_account_id, override_counter_account_id) SELECT '__local__', schedule_id, date, skip, override_amount, override_account_id, override_counter_account_id FROM schedule_exceptions;
+
+CREATE TABLE postings_new(
+    space_id TEXT NOT NULL,
+    id TEXT NOT NULL,
+    schedule_id TEXT,
+    type TEXT NOT NULL,
+    account_id TEXT NOT NULL,
+    date INTEGER NOT NULL,
+    amount REAL NOT NULL,
+    pair_id TEXT,
+    title TEXT,
+    category_id TEXT,
+    FOREIGN KEY(space_id, schedule_id) REFERENCES schedules(space_id, id) ON UPDATE CASCADE,
+    PRIMARY KEY(space_id, id)
+);
+
+INSERT INTO postings_new(space_id, id, schedule_id, type, account_id, date, amount, pair_id, title, category_id) SELECT '__local__', id, schedule_id, type, account_id, date, amount, pair_id, title, category_id FROM postings;
+
+CREATE TABLE receipts_new(
+    space_id TEXT NOT NULL,
+    id TEXT NOT NULL,
+    posting_id TEXT,
+    file_path TEXT NOT NULL,
+    original_name TEXT NOT NULL,
+    added_at INTEGER NOT NULL,
+    receipt_date INTEGER,
+    amount REAL,
+    notes TEXT,
+    FOREIGN KEY(space_id, posting_id) REFERENCES postings(space_id, id) ON UPDATE CASCADE,
+    PRIMARY KEY(space_id, id)
+);
+
+INSERT INTO receipts_new(space_id, id, posting_id, file_path, original_name, added_at, receipt_date, amount, notes) SELECT '__local__', id, posting_id, file_path, original_name, added_at, receipt_date, amount, notes FROM receipts;
+
+CREATE TABLE receipt_files_new(
+    space_id TEXT NOT NULL,
+    receipt_id TEXT NOT NULL,
+    file_bytes BLOB NOT NULL,
+    size_bytes INTEGER NOT NULL,
+    mime_type TEXT,
+    FOREIGN KEY(space_id, receipt_id) REFERENCES receipts(space_id, id) ON UPDATE CASCADE ON DELETE CASCADE,
+    PRIMARY KEY(space_id, receipt_id)
+);
+
+INSERT INTO receipt_files_new(space_id, receipt_id, file_bytes, size_bytes, mime_type) SELECT '__local__', receipt_id, file_bytes, size_bytes, mime_type FROM receipt_files;
+
+CREATE TABLE bookkeeping_new(
+    space_id TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    PRIMARY KEY(space_id, entity_type, entity_id)
+
+);
+
+INSERT INTO bookkeeping_new(space_id, entity_type, entity_id, timestamp) SELECT '__local__', entity_type, entity_id, timestamp FROM bookkeeping;
+
+DROP TABLE bookkeeping;
+
+DROP TABLE receipt_files;
+
+DROP TABLE receipts;
+
+DROP TABLE postings;
+
+DROP TABLE schedule_exceptions;
+
+DROP TABLE schedules;
+
+DROP TABLE categories;
+
+DROP TABLE accounts;
+
+ALTER TABLE accounts_new RENAME TO accounts;
+
+ALTER TABLE categories_new RENAME TO categories;
+
+ALTER TABLE schedules_new RENAME TO schedules;
+
+ALTER TABLE schedule_exceptions_new RENAME TO schedule_exceptions;
+
+ALTER TABLE postings_new RENAME TO postings;
+
+ALTER TABLE receipts_new RENAME TO receipts;
+
+ALTER TABLE receipt_files_new RENAME TO receipt_files;
+
+ALTER TABLE bookkeeping_new RENAME TO bookkeeping;
+
+CREATE INDEX schedules_date_idx ON schedules(space_id, start_date, end_date);
+
+CREATE INDEX postings_date_idx ON postings(space_id, date);
+
+UPDATE change_log SET household_id = '__local__' WHERE household_id = '__local_sync__';
+
+CREATE TABLE local_spaces (
+    space_id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    legacy_files INTEGER NOT NULL DEFAULT 0
+);
+
+INSERT INTO local_spaces(space_id, name, kind, legacy_files) VALUES ('__local__', 'Home', 'home', 1);

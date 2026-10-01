@@ -5,7 +5,12 @@ import KMPNativeCoroutinesAsync
 /// Observes `AppRoot.phase` (onboarding, starting, main app) for SwiftUI.
 @MainActor
 final class AppPhaseModel: ObservableObject {
+    @Published private(set) var spaceId: String = AppRoot.shared.spaceId
     @Published private(set) var phase: AppPhase = AppRoot.shared.phase
+
+    func observeSpace() async {
+        do { for try await value in asyncSequence(for: AppRoot.shared.spaceIdFlow) { spaceId = value } } catch {}
+    }
 
     func observe() async {
         do {

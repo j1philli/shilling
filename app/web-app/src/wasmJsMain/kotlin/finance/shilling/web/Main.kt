@@ -89,8 +89,7 @@ fun main() {
     var koinReady by mutableStateOf(false)
     MainScope().launch {
         val driver = WebWorkerDriver(Worker("sqldelight.worker.js"))
-        (ShillingDatabase.Schema.create(driver) as QueryResult.AsyncValue).await()
-        (driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0) as QueryResult.AsyncValue).await()
+        finance.shilling.shared.data.ensureLocalSchemaReady(driver, logTag = "Web")
         initKoin(webPlatformModule(ShillingDatabase(driver)), sessionModule).get<AppSession>().start()
         koinReady = true
     }
@@ -133,6 +132,9 @@ private fun webPlatformModule(db: ShillingDatabase) = module {
     single { Settings() }
     single<IdGenerator> { WasmIdGenerator() }
     single<ReceiptFileStore> { WasmReceiptFileStore(get()) }
+    single<finance.shilling.shared.data.store.ReceiptFileStoreFactory> {
+        finance.shilling.shared.data.store.ReceiptFileStoreFactory { id, legacy -> WasmReceiptFileStore(get(), id) }
+    }
     single { createSyncHttpClient() }
     single {
         WebRtcPlatform(

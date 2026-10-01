@@ -30,7 +30,9 @@ function saveToIndexedDB(idb, data) {
     const tx = idb.transaction(DB_STORE, "readwrite");
     const store = tx.objectStore(DB_STORE);
     const request = store.put(data, DB_KEY);
-    request.onsuccess = () => resolve();
+    tx.oncomplete = () => resolve();
+    tx.onabort = () => reject(tx.error);
+    tx.onerror = () => reject(tx.error);
     request.onerror = () => reject(request.error);
   });
 }
@@ -43,16 +45,17 @@ let inTransaction = false;
 function scheduleSave() {
   if (inTransaction) return;
   if (saveTimer !== null) clearTimeout(saveTimer);
-  saveTimer = setTimeout(persistDatabase, 100);
+  saveTimer = setTimeout(() => persistDatabase().catch(err => console.error("Failed to persist database:", err)), 100);
 }
 
-function persistDatabase() {
+async function persistDatabase() {
   saveTimer = null;
-  if (!db || !idb) return;
+  if (!db || !idb || inTransaction) return;
+  const foreignKeys = db.exec("PRAGMA foreign_keys;")[0]?.values[0]?.[0] ?? 1;
   const data = db.export();
-  saveToIndexedDB(idb, data).catch((err) => {
-    console.error("Failed to persist database to IndexedDB:", err);
-  });
+  // sql.js export closes/reopens the database and resets connection pragmas.
+  db.run(`PRAGMA foreign_keys = ${foreignKeys ? "ON" : "OFF"};`);
+  await saveToIndexedDB(idb, data);
 }
 
 async function createDatabase() {
@@ -64,9 +67,10 @@ async function createDatabase() {
   } else {
     db = new SQL.Database();
   }
+  db.run("PRAGMA foreign_keys = ON;");
 }
 
-function onModuleReady() {
+async function onModuleReady() {
   const data = this.data;
 
   switch (data && data.action) {
@@ -75,10 +79,8 @@ function onModuleReady() {
         throw new Error("exec: Missing query string");
       }
 
-      // Make schema creation idempotent so Schema.create() is safe on a persisted DB
-      let sql = data.sql;
-      sql = sql.replace(/\bCREATE\s+TABLE\b(?!\s+IF\s+NOT\s+EXISTS)/gi, "CREATE TABLE IF NOT EXISTS");
-      sql = sql.replace(/\bCREATE\s+INDEX\b(?!\s+IF\s+NOT\s+EXISTS)/gi, "CREATE INDEX IF NOT EXISTS");
+      // Schema creation and migrations are versioned by DatabaseBootstrap.
+      const sql = data.sql;
 
       const results = db.exec(sql, data.params)[0] ?? { values: [] };
       scheduleSave();
@@ -87,6 +89,7 @@ function onModuleReady() {
         results: results
       });
     case "begin_transaction":
+      if (saveTimer !== null) { clearTimeout(saveTimer); saveTimer = null; }
       inTransaction = true;
       return postMessage({
         id: data.id,
@@ -95,7 +98,7 @@ function onModuleReady() {
     case "end_transaction": {
       const txResults = db.exec("END TRANSACTION;");
       inTransaction = false;
-      scheduleSave();
+      await persistDatabase();
       return postMessage({
         id: data.id,
         results: txResults
@@ -120,8 +123,9 @@ function onError(err) {
 }
 
 const sqlModuleReady = createDatabase()
+let requests = Promise.resolve();
 self.onmessage = (event) => {
-  return sqlModuleReady
+  requests = requests.then(() => sqlModuleReady)
     .then(onModuleReady.bind(event))
     .catch(onError.bind(event));
 }

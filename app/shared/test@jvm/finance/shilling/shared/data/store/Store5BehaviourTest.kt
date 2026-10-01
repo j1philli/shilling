@@ -75,7 +75,7 @@ class Store5BehaviourTest {
         repo.upsert(Account(id = "a1", name = "Checking", balance = 10.0))
 
         // toBookkeepingKey uses lowercase "account"
-        val rows = db.bookkeepingQueries.selectByType("account").awaitAsList()
+        val rows = db.bookkeepingQueries.selectByType("account", space_id = "__local__").awaitAsList()
         assertTrue(
             rows.isEmpty(),
             "Bookkeeper should stay empty while updater returns Success with null peer; found $rows"
@@ -99,7 +99,7 @@ class Store5BehaviourTest {
 
         repo.upsert(Account(id = "a1", name = "Checking", balance = 10.0))
 
-        val rows = db.bookkeepingQueries.selectByType("account").awaitAsList()
+        val rows = db.bookkeepingQueries.selectByType("account", space_id = "__local__").awaitAsList()
         assertTrue(
             rows.isNotEmpty(),
             "Bookkeeper should record a failed sync when broadcast throws; found $rows"

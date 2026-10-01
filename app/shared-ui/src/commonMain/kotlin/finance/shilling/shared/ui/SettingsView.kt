@@ -78,6 +78,8 @@ fun SettingsView(
                 if (!devicesState.selfHosted) {
                     ListSectionHeader("Subscription")
                     HostedBillingSection(devicesState, devicesViewModel)
+                    ListSectionHeader("Finance spaces")
+                    HostedSpacesSection()
                 }
             }
 

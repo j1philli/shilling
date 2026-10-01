@@ -106,26 +106,26 @@ class SyncIntegrationTest {
             sender.receiptRepository.save(receipt)
 
             waitUntil {
-                receiver.db.accountQueries.selectById(account.id).awaitAsOneOrNull() != null &&
-                    receiver.db.categoryQueries.selectAll().awaitAsList().any { it.id == category.id } &&
-                    receiver.db.scheduleQueries.selectById(schedule.id).awaitAsOneOrNull() != null &&
-                    receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id)
+                receiver.db.accountQueries.selectById(account.id, space_id = "__local__").awaitAsOneOrNull() != null &&
+                    receiver.db.categoryQueries.selectAll(space_id = "__local__").awaitAsList().any { it.id == category.id } &&
+                    receiver.db.scheduleQueries.selectById(schedule.id, space_id = "__local__").awaitAsOneOrNull() != null &&
+                    receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id, space_id = "__local__")
                         .awaitAsList()
                         .any { it.schedule_id == schedule.id } &&
                     receiver.findPosting(posting.id) != null &&
-                    receiver.db.receiptQueries.selectById(receipt.id).awaitAsOneOrNull() != null &&
+                    receiver.db.receiptQueries.selectById(receipt.id, space_id = "__local__").awaitAsOneOrNull() != null &&
                     receiver.hasFile(receipt.id)
             }
 
-            assertEquals(account, receiver.db.accountQueries.selectById(account.id).awaitAsOneOrNull()!!.toDomain())
-            assertEquals(category, receiver.db.categoryQueries.selectAll().awaitAsList().single().toDomain())
-            assertEquals(schedule, receiver.db.scheduleQueries.selectById(schedule.id).awaitAsOneOrNull()!!.toDomain())
+            assertEquals(account, receiver.db.accountQueries.selectById(account.id, space_id = "__local__").awaitAsOneOrNull()!!.toDomain())
+            assertEquals(category, receiver.db.categoryQueries.selectAll(space_id = "__local__").awaitAsList().single().toDomain())
+            assertEquals(schedule, receiver.db.scheduleQueries.selectById(schedule.id, space_id = "__local__").awaitAsOneOrNull()!!.toDomain())
             assertEquals(
                 exception,
-                receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id).awaitAsList().single().toDomain()
+                receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id, space_id = "__local__").awaitAsList().single().toDomain()
             )
             assertEquals(posting, receiver.findPosting(posting.id)!!.toDomain())
-            assertEquals(receipt, receiver.db.receiptQueries.selectById(receipt.id).awaitAsOneOrNull()!!.toDomain())
+            assertEquals(receipt, receiver.db.receiptQueries.selectById(receipt.id, space_id = "__local__").awaitAsOneOrNull()!!.toDomain())
             assertContentEquals(receiptBytes, receiver.readFile(receipt.id))
         } finally {
             sender.close()
@@ -168,7 +168,7 @@ class SyncIntegrationTest {
             sender.receiptRepository.save(receipt)
 
             waitUntil {
-                receiver.db.receiptQueries.selectById(receipt.id).awaitAsOneOrNull() != null &&
+                receiver.db.receiptQueries.selectById(receipt.id, space_id = "__local__").awaitAsOneOrNull() != null &&
                     receiver.hasFile(receipt.id)
             }
 
@@ -181,7 +181,7 @@ class SyncIntegrationTest {
             )
 
             waitUntil {
-                receiver.db.receiptQueries.selectById(receipt.id).awaitAsOneOrNull()?.let { row ->
+                receiver.db.receiptQueries.selectById(receipt.id, space_id = "__local__").awaitAsOneOrNull()?.let { row ->
                     row.posting_id == posting.id &&
                         row.notes == "latte + croissant" &&
                         row.receipt_date == 333L &&
@@ -189,7 +189,7 @@ class SyncIntegrationTest {
                 } == true
             }
 
-            val synced = receiver.db.receiptQueries.selectById(receipt.id).awaitAsOneOrNull()!!.toDomain()
+            val synced = receiver.db.receiptQueries.selectById(receipt.id, space_id = "__local__").awaitAsOneOrNull()!!.toDomain()
             assertEquals(posting.id, synced.postingId)
             assertEquals("latte + croissant", synced.notes)
             assertEquals(333L, synced.receiptDate)
@@ -253,8 +253,8 @@ class SyncIntegrationTest {
             sender.receiptRepository.save(receipt)
 
             waitUntil {
-                receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id).awaitAsList().isNotEmpty() &&
-                    receiver.db.receiptQueries.selectById(receipt.id).awaitAsOneOrNull() != null &&
+                receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id, space_id = "__local__").awaitAsList().isNotEmpty() &&
+                    receiver.db.receiptQueries.selectById(receipt.id, space_id = "__local__").awaitAsOneOrNull() != null &&
                     receiver.hasFile(receipt.id)
             }
 
@@ -262,19 +262,19 @@ class SyncIntegrationTest {
             sender.receiptRepository.detach(receipt.id)
 
             waitUntil {
-                receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id).awaitAsList().isEmpty() &&
-                    receiver.db.receiptQueries.selectById(receipt.id).awaitAsOneOrNull()?.posting_id == null
+                receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id, space_id = "__local__").awaitAsList().isEmpty() &&
+                    receiver.db.receiptQueries.selectById(receipt.id, space_id = "__local__").awaitAsOneOrNull()?.posting_id == null
             }
 
             sender.receiptRepository.delete(receipt.id)
 
             waitUntil {
-                receiver.db.receiptQueries.selectById(receipt.id).awaitAsOneOrNull() == null &&
+                receiver.db.receiptQueries.selectById(receipt.id, space_id = "__local__").awaitAsOneOrNull() == null &&
                     !receiver.hasFile(receipt.id)
             }
 
-            assertTrue(receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id).awaitAsList().isEmpty())
-            assertNull(receiver.db.receiptQueries.selectById(receipt.id).awaitAsOneOrNull())
+            assertTrue(receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id, space_id = "__local__").awaitAsList().isEmpty())
+            assertNull(receiver.db.receiptQueries.selectById(receipt.id, space_id = "__local__").awaitAsOneOrNull())
             assertTrue(!receiver.hasFile(receipt.id))
         } finally {
             sender.close()
@@ -313,10 +313,10 @@ class SyncIntegrationTest {
             )
 
             waitUntil {
-                receiver.db.postingQueries.selectAll().awaitAsList().size == 3
+                receiver.db.postingQueries.selectAll(space_id = "__local__").awaitAsList().size == 3
             }
 
-            val postings = receiver.db.postingQueries.selectAll().awaitAsList().map { it.toDomain() }
+            val postings = receiver.db.postingQueries.selectAll(space_id = "__local__").awaitAsList().map { it.toDomain() }
             assertTrue(postings.any {
                 it.title == "Coffee" &&
                     it.amount == 6.5 &&
@@ -378,9 +378,9 @@ class SyncIntegrationTest {
             sender.postingRepository.record(posting)
 
             waitUntil {
-                receiver.db.accountQueries.selectById(account.id).awaitAsOneOrNull() != null &&
-                    receiver.db.categoryQueries.selectAll().awaitAsList().any { it.id == category.id } &&
-                    receiver.db.scheduleQueries.selectById(schedule.id).awaitAsOneOrNull() != null &&
+                receiver.db.accountQueries.selectById(account.id, space_id = "__local__").awaitAsOneOrNull() != null &&
+                    receiver.db.categoryQueries.selectAll(space_id = "__local__").awaitAsList().any { it.id == category.id } &&
+                    receiver.db.scheduleQueries.selectById(schedule.id, space_id = "__local__").awaitAsOneOrNull() != null &&
                     receiver.findPosting(posting.id) != null
             }
 
@@ -388,17 +388,17 @@ class SyncIntegrationTest {
             sender.accountRepository.delete(account.id)
 
             waitUntil {
-                receiver.db.accountQueries.selectById(account.id).awaitAsOneOrNull() == null &&
-                    receiver.db.categoryQueries.selectAll().awaitAsList().none { it.id == category.id } &&
-                    receiver.db.scheduleQueries.selectById(schedule.id).awaitAsOneOrNull()?.let { row ->
+                receiver.db.accountQueries.selectById(account.id, space_id = "__local__").awaitAsOneOrNull() == null &&
+                    receiver.db.categoryQueries.selectAll(space_id = "__local__").awaitAsList().none { it.id == category.id } &&
+                    receiver.db.scheduleQueries.selectById(schedule.id, space_id = "__local__").awaitAsOneOrNull()?.let { row ->
                         row.account_id == null && row.category_id == null
                     } == true &&
                     receiver.findPosting(posting.id) == null
             }
 
-            val syncedSchedule = receiver.db.scheduleQueries.selectById(schedule.id).awaitAsOneOrNull()!!.toDomain()
-            assertNull(receiver.db.accountQueries.selectById(account.id).awaitAsOneOrNull())
-            assertTrue(receiver.db.categoryQueries.selectAll().awaitAsList().none { it.id == category.id })
+            val syncedSchedule = receiver.db.scheduleQueries.selectById(schedule.id, space_id = "__local__").awaitAsOneOrNull()!!.toDomain()
+            assertNull(receiver.db.accountQueries.selectById(account.id, space_id = "__local__").awaitAsOneOrNull())
+            assertTrue(receiver.db.categoryQueries.selectAll(space_id = "__local__").awaitAsList().none { it.id == category.id })
             assertNull(receiver.findPosting(posting.id))
             assertEquals("", syncedSchedule.accountId)
             assertNull(syncedSchedule.categoryId)
@@ -449,21 +449,21 @@ class SyncIntegrationTest {
             sender.postingRepository.record(posting)
 
             waitUntil(timeoutMs = 10_000L) {
-                receiver.db.scheduleQueries.selectById(schedule.id).awaitAsOneOrNull() != null &&
-                    receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id).awaitAsList().isNotEmpty() &&
+                receiver.db.scheduleQueries.selectById(schedule.id, space_id = "__local__").awaitAsOneOrNull() != null &&
+                    receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id, space_id = "__local__").awaitAsList().isNotEmpty() &&
                     receiver.findPosting(posting.id) != null
             }
 
             sender.scheduleRepository.delete(schedule.id)
 
             waitUntil(timeoutMs = 10_000L) {
-                receiver.db.scheduleQueries.selectById(schedule.id).awaitAsOneOrNull() == null &&
-                    receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id).awaitAsList().isEmpty() &&
+                receiver.db.scheduleQueries.selectById(schedule.id, space_id = "__local__").awaitAsOneOrNull() == null &&
+                    receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id, space_id = "__local__").awaitAsList().isEmpty() &&
                     receiver.findPosting(posting.id) == null
             }
 
-            assertNull(receiver.db.scheduleQueries.selectById(schedule.id).awaitAsOneOrNull())
-            assertTrue(receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id).awaitAsList().isEmpty())
+            assertNull(receiver.db.scheduleQueries.selectById(schedule.id, space_id = "__local__").awaitAsOneOrNull())
+            assertTrue(receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id, space_id = "__local__").awaitAsList().isEmpty())
             assertNull(receiver.findPosting(posting.id))
         } finally {
             sender.close()
@@ -512,8 +512,8 @@ class SyncIntegrationTest {
             )
             val receiptBytes = ByteArray(8_192) { (it % 193).toByte() }
 
-            sender.db.accountQueries.upsert(account.id, account.name, account.balance)
-            sender.db.categoryQueries.upsert(category.id, category.name, category.color)
+            sender.db.accountQueries.upsert(account.id, account.name, account.balance, space_id = "__local__").await()
+            sender.db.categoryQueries.upsert(category.id, category.name, category.color, space_id = "__local__").await()
             sender.db.scheduleQueries.upsert(
                 id = schedule.id,
                 title = schedule.title,
@@ -531,16 +531,18 @@ class SyncIntegrationTest {
                 nth_weekday = schedule.nthWeekday?.toLong(),
                 last_day_flag = if (schedule.lastDayFlag) 1L else 0L,
                 auto_pay = if (schedule.autoPay) 1L else 0L,
-                notes = schedule.notes
-            )
+                notes = schedule.notes,
+                space_id = "__local__"
+            ).await()
             sender.db.scheduleExceptionQueries.upsert(
                 schedule_id = exception.scheduleId,
                 date = exception.date.toEpochDays().toLong(),
                 skip = if (exception.skip) 1L else 0L,
                 override_amount = exception.overrideAmount,
                 override_account_id = exception.overrideAccountId,
-                override_counter_account_id = exception.overrideCounterAccountId
-            )
+                override_counter_account_id = exception.overrideCounterAccountId,
+                space_id = "__local__"
+            ).await()
             sender.db.postingQueries.upsert(
                 id = posting.id,
                 schedule_id = posting.scheduleId,
@@ -550,8 +552,9 @@ class SyncIntegrationTest {
                 amount = posting.amount,
                 pair_id = posting.pairId,
                 title = posting.title,
-                category_id = posting.categoryId
-            )
+                category_id = posting.categoryId,
+                space_id = "__local__"
+            ).await()
             sender.db.receiptQueries.upsert(
                 id = receipt.id,
                 posting_id = receipt.postingId,
@@ -560,8 +563,9 @@ class SyncIntegrationTest {
                 added_at = receipt.addedAt,
                 receipt_date = receipt.receiptDate,
                 amount = receipt.amount,
-                notes = receipt.notes
-            )
+                notes = receipt.notes,
+                space_id = "__local__"
+            ).await()
             sender.storeFile(receipt.id, receipt.originalName, receiptBytes)
 
             sender.start()
@@ -573,20 +577,20 @@ class SyncIntegrationTest {
             sender.emitPeerConnected(receiver.deviceId)
 
             waitUntil(timeoutMs = 10_000L) {
-                receiver.db.accountQueries.selectById(account.id).awaitAsOneOrNull() != null &&
-                    receiver.db.categoryQueries.selectAll().awaitAsList().any { it.id == category.id } &&
-                    receiver.db.scheduleQueries.selectById(schedule.id).awaitAsOneOrNull() != null &&
-                    receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id).awaitAsList().isNotEmpty() &&
+                receiver.db.accountQueries.selectById(account.id, space_id = "__local__").awaitAsOneOrNull() != null &&
+                    receiver.db.categoryQueries.selectAll(space_id = "__local__").awaitAsList().any { it.id == category.id } &&
+                    receiver.db.scheduleQueries.selectById(schedule.id, space_id = "__local__").awaitAsOneOrNull() != null &&
+                    receiver.db.scheduleExceptionQueries.selectByScheduleId(schedule.id, space_id = "__local__").awaitAsList().isNotEmpty() &&
                     receiver.findPosting(posting.id) != null &&
-                    receiver.db.receiptQueries.selectById(receipt.id).awaitAsOneOrNull() != null &&
+                    receiver.db.receiptQueries.selectById(receipt.id, space_id = "__local__").awaitAsOneOrNull() != null &&
                     receiver.hasFile(receipt.id)
             }
 
-            assertEquals(account, receiver.db.accountQueries.selectById(account.id).awaitAsOneOrNull()!!.toDomain())
-            assertEquals(category, receiver.db.categoryQueries.selectAll().awaitAsList().single().toDomain())
-            assertEquals(schedule, receiver.db.scheduleQueries.selectById(schedule.id).awaitAsOneOrNull()!!.toDomain())
+            assertEquals(account, receiver.db.accountQueries.selectById(account.id, space_id = "__local__").awaitAsOneOrNull()!!.toDomain())
+            assertEquals(category, receiver.db.categoryQueries.selectAll(space_id = "__local__").awaitAsList().single().toDomain())
+            assertEquals(schedule, receiver.db.scheduleQueries.selectById(schedule.id, space_id = "__local__").awaitAsOneOrNull()!!.toDomain())
             assertEquals(posting, receiver.findPosting(posting.id)!!.toDomain())
-            assertEquals(receipt, receiver.db.receiptQueries.selectById(receipt.id).awaitAsOneOrNull()!!.toDomain())
+            assertEquals(receipt, receiver.db.receiptQueries.selectById(receipt.id, space_id = "__local__").awaitAsOneOrNull()!!.toDomain())
             assertContentEquals(receiptBytes, receiver.readFile(receipt.id))
         } finally {
             sender.close()
@@ -608,7 +612,7 @@ class SyncIntegrationTest {
             desktop.accountRepository.upsert(initial)
 
             waitUntil {
-                web.db.accountQueries.selectById(initial.id).awaitAsOneOrNull()?.balance == 100.0
+                web.db.accountQueries.selectById(initial.id, space_id = "__local__").awaitAsOneOrNull()?.balance == 100.0
             }
 
             web.unlinkFrom(desktop)
@@ -629,17 +633,17 @@ class SyncIntegrationTest {
 
             desktop.emitPeerConnected(web.deviceId)
             waitUntil {
-                web.db.accountQueries.selectById(initial.id).awaitAsOneOrNull()?.balance == 300.0
+                web.db.accountQueries.selectById(initial.id, space_id = "__local__").awaitAsOneOrNull()?.balance == 300.0
             }
 
             web.resumeTargetedChangesTo(desktop.deviceId)
 
             waitUntil {
-                desktop.db.accountQueries.selectById(initial.id).awaitAsOneOrNull()?.balance == 300.0
+                desktop.db.accountQueries.selectById(initial.id, space_id = "__local__").awaitAsOneOrNull()?.balance == 300.0
             }
 
-            assertEquals(300.0, web.db.accountQueries.selectById(initial.id).awaitAsOneOrNull()!!.balance)
-            assertEquals(300.0, desktop.db.accountQueries.selectById(initial.id).awaitAsOneOrNull()!!.balance)
+            assertEquals(300.0, web.db.accountQueries.selectById(initial.id, space_id = "__local__").awaitAsOneOrNull()!!.balance)
+            assertEquals(300.0, desktop.db.accountQueries.selectById(initial.id, space_id = "__local__").awaitAsOneOrNull()!!.balance)
         } finally {
             web.close()
             desktop.close()
@@ -754,7 +758,7 @@ class SyncIntegrationTest {
         suspend fun readFile(receiptId: String): ByteArray? = fileStore.read(receiptId)
 
         suspend fun findPosting(postingId: String) =
-            db.postingQueries.selectAll().awaitAsList().firstOrNull { it.id == postingId }
+            db.postingQueries.selectAll(space_id = "__local__").awaitAsList().firstOrNull { it.id == postingId }
 
         fun close() {
             scope.cancel()

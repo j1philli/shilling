@@ -77,7 +77,12 @@ fun ShillingAppBootstrap(
             scaffoldConfig.startupPendingContent()
         }
 
-        is SessionPhase.Ready -> ShillingTheme {
+        is SessionPhase.Ready -> androidx.compose.runtime.key(current.spaceId) {
+            val owner = remember { object : androidx.lifecycle.ViewModelStoreOwner {
+                override val viewModelStore = androidx.lifecycle.ViewModelStore()
+            } }
+            androidx.compose.runtime.DisposableEffect(owner) { onDispose { owner.viewModelStore.clear() } }
+            androidx.compose.runtime.CompositionLocalProvider(androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner provides owner) { ShillingTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
                 scaffoldConfig.preScaffoldContent()
                 ShillingScaffold(
@@ -97,7 +102,7 @@ fun ShillingAppBootstrap(
                 )
             }
             PasswordSetupPrompt(current.authService)
-        }
+        } } }
     }
 }
 
