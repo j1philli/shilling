@@ -136,7 +136,7 @@ private fun HostedBillingSection(state: HostedDevicesUiState, viewModel: HostedD
     ShillingCard {
         Text("Hosted plan", style = MaterialTheme.typography.titleMedium)
         Text("Your plan: ${state.accountPlan?.name?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "Loading"}")
-        Text(if (state.bankReadingEnabled) "Bank reading is included when available" else "Bank reading requires Silver")
+        Text("Live bank connections are deferred and unavailable")
         if (!state.canPurchase) {
             Text("Create an account to subscribe and restore purchases on other devices.")
         } else if (PlatformBilling.usesNativeStore) {

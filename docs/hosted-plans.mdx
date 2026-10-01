@@ -10,18 +10,18 @@ The hosted service enforces Free, Silver, and Gold capabilities in its control p
 | --- | --- | --- | --- | --- |
 | Registered devices in a finance space | 2 | Unlimited | Unlimited | Operator controlled |
 | TURN for WebRTC | No hosted TURN | Hosted TURN | Hosted TURN | Operator configured |
-| Live bank account reading | No | Entitled; provider pending | Entitled; provider pending | Operator configured when supported |
-| Finance spaces an account may belong to | 1 | 1 | Unlimited, once space switching is implemented | Operator controlled |
+| Live bank account reading | No | Deferred; unavailable | Deferred; unavailable | Deferred; unavailable |
+| Finance spaces an account may belong to | 1 | 1 | Unlimited | Operator controlled |
 
-Self-hosted is a deployment edition, not a RevenueCat subscription. Its server uses `authMode=none`, does not query hosted billing, and does not enforce hosted quotas. A self-hosted bank connection would require the operator to configure a supported provider after that integration exists.
+Self-hosted is a deployment edition, not a RevenueCat subscription. Its server uses `authMode=none`, does not query hosted billing, and does not enforce hosted quotas. Live bank connections are deferred in every edition.
 
 Free receives STUN and can connect directly. Direct WebRTC sometimes works across networks without TURN, so Free must not be described as technically restricted to one local network. Silver and Gold may receive time-limited TURN credentials when configured; `/api/tier` reports TURN available only when both entitlement and server configuration are present. TURN is part of WebRTC, not an entity-sync API.
 
 Each device has a Cloud relay switch in Settings. It starts off, including after logout or local reset. The ICE endpoint only returns TURN credentials when the device explicitly requests relay and the space has a paid entitlement. The client also discards relay candidates advertised by peers while the switch is off, and reconnects peers when it changes. STUN and direct WebRTC remain available with the switch off. Self-hosted devices can make the same choice when their operator configures TURN.
 
-The space's effective sync plan is the highest active plan among its members. A Silver or Gold member sponsors device slots, TURN, and future bank reading for that space. Each account's own plan controls how many spaces it may join. The `hosted_spaces` migration stores roles and memberships, while `user_profiles.household_id` remains the legacy active-space pointer. Invitations and Gold switching still need local data isolation and client UI.
+The space's effective sync plan is the highest active plan among its members. A Silver or Gold member sponsors device slots and TURN for that space. Each account's own plan controls how many spaces it may join. The `hosted_spaces` migration stores roles and memberships, while `user_profiles.household_id` remains the legacy active-space pointer. Invitations and Gold switching use isolated local data and the implemented client UI.
 
-Space owners and admins can manage registered devices. Side-business spaces will have their own Store5 data, with a linked transfer creating matching entries in both spaces when money moves between them. This cross-space transaction flow is not implemented yet.
+Space owners and admins can manage registered devices. Side-business spaces have their own Store5 data, with a linked transfer creating matching entries in both spaces when money moves between them.
 
 The hosted device list shows all registrations in the active finance space and labels the account that registered each new device as yours, another member's, or unknown for legacy registrations. Legacy registrations remain unknown until an owner or admin removes them and the device registers again; a peer cannot claim an old device ID merely by reconnecting. Connection badges are computed locally from open WebRTC data channels on the device viewing the list; "not connected" does not mean unregistered or offline. The server does not record P2P connection status. The owner metadata migration must be applied before deploying the server version that uses it.
 
@@ -44,5 +44,5 @@ The server reads current active entitlements from RevenueCat's API with a 30-sec
 - Settings includes space creation/selection, email-bound invitation codes, acceptance/decline, invitation revocation, owner/admin roles, removal, and last-owner protection. Free/Silver can hold one membership; Gold can hold multiple. A downgraded account can select its one active space without deleting local books.
 - Every Store5 entity query, receipt file, change-log version, and bookkeeping entry is space-scoped. Switching stops the old WebRTC runtime and retires its repository writers before exposing the next graph. Versioned local migration preserves existing books.
 - Gold linked transfers write paired postings atomically in the local database. Retry uses a stable transfer ID; paired edit/delete controls are in Finance spaces. Ordinary transaction editors cannot mutate one leg. Each space synchronizes only its own posting, and an inactive space catches up when opened over WebRTC. Both spaces must be locally synchronized to edit a complete pair. Currency conversion is not supported.
-- Bank launch regions are Canada and the United States. Client HTTPS ingestion is approved; device sync stays WebRTC. Plaid is the proposed provider, but its server-secret requirement, credentials, currency model, consent, and import mapping remain to be resolved. No live bank data is fetched yet.
+- Live bank connections are deferred. Canada and the United States remain the intended regions. Direct client HTTPS ingestion is approved, but bank data must stay off Shilling servers, including transient forwarding. The proposed Plaid proxy is rejected. Device sync stays WebRTC; no live bank data is fetched, and live banking is not an available paid-plan feature.
 - Store products, RevenueCat keys, Web Purchase Links, and Supabase schema must be configured in the hosted environment before paid checkout works.
