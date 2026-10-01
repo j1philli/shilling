@@ -142,6 +142,8 @@ configuration after installing the key on the Mac runner:
 - `IOS_TEAM_ID`: the Apple Developer Program team ID
 - `ASC_KEY_PATH`: absolute path to the App Store Connect team `.p8` key on the Mac
 - `ASC_KEY_ID` and `ASC_ISSUER_ID`: identifiers from App Store Connect
+- `IOS_KEYCHAIN_PATH` and `IOS_KEYCHAIN_PASSWORD_FILE`: dedicated signing keychain
+  and its runner-local password file, to unlock signing for unattended builds
 
 Store the key outside the checkout and artifact directories, readable only by
 `shillin-ci` (directory mode 700, file mode 600). Do not put its contents in an

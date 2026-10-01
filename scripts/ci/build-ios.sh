@@ -23,6 +23,10 @@ if [ "${SHILLING_IOS_SIGNED:-0}" = 1 ]; then
         echo "ERROR: TeamCity signed iOS builds must run on main" >&2
         exit 1
     fi
+    if [ -n "${IOS_KEYCHAIN_PATH:-}" ]; then
+        : "${IOS_KEYCHAIN_PASSWORD_FILE:?Set the runner-local signing keychain password file}"
+        security unlock-keychain -p "$(cat "$IOS_KEYCHAIN_PASSWORD_FILE")" "$IOS_KEYCHAIN_PATH"
+    fi
     apple_auth_args=(-allowProvisioningUpdates
         -authenticationKeyPath "$ASC_KEY_PATH"
         -authenticationKeyID "$ASC_KEY_ID"
