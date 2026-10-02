@@ -229,7 +229,7 @@ object IosSubmitReview : BuildType({
     maxRunningBuilds = 1
     params {
         param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
-        param("env.ASC_API_PRIVATE_KEY", "%shilling.apple.api.private.key%")
+        password("env.ASC_API_PRIVATE_KEY", "%shilling.apple.api.private.key%", display = ParameterDisplay.HIDDEN)
     }
     vcs { root(DslContext.settingsRoot) }
     features { sharedResources { writeLock("shilling-release") } }
@@ -478,7 +478,7 @@ open class ReleaseBuild(buildId: String, title: String, singleTarget: Boolean) :
     maxRunningBuilds = 1
     params {
         // This non-environment password is exposed only to release/review jobs.
-        param("env.ASC_API_PRIVATE_KEY", "%shilling.apple.api.private.key%")
+        password("env.ASC_API_PRIVATE_KEY", "%shilling.apple.api.private.key%", display = ParameterDisplay.HIDDEN)
         param("env.TEAMCITY_BUILD_ID", "%teamcity.build.id%")
         param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
         param("env.SHILLING_RELEASE_MODE", if (singleTarget) "single" else "full")
