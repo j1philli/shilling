@@ -2,7 +2,7 @@
 """Profile populated shared Compose screens in the isolated Pixel fixture.
 
 Run after installing the Release perf APK. Prints synthetic, per-run JSON.
-The fixture owns its database; this script only launches the normal app afterward.
+The fixture owns its database and remains visible afterward.
 """
 
 import argparse
@@ -28,8 +28,10 @@ def gfxinfo():
         if not found:
             raise RuntimeError(f"Missing gfxinfo metric: {label}")
         return int(found.group(1))
-    return {"frames": value("Total frames rendered"), "jankyFrames": value("Janky frames"),
-            "p95Ms": value("95th percentile"), "p99Ms": value("99th percentile")}
+    frames = value("Total frames rendered")
+    return {"frames": frames, "jankyFrames": value("Janky frames"),
+            "p95Ms": value("95th percentile") if frames else None,
+            "p99Ms": value("99th percentile") if frames else None}
 
 
 def meminfo():
@@ -43,7 +45,7 @@ def meminfo():
 def verify(screen):
     adb("shell", "uiautomator", "dump", "/sdcard/shilling-perf-window.xml")
     xml = adb("shell", "cat", "/sdcard/shilling-perf-window.xml")
-    marker = "Synthetic transaction" if screen == "activity" else "Synthetic schedule"
+    marker = "1000 due" if screen == "home" else "Synthetic transaction" if screen == "activity" else "Synthetic schedule"
     if marker not in xml:
         raise RuntimeError(f"Populated {screen} screen not visible")
 
@@ -75,6 +77,8 @@ def measure(screen, run, scroll):
         adb("shell", "dumpsys", "gfxinfo", "finance.shilling.perf", "reset")
         adb("shell", "for i in 1 2 3 4 5 6 7 8 9 10; do input swipe 550 1800 550 800 350; done")
         baseline["scrollGfxinfo"] = gfxinfo()
+        if baseline["scrollGfxinfo"]["frames"] == 0:
+            baseline["scrollNote"] = "No frames rendered during swipes; no scroll performance conclusion."
     return baseline
 
 
@@ -82,19 +86,16 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs", type=int, default=3)
     parser.add_argument("--scroll", action="store_true")
+    parser.add_argument("--screens", nargs="+", choices=["home", "activity", "plan"], default=["activity", "plan"])
     args = parser.parse_args()
     if args.runs < 1 or args.runs > 5:
         parser.error("--runs must be 1–5")
     try:
         for run in range(1, args.runs + 1):
-            for screen in ("activity", "plan"):
+            for screen in args.screens:
                 print(json.dumps(measure(screen, run, args.scroll)), flush=True)
     finally:
-        subprocess.run(["adb", "shell", "am", "force-stop", "finance.shilling.perf"], check=False)
         subprocess.run(["adb", "shell", "rm", "-f", "/sdcard/shilling-perf-window.xml"], check=False)
-        subprocess.run(["adb", "shell", "am", "start", "-n",
-                        "finance.shilling.android/finance.shilling.android.MainActivity"],
-                       check=False, stdout=subprocess.DEVNULL)
 
 
 if __name__ == "__main__":

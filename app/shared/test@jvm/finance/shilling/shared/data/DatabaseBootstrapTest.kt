@@ -14,6 +14,18 @@ import kotlin.test.assertTrue
 
 class DatabaseBootstrapTest {
     @Test
+    fun androidMetadataAloneDoesNotMakeAFreshDatabaseRequireMigration() = runBlocking {
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        try {
+            driver.execute(null, "CREATE TABLE android_metadata (locale TEXT);", 0)
+            ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
+            assertEquals(ShillingDatabase.Schema.version, userVersion(driver))
+            assertTrue(tableExists(driver, "accounts"))
+            assertTrue(tableExists(driver, "android_metadata"))
+        } finally { driver.close() }
+    }
+
+    @Test
     fun emptyDatabaseIsInitialized() = runBlocking {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
 
@@ -43,12 +55,14 @@ class DatabaseBootstrapTest {
         ShillingDatabase.Schema.create(driver).await()
         driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0)
         driver.execute(null, "DROP INDEX idx_change_log_entity_latest;", 0)
+        driver.execute(null, "DROP INDEX postings_pair_idx;", 0)
         val db = ShillingDatabase(driver)
         db.accountQueries.upsert("acct-1", "Checking", 123.45)
 
         ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
 
         assertTrue(indexExists(driver, "idx_change_log_entity_latest"))
+        assertTrue(indexExists(driver, "postings_pair_idx"))
         assertEquals(1L, rowCount(driver, "accounts"))
     }
 

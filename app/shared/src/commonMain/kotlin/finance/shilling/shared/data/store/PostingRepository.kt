@@ -11,9 +11,13 @@ import finance.shilling.shared.data.ScheduledTx
 import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.EntityType
 import kotlinx.coroutines.yield
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.first
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.datetime.LocalDate
@@ -44,14 +48,22 @@ class PostingRepository(
         }.flowOn(Dispatchers.Default)
 
     fun watchById(id: String): Flow<PostingWithDetails?> =
-        combine(
-            store.watchCached(PostingKey.ById(id)),
-            accountStore.watchCached(AccountKey.All),
-            categoryStore.watchCached(CategoryKey.All),
-            scheduleStore.watchCached(ScheduleKey.All)
-        ) { postings, accounts, categories, schedules ->
-            postings.toPostingDetails(accounts, categories, schedules).firstOrNull()
-        }
+        store.watchDetails(PostingDetailsKey.ById(id)).map { it.firstOrNull() }.flowOn(Dispatchers.Default)
+
+    fun watchPostingsBetween(start: LocalDate, end: LocalDate): Flow<List<Posting>> =
+        store.watchCached(PostingKey.Between(start, end)).flowOn(Dispatchers.Default)
+
+    /**
+     * Candidates for [limit] merged activity rows, plus their first matching transfer partners.
+     * At most 4 * limit rows cross the Store5 boundary. Callers still merge and take(limit).
+     * Partners are constrained to the same date window, as in watchBetween.
+     */
+    fun watchRecentBetween(start: LocalDate, end: LocalDate, limit: Int): Flow<List<PostingWithDetails>> {
+        require(limit >= 0)
+        if (limit == 0) return flowOf(emptyList())
+        return store.watchDetails(PostingDetailsKey.Recent(start, end, limit.toLong() * 2))
+            .flowOn(Dispatchers.Default)
+    }
 
     suspend fun getById(id: String): Posting? =
         store.readLocalSourceOfTruth(PostingKey.ById(id)).firstOrNull()
@@ -60,17 +72,18 @@ class PostingRepository(
      * The other leg of a transfer, if [posting] is one. Scheduled transfer legs share an
      * id prefix (`_dr` / `_cr`); ad-hoc transfer legs share a pairId.
      */
-    suspend fun getTransferPartner(posting: Posting): Posting? {
+    suspend fun getTransferPartner(posting: Posting): Posting? = withContext(Dispatchers.Default) {
         val partnerId = when {
             posting.id.endsWith("_dr") -> posting.id.removeSuffix("_dr") + "_cr"
             posting.id.endsWith("_cr") -> posting.id.removeSuffix("_cr") + "_dr"
             else -> null
         }
-        if (partnerId != null) return getById(partnerId)
-        if (posting.scheduleId != null) return null
-        val pairId = posting.pairId ?: return null
-        return getBetween(posting.date, posting.date.plus(1, DateTimeUnit.DAY))
-            .firstOrNull { it.pairId == pairId && it.id != posting.id }
+        if (partnerId != null) return@withContext getById(partnerId)
+        if (posting.scheduleId != null) return@withContext null
+        val pairId = posting.pairId ?: return@withContext null
+        store.watchDetails(PostingDetailsKey.TransferPartner(
+            pairId, posting.id, posting.date, posting.date.plus(1, DateTimeUnit.DAY)
+        )).first().firstOrNull()?.posting
     }
 
     /** Record an ad-hoc transfer as a linked debit/credit pair. */

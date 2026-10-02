@@ -5,7 +5,13 @@ import KotlinModules
 @main
 struct ShillingPerformanceApp: App {
     var body: some Scene {
-        WindowGroup { PerformanceView().ignoresSafeArea() }
+        WindowGroup {
+            if ProcessInfo.processInfo.arguments.contains("--perf-ui") {
+                NativeUiPerformanceView().ignoresSafeArea()
+            } else {
+                PerformanceView().ignoresSafeArea()
+            }
+        }
     }
 }
 

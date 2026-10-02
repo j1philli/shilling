@@ -21,6 +21,14 @@ SELECT * FROM receipts WHERE id = ? AND space_id = :space_id;
 selectAll:
 SELECT * FROM receipts WHERE space_id = :space_id ORDER BY added_at DESC;
 
+-- The posting join keeps this projection live after ON DELETE SET NULL cascades.
+selectCounts:
+SELECT COUNT(*) AS receipt_count,
+       COALESCE(SUM(CASE WHEN r.posting_id IS NULL THEN 1 ELSE 0 END), 0) AS unattached_count
+FROM receipts r
+LEFT JOIN postings p ON p.id = r.posting_id AND p.space_id = r.space_id
+WHERE r.space_id = :space_id;
+
 selectByPostingId:
 SELECT * FROM receipts WHERE posting_id = ? AND space_id = :space_id ORDER BY added_at ASC;
 

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 enum class ReceiptFilter(val label: String) {
@@ -44,6 +45,10 @@ class ReceiptsViewModel(receiptRepository: ReceiptRepository) : ViewModel() {
     private val filter = MutableStateFlow(ReceiptFilter.ALL)
 
     val state: StateFlow<ReceiptsUiState> = combine(receiptRepository.watchAll(), filter) { receipts, selected ->
+        // On native targets resolving the system zone reads the time-zone database.
+        // Take one date/zone snapshot per projection, not twice for every receipt.
+        val zone = TimeZone.currentSystemDefault()
+        val reference = Clock.System.now().toLocalDateTime(zone).date
         val filtered = when (selected) {
             ReceiptFilter.ALL -> receipts
             ReceiptFilter.UNATTACHED -> receipts.filter { it.receipt.postingId == null }
@@ -52,7 +57,7 @@ class ReceiptsViewModel(receiptRepository: ReceiptRepository) : ViewModel() {
         ReceiptsUiState(
             filter = selected,
             subtitle = receipts.count { it.receipt.postingId == null }.takeIf { it > 0 }?.let { "$it not attached" },
-            rows = filtered.map { it.toRow() },
+            rows = filtered.map { it.toRow(zone, reference) },
             empty = if (filtered.isNotEmpty()) null else when (selected) {
                 ReceiptFilter.ALL -> ReceiptsEmpty(
                     "No receipts yet",
@@ -70,10 +75,12 @@ class ReceiptsViewModel(receiptRepository: ReceiptRepository) : ViewModel() {
     }
 }
 
-private fun ReceiptWithPosting.toRow(): ReceiptRowUi {
-    val added = Instant.fromEpochMilliseconds(receipt.addedAt).toLocalDateTime(TimeZone.currentSystemDefault()).date
+private fun ReceiptWithPosting.toRow(zone: TimeZone, reference: LocalDate): ReceiptRowUi {
     val supporting = buildList {
-        add(receipt.receiptDate?.let { formatDate(LocalDate.fromEpochDays(it)) } ?: "Added ${formatDate(added)}")
+        add(receipt.receiptDate?.let { formatDate(LocalDate.fromEpochDays(it), reference) } ?: run {
+            val added = Instant.fromEpochMilliseconds(receipt.addedAt).toLocalDateTime(zone).date
+            "Added ${formatDate(added, reference)}"
+        })
         add(postingTitle?.let { "Attached to $it" } ?: "Not attached")
     }.joinToString(" · ")
     return ReceiptRowUi(

@@ -23,7 +23,8 @@ final class SettingsModel: ObservableObject {
     func observe() async {
         do {
             for try await value in asyncSequence(for: screen.stateFlow) {
-                state = value
+                // StateFlow replays its current object when a tab becomes visible again.
+                if state !== value { state = value }
             }
         } catch {}
     }
@@ -31,7 +32,7 @@ final class SettingsModel: ObservableObject {
     func observeDevices() async {
         do {
             for try await value in asyncSequence(for: screen.devicesStateFlow) {
-                devicesState = value
+                if devicesState !== value { devicesState = value }
             }
         } catch {}
     }
@@ -59,6 +60,7 @@ final class SettingsModel: ObservableObject {
 
 /// Native Settings: same sections, copy and actions as the Compose Settings.
 struct SettingsScreen: View {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var model = SettingsModel()
     @State private var confirmingAccountAction = false
     @State private var toast: Toast?
@@ -125,9 +127,11 @@ struct SettingsScreen: View {
         }
         .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .task { await model.observe() }
-        .task { await model.observeDevices() }
         .task { await model.observeSpaces() }
         .onAppear { transferLink = model.screen.createTransferId(); transferDate = model.screen.transferToday }
+        .task(id: scenePhase) {
+            if scenePhase == .active { await model.observeDevices() }
+        }
         .task(id: model.devicesState.billingConfig?.iosPublicKey) { await model.loadBilling() }
     }
 

@@ -15,9 +15,11 @@ import co.touchlab.kermit.Severity
 import finance.shilling.shared.data.*
 import finance.shilling.shared.data.store.*
 import finance.shilling.shared.data.usecase.ComputeWindowUseCase
+import finance.shilling.shared.data.usecase.ComputeBudgetUseCase
 import finance.shilling.shared.db.ShillingDatabase
 import finance.shilling.shared.ui.ActivityView
 import finance.shilling.shared.ui.PlanView
+import finance.shilling.shared.ui.HomeView
 import finance.shilling.shared.presentation.*
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.flow.first
@@ -90,7 +92,9 @@ class UiPerformanceActivity : ComponentActivity() {
                         single { accountRepo }; single { categoryRepo }; single { scheduleRepo }
                         single { postingRepo }; single { receiptRepo }; single<ReceiptFileStore> { files }
                         single<IdGenerator> { ids }
-                        single { ComputeWindowUseCase(notifier, accountRepo, categoryRepo, scheduleRepo, postingRepo) }
+                        single { ComputeWindowUseCase(accountRepo, categoryRepo, scheduleRepo, postingRepo) }
+                        single { ComputeBudgetUseCase(categoryRepo, scheduleRepo) }
+                        single { HomeViewModel(accountRepo, categoryRepo, postingRepo, receiptRepo, scheduleRepo, get(), get()) }
                         single { ActivityViewModel(postingRepo) }
                         single { PlanOverviewViewModel(get(), OccurrenceActions(postingRepo, scheduleRepo)) }
                         single { PlanRequests() }
@@ -116,7 +120,11 @@ class UiPerformanceActivity : ComponentActivity() {
                                     .put("sinceRenderMs", SystemClock.elapsedRealtime() - renderStarted).toString())
                                 Unit
                             }
-                            if (screen == "weekly" || screen == "plan") {
+                            if (screen == "home") {
+                                val model = koinInject<HomeViewModel>()
+                                LaunchedEffect(model) { model.state.first { it.recent.isNotEmpty() && it.upcoming.isNotEmpty() }; ready() }
+                                HomeView({}, viewModel = model)
+                            } else if (screen == "weekly" || screen == "plan") {
                                 val model = koinInject<PlanOverviewViewModel>()
                                 LaunchedEffect(model) { model.state.first { it.days.isNotEmpty() }; ready() }
                                 PlanView({}, { _, _ -> }, {}, {}, overviewViewModel = model)

@@ -9,11 +9,13 @@ import KMPNativeCoroutinesCore
 struct TransactionEditorScreen: View {
     @StateObject private var model: FlowModel<TransactionEditorUiState, TransactionEditorScreenModel>
     @Environment(\.dismiss) private var dismiss
-    @State private var title = ""
+    @State private var titleDraft = EditorTextDraft()
     @State private var amount = ""
     @State private var loaded = false
+    @FocusState private var focusedField: Field?
+    private enum Field: Hashable { case title, amount }
     @State private var toast: Toast?
-    @State private var preview: URL?
+    @StateObject private var preview = ReceiptPreviewModel()
     let onDone: (Toast) -> Void
 
     init(postingId: String?, onDone: @escaping (Toast) -> Void) {
@@ -35,7 +37,9 @@ struct TransactionEditorScreen: View {
             missingMessage: state.missingMessage,
             saveEnabled: state.saveEnabled,
             delete: state.deleteConfirm,
+            showsKeyboardDone: focusedField != nil,
             onSave: {
+                screen.setTitle(value: titleDraft.value)
                 let result: String?? = try? await asyncFunction(for: screen.save())
                 if let message = result ?? nil { finish(Toast(message)) }
             },
@@ -51,10 +55,13 @@ struct TransactionEditorScreen: View {
                     }
                     .pickerStyle(.segmented)
                 }
-                TextField("Description", text: $title)
-                    .onChange(of: title) { _, value in screen.setTitle(value: value) }
+                BufferedEditorTitleField("Description", initial: f.title, draft: titleDraft) {
+                    screen.setTitle(value: $0)
+                }
+                .focused($focusedField, equals: .title)
                 LabeledContent("Amount") {
                     TextField("0.00", text: $amount)
+                        .focused($focusedField, equals: .amount)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
                         .onChange(of: amount) { _, value in screen.setAmountText(value: value) }
@@ -68,21 +75,16 @@ struct TransactionEditorScreen: View {
             }
 
             Section {
-                Picker(state.accountLabel, selection: Binding(get: { f.accountId }, set: { screen.setAccount(id: $0) })) {
-                    ForEach(state.accounts, id: \.id) { Text($0.label).tag(Optional($0.id)) }
-                }
+                EditorChoicePicker(state.accountLabel, selection: Binding(get: { f.accountId }, set: { screen.setAccount(id: $0) }),
+                                   choices: state.accounts)
                 .disabled(state.accounts.isEmpty)
                 if state.isTransfer {
-                    Picker("To account", selection: Binding(get: { f.toAccountId }, set: { screen.setToAccount(id: $0) })) {
-                        Text("Choose…").tag(String?.none)
-                        ForEach(state.toAccountChoices, id: \.id) { Text($0.label).tag(Optional($0.id)) }
-                    }
+                    EditorChoicePicker("To account", selection: Binding(get: { f.toAccountId }, set: { screen.setToAccount(id: $0) }),
+                                       choices: state.toAccountChoices, noneLabel: "Choose…")
                     .disabled(state.toAccountHint != nil)
                 }
-                Picker("Category", selection: Binding(get: { f.categoryId }, set: { screen.setCategory(id: $0) })) {
-                    Text(state.categoryNoneLabel).tag(String?.none)
-                    ForEach(state.categories, id: \.id) { Text($0.label).tag(Optional($0.id)) }
-                }
+                EditorChoicePicker("Category", selection: Binding(get: { f.categoryId }, set: { screen.setCategory(id: $0) }),
+                                   choices: state.categories, noneLabel: state.categoryNoneLabel)
             } footer: {
                 if let hint = state.accountHint ?? (state.isTransfer ? state.toAccountHint : nil) {
                     Text(hint)
@@ -114,7 +116,7 @@ struct TransactionEditorScreen: View {
                 }
             }
         }
-        .quickLookPreview($preview)
+        .quickLookPreview($preview.url)
         .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .task { await model.observe() }
         .onChange(of: state.load) { _, _ in syncFields() }
@@ -124,7 +126,7 @@ struct TransactionEditorScreen: View {
     private func syncFields() {
         guard !loaded, model.state.load == .ready else { return }
         loaded = true
-        title = model.state.fields.title
+        titleDraft.value = model.state.fields.title
         amount = model.state.fields.amountText
     }
 
@@ -143,7 +145,7 @@ struct TransactionEditorScreen: View {
         Task {
             let result: String?? = try? await asyncFunction(for: screen.previewPath(receiptId: receipt.id))
             if let path = result ?? nil {
-                preview = URL(fileURLWithPath: path)
+                preview.url = URL(fileURLWithPath: path)
             } else {
                 toast = Toast("Couldn't open \(receipt.name)")
             }

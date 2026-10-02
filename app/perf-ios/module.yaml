@@ -1,17 +1,58 @@
 product:
   type: ios/app
-  platforms: [iosArm64]
+  platforms: [iosArm64, iosSimulatorArm64]
+
+repositories:
+  - id: google-maven-central-mirror
+    url: https://maven-central.storage-download.googleapis.com/maven2
+  - id: maven-central-canonical
+    url: https://repo.maven.apache.org/maven2
+  - id: google-canonical
+    url: https://dl.google.com/dl/android/maven2
 
 dependencies:
   - ../shared
   - ../ios-platform
   - $libs.coroutines.core
+  - $libs.datetime
   - $libs.sqldelight.native.driver
+  - $libs.koin.core
   - $libs.ktor.client.darwin
   - $libs.ktor.client.webrtc
+  - $libs.multiplatform.settings
+  - $libs.multiplatform.settings.no.arg
   - $libs.kermit
+  - $libs.lifecycle.viewmodel
+  - $libs.kmp.nativecoroutines.core
+  - $libs.kmp.nativecoroutines.annotations
+  - $libs.revenuecat.kmp.core
+  # Swift side of KMP-NativeCoroutines (async/await + AsyncSequence); keep in sync with the Kotlin version.
+  - swiftPackage:
+      repository:
+        type: url
+        value: https://github.com/rickclephas/KMP-NativeCoroutines.git
+      version:
+        type: exact
+        value: 1.0.6
+      products: [ KMPNativeCoroutinesAsync ]
 
 settings:
   kotlin:
     version: "2.4.20"
     compileIncrementally: true
+    optIns: [ kotlin.experimental.ExperimentalObjCName ]
+    # KMP-NativeCoroutines exposes Flows/suspend functions of the Swift-facing screen models as
+    # AsyncSequence/async. It crashes non-Apple compilations, so it's only enabled in this
+    # iOS-only module (the toolchain can't scope compilerPlugins per platform). All options are
+    # required on the CLI even though the Gradle plugin defaults them.
+    compilerPlugins:
+      - id: com.rickclephas.kmp.nativecoroutines
+        dependency: com.rickclephas.kmp:kmp-nativecoroutines-compiler-embeddable:1.0.6
+        options:
+          exposedSeverity: NONE
+          suffix: Native
+          flowValueSuffix: Value
+          flowReplayCacheSuffix: ReplayCache
+          stateSuffix: Value
+          stateFlowSuffix: Flow
+          swiftExport: "0"

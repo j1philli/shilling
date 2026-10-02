@@ -1,0 +1,2429 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-29",
+  "device": "iPhone SE (2nd generation)",
+  "os": "iOS 18.7.8",
+  "build": "Release, arm64, production SwiftUI source links in isolated finance.shilling.perf app",
+  "baselineRevision": "d715790",
+  "dataset": {
+    "accounts": 10,
+    "categories": 40,
+    "schedules": 1000,
+    "postings": 10000,
+    "receipts": 250,
+    "additionalFixedProbePosting": 1
+  },
+  "notes": [
+    "Three fresh processes per cohort, seeded local Store5 database, no sync/session/network graph.",
+    "All reported measurements have nominal thermal state (0).",
+    "Load includes a populated collection with visible cells plus a 50 ms display allowance; not full app startup.",
+    "Display callback intervals are not GPU presentation times.",
+    "Plan candidate cohort predates the independent Receipt date/zone change; navigation checks run after timed phases.",
+    "Time Profiler inclusive stack counts overlap. Raw traces and screenshots remain outside the repository."
+  ],
+  "medians": {
+    "plan-baseline": {
+      "load": {
+        "elapsedMs": 439.5162500150036,
+        "cpuMs": 519.7579999999999,
+        "gapsOver25ms": 4,
+        "maxCallbackGapMs": 221.44591668620706,
+        "p95CallbackGapMs": 69.61387500632554,
+        "residentMiB": 87.109375,
+        "mainThreadQueries": 24,
+        "queries": 24
+      },
+      "scroll": {
+        "elapsedMs": 5015.923416678561,
+        "cpuMs": 1824.584,
+        "gapsOver25ms": 8,
+        "maxCallbackGapMs": 34.0671666781418,
+        "p95CallbackGapMs": 16.667541669448838,
+        "residentMiB": 94.578125,
+        "mainThreadQueries": 0,
+        "queries": 0
+      },
+      "hidden-sections": {
+        "elapsedMs": 6805.932666640729,
+        "cpuMs": 3085.807,
+        "gapsOver25ms": 14,
+        "maxCallbackGapMs": 280.4535833420232,
+        "p95CallbackGapMs": 26.42974999616854,
+        "residentMiB": 106.453125,
+        "mainThreadQueries": 140,
+        "queries": 140
+      },
+      "idle": {
+        "elapsedMs": 5071.542083343957,
+        "cpuMs": 50.184999999999924,
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.667500021867454,
+        "p95CallbackGapMs": 16.667500021867454,
+        "residentMiB": 106.46875,
+        "mainThreadQueries": 0,
+        "queries": 0
+      }
+    },
+    "plan-candidate": {
+      "load": {
+        "elapsedMs": 196.3018749956973,
+        "cpuMs": 175.63899999999998,
+        "gapsOver25ms": 2,
+        "maxCallbackGapMs": 71.57245834241621,
+        "p95CallbackGapMs": 34.23087499686517,
+        "residentMiB": 94.546875,
+        "mainThreadQueries": 0,
+        "queries": 14
+      },
+      "scroll": {
+        "elapsedMs": 5009.819416649407,
+        "cpuMs": 1818.337,
+        "gapsOver25ms": 8,
+        "maxCallbackGapMs": 34.90691666956991,
+        "p95CallbackGapMs": 16.667500021867454,
+        "residentMiB": 88.953125,
+        "mainThreadQueries": 0,
+        "queries": 0
+      },
+      "hidden-sections": {
+        "elapsedMs": 4214.639333309606,
+        "cpuMs": 103.94999999999976,
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.667500021867454,
+        "p95CallbackGapMs": 16.667500021867454,
+        "residentMiB": 97.984375,
+        "mainThreadQueries": 0,
+        "queries": 0
+      },
+      "idle": {
+        "elapsedMs": 5032.308083347743,
+        "cpuMs": 62.00800000000007,
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.66745834518224,
+        "p95CallbackGapMs": 16.66745834518224,
+        "residentMiB": 95.25,
+        "mainThreadQueries": 0,
+        "queries": 0
+      }
+    },
+    "activity-baseline": {
+      "load": {
+        "elapsedMs": 280.9769583400339,
+        "cpuMs": 290.069,
+        "gapsOver25ms": 2,
+        "maxCallbackGapMs": 78.8905416848138,
+        "p95CallbackGapMs": 37.783083360409364,
+        "residentMiB": 114.546875,
+        "mainThreadQueries": 0,
+        "queries": 8
+      },
+      "scroll": {
+        "elapsedMs": 5067.498041666113,
+        "cpuMs": 1878.8719999999998,
+        "gapsOver25ms": 2,
+        "maxCallbackGapMs": 34.04212501482107,
+        "p95CallbackGapMs": 16.667500021867454,
+        "residentMiB": 108.65625,
+        "mainThreadQueries": 0,
+        "queries": 0
+      }
+    },
+    "receipts-baseline": {
+      "load": {
+        "elapsedMs": 224.19408333371393,
+        "cpuMs": 266.08700000000005,
+        "gapsOver25ms": 2,
+        "maxCallbackGapMs": 59.12220833124593,
+        "p95CallbackGapMs": 47.80433332780376,
+        "residentMiB": 92.75,
+        "mainThreadQueries": 0,
+        "queries": 1
+      },
+      "scroll": {
+        "elapsedMs": 5073.204874992371,
+        "cpuMs": 1842.72,
+        "gapsOver25ms": 3,
+        "maxCallbackGapMs": 34.75741666625254,
+        "p95CallbackGapMs": 16.667500021867454,
+        "residentMiB": 87.015625,
+        "mainThreadQueries": 0,
+        "queries": 0
+      }
+    },
+    "receipts-candidate": {
+      "load": {
+        "elapsedMs": 183.14341668155976,
+        "cpuMs": 159.331,
+        "gapsOver25ms": 2,
+        "maxCallbackGapMs": 60.8232083322946,
+        "p95CallbackGapMs": 56.670375022804365,
+        "residentMiB": 88.140625,
+        "mainThreadQueries": 0,
+        "queries": 1
+      },
+      "scroll": {
+        "elapsedMs": 5080.935541685903,
+        "cpuMs": 1852.1429999999998,
+        "gapsOver25ms": 3,
+        "maxCallbackGapMs": 35.19304166547954,
+        "p95CallbackGapMs": 16.667500021867454,
+        "residentMiB": 82.171875,
+        "mainThreadQueries": 0,
+        "queries": 0
+      }
+    }
+  },
+  "cohorts": {
+    "plan-baseline": [
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.03806204168358818,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "plan",
+        "sinceStartSeconds": 0.03879449999658391,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "cpuMs": 519.7579999999999,
+        "database": {
+          "mainThreadQueries": 24,
+          "queries": 24,
+          "tables": {
+            "accounts": 3,
+            "bookkeeping": 12,
+            "categories": 3,
+            "postings": 1,
+            "schedule_exceptions": 3,
+            "schedules": 2
+          }
+        },
+        "displayCallbacks": 6,
+        "elapsedMs": 456.60054168547504,
+        "event": "measurement",
+        "gapsOver25ms": 5,
+        "listItems": 1005,
+        "maxCallbackGapMs": 234.67858333606273,
+        "p95CallbackGapMs": 71.38674997258931,
+        "phase": "load",
+        "residentMiB": 84.765625,
+        "screen": "plan",
+        "sinceStartSeconds": 0.4955255416862201,
+        "thermalState": 0,
+        "visibleCells": 8,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "plan",
+        "sinceStartSeconds": 1.581814666686114,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "contentOffsetY": 2264,
+        "cpuMs": 1824.584,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 290,
+        "elapsedMs": 5015.923416678561,
+        "event": "measurement",
+        "gapsOver25ms": 9,
+        "listItems": 1005,
+        "maxCallbackGapMs": 34.0671666781418,
+        "p95CallbackGapMs": 16.66758334613405,
+        "phase": "scroll",
+        "residentMiB": 92.40625,
+        "screen": "plan",
+        "sinceStartSeconds": 6.597780791664263,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "hidden-sections",
+        "screen": "plan",
+        "sinceStartSeconds": 14.095523041673005,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "cpuMs": 3077.4869999999996,
+        "database": {
+          "mainThreadQueries": 140,
+          "queries": 140,
+          "tables": {
+            "accounts": 10,
+            "bookkeeping": 70,
+            "categories": 10,
+            "postings": 10,
+            "schedule_exceptions": 30,
+            "schedules": 10
+          }
+        },
+        "displayCallbacks": 252,
+        "elapsedMs": 6805.932666640729,
+        "event": "measurement",
+        "gapsOver25ms": 14,
+        "listItems": 11,
+        "maxCallbackGapMs": 280.4535833420232,
+        "mutations": 10,
+        "p95CallbackGapMs": 26.69537501060404,
+        "phase": "hidden-sections",
+        "residentMiB": 105.140625,
+        "screen": "plan",
+        "sinceStartSeconds": 20.901757083338453,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "idle",
+        "screen": "plan",
+        "sinceStartSeconds": 20.903841374994954,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "cpuMs": 48.56000000000016,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 301,
+        "elapsedMs": 5029.2602500121575,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.667500021867454,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "idle",
+        "residentMiB": 105.140625,
+        "screen": "plan",
+        "sinceStartSeconds": 25.933147875010036,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 25.934993291681167,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.03706745835370384,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "plan",
+        "sinceStartSeconds": 0.03771095833508298,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "cpuMs": 522.744,
+        "database": {
+          "mainThreadQueries": 24,
+          "queries": 24,
+          "tables": {
+            "accounts": 3,
+            "bookkeeping": 12,
+            "categories": 3,
+            "postings": 1,
+            "schedule_exceptions": 3,
+            "schedules": 2
+          }
+        },
+        "displayCallbacks": 7,
+        "elapsedMs": 438.9788333210163,
+        "event": "measurement",
+        "gapsOver25ms": 4,
+        "listItems": 1005,
+        "maxCallbackGapMs": 221.10600001178682,
+        "p95CallbackGapMs": 69.61387500632554,
+        "phase": "load",
+        "residentMiB": 87.109375,
+        "screen": "plan",
+        "sinceStartSeconds": 0.47686508332844824,
+        "thermalState": 0,
+        "visibleCells": 8,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "plan",
+        "sinceStartSeconds": 1.5615075833338778,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "contentOffsetY": 2264,
+        "cpuMs": 1805.913,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 290,
+        "elapsedMs": 5007.995708321687,
+        "event": "measurement",
+        "gapsOver25ms": 8,
+        "listItems": 1005,
+        "maxCallbackGapMs": 35.12195832445286,
+        "p95CallbackGapMs": 16.667541669448838,
+        "phase": "scroll",
+        "residentMiB": 94.578125,
+        "screen": "plan",
+        "sinceStartSeconds": 6.569552500004647,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "hidden-sections",
+        "screen": "plan",
+        "sinceStartSeconds": 14.26175125001464,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "cpuMs": 3089.2889999999998,
+        "database": {
+          "mainThreadQueries": 140,
+          "queries": 140,
+          "tables": {
+            "accounts": 10,
+            "bookkeeping": 70,
+            "categories": 10,
+            "postings": 10,
+            "schedule_exceptions": 30,
+            "schedules": 10
+          }
+        },
+        "displayCallbacks": 254,
+        "elapsedMs": 6799.737583321985,
+        "event": "measurement",
+        "gapsOver25ms": 11,
+        "listItems": 11,
+        "maxCallbackGapMs": 281.0237500234507,
+        "mutations": 10,
+        "p95CallbackGapMs": 19.15420833393,
+        "phase": "hidden-sections",
+        "residentMiB": 107.015625,
+        "screen": "plan",
+        "sinceStartSeconds": 21.061858833330916,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "idle",
+        "screen": "plan",
+        "sinceStartSeconds": 21.06403275000048,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "cpuMs": 51.728999999999914,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 303,
+        "elapsedMs": 5071.542083343957,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.66745834518224,
+        "p95CallbackGapMs": 16.66745834518224,
+        "phase": "idle",
+        "residentMiB": 107.03125,
+        "screen": "plan",
+        "sinceStartSeconds": 26.135626333329128,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 26.137384000001475,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.03484325000317767,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "plan",
+        "sinceStartSeconds": 0.03549020833452232,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "cpuMs": 516.37,
+        "database": {
+          "mainThreadQueries": 24,
+          "queries": 24,
+          "tables": {
+            "accounts": 3,
+            "bookkeeping": 12,
+            "categories": 3,
+            "postings": 1,
+            "schedule_exceptions": 3,
+            "schedules": 2
+          }
+        },
+        "displayCallbacks": 6,
+        "elapsedMs": 439.5162500150036,
+        "event": "measurement",
+        "gapsOver25ms": 4,
+        "listItems": 1005,
+        "maxCallbackGapMs": 221.44591668620706,
+        "p95CallbackGapMs": 69.57799999509007,
+        "phase": "load",
+        "residentMiB": 87.796875,
+        "screen": "plan",
+        "sinceStartSeconds": 0.4751388749864418,
+        "thermalState": 0,
+        "visibleCells": 8,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "plan",
+        "sinceStartSeconds": 1.5567159166675992,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "contentOffsetY": 2320,
+        "cpuMs": 1855.9829999999997,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 297,
+        "elapsedMs": 5114.72116666846,
+        "event": "measurement",
+        "gapsOver25ms": 8,
+        "listItems": 1005,
+        "maxCallbackGapMs": 33.89799999422394,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "scroll",
+        "residentMiB": 95.28125,
+        "screen": "plan",
+        "sinceStartSeconds": 6.67147400000249,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "hidden-sections",
+        "screen": "plan",
+        "sinceStartSeconds": 14.424565458321013,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "cpuMs": 3085.807,
+        "database": {
+          "mainThreadQueries": 140,
+          "queries": 140,
+          "tables": {
+            "accounts": 10,
+            "bookkeeping": 70,
+            "categories": 10,
+            "postings": 10,
+            "schedule_exceptions": 30,
+            "schedules": 10
+          }
+        },
+        "displayCallbacks": 253,
+        "elapsedMs": 6828.11216666596,
+        "event": "measurement",
+        "gapsOver25ms": 14,
+        "listItems": 11,
+        "maxCallbackGapMs": 278.2157500041649,
+        "mutations": 10,
+        "p95CallbackGapMs": 26.42974999616854,
+        "phase": "hidden-sections",
+        "residentMiB": 106.453125,
+        "screen": "plan",
+        "sinceStartSeconds": 21.253065500000957,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "idle",
+        "screen": "plan",
+        "sinceStartSeconds": 21.25511341667152,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "cpuMs": 50.184999999999924,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 306,
+        "elapsedMs": 5110.787916666595,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.667500021867454,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "idle",
+        "residentMiB": 106.46875,
+        "screen": "plan",
+        "sinceStartSeconds": 26.365959916671272,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 26.36773312499281,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      }
+    ],
+    "plan-candidate": [
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.06512708333320916,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "plan",
+        "sinceStartSeconds": 0.06582945832633413,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "cpuMs": 156.45799999999994,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 14,
+          "tables": {
+            "accounts": 1,
+            "bookkeeping": 7,
+            "categories": 1,
+            "postings": 1,
+            "schedule_exceptions": 3,
+            "schedules": 1
+          }
+        },
+        "displayCallbacks": 6,
+        "elapsedMs": 219.13804166251794,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 1005,
+        "maxCallbackGapMs": 33.743874984793365,
+        "p95CallbackGapMs": 24.18775000842288,
+        "phase": "load",
+        "residentMiB": 94.546875,
+        "screen": "plan",
+        "sinceStartSeconds": 0.285100416658679,
+        "thermalState": 0,
+        "visibleCells": 8,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "plan",
+        "sinceStartSeconds": 1.3672045833372977,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "contentOffsetY": 2264,
+        "cpuMs": 1820.719,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 290,
+        "elapsedMs": 5008.125624997774,
+        "event": "measurement",
+        "gapsOver25ms": 8,
+        "listItems": 1005,
+        "maxCallbackGapMs": 35.51358333788812,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "scroll",
+        "residentMiB": 89.046875,
+        "screen": "plan",
+        "sinceStartSeconds": 6.375408041669289,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "hidden-sections",
+        "screen": "plan",
+        "sinceStartSeconds": 13.781776208343217,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "cpuMs": 103.94999999999976,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 253,
+        "elapsedMs": 4247.97862500418,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "listItems": 11,
+        "maxCallbackGapMs": 16.667500021867454,
+        "mutations": 10,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "hidden-sections",
+        "residentMiB": 98.03125,
+        "screen": "plan",
+        "sinceStartSeconds": 18.02996079166769,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "idle",
+        "screen": "plan",
+        "sinceStartSeconds": 18.032247458322672,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "cpuMs": 62.20500000000007,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 300,
+        "elapsedMs": 5031.052166654263,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.667500021867454,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "idle",
+        "residentMiB": 95.25,
+        "screen": "plan",
+        "sinceStartSeconds": 23.063371124997502,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 1005,
+        "section": "Overview",
+        "sinceStartSeconds": 23.149381625000387,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 45,
+        "section": "By category",
+        "sinceStartSeconds": 23.480986500013387,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 1005,
+        "section": "By day",
+        "sinceStartSeconds": 23.82376737499726,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 1002,
+        "section": "Schedules",
+        "sinceStartSeconds": 24.16161499998998,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 41,
+        "section": "Categories",
+        "sinceStartSeconds": 24.494754666666267,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 11,
+        "section": "Accounts",
+        "sinceStartSeconds": 24.823744624998653,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 25.095570458332077,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 1
+      },
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.04265208332799375,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "plan",
+        "sinceStartSeconds": 0.043334374990081415,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "cpuMs": 175.63899999999998,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 14,
+          "tables": {
+            "accounts": 1,
+            "bookkeeping": 7,
+            "categories": 1,
+            "postings": 1,
+            "schedule_exceptions": 3,
+            "schedules": 1
+          }
+        },
+        "displayCallbacks": 5,
+        "elapsedMs": 196.3018749956973,
+        "event": "measurement",
+        "gapsOver25ms": 3,
+        "listItems": 1005,
+        "maxCallbackGapMs": 71.57245834241621,
+        "p95CallbackGapMs": 34.23087499686517,
+        "phase": "load",
+        "residentMiB": 94.5,
+        "screen": "plan",
+        "sinceStartSeconds": 0.2397637499962002,
+        "thermalState": 0,
+        "visibleCells": 8,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "plan",
+        "sinceStartSeconds": 1.3244031666545197,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "contentOffsetY": 2264,
+        "cpuMs": 1810.912,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 290,
+        "elapsedMs": 5009.819416649407,
+        "event": "measurement",
+        "gapsOver25ms": 8,
+        "listItems": 1005,
+        "maxCallbackGapMs": 34.69262502039783,
+        "p95CallbackGapMs": 16.668666678015143,
+        "phase": "scroll",
+        "residentMiB": 88.953125,
+        "screen": "plan",
+        "sinceStartSeconds": 6.334291208331706,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "hidden-sections",
+        "screen": "plan",
+        "sinceStartSeconds": 14.17805624997709,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "cpuMs": 101.56600000000005,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 251,
+        "elapsedMs": 4204.104749980615,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "listItems": 11,
+        "maxCallbackGapMs": 16.667541669448838,
+        "mutations": 10,
+        "p95CallbackGapMs": 16.667541669448838,
+        "phase": "hidden-sections",
+        "residentMiB": 97.984375,
+        "screen": "plan",
+        "sinceStartSeconds": 18.382321624987526,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "idle",
+        "screen": "plan",
+        "sinceStartSeconds": 18.3842838749988,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "cpuMs": 61.479999999999976,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 301,
+        "elapsedMs": 5036.6302500187885,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.66745834518224,
+        "p95CallbackGapMs": 16.66745834518224,
+        "phase": "idle",
+        "residentMiB": 95.609375,
+        "screen": "plan",
+        "sinceStartSeconds": 23.420973583328305,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 1005,
+        "section": "Overview",
+        "sinceStartSeconds": 23.510819208313478,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 45,
+        "section": "By category",
+        "sinceStartSeconds": 23.829933374974644,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 1005,
+        "section": "By day",
+        "sinceStartSeconds": 24.156871333310846,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 1002,
+        "section": "Schedules",
+        "sinceStartSeconds": 24.51333645833074,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 41,
+        "section": "Categories",
+        "sinceStartSeconds": 24.87066091664019,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 11,
+        "section": "Accounts",
+        "sinceStartSeconds": 25.19247591664316,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 25.462400416639866,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 2
+      },
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.040766999998595566,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "plan",
+        "sinceStartSeconds": 0.04141208334476687,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "cpuMs": 188.53799999999998,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 14,
+          "tables": {
+            "accounts": 1,
+            "bookkeeping": 7,
+            "categories": 1,
+            "postings": 1,
+            "schedule_exceptions": 3,
+            "schedules": 1
+          }
+        },
+        "displayCallbacks": 4,
+        "elapsedMs": 191.42795831430703,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 1005,
+        "maxCallbackGapMs": 75.97495833761059,
+        "p95CallbackGapMs": 49.41149998921901,
+        "phase": "load",
+        "residentMiB": 94.625,
+        "screen": "plan",
+        "sinceStartSeconds": 0.23300308335456066,
+        "thermalState": 0,
+        "visibleCells": 8,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "plan",
+        "sinceStartSeconds": 1.3157832916767802,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "contentOffsetY": 2264,
+        "cpuMs": 1818.337,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 290,
+        "elapsedMs": 5016.819708340336,
+        "event": "measurement",
+        "gapsOver25ms": 9,
+        "listItems": 1005,
+        "maxCallbackGapMs": 34.90691666956991,
+        "p95CallbackGapMs": 16.667416668497026,
+        "phase": "scroll",
+        "residentMiB": 88.75,
+        "screen": "plan",
+        "sinceStartSeconds": 6.3326176250120625,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "hidden-sections",
+        "screen": "plan",
+        "sinceStartSeconds": 14.050108208350139,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "cpuMs": 104.22699999999985,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 252,
+        "elapsedMs": 4214.639333309606,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "listItems": 11,
+        "maxCallbackGapMs": 16.667500021867454,
+        "mutations": 10,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "hidden-sections",
+        "residentMiB": 97.71875,
+        "screen": "plan",
+        "sinceStartSeconds": 18.26496812500409,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "idle",
+        "screen": "plan",
+        "sinceStartSeconds": 18.2668702499941,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "cpuMs": 62.00800000000007,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 301,
+        "elapsedMs": 5032.308083347743,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.66745834518224,
+        "p95CallbackGapMs": 16.66745834518224,
+        "phase": "idle",
+        "residentMiB": 95.046875,
+        "screen": "plan",
+        "sinceStartSeconds": 23.29922437501955,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 1005,
+        "section": "Overview",
+        "sinceStartSeconds": 23.386792958335718,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 45,
+        "section": "By category",
+        "sinceStartSeconds": 23.700270333327353,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 1005,
+        "section": "By day",
+        "sinceStartSeconds": 24.021384583349572,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 1002,
+        "section": "Schedules",
+        "sinceStartSeconds": 24.337817791674752,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 41,
+        "section": "Categories",
+        "sinceStartSeconds": 24.66715037499671,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "event": "navigation-check",
+        "listItems": 11,
+        "section": "Accounts",
+        "sinceStartSeconds": 24.987887666677125,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 25.25420670834137,
+        "thermalState": 0,
+        "label": "plan-fix",
+        "processRun": 3
+      }
+    ],
+    "activity-baseline": [
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.06728387498878874,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "activity",
+        "sinceStartSeconds": 0.06802424998022616,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "cpuMs": 386.84,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 8,
+          "tables": {
+            "accounts": 1,
+            "bookkeeping": 4,
+            "categories": 1,
+            "postings": 1,
+            "schedules": 1
+          }
+        },
+        "displayCallbacks": 7,
+        "elapsedMs": 343.4207916725427,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 7502,
+        "maxCallbackGapMs": 43.617916671792045,
+        "p95CallbackGapMs": 27.317833330016583,
+        "phase": "load",
+        "residentMiB": 102,
+        "screen": "activity",
+        "sinceStartSeconds": 0.41144724999321625,
+        "thermalState": 0,
+        "visibleCells": 8,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "activity",
+        "sinceStartSeconds": 1.5400969583133701,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "contentOffsetY": 2344,
+        "cpuMs": 1878.8719999999998,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 300,
+        "elapsedMs": 5067.498041666113,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 7502,
+        "maxCallbackGapMs": 34.04212501482107,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "scroll",
+        "residentMiB": 109.71875,
+        "screen": "activity",
+        "sinceStartSeconds": 6.607618541660486,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 6.608280249987729,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.04404916666680947,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "activity",
+        "sinceStartSeconds": 0.04473762499401346,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "cpuMs": 272.856,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 8,
+          "tables": {
+            "accounts": 1,
+            "bookkeeping": 4,
+            "categories": 1,
+            "postings": 1,
+            "schedules": 1
+          }
+        },
+        "displayCallbacks": 8,
+        "elapsedMs": 253.40079166926444,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 7502,
+        "maxCallbackGapMs": 79.99195830780081,
+        "p95CallbackGapMs": 46.50654169381596,
+        "phase": "load",
+        "residentMiB": 114.546875,
+        "screen": "activity",
+        "sinceStartSeconds": 0.2982059166824911,
+        "thermalState": 0,
+        "visibleCells": 8,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "activity",
+        "sinceStartSeconds": 1.4211362916685175,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "contentOffsetY": 2344,
+        "cpuMs": 1764.1529999999998,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 300,
+        "elapsedMs": 5059.418666671263,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 7502,
+        "maxCallbackGapMs": 33.661624998785555,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "scroll",
+        "residentMiB": 108.65625,
+        "screen": "activity",
+        "sinceStartSeconds": 6.480574125016574,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 6.481553166668164,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.038930749986320734,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "activity",
+        "sinceStartSeconds": 0.03959395832498558,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "cpuMs": 290.069,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 8,
+          "tables": {
+            "accounts": 1,
+            "bookkeeping": 4,
+            "categories": 1,
+            "postings": 1,
+            "schedules": 1
+          }
+        },
+        "displayCallbacks": 9,
+        "elapsedMs": 280.9769583400339,
+        "event": "measurement",
+        "gapsOver25ms": 4,
+        "listItems": 7502,
+        "maxCallbackGapMs": 78.8905416848138,
+        "p95CallbackGapMs": 37.783083360409364,
+        "phase": "load",
+        "residentMiB": 115.5625,
+        "screen": "activity",
+        "sinceStartSeconds": 0.3206084583362099,
+        "thermalState": 0,
+        "visibleCells": 8,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "activity",
+        "sinceStartSeconds": 1.4360475416760892,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "contentOffsetY": 2344,
+        "cpuMs": 1951.494,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 300,
+        "elapsedMs": 5108.307124988642,
+        "event": "measurement",
+        "gapsOver25ms": 4,
+        "listItems": 7502,
+        "maxCallbackGapMs": 37.163041677558795,
+        "p95CallbackGapMs": 16.667499992763624,
+        "phase": "scroll",
+        "residentMiB": 108.65625,
+        "screen": "activity",
+        "sinceStartSeconds": 6.544443833321566,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 6.5452370416605845,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      }
+    ],
+    "receipts-baseline": [
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.03344966666190885,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "receipts",
+        "sinceStartSeconds": 0.03410733334021643,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "cpuMs": 266.08700000000005,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 1,
+          "tables": {
+            "receipts": 1
+          }
+        },
+        "displayCallbacks": 11,
+        "elapsedMs": 275.49320831894875,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 251,
+        "maxCallbackGapMs": 62.51316668931395,
+        "p95CallbackGapMs": 52.588166669011116,
+        "phase": "load",
+        "residentMiB": 92.75,
+        "screen": "receipts",
+        "sinceStartSeconds": 0.30966270831413567,
+        "thermalState": 0,
+        "visibleCells": 9,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "receipts",
+        "sinceStartSeconds": 1.4153183333401103,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "contentOffsetY": 2336,
+        "cpuMs": 1844.6850000000002,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 299,
+        "elapsedMs": 5068.166041659424,
+        "event": "measurement",
+        "gapsOver25ms": 3,
+        "listItems": 251,
+        "maxCallbackGapMs": 35.72829166660085,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "scroll",
+        "residentMiB": 87.015625,
+        "screen": "receipts",
+        "sinceStartSeconds": 6.483515625004657,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 6.4845612083154265,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 1
+      },
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.032707541657146066,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "receipts",
+        "sinceStartSeconds": 0.03333204166847281,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "cpuMs": 267.033,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 1,
+          "tables": {
+            "receipts": 1
+          }
+        },
+        "displayCallbacks": 8,
+        "elapsedMs": 223.52724999655038,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 251,
+        "maxCallbackGapMs": 59.12220833124593,
+        "p95CallbackGapMs": 47.80433332780376,
+        "phase": "load",
+        "residentMiB": 92.84375,
+        "screen": "receipts",
+        "sinceStartSeconds": 0.25686904168105684,
+        "thermalState": 0,
+        "visibleCells": 9,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "receipts",
+        "sinceStartSeconds": 1.3942454166826792,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "contentOffsetY": 2336,
+        "cpuMs": 1821.731,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 299,
+        "elapsedMs": 5073.204874992371,
+        "event": "measurement",
+        "gapsOver25ms": 3,
+        "listItems": 251,
+        "maxCallbackGapMs": 34.73191667580977,
+        "p95CallbackGapMs": 16.66745834518224,
+        "phase": "scroll",
+        "residentMiB": 87.1875,
+        "screen": "receipts",
+        "sinceStartSeconds": 6.46751074999338,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 6.468622416665312,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 2
+      },
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.04028349998407066,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "receipts",
+        "sinceStartSeconds": 0.04095479164971039,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "cpuMs": 241.533,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 1,
+          "tables": {
+            "receipts": 1
+          }
+        },
+        "displayCallbacks": 8,
+        "elapsedMs": 224.19408333371393,
+        "event": "measurement",
+        "gapsOver25ms": 3,
+        "listItems": 251,
+        "maxCallbackGapMs": 57.62108333874494,
+        "p95CallbackGapMs": 41.96166666224599,
+        "phase": "load",
+        "residentMiB": 92.5625,
+        "screen": "receipts",
+        "sinceStartSeconds": 0.2651862916536629,
+        "thermalState": 0,
+        "visibleCells": 9,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "receipts",
+        "sinceStartSeconds": 1.3490975416498259,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "contentOffsetY": 2336,
+        "cpuMs": 1842.72,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 299,
+        "elapsedMs": 5094.4463333289605,
+        "event": "measurement",
+        "gapsOver25ms": 4,
+        "listItems": 251,
+        "maxCallbackGapMs": 34.75741666625254,
+        "p95CallbackGapMs": 16.667541669448838,
+        "phase": "scroll",
+        "residentMiB": 86.84375,
+        "screen": "receipts",
+        "sinceStartSeconds": 6.443613791663665,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 6.444647458323743,
+        "thermalState": 0,
+        "label": "baseline",
+        "processRun": 3
+      }
+    ],
+    "receipts-candidate": [
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.06914991667144932,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "receipts",
+        "sinceStartSeconds": 0.06995600002119318,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 1
+      },
+      {
+        "cpuMs": 142.05700000000004,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 1,
+          "tables": {
+            "receipts": 1
+          }
+        },
+        "displayCallbacks": 4,
+        "elapsedMs": 185.89783331844956,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 251,
+        "maxCallbackGapMs": 71.35795833892189,
+        "p95CallbackGapMs": 56.670375022804365,
+        "phase": "load",
+        "residentMiB": 88.234375,
+        "screen": "receipts",
+        "sinceStartSeconds": 0.2559389583475422,
+        "thermalState": 0,
+        "visibleCells": 9,
+        "label": "final",
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "receipts",
+        "sinceStartSeconds": 1.3407522500201594,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 1
+      },
+      {
+        "contentOffsetY": 2336,
+        "cpuMs": 1852.5529999999999,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 299,
+        "elapsedMs": 5080.935541685903,
+        "event": "measurement",
+        "gapsOver25ms": 3,
+        "listItems": 251,
+        "maxCallbackGapMs": 35.19304166547954,
+        "p95CallbackGapMs": 16.66758334613405,
+        "phase": "scroll",
+        "residentMiB": 82.515625,
+        "screen": "receipts",
+        "sinceStartSeconds": 6.42167570834863,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 1
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 6.422395500005223,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 1
+      },
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.04926370832254179,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "receipts",
+        "sinceStartSeconds": 0.049934874987229705,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 2
+      },
+      {
+        "cpuMs": 159.331,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 1,
+          "tables": {
+            "receipts": 1
+          }
+        },
+        "displayCallbacks": 5,
+        "elapsedMs": 183.14341668155976,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 251,
+        "maxCallbackGapMs": 60.8232083322946,
+        "p95CallbackGapMs": 56.88187500345521,
+        "phase": "load",
+        "residentMiB": 88.140625,
+        "screen": "receipts",
+        "sinceStartSeconds": 0.2331162916671019,
+        "thermalState": 0,
+        "visibleCells": 9,
+        "label": "final",
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "receipts",
+        "sinceStartSeconds": 1.314475458319066,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 2
+      },
+      {
+        "contentOffsetY": 2336,
+        "cpuMs": 1852.1429999999998,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 299,
+        "elapsedMs": 5092.703875008738,
+        "event": "measurement",
+        "gapsOver25ms": 4,
+        "listItems": 251,
+        "maxCallbackGapMs": 35.52533334004693,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "scroll",
+        "residentMiB": 82.171875,
+        "screen": "receipts",
+        "sinceStartSeconds": 6.4072299166582525,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 2
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 6.408241333323531,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 2
+      },
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.038715333328582346,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "load",
+        "screen": "receipts",
+        "sinceStartSeconds": 0.039320125011727214,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 3
+      },
+      {
+        "cpuMs": 163.76200000000003,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 1,
+          "tables": {
+            "receipts": 1
+          }
+        },
+        "displayCallbacks": 4,
+        "elapsedMs": 174.77599999983795,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 251,
+        "maxCallbackGapMs": 57.95625000610016,
+        "p95CallbackGapMs": 52.158125006826594,
+        "phase": "load",
+        "residentMiB": 87.90625,
+        "screen": "receipts",
+        "sinceStartSeconds": 0.21412162500200793,
+        "thermalState": 0,
+        "visibleCells": 9,
+        "label": "final",
+        "processRun": 3
+      },
+      {
+        "event": "begin",
+        "phase": "scroll",
+        "screen": "receipts",
+        "sinceStartSeconds": 1.289988500007894,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 3
+      },
+      {
+        "contentOffsetY": 2336,
+        "cpuMs": 1832.3579999999997,
+        "database": {
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "tables": {}
+        },
+        "displayCallbacks": 299,
+        "elapsedMs": 5066.338499978883,
+        "event": "measurement",
+        "gapsOver25ms": 3,
+        "listItems": 251,
+        "maxCallbackGapMs": 34.238666645251215,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "scroll",
+        "residentMiB": 81.921875,
+        "screen": "receipts",
+        "sinceStartSeconds": 6.356305374996737,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 3
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 6.357052916660905,
+        "thermalState": 0,
+        "label": "final",
+        "processRun": 3
+      }
+    ]
+  },
+  "timeProfiler": {
+    "plan-baseline": {
+      "windowSeconds": [
+        0,
+        40
+      ],
+      "samples": 6397,
+      "sampledCpuMilliseconds": 6397.0,
+      "threads": {
+        "main": 5533,
+        "other": 387,
+        "gc": 477
+      },
+      "inclusiveAppFrames": {
+        "kfun:finance.shilling.shared.data.usecase.ComputeWindowUseCase.ComputeWindowUseCase$watchWindow$$inlined$flatMapLatest$1.ComputeWindowUseCase$watchWindow$$inlined$flatMapLatest$1$invoke$2.invoke#internal": 2676,
+        "kfun:finance.shilling.shared.data.usecase.ComputeWindowUseCase.ComputeWindowUseCase$watchWindow$$inlined$flatMapLatest$1.invoke#internal": 2676,
+        "kfun:finance.shilling.shared.data.usecase.ComputeWindowUseCase.ComputeWindowUseCase$watchWindow$$inlined$flatMapLatest$1.ComputeWindowUseCase$watchWindow$$inlined$flatMapLatest$1$invoke$2.$invokeCOROUTINE$0.invokeSuspend#internal": 2676,
+        "kfun:finance.shilling.shared.presentation.PlanOverviewViewModel.PlanOverviewViewModel$$inlined$flatMapLatest$1.PlanOverviewViewModel$$inlined$flatMapLatest$1$invoke$2.invoke#internal": 2485,
+        "kfun:finance.shilling.shared.presentation.groupByCategory#internal": 2404,
+        "kfun:finance.shilling.shared.data.usecase.ComputeWindowUseCase.$loadWindowCOROUTINE$3.invokeSuspend#internal": 405,
+        "kfun:finance.shilling.shared.data.usecase.ComputeWindowUseCase.loadWindow#internal": 404,
+        "kfun:finance.shilling.shared.data.store.watchLocalSourceOfTruth$$inlined$mapNotNull$1.collect#internal": 361,
+        "kfun:finance.shilling.app.UiQueryDriver.executeQuery#internal": 237,
+        "kfun:finance.shilling.shared.data.store.ScheduleRepository#getIntersecting#suspend(kotlinx.datetime.LocalDate;kotlinx.datetime.LocalDate;kotlin.coroutines.Continuation<kotlin.collections.List<finance.shilling.shared.data.Schedule>>){}kotlin.Any": 202,
+        "kfun:finance.shilling.shared.data.store.createScheduleStore$store$2.createScheduleStore$2$invoke$$inlined$map$3.collect#internal": 193,
+        "kfun:finance.shilling.shared.data.store.createScheduleStore$store$2.createScheduleStore$2$invoke$$inlined$map$3.createScheduleStore$2$invoke$$inlined$map$3$collect$2.emit#internal": 192,
+        "kfun:finance.shilling.shared.data.store.createScheduleStore$store$2.createScheduleStore$2$invoke$$inlined$map$3.createScheduleStore$2$invoke$$inlined$map$3$collect$2.$emitCOROUTINE$19.invokeSuspend#internal": 192,
+        "kfun:finance.shilling.shared.db.ScheduleQueries.SelectIntersectingQuery.execute#internal": 187,
+        "kfun:finance.shilling.shared.db.ScheduleQueries.ScheduleQueries$selectIntersecting$1.invoke#internal": 160,
+        "kfun:finance.shilling.shared.data.store.ScheduleRepository#getExceptions#suspend(kotlin.collections.List<kotlin.String>;kotlin.coroutines.Continuation<kotlin.collections.Map<kotlin.String,kotlin.collections.List<finance.shilling.shared.data.ScheduleException>>>){}kotlin.Any": 70,
+        "kfun:finance.shilling.shared.data.store.ScheduleRepository.$getExceptionsCOROUTINE$0.invokeSuspend#internal": 69,
+        "kfun:finance.shilling.app.NativeUiFixture.NativeUiFixture$changePostingNative$1.invoke#internal": 55,
+        "kfun:finance.shilling.app.NativeUiFixture.NativeUiFixture$changePosting$2.invoke#internal": 55,
+        "kfun:finance.shilling.shared.data.store.AccountRepository.$getAllCOROUTINE$0.invokeSuspend#internal": 48,
+        "kfun:finance.shilling.shared.data.store.AccountRepository#getAll#suspend(kotlin.coroutines.Continuation<kotlin.collections.Map<kotlin.String?,finance.shilling.shared.data.Account>>){}kotlin.Any": 48,
+        "kfun:finance.shilling.shared.presentation#today(){}kotlinx.datetime.LocalDate": 39,
+        "kfun:finance.shilling.shared.data.store.CategoryRepository#getAll#suspend(kotlin.coroutines.Continuation<kotlin.collections.List<finance.shilling.shared.data.Category>>){}kotlin.Any": 36,
+        "kfun:finance.shilling.shared.presentation.occurrenceKey#internal": 31,
+        "kfun:finance.shilling.shared.presentation#formatCurrency(kotlin.Double){}kotlin.String": 29,
+        "kfun:finance.shilling.shared.presentation.groupByCategory$$inlined$map$2.compare#internal": 27,
+        "kfun:finance.shilling.shared.data.store.PostingRepository.$recordCOROUTINE$4.invokeSuspend#internal": 26,
+        "kfun:finance.shilling.shared.data.store.PostingRepository#record#suspend(finance.shilling.shared.data.Posting;kotlin.coroutines.Continuation<kotlin.Unit>){}kotlin.Any": 26,
+        "kfun:finance.shilling.shared.data#generateOccurrences(finance.shilling.shared.data.Schedule;kotlinx.datetime.LocalDate;kotlinx.datetime.LocalDate;kotlin.collections.Map<kotlinx.datetime.LocalDate,finance.shilling.shared.data.ScheduleException>;kotlin.collections.Set<kotlinx.datetime.LocalDate>){}kotlin.collections.List<finance.shilling.shared.data.ScheduledTx>": 25,
+        "kfun:finance.shilling.shared.data.store.createScheduleExceptionStore$store$2.createScheduleExceptionStore$2$invoke$$inlined$map$3.collect#internal": 24,
+        "kfun:finance.shilling.shared.data.store.createScheduleExceptionStore$store$2.createScheduleExceptionStore$2$invoke$$inlined$map$3.createScheduleExceptionStore$2$invoke$$inlined$map$3$collect$2.$emitCOROUTINE$29.invokeSuspend#internal": 23,
+        "kfun:finance.shilling.shared.data.store.createScheduleExceptionStore$store$2.createScheduleExceptionStore$2$invoke$$inlined$map$3.createScheduleExceptionStore$2$invoke$$inlined$map$3$collect$2.emit#internal": 23,
+        "kfun:finance.shilling.shared.db.ScheduleExceptionQueries.SelectByScheduleIdsQuery.execute#internal": 23,
+        "kfun:finance.shilling.shared.data.store.createBookkeeper$1.$invokeCOROUTINE$51.invokeSuspend#internal": 13,
+        "kfun:finance.shilling.shared.data.store.createBookkeeper$1.invoke#internal": 13,
+        "kfun:finance.shilling.shared.data.store.PostingRepository#getBetween#suspend(kotlinx.datetime.LocalDate;kotlinx.datetime.LocalDate;kotlin.coroutines.Continuation<kotlin.collections.List<finance.shilling.shared.data.Posting>>){}kotlin.Any": 12,
+        "kfun:finance.shilling.app.UiQueryDriver.execute#internal": 10,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$$inlined$createUpdater$1.invoke#internal": 10,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$$inlined$createUpdater$1.$invokeCOROUTINE$42.invokeSuspend#internal": 10,
+        "kfun:finance.shilling.shared.db.BookkeepingQueries.SelectByEntityQuery.execute#internal": 9,
+        "kfun:finance.shilling.shared.db.ScheduleExceptionQueries.SelectByScheduleIdsQuery.ScheduleExceptionQueries$SelectByScheduleIdsQuery$execute$1.$<bridge-DNN>invoke(app.cash.sqldelight.db.SqlPreparedStatement){}#internal": 9,
+        "kfun:finance.shilling.shared.presentation#formatDate(kotlinx.datetime.LocalDate;kotlinx.datetime.LocalDate){}kotlin.String": 7,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$store$3.invoke#internal": 7,
+        "kfun:finance.shilling.shared.data.store.createCategoryStore$store$2.createCategoryStore$2$invoke$$inlined$map$1.collect#internal": 7,
+        "kfun:finance.shilling.shared.data.store.createCategoryStore$store$2.createCategoryStore$2$invoke$$inlined$map$1.createCategoryStore$2$invoke$$inlined$map$1$collect$2.$emitCOROUTINE$9.invokeSuspend#internal": 7,
+        "kfun:finance.shilling.shared.data.store.createCategoryStore$store$2.createCategoryStore$2$invoke$$inlined$map$1.createCategoryStore$2$invoke$$inlined$map$1$collect$2.emit#internal": 7,
+        "kfun:finance.shilling.shared.data.store.createAccountStore$store$2.createAccountStore$2$invoke$$inlined$map$1.collect#internal": 6,
+        "kfun:finance.shilling.shared.presentation.SchedulesViewModel.SchedulesViewModel$1.invoke#internal": 6,
+        "kfun:finance.shilling.shared.data.store.createScheduleStore$store$2.createScheduleStore$2$invoke$$inlined$map$1.createScheduleStore$2$invoke$$inlined$map$1$collect$2.$emitCOROUTINE$17.invokeSuspend#internal": 5,
+        "kfun:finance.shilling.shared.data.store.createScheduleStore$store$2.createScheduleStore$2$invoke$$inlined$map$1.collect#internal": 5,
+        "kfun:finance.shilling.shared.data.store.createScheduleStore$store$2.createScheduleStore$2$invoke$$inlined$map$1.createScheduleStore$2$invoke$$inlined$map$1$collect$2.emit#internal": 5,
+        "kfun:finance.shilling.shared.presentation.SchedulesViewModel.SchedulesViewModel$1.SchedulesViewModel$1$invoke$$inlined$thenBy$1.compare#internal": 5,
+        "kfun:finance.shilling.shared.data.store#recordEntityChange#suspend__at__finance.shilling.shared.db.ShillingDatabase(finance.shilling.shared.data.sync.ChangeMessage;kotlin.coroutines.Continuation<kotlin.Unit>){}kotlin.Any": 5,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$$inlined$createUpdater$1.createPostingStore$$inlined$createUpdater$1$invoke$2.invoke#internal": 5,
+        "kfun:finance.shilling.shared.db.ChangeLogQueries.$insertCOROUTINE$0.invokeSuspend#internal": 5,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$$inlined$createUpdater$1.createPostingStore$$inlined$createUpdater$1$invoke$2.$invokeCOROUTINE$41.invokeSuspend#internal": 5,
+        "kfun:finance.shilling.shared.db.ChangeLogQueries#insert#suspend(kotlin.String;kotlin.String;kotlin.String;kotlin.String;kotlin.String;kotlin.Long;kotlin.String?;kotlin.coroutines.Continuation<kotlin.Long>){}kotlin.Any": 5,
+        "kfun:finance.shilling.shared.data.store.$recordEntityChangeCOROUTINE$1.invokeSuspend#internal": 5,
+        "kfun:finance.shilling.shared.data.store.watchLocalSourceOfTruth$$inlined$mapNotNull$1.watchLocalSourceOfTruth$$inlined$mapNotNull$1$collect$2.emit#internal": 5,
+        "kfun:finance.shilling.shared.db.CategoryQueries.CategoryQueries$selectAll$1.invoke#internal": 5,
+        "kfun:finance.shilling.shared.data.store.createAccountStore$store$2.createAccountStore$2$invoke$$inlined$map$1.createAccountStore$2$invoke$$inlined$map$1$collect$2.emit#internal": 5,
+        "kfun:finance.shilling.shared.data.store.createAccountStore$store$2.createAccountStore$2$invoke$$inlined$map$1.createAccountStore$2$invoke$$inlined$map$1$collect$2.$emitCOROUTINE$1.invokeSuspend#internal": 5,
+        "kfun:finance.shilling.app.NativeUiFixture.NativeUiFixture$seedNative$1.invoke#internal": 4,
+        "kfun:finance.shilling.app.NativeUiFixture.NativeUiFixture$seed$2.$invokeCOROUTINE$0.invokeSuspend#internal": 4,
+        "kfun:finance.shilling.app.NativeUiFixture.NativeUiFixture$seed$2.invoke#internal": 4,
+        "kfun:finance.shilling.shared.db.BookkeepingQueries.SelectByEntityQuery.BookkeepingQueries$SelectByEntityQuery$execute$1.$<bridge-DNN>invoke(app.cash.sqldelight.db.SqlPreparedStatement){}#internal": 4,
+        "kfun:finance.shilling.shared.db.ScheduleQueries.ScheduleQueries$selectAll$1.invoke#internal": 3,
+        "kfun:finance.shilling.shared.data.store#toDomain__at__finance.shilling.shared.db.Schedules(){}finance.shilling.shared.data.Schedule": 3,
+        "kfun:finance.shilling.shared.data.store#toBookkeepingKey__at__finance.shilling.shared.data.store.ScheduleExceptionKey(){}kotlin.Pair<kotlin.String,kotlin.String>": 3,
+        "kfun:finance.shilling.shared.data.store.createScheduleExceptionStore$store$5.invoke#internal": 3,
+        "kfun:finance.shilling.shared.db.PostingQueries.$upsertCOROUTINE$0.invokeSuspend#internal": 3,
+        "kfun:finance.shilling.shared.db.PostingQueries#upsert#suspend(kotlin.String;kotlin.String?;kotlin.String;kotlin.String;kotlin.Long;kotlin.Double;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.coroutines.Continuation<kotlin.Long>){}kotlin.Any": 3,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$store$3.createPostingStore$store$3$invoke$2.$invokeCOROUTINE$39.invokeSuspend#internal": 3,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$store$3.createPostingStore$store$3$invoke$2.invoke#internal": 3,
+        "kfun:finance.shilling.shared.data.$ensureLocalSchemaReadyCOROUTINE$0.invokeSuspend#internal": 2,
+        "kfun:finance.shilling.shared.data#ensureLocalSchemaReady#suspend(app.cash.sqldelight.db.SqlDriver;kotlin.String;kotlin.coroutines.Continuation<kotlin.Unit>){}kotlin.Any": 2,
+        "objc2kotlin_kfun:finance.shilling.app.PlanScreenModel#<init>(){}": 2,
+        "kfun:finance.shilling.app.IosIdGenerator#newId(){}kotlin.String": 2,
+        "kfun:finance.shilling.shared.presentation.PlanOverviewUiState#equals(kotlin.Any?){}kotlin.Boolean": 2,
+        "kfun:finance.shilling.app.UiQueryDriver.newTransaction#internal": 2,
+        "kfun:finance.shilling.shared.data.store.ChangeNotifier#notifyChanged(){}": 2,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$store$2.createPostingStore$2$invoke$$inlined$map$3.createPostingStore$2$invoke$$inlined$map$3$collect$2.$emitCOROUTINE$37.invokeSuspend#internal": 2,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$store$2.createPostingStore$2$invoke$$inlined$map$3.createPostingStore$2$invoke$$inlined$map$3$collect$2.emit#internal": 2,
+        "kfun:finance.shilling.shared.db.PostingQueries.SelectBetweenQuery.execute#internal": 2,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$store$2.createPostingStore$2$invoke$$inlined$map$3.collect#internal": 2,
+        "kfun:finance.shilling.shared.presentation.groupByCategory$$inlined$thenBy$1.compare#internal": 2,
+        "kfun:finance.shilling.shared.data.dataModule$1.dataModule$1$invoke$23.invoke#internal": 1,
+        "kfun:finance.shilling.app.PlanScreenModel.PlanScreenModel$$inlined$viewModel$1.invoke#internal": 1,
+        "kfun:finance.shilling.shared.data.dataModule$1.dataModule$1$invoke$16.invoke#internal": 1,
+        "kfun:finance.shilling.app.PlanScreenModel.PlanScreenModel$$inlined$viewModel$2.invoke#internal": 1,
+        "kfun:finance.shilling.shared.presentation.SchedulesViewModel#<init>(finance.shilling.shared.data.store.ScheduleRepository;finance.shilling.shared.data.store.AccountRepository;finance.shilling.shared.data.store.CategoryRepository){}": 1,
+        "kfun:finance.shilling.shared.data.dataModule$1.dataModule$1$invoke$24.invoke#internal": 1,
+        "kfun:finance.shilling.shared.db.ScheduleExceptionQueries.SelectByScheduleIdsQuery.addListener#internal": 1,
+        "objc2kotlin_kfun:finance.shilling.shared.presentation.OccurrenceUi#<get-key>(){}kotlin.String": 1,
+        "kfun:finance.shilling.shared.presentation.PlanLineUi#equals(kotlin.Any?){}kotlin.Boolean": 1,
+        "kfun:finance.shilling.shared.db.ScheduleQueries.SelectIntersectingQuery.ScheduleQueries$SelectIntersectingQuery$execute$1.$<bridge-DNN>invoke(app.cash.sqldelight.db.SqlPreparedStatement){}#internal": 1,
+        "kfun:finance.shilling.shared.db.Schedules#<init>(kotlin.String;kotlin.String;kotlin.Double;kotlin.String;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.Long;kotlin.Long?;kotlin.String;kotlin.Long;kotlin.Long?;kotlin.Long?;kotlin.Long?;kotlin.Long;kotlin.Long;kotlin.String?){}": 1,
+        "kfun:finance.shilling.shared.db.ScheduleQueries.ScheduleQueries$selectIntersecting$$FUNCTION_REFERENCE_FOR$<init>$2.$<bridge-NNNNUNNNNUNNUNNNUUN>invoke(kotlin.String;kotlin.String;kotlin.Double;kotlin.String;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.Long;kotlin.Long?;kotlin.String;kotlin.Long;kotlin.Long?;kotlin.Long?;kotlin.Long?;kotlin.Long;kotlin.Long;kotlin.String?){}finance.shilling.shared.db.Schedules#internal": 1,
+        "kfun:finance.shilling.shared.data.store.createBookkeeper$3.invoke#internal": 1,
+        "kfun:finance.shilling.shared.db.BookkeepingQueries.$deleteByEntityCOROUTINE$1.invokeSuspend#internal": 1,
+        "kfun:finance.shilling.shared.data.store.createBookkeeper$3.$invokeCOROUTINE$53.invokeSuspend#internal": 1,
+        "kfun:finance.shilling.shared.db.BookkeepingQueries#deleteByEntity#suspend(kotlin.String;kotlin.String;kotlin.coroutines.Continuation<kotlin.Long>){}kotlin.Any": 1,
+        "kfun:finance.shilling.shared.db.AccountQueries#selectAll(kotlin.Function3<kotlin.String,kotlin.String,kotlin.Double,0:0>){0\u00a7<kotlin.Any>}app.cash.sqldelight.Query<0:0>": 1,
+        "kfun:finance.shilling.shared.data.store.createAccountStore$store$2.invoke#internal": 1,
+        "kfun:finance.shilling.shared.data.store#toBookkeepingKey__at__finance.shilling.shared.data.store.ScheduleKey(){}kotlin.Pair<kotlin.String,kotlin.String>": 1,
+        "kfun:finance.shilling.shared.data.store.createScheduleStore$store$5.invoke#internal": 1,
+        "kfun:finance.shilling.shared.presentation.OccurrenceUi#equals(kotlin.Any?){}kotlin.Boolean": 1
+      },
+      "note": "Statistical CPU samples, not battery measurements. Inclusive frame counts overlap.",
+      "microhangDurationsMs": [
+        275.547167,
+        276.24725,
+        271.115834,
+        270.965125,
+        271.7415,
+        270.435791,
+        276.893709,
+        272.128125,
+        276.773833
+      ]
+    },
+    "plan-candidate": {
+      "windowSeconds": [
+        0,
+        40
+      ],
+      "samples": 3417,
+      "sampledCpuMilliseconds": 3417.0,
+      "threads": {
+        "main": 2876,
+        "other": 507,
+        "gc": 34
+      },
+      "inclusiveAppFrames": {
+        "kfun:finance.shilling.app.NativeUiFixture.NativeUiFixture$changePostingNative$1.invoke#internal": 45,
+        "kfun:finance.shilling.app.NativeUiFixture.NativeUiFixture$changePosting$2.invoke#internal": 45,
+        "kfun:finance.shilling.shared.presentation#today(){}kotlinx.datetime.LocalDate": 27,
+        "kfun:finance.shilling.shared.data.store.PostingRepository.$recordCOROUTINE$4.invokeSuspend#internal": 20,
+        "kfun:finance.shilling.shared.data.store.PostingRepository#record#suspend(finance.shilling.shared.data.Posting;kotlin.coroutines.Continuation<kotlin.Unit>){}kotlin.Any": 20,
+        "kfun:finance.shilling.app.UiQueryDriver.executeQuery#internal": 12,
+        "kfun:finance.shilling.shared.data.store.createScheduleStore$store$2.createScheduleStore$2$invoke$$inlined$map$3.createScheduleStore$2$invoke$$inlined$map$3$collect$2.emit#internal": 8,
+        "kfun:finance.shilling.shared.db.ScheduleQueries.SelectIntersectingQuery.execute#internal": 8,
+        "kfun:finance.shilling.shared.data.store.createScheduleStore$store$2.createScheduleStore$2$invoke$$inlined$map$3.collect#internal": 8,
+        "kfun:finance.shilling.shared.data.store.createScheduleStore$store$2.createScheduleStore$2$invoke$$inlined$map$3.createScheduleStore$2$invoke$$inlined$map$3$collect$2.$emitCOROUTINE$19.invokeSuspend#internal": 8,
+        "kfun:finance.shilling.app.NativeUiFixture.NativeUiFixture$seedNative$1.invoke#internal": 7,
+        "kfun:finance.shilling.app.NativeUiFixture.NativeUiFixture$seed$2.$invokeCOROUTINE$0.invokeSuspend#internal": 7,
+        "kfun:finance.shilling.app.NativeUiFixture.NativeUiFixture$seed$2.invoke#internal": 7,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$store$3.invoke#internal": 7,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$$inlined$createUpdater$1.invoke#internal": 7,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$$inlined$createUpdater$1.$invokeCOROUTINE$42.invokeSuspend#internal": 7,
+        "kfun:finance.shilling.app.UiQueryDriver.execute#internal": 5,
+        "kfun:finance.shilling.shared.db.ScheduleQueries.ScheduleQueries$selectIntersecting$1.invoke#internal": 5,
+        "kfun:finance.shilling.shared.presentation.PlanOverviewViewModel.PlanOverviewViewModel$$inlined$flatMapLatest$1.PlanOverviewViewModel$$inlined$flatMapLatest$1$invoke$2.invoke#internal": 4,
+        "kfun:finance.shilling.shared.presentation.occurrenceKey#internal": 4,
+        "kfun:finance.shilling.shared.data.$ensureLocalSchemaReadyCOROUTINE$0.invokeSuspend#internal": 3,
+        "kfun:finance.shilling.shared.data#ensureLocalSchemaReady#suspend(app.cash.sqldelight.db.SqlDriver;kotlin.String;kotlin.coroutines.Continuation<kotlin.Unit>){}kotlin.Any": 3,
+        "kfun:finance.shilling.shared.data.usecase.ComputeWindowUseCase.$loadWindowCOROUTINE$3.invokeSuspend#internal": 3,
+        "kfun:finance.shilling.shared.data.store.createScheduleExceptionStore$store$2.createScheduleExceptionStore$2$invoke$$inlined$map$3.collect#internal": 2,
+        "kfun:finance.shilling.shared.db.ScheduleExceptionQueries.SelectByScheduleIdsQuery.execute#internal": 2,
+        "kfun:finance.shilling.shared.data.store.createScheduleExceptionStore$store$2.createScheduleExceptionStore$2$invoke$$inlined$map$3.createScheduleExceptionStore$2$invoke$$inlined$map$3$collect$2.$emitCOROUTINE$29.invokeSuspend#internal": 2,
+        "kfun:finance.shilling.shared.data.store.createScheduleExceptionStore$store$2.createScheduleExceptionStore$2$invoke$$inlined$map$3.createScheduleExceptionStore$2$invoke$$inlined$map$3$collect$2.emit#internal": 2,
+        "kfun:finance.shilling.shared.data#generateOccurrences(finance.shilling.shared.data.Schedule;kotlinx.datetime.LocalDate;kotlinx.datetime.LocalDate;kotlin.collections.Map<kotlinx.datetime.LocalDate,finance.shilling.shared.data.ScheduleException>;kotlin.collections.Set<kotlinx.datetime.LocalDate>){}kotlin.collections.List<finance.shilling.shared.data.ScheduledTx>": 2,
+        "kfun:finance.shilling.shared.db.PostingQueries.$upsertCOROUTINE$0.invokeSuspend#internal": 2,
+        "kfun:finance.shilling.shared.db.PostingQueries#upsert#suspend(kotlin.String;kotlin.String?;kotlin.String;kotlin.String;kotlin.Long;kotlin.Double;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.coroutines.Continuation<kotlin.Long>){}kotlin.Any": 2,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$store$3.createPostingStore$store$3$invoke$2.$invokeCOROUTINE$39.invokeSuspend#internal": 2,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$store$3.createPostingStore$store$3$invoke$2.invoke#internal": 2,
+        "kfun:finance.shilling.shared.data.store#recordEntityChange#suspend__at__finance.shilling.shared.db.ShillingDatabase(finance.shilling.shared.data.sync.ChangeMessage;kotlin.coroutines.Continuation<kotlin.Unit>){}kotlin.Any": 2,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$$inlined$createUpdater$1.createPostingStore$$inlined$createUpdater$1$invoke$2.invoke#internal": 2,
+        "kfun:finance.shilling.shared.db.ChangeLogQueries.$insertCOROUTINE$0.invokeSuspend#internal": 2,
+        "kfun:finance.shilling.shared.data.store.createPostingStore$$inlined$createUpdater$1.createPostingStore$$inlined$createUpdater$1$invoke$2.$invokeCOROUTINE$41.invokeSuspend#internal": 2,
+        "kfun:finance.shilling.shared.db.ChangeLogQueries#insert#suspend(kotlin.String;kotlin.String;kotlin.String;kotlin.String;kotlin.String;kotlin.Long;kotlin.String?;kotlin.coroutines.Continuation<kotlin.Long>){}kotlin.Any": 2,
+        "kfun:finance.shilling.shared.data.store.$recordEntityChangeCOROUTINE$1.invokeSuspend#internal": 2,
+        "objc2kotlin_kclass:finance.shilling.app.NativeUiFixture#shared": 1,
+        "objc2kotlin_kfun:finance.shilling.app.NativeUiFixture#seedNative(){}kotlin.Function3<kotlin.Function2<kotlin.Unit,kotlin.Unit,kotlin.Unit>,kotlin.Function2<platform.Foundation.NSError,kotlin.Unit,kotlin.Unit>,kotlin.Function2<platform.Foundation.NSError,kotlin.Unit,kotlin.Unit>,kotlin.Function0<kotlin.Unit>>": 1,
+        "kfun:finance.shilling.shared.presentation.PlanOverviewViewModel#<init>(finance.shilling.shared.data.usecase.ComputeWindowUseCase;finance.shilling.shared.presentation.OccurrenceActions){}": 1,
+        "kfun:finance.shilling.shared.data.dataModule$1.dataModule$1$invoke$23.invoke#internal": 1,
+        "objc2kotlin_kfun:finance.shilling.app.PlanScreenModel#<init>(){}": 1,
+        "kfun:finance.shilling.app.PlanScreenModel.PlanScreenModel$$inlined$viewModel$1.invoke#internal": 1,
+        "objc2kotlin_kfun:finance.shilling.shared.presentation.PlanPeriod#<get-label>(){}kotlin.String": 1,
+        "kfun:finance.shilling.shared.data.usecase.ComputeWindowUseCase.ComputeWindowUseCase$watchWindow$$inlined$flatMapLatest$1.ComputeWindowUseCase$watchWindow$$inlined$flatMapLatest$1$invoke$2.invoke#internal": 1,
+        "kfun:finance.shilling.shared.data.usecase.ComputeWindowUseCase.loadWindow#internal": 1,
+        "kfun:finance.shilling.shared.data.store.watchLocalSourceOfTruth$$inlined$mapNotNull$1.collect#internal": 1,
+        "kfun:finance.shilling.shared.db.BookkeepingQueries.SelectByEntityQuery.execute#internal": 1,
+        "kfun:finance.shilling.shared.data.store.AccountRepository.$getAllCOROUTINE$0.invokeSuspend#internal": 1,
+        "kfun:finance.shilling.shared.data.usecase.ComputeWindowUseCase.ComputeWindowUseCase$watchWindow$$inlined$flatMapLatest$1.invoke#internal": 1,
+        "kfun:finance.shilling.shared.data.store.createBookkeeper$1.$invokeCOROUTINE$51.invokeSuspend#internal": 1,
+        "kfun:finance.shilling.shared.data.store.AccountRepository#getAll#suspend(kotlin.coroutines.Continuation<kotlin.collections.Map<kotlin.String?,finance.shilling.shared.data.Account>>){}kotlin.Any": 1,
+        "kfun:finance.shilling.shared.data.usecase.ComputeWindowUseCase.ComputeWindowUseCase$watchWindow$$inlined$flatMapLatest$1.ComputeWindowUseCase$watchWindow$$inlined$flatMapLatest$1$invoke$2.$invokeCOROUTINE$0.invokeSuspend#internal": 1,
+        "kfun:finance.shilling.shared.data.store.createBookkeeper$1.invoke#internal": 1,
+        "kfun:finance.shilling.shared.db.PostingQueries.SelectBetweenQuery.removeListener#internal": 1,
+        "objc2kotlin_kfun:finance.shilling.shared.presentation.OccurrenceUi#<get-key>(){}kotlin.String": 1,
+        "objc2kotlin_kfun:finance.shilling.shared.presentation.OccurrenceUi#<get-title>(){}kotlin.String": 1,
+        "kfun:finance.shilling.shared.presentation#parseAmountInput(kotlin.String){}kotlin.Double?": 1,
+        "objc2kotlin_kfun:finance.shilling.app.PlanScreenModel#isValidAmount(kotlin.String){}kotlin.Boolean": 1,
+        "kfun:finance.shilling.app.UiQueryDriver.newTransaction#internal": 1,
+        "kfun:finance.shilling.shared.data.sync.ChangePayload.$init_global#internal": 1
+      },
+      "note": "Statistical CPU samples, not battery measurements. Inclusive frame counts overlap.",
+      "microhangDurationsMs": []
+    }
+  },
+  "receiptCpuTraceSamples": {
+    "baseline": {
+      "projectionSamples": 104,
+      "systemZoneSamples": 104
+    },
+    "candidate": {
+      "projectionSamples": 1,
+      "systemZoneSamples": 0
+    }
+  },
+  "finalBuildSmoke": [
+    {
+      "event": "seeded",
+      "postings": 10000,
+      "receipts": 250,
+      "schedules": 1000,
+      "sinceStartSeconds": 0.04312208332703449,
+      "thermalState": 0
+    },
+    {
+      "event": "begin",
+      "phase": "load",
+      "screen": "plan",
+      "sinceStartSeconds": 0.04381391665083356,
+      "thermalState": 0
+    },
+    {
+      "cpuMs": 190.603,
+      "database": {
+        "mainThreadQueries": 0,
+        "queries": 14,
+        "tables": {
+          "accounts": 1,
+          "bookkeeping": 7,
+          "categories": 1,
+          "postings": 1,
+          "schedule_exceptions": 3,
+          "schedules": 1
+        }
+      },
+      "displayCallbacks": 5,
+      "elapsedMs": 196.43933331826702,
+      "event": "measurement",
+      "gapsOver25ms": 3,
+      "listItems": 1005,
+      "maxCallbackGapMs": 80.91608333052136,
+      "p95CallbackGapMs": 39.218916645040736,
+      "phase": "load",
+      "residentMiB": 94.671875,
+      "screen": "plan",
+      "sinceStartSeconds": 0.2403784166672267,
+      "thermalState": 0,
+      "visibleCells": 8
+    },
+    {
+      "event": "begin",
+      "phase": "scroll",
+      "screen": "plan",
+      "sinceStartSeconds": 1.38350508332951,
+      "thermalState": 0
+    },
+    {
+      "contentOffsetY": 2320,
+      "cpuMs": 1864.9249999999997,
+      "database": {
+        "mainThreadQueries": 0,
+        "queries": 0,
+        "tables": {}
+      },
+      "displayCallbacks": 297,
+      "elapsedMs": 5111.690749996342,
+      "event": "measurement",
+      "gapsOver25ms": 8,
+      "listItems": 1005,
+      "maxCallbackGapMs": 35.71950001060031,
+      "p95CallbackGapMs": 16.667541669448838,
+      "phase": "scroll",
+      "residentMiB": 88.875,
+      "screen": "plan",
+      "sinceStartSeconds": 6.495270499988692,
+      "thermalState": 0
+    },
+    {
+      "event": "begin",
+      "phase": "hidden-sections",
+      "screen": "plan",
+      "sinceStartSeconds": 14.162466291658347,
+      "thermalState": 0
+    },
+    {
+      "cpuMs": 104.92800000000014,
+      "database": {
+        "mainThreadQueries": 0,
+        "queries": 0,
+        "tables": {}
+      },
+      "displayCallbacks": 252,
+      "elapsedMs": 4212.500458321301,
+      "event": "measurement",
+      "gapsOver25ms": 0,
+      "listItems": 11,
+      "maxCallbackGapMs": 16.667500021867454,
+      "mutations": 10,
+      "p95CallbackGapMs": 16.667500021867454,
+      "phase": "hidden-sections",
+      "residentMiB": 98.015625,
+      "screen": "plan",
+      "sinceStartSeconds": 18.37514870832092,
+      "thermalState": 0
+    },
+    {
+      "event": "begin",
+      "phase": "idle",
+      "screen": "plan",
+      "sinceStartSeconds": 18.377341499988688,
+      "thermalState": 0
+    },
+    {
+      "cpuMs": 63.39800000000029,
+      "database": {
+        "mainThreadQueries": 0,
+        "queries": 0,
+        "tables": {}
+      },
+      "displayCallbacks": 307,
+      "elapsedMs": 5126.2684166722465,
+      "event": "measurement",
+      "gapsOver25ms": 0,
+      "maxCallbackGapMs": 16.66745834518224,
+      "p95CallbackGapMs": 16.66745834518224,
+      "phase": "idle",
+      "residentMiB": 95.265625,
+      "screen": "plan",
+      "sinceStartSeconds": 23.503712583333254,
+      "thermalState": 0
+    },
+    {
+      "event": "navigation-check",
+      "listItems": 1005,
+      "section": "Overview",
+      "sinceStartSeconds": 23.593187583319377,
+      "thermalState": 0
+    },
+    {
+      "event": "navigation-check",
+      "listItems": 45,
+      "section": "By category",
+      "sinceStartSeconds": 23.907278833328746,
+      "thermalState": 0
+    },
+    {
+      "event": "navigation-check",
+      "listItems": 1005,
+      "section": "By day",
+      "sinceStartSeconds": 24.228434291639132,
+      "thermalState": 0
+    },
+    {
+      "event": "navigation-check",
+      "listItems": 1002,
+      "section": "Schedules",
+      "sinceStartSeconds": 24.59014487499371,
+      "thermalState": 0
+    },
+    {
+      "event": "navigation-check",
+      "listItems": 41,
+      "section": "Categories",
+      "sinceStartSeconds": 24.935051416658098,
+      "thermalState": 0
+    },
+    {
+      "event": "navigation-check",
+      "listItems": 11,
+      "section": "Accounts",
+      "sinceStartSeconds": 25.254801666655112,
+      "thermalState": 0
+    },
+    {
+      "event": "complete",
+      "sinceStartSeconds": 25.52816033331328,
+      "thermalState": 0
+    }
+  ]
+}

@@ -108,18 +108,17 @@ class SignalingHub(
 
     suspend fun evict(householdId: String, deviceId: String) {
         val peers = households[householdId] ?: return
-        val session = peers.remove(deviceId)
-        if (session != null) {
-            runCatching { session.close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Device removed")) }
+        peers[deviceId]?.let { peer ->
+            unregister(householdId, deviceId, peer.session)
+            runCatching { peer.session.close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Device removed")) }
         }
         // Notify remaining clients even if the removed device lost signaling while its
         // data channel stayed open. This is control-plane metadata, never entity data.
-        peers.values.forEach { peer ->
-            runCatching {
-                peer.send(json.encodeToString<SignalingMessage>(
-                    SignalingMessage.PeerList(emptyList(), removedDeviceIds = listOf(deviceId))
-                ))
-            }.onFailure { log.w { "[HUB] Failed to notify device removal: ${it::class.simpleName}" } }
+        val notification = json.encodeToString<SignalingMessage>(
+            SignalingMessage.PeerList(emptyList(), removedDeviceIds = listOf(deviceId))
+        )
+        households[householdId]?.forEach { (id, other) ->
+            enqueue(householdId, id, other, notification)
         }
     }
 

@@ -4,9 +4,13 @@ import finance.shilling.shared.data.Receipt
 import finance.shilling.shared.data.ReceiptWithPosting
 import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.EntityType
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
+
+data class ReceiptCounts(val total: Int, val unattached: Int)
 
 @OptIn(ExperimentalStoreApi::class)
 class ReceiptRepository(
@@ -15,9 +19,11 @@ class ReceiptRepository(
     private val sync: StoreSyncDeps? = null
 ) {
     fun watchAll(): Flow<List<ReceiptWithPosting>> =
-        store.watchWithPostings()
+        store.watchWithPostings().flowOn(Dispatchers.Default)
 
-    fun watchByPosting(postingId: String): Flow<List<Receipt>> = store.watchCached(ReceiptKey.ByPosting(postingId))
+    fun watchCounts(): Flow<ReceiptCounts> = store.watchCounts().flowOn(Dispatchers.Default)
+
+    fun watchByPosting(postingId: String): Flow<List<Receipt>> = store.watchCached(ReceiptKey.ByPosting(postingId)).flowOn(Dispatchers.Default)
 
     suspend fun save(receipt: Receipt) {
         store.write(StoreWriteRequest.of<ReceiptKey, List<Receipt>, Unit>(ReceiptKey.ById(receipt.id), listOf(receipt)))

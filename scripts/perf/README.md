@@ -401,3 +401,57 @@ not iPhone rendering, SQLite latency, or Swift bridging.
 
 See [the native UI audit](../../docs/native-ios-audit-2026-09-29.md) for results and
 the remaining native profiling workloads.
+
+### Hosted Settings polling and device removal
+
+`hosted_control_fixture.cjs` serves synthetic registration/plan metadata with a
+100 ms delay per endpoint and accepts signaling for `z-pixel` and `z-iphone` in
+the `synthetic-live-perf` household. It has no entity or receipt HTTP/WebSocket
+routes. Its local controller routes accept requests from localhost only.
+
+```sh
+node scripts/perf/hosted_control_fixture.cjs > /tmp/shilling-hosted-fixture.jsonl
+```
+
+With a rebuilt Release `finance.shilling.perf` installed on the phone:
+
+```sh
+python3 scripts/perf/profile_ios_native_ui.py --device <UDID> \
+  --screen hosted-settings --hosted-server http://<Mac-LAN-address>:18083 \
+  --runs 1 --label hosted-settings --output /tmp/hosted-settings.json
+```
+
+This mounts the production native tabs and measures Settings visible for 35 s,
+hidden behind Home for 35 s, then reopened for 5 s. With negligible network delay,
+the metadata request counts are 7, 0, and 3. Network delays can move the last visible
+request's arrival into the hidden interval; inspect request timing for continued
+polls rather than assuming that cancelling a request retracts it from the network.
+App records and fixture requests include wall-clock times. Billing uses an authenticated
+synthetic guest and empty configuration, so no purchase SDK service is called.
+The script ends the fixture process when measurement completes. To check actual
+background/resume behavior, launch the same arguments through `devicectl` without
+`--console`, then read `Documents/native-ui.jsonl` from the perf app container.
+
+For the physical removal check, forward the Android fixture's signaling port
+with `adb reverse tcp:18081 tcp:18083`, launch `P2pPerformanceActivity`, and launch
+the iOS fixture with `--perf-server ws://<Mac-LAN-address>:18083`. Both report
+`SHILLING_PEERS` whenever their production `PeerConnectionStatus` changes. Once
+both list the other peer, POST to `/__fixture/disconnect?device=z-pixel`, verify
+the P2P channel remains open, then POST to `/__fixture/remove?device=z-pixel` and
+verify both connected sets empty and no subsequent Offer is sent to the removed
+peer. `/__fixture/readmit?device=z-pixel` allows a newly launched fixture to join
+again. These controller routes simulate control-plane events; the production
+server eviction/queue behavior is covered by `SignalingHubTest` and
+`SignalingLifecycleTest`.
+
+To check native receipt reception after a channel-adapter change, restart this
+server with `BROWSER_PROBE=1` (which also permits the synthetic `a-browser` peer),
+stop the Android fixture, and relaunch the iPhone P2P fixture. Then run:
+
+```sh
+SIGNAL_URL=ws://127.0.0.1:18083/ws/signal PEER_ID=z-iphone UPLOAD_ONLY=1 \
+  node scripts/perf/bench_live_webrtc.cjs
+```
+
+This uploads 1 MiB through native Store5 and verifies the returned bytes over
+WebRTC. It is a correctness check, not a before/after throughput comparison.

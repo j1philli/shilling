@@ -58,6 +58,13 @@ fun ScheduleExceptionKey.toBookkeepingKey(): Pair<String, String> = when (this) 
 
 // --- Posting ---
 
+/** Local read-only projections; entity writes still use PostingKey. */
+sealed class PostingDetailsKey {
+    data class ById(val id: String) : PostingDetailsKey()
+    data class Recent(val start: LocalDate, val end: LocalDate, val rowLimit: Long) : PostingDetailsKey()
+    data class TransferPartner(val pairId: String, val postingId: String, val start: LocalDate, val end: LocalDate) : PostingDetailsKey()
+}
+
 sealed class PostingKey {
     data object All : PostingKey()
     data class ById(val id: String) : PostingKey()

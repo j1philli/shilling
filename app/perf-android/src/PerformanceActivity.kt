@@ -109,7 +109,7 @@ class PerformanceActivity : Activity() {
                     categoryId = "synthetic-category", startDate = start, freq = Frequency.WEEKLY
                 )) }
             }
-            val window = ComputeWindowUseCase(notifier, accountRepo, categoryRepo, scheduleRepo, postingRepo)
+            val window = ComputeWindowUseCase(accountRepo, categoryRepo, scheduleRepo, postingRepo)
             repeat(3) { run ->
                 measured("recent20_run$run") { check(postingRepo.loadRecentPostings(20).size == 20) }
                 measured("history11000_run$run") { check(postingRepo.watchBetween(start, end).first().size == 11_000) }

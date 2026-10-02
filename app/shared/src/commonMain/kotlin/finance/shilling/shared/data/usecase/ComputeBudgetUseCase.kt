@@ -2,34 +2,52 @@ package finance.shilling.shared.data.usecase
 
 import finance.shilling.shared.data.*
 import finance.shilling.shared.data.store.CategoryRepository
-import finance.shilling.shared.data.store.ChangeNotifier
 import finance.shilling.shared.data.store.ScheduleRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 
 class ComputeBudgetUseCase(
-    private val notifier: ChangeNotifier,
     private val categoryRepository: CategoryRepository,
     private val scheduleRepository: ScheduleRepository
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun watchBudget(monthStart: LocalDate): Flow<BudgetSummary> =
-        notifier.version.flatMapLatest {
-            flow { emit(computeMonthlyBudget(monthStart)) }
-        }
+    fun watchBudget(monthStart: LocalDate): Flow<BudgetSummary> {
+        val monthEnd = monthStart.plus(1, DateTimeUnit.MONTH)
+        val schedulesWithExceptions = scheduleRepository.watchIntersecting(monthStart, monthEnd)
+            .flatMapLatest { schedules ->
+                scheduleRepository.watchExceptions(schedules.map { it.id })
+                    .map { exceptions -> schedules to exceptions }
+            }
+        return combine(schedulesWithExceptions, categoryRepository.watchAll()) { (schedules, exceptions), categories ->
+            buildMonthlyBudget(monthStart, monthEnd, schedules, exceptions, categories.associateBy { it.id })
+        }.flowOn(Dispatchers.Default)
+    }
 
     suspend fun computeMonthlyBudget(monthStart: LocalDate): BudgetSummary {
         val monthEnd = monthStart.plus(1, DateTimeUnit.MONTH)
         val schedules = scheduleRepository.getIntersecting(monthStart, monthEnd)
-        if (schedules.isEmpty()) return BudgetSummary.empty(monthStart, monthEnd)
         val categories = categoryRepository.getAll().associateBy { it.id }
         val scheduleIds = schedules.map { it.id }
         val exceptions = scheduleRepository.getExceptions(scheduleIds)
+        return buildMonthlyBudget(monthStart, monthEnd, schedules, exceptions, categories)
+    }
+
+    private fun buildMonthlyBudget(
+        monthStart: LocalDate,
+        monthEnd: LocalDate,
+        schedules: List<Schedule>,
+        exceptions: Map<String, List<ScheduleException>>,
+        categories: Map<String, Category>
+    ): BudgetSummary {
+        if (schedules.isEmpty()) return BudgetSummary.empty(monthStart, monthEnd)
         val lines = mutableListOf<BudgetLine>()
         schedules.forEach { schedule ->
             val ex = exceptions[schedule.id]?.associateBy { it.date } ?: emptyMap()

@@ -88,8 +88,8 @@ val dataModule: Module = module {
     factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.schedules }
     factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.postings }
     factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.receipts }
-    factory { ComputeWindowUseCase(get(), get(), get(), get(), get()) }
-    factory { ComputeBudgetUseCase(get(), get(), get()) }
+    factory { ComputeWindowUseCase(get(), get(), get(), get()) }
+    factory { ComputeBudgetUseCase(get(), get()) }
 
     viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { ActivityViewModel(get()) }

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import finance.shilling.shared.data.ScheduleType
 import finance.shilling.shared.data.ScheduledTxWithAccount
 import finance.shilling.shared.data.usecase.ComputeWindowUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.datetime.DateTimeUnit
@@ -109,7 +111,8 @@ class PlanOverviewViewModel(
     private val anchor = MutableStateFlow(today)
     private val grouping = MutableStateFlow(PlanGrouping.BY_DAY)
     private val expanded = MutableStateFlow(emptySet<String>())
-    private var itemsByKey: Map<String, ScheduledTxWithAccount> = emptyMap()
+    // Projection runs on Default; actions can read the latest immutable snapshot on Main.
+    private val itemsByKey = MutableStateFlow<Map<String, ScheduledTxWithAccount>>(emptyMap())
 
     private data class Window(val period: PlanPeriod, val range: Pair<LocalDate, LocalDate>, val current: Pair<LocalDate, LocalDate>)
 
@@ -127,10 +130,11 @@ class PlanOverviewViewModel(
 
     val state: StateFlow<PlanOverviewUiState> = window.flatMapLatest { w ->
         combine(windowUseCase.watchWindow(w.range.first, w.range.second), grouping, expanded) { items, g, open ->
-            itemsByKey = items.associateBy(::occurrenceKey)
+            itemsByKey.value = items.associateBy(::occurrenceKey)
             buildState(w, items, g, open)
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PlanOverviewUiState())
+    }.flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PlanOverviewUiState())
 
     fun setPeriod(value: PlanPeriod) {
         period.value = value
@@ -160,11 +164,11 @@ class PlanOverviewViewModel(
         expanded.value = if (key in expanded.value) expanded.value - key else expanded.value + key
     }
 
-    suspend fun markPosted(key: String): Undoable? = itemsByKey[key]?.let { actions.markPosted(it) }
-    suspend fun unmark(key: String): Undoable? = itemsByKey[key]?.let { actions.unmarkPosted(it) }
-    suspend fun skip(key: String): Undoable? = itemsByKey[key]?.let { actions.skip(it) }
+    suspend fun markPosted(key: String): Undoable? = itemsByKey.value[key]?.let { actions.markPosted(it) }
+    suspend fun unmark(key: String): Undoable? = itemsByKey.value[key]?.let { actions.unmarkPosted(it) }
+    suspend fun skip(key: String): Undoable? = itemsByKey.value[key]?.let { actions.skip(it) }
 
-    fun changeAmountPrompt(key: String): ChangeAmountPrompt? = itemsByKey[key]?.let { item ->
+    fun changeAmountPrompt(key: String): ChangeAmountPrompt? = itemsByKey.value[key]?.let { item ->
         ChangeAmountPrompt(
             title = "Change amount",
             message = "Applies only to ${item.tx.title} on ${formatDate(item.tx.date)}. The schedule is unchanged.",
@@ -174,7 +178,7 @@ class PlanOverviewViewModel(
 
     /** Null when [text] isn't a valid amount (or the item is gone). */
     suspend fun changeAmount(key: String, text: String): Undoable? {
-        val item = itemsByKey[key] ?: return null
+        val item = itemsByKey.value[key] ?: return null
         val amount = parseAmountInput(text) ?: return null
         return actions.changeAmount(item, amount)
     }
@@ -213,10 +217,10 @@ class PlanOverviewViewModel(
                 net = formatCurrency(abs(net)),
                 netPositive = net >= 0
             ),
-            days = items.groupBy { it.tx.date }.entries.sortedBy { it.key }.map { (date, dayItems) ->
+            days = if (g == PlanGrouping.BY_DAY) items.groupBy { it.tx.date }.entries.sortedBy { it.key }.map { (date, dayItems) ->
                 PlanDayUi(formatDayHeader(date, today), dayItems.map { it.toOccurrenceUi() })
-            },
-            categories = groupByCategory(items, open),
+            } else emptyList(),
+            categories = if (g == PlanGrouping.BY_CATEGORY) groupByCategory(items, open, today) else emptyList(),
             emptyTitle = if (items.isEmpty()) "Nothing scheduled this $label" else null
         )
     }
@@ -248,9 +252,11 @@ private fun ScheduledTxWithAccount.toOccurrenceUi(): OccurrenceUi {
     )
 }
 
-private fun groupByCategory(items: List<ScheduledTxWithAccount>, open: Set<String>): List<PlanCategoryUi> =
+private fun groupByCategory(items: List<ScheduledTxWithAccount>, open: Set<String>, today: LocalDate): List<PlanCategoryUi> =
     items.groupBy { it.category?.id }.map { (id, group) ->
-        val lines = group.groupBy { it.tx.scheduleId }.map { (scheduleId, occurrences) ->
+        val key = id ?: "uncategorized"
+        val schedules = group.groupBy { it.tx.scheduleId }
+        val lines = if (key in open) schedules.map { (scheduleId, occurrences) ->
             val first = occurrences.first()
             val count = occurrences.size
             val total = occurrences.sumOf { it.tx.amount }
@@ -259,7 +265,7 @@ private fun groupByCategory(items: List<ScheduledTxWithAccount>, open: Set<Strin
             val supporting = buildList {
                 add(
                     when {
-                        count == 1 -> formatDate(first.tx.date)
+                        count == 1 -> formatDate(first.tx.date, today)
                         sameAmount -> "$count × ${formatCurrency(first.tx.amount)}"
                         else -> "$count times"
                     }
@@ -282,6 +288,7 @@ private fun groupByCategory(items: List<ScheduledTxWithAccount>, open: Set<Strin
                 postingId = first.postingId
             ) to first.tx.type.ordinal
         }.sortedWith(compareBy<Pair<PlanLineUi, Int>> { it.second }.thenBy { it.first.title.lowercase() }).map { it.first }
+        else emptyList()
         val income = group.filter { it.tx.type == ScheduleType.INCOME }.sumOf { it.tx.amount }
         val expense = group.filter { it.tx.type == ScheduleType.EXPENSE }.sumOf { it.tx.amount }
         val onlyTransfers = group.all { it.tx.type == ScheduleType.TRANSFER }
@@ -292,13 +299,12 @@ private fun groupByCategory(items: List<ScheduledTxWithAccount>, open: Set<Strin
             else -> ScheduleType.EXPENSE
         }
         val total = if (onlyTransfers) group.sumOf { it.tx.amount } else abs(net)
-        val key = id ?: "uncategorized"
         val category = group.first().category
         PlanCategoryUi(
             key = key,
             name = category?.name ?: "Uncategorized",
             color = category?.color,
-            countLabel = "${lines.size} ${if (lines.size == 1) "item" else "items"}",
+            countLabel = "${schedules.size} ${if (schedules.size == 1) "item" else "items"}",
             totalType = totalType,
             total = formatSigned(totalType, total),
             expanded = key in open,

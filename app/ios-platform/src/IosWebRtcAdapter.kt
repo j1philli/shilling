@@ -37,11 +37,13 @@ val iosDelay: suspend (Long) -> Unit = { ms ->
 private class NativeChannelReceiver : NSObject(), RTCDataChannelDelegateProtocol {
     val messages = Channel<WebRtc.DataChannel.Message>(capacity = 256)
     private val deliveryLock = NSRecursiveLock()
+    private var eventDelegate: RTCDataChannelDelegateProtocol? = null
 
     fun install(channel: WebRtcDataChannel) {
         deliveryLock.lock()
         try {
             val native = channel.getNative()
+            eventDelegate = native.delegate
             native.delegate = this
             // The peer can send before the Open event reaches our collector.
             // Ktor 3.6 retains its delegate and queues those early messages.
@@ -60,7 +62,14 @@ private class NativeChannelReceiver : NSObject(), RTCDataChannelDelegateProtocol
     }
 
     override fun dataChannelDidChangeState(dataChannel: RTCDataChannel) {
+        // Ktor emits Open/Closed from this callback. Replacing only the receive
+        // queue must preserve those events, including an offerer's later Open.
+        eventDelegate?.dataChannelDidChangeState(dataChannel)
         if (dataChannel.readyState == RTCDataChannelState.RTCDataChannelStateClosed) messages.close()
+    }
+
+    override fun dataChannel(dataChannel: RTCDataChannel, didChangeBufferedAmount: ULong) {
+        eventDelegate?.dataChannel(dataChannel, didChangeBufferedAmount)
     }
 
     override fun dataChannel(dataChannel: RTCDataChannel, didReceiveMessageWithBuffer: RTCDataBuffer) {

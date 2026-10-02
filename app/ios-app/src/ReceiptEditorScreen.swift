@@ -14,7 +14,7 @@ struct ReceiptEditorScreen: View {
     @State private var notes = ""
     @State private var loaded = false
     @State private var toast: Toast?
-    @State private var preview: URL?
+    @StateObject private var preview = ReceiptPreviewModel()
     @State private var picking = false
     let launchCamera: Bool
     let onDone: (Toast) -> Void
@@ -102,7 +102,7 @@ struct ReceiptEditorScreen: View {
                 attach(postingId)
             }
         }
-        .quickLookPreview($preview)
+        .quickLookPreview($preview.url)
         .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .task { await model.observe() }
         .onChange(of: state.load) { _, _ in syncFields() }
@@ -130,7 +130,7 @@ struct ReceiptEditorScreen: View {
         Task {
             let result: String?? = try? await asyncFunction(for: screen.previewPath())
             if let path = result ?? nil {
-                preview = URL(fileURLWithPath: path)
+                preview.url = URL(fileURLWithPath: path)
             } else {
                 toast = Toast("Couldn't open \(model.state.title)")
             }

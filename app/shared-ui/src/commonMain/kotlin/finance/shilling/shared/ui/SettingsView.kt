@@ -45,6 +45,8 @@ import finance.shilling.shared.presentation.fullLabel
 import finance.shilling.shared.presentation.label
 import finance.shilling.shared.session.HostedCredentialsMode
 import kotlinx.coroutines.launch
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.ktor.http.encodeURLPathPart
 import kotlinx.datetime.DayOfWeek
 import org.koin.compose.koinInject
@@ -57,7 +59,7 @@ fun SettingsView(
     devicesViewModel: HostedDevicesViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val devicesState by devicesViewModel.state.collectAsState()
+    val devicesState by devicesViewModel.state.collectAsStateWithLifecycle(minActiveState = Lifecycle.State.RESUMED)
     val snackbar = LocalSnackbarController.current
     val showDeveloperTools = developerToolsEnabled || state.developerToolsUnlocked
 

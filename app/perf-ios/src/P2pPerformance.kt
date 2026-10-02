@@ -14,6 +14,7 @@ import io.ktor.client.webrtc.*
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import platform.Foundation.NSBundle
 import platform.Foundation.NSProcessInfo
 import platform.UIKit.*
@@ -77,10 +78,13 @@ private object PerformancePeer {
                 val client = HttpClient(Darwin) { install(WebSockets) }
                 val signal = SignalingClient(client, server, "z-iphone", "synthetic-live-perf")
                 val rtcClient = WebRtcClient(IosWebRtc) { defaultConnectionConfig = { iceServers = emptyList() } }
+                val status = PeerConnectionStatus()
+                scope.launch { status.connectedPeerIds.collect { println("SHILLING_PEERS iphone=$it") } }
                 val manager = if (receiver == "adapter") {
-                    WebRtcConnectionManager(rtcClient, signal, "z-iphone", iosReceiveMessage, nativeChannelOpen, iosDelay)
+                    WebRtcConnectionManager(rtcClient, signal, "z-iphone", status,
+                        receiveMessageFn = iosReceiveMessage, onChannelOpen = nativeChannelOpen, delayFn = iosDelay)
                 } else {
-                    WebRtcConnectionManager(rtcClient, signal, "z-iphone", delayFn = iosDelay)
+                    WebRtcConnectionManager(rtcClient, signal, "z-iphone", status, delayFn = iosDelay)
                 }
                 val timed = object : PeerSyncManager by manager {
                     override suspend fun sendFileMessages(peerId: String, messages: Flow<FileTransferMessage>): Int {

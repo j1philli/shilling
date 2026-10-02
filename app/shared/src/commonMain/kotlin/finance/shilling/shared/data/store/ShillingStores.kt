@@ -3,6 +3,7 @@ package finance.shilling.shared.data.store
 import app.cash.sqldelight.async.coroutines.await
 
 import app.cash.sqldelight.async.coroutines.awaitAsList
+import app.cash.sqldelight.async.coroutines.awaitAsOne
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import app.cash.sqldelight.coroutines.asFlow
 import co.touchlab.kermit.Logger
@@ -50,16 +51,29 @@ class ScheduleExceptionStore(delegate: MutableStore<ScheduleExceptionKey, List<S
     MutableStore<ScheduleExceptionKey, List<ScheduleException>> by delegate
 
 @OptIn(ExperimentalStoreApi::class)
-class PostingStore(delegate: MutableStore<PostingKey, List<Posting>>) :
-    MutableStore<PostingKey, List<Posting>> by delegate
+class PostingStore(
+    delegate: MutableStore<PostingKey, List<Posting>>,
+    private val detailsStore: Store<PostingDetailsKey, List<PostingWithDetails>>
+) : MutableStore<PostingKey, List<Posting>> by delegate {
+    internal fun watchDetails(key: PostingDetailsKey): Flow<List<PostingWithDetails>> =
+        detailsStore.stream(StoreReadRequest.localOnly(key))
+            .mapNotNull { (it as? StoreReadResponse.Data)?.value }
+            .distinctUntilChanged()
+}
 
 @OptIn(ExperimentalStoreApi::class)
 class ReceiptStore(
     delegate: MutableStore<ReceiptKey, List<Receipt>>,
-    private val listStore: Store<Unit, List<ReceiptWithPosting>>
+    private val listStore: Store<Unit, List<ReceiptWithPosting>>,
+    private val countsStore: Store<Unit, ReceiptCounts>
 ) : MutableStore<ReceiptKey, List<Receipt>> by delegate {
     internal fun watchWithPostings(): Flow<List<ReceiptWithPosting>> =
         listStore.stream(StoreReadRequest.localOnly(Unit))
+            .mapNotNull { (it as? StoreReadResponse.Data)?.value }
+            .distinctUntilChanged()
+
+    internal fun watchCounts(): Flow<ReceiptCounts> =
+        countsStore.stream(StoreReadRequest.localOnly(Unit))
             .mapNotNull { (it as? StoreReadResponse.Data)?.value }
             .distinctUntilChanged()
 }
@@ -394,7 +408,23 @@ fun createPostingStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
         },
         bookkeeper = createBookkeeper(db, spaceId) { it.toBookkeepingKey() }
     )
-    return PostingStore(store)
+    val detailsStore = StoreBuilder.from<PostingDetailsKey, List<PostingWithDetails>, List<PostingWithDetails>>(
+        fetcher = Fetcher.of { _: PostingDetailsKey -> error("Posting projections are local-only") },
+        sourceOfTruth = SourceOfTruth.of(
+            reader = { key ->
+                val query = when (key) {
+                    is PostingDetailsKey.ById -> db.postingQueries.selectByIdWithDetails(postingId = key.id, space_id = spaceId, mapper = ::postingWithDetails)
+                    is PostingDetailsKey.Recent -> db.postingQueries.selectRecentActivity(
+                        startDay = key.start.toEpochDays(), endDay = key.end.toEpochDays(), rowLimit = key.rowLimit, space_id = spaceId, mapper = ::postingWithDetails)
+                    is PostingDetailsKey.TransferPartner -> db.postingQueries.selectTransferPartnerWithDetails(
+                        pairId = key.pairId, postingId = key.postingId, startDay = key.start.toEpochDays(), endDay = key.end.toEpochDays(), space_id = spaceId, mapper = ::postingWithDetails)
+                }
+                query.asFlow().map { it.awaitAsList() }
+            },
+            writer = { _, _ -> error("Posting projections are read-only") }
+        )
+    ).disableCache().build()
+    return PostingStore(store, detailsStore)
 }
 
 @OptIn(ExperimentalStoreApi::class)
@@ -452,7 +482,16 @@ fun createReceiptStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
             writer = { _, _ -> error("Receipt list projection is read-only") }
         )
     ).disableCache().build()
-    return ReceiptStore(store, listStore)
+    val countsStore = StoreBuilder.from<Unit, ReceiptCounts, ReceiptCounts>(
+        fetcher = Fetcher.of { _: Unit -> error("Receipt counts are local-only") },
+        sourceOfTruth = SourceOfTruth.of(
+            reader = { _: Unit -> db.receiptQueries.selectCounts(space_id = spaceId) { total, unattached ->
+                ReceiptCounts(total.toInt(), unattached?.toInt() ?: 0)
+            }.asFlow().map { it.awaitAsOne() } },
+            writer = { _, _ -> error("Receipt count projection is read-only") }
+        )
+    ).disableCache().build()
+    return ReceiptStore(store, listStore, countsStore)
 }
 
 // --- Sync broadcast helper (for repository delete/special operations) ---

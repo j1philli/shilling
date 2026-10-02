@@ -7,11 +7,13 @@ import KMPNativeCoroutinesCore
 struct ScheduleEditorScreen: View {
     @StateObject private var model: FlowModel<ScheduleEditorUiState, ScheduleEditorScreenModel>
     @Environment(\.dismiss) private var dismiss
-    @State private var title = ""
+    @State private var titleDraft = EditorTextDraft()
     @State private var amount = ""
     @State private var monthDay = ""
     @State private var notes = ""
     @State private var loaded = false
+    @FocusState private var focusedField: Field?
+    private enum Field: Hashable { case title, amount, monthDay, notes }
     let onDone: (String) -> Void
 
     init(scheduleId: String?, presetType: ScheduleType?, onDone: @escaping (String) -> Void) {
@@ -32,7 +34,11 @@ struct ScheduleEditorScreen: View {
             missingMessage: state.missingMessage,
             saveEnabled: state.saveEnabled,
             delete: state.deleteConfirm,
-            onSave: { await finish(screen.save()) },
+            showsKeyboardDone: focusedField != nil,
+            onSave: {
+                screen.setTitle(value: titleDraft.value)
+                await finish(screen.save())
+            },
             onDelete: { await finish(screen.delete()) }
         ) {
             Section {
@@ -40,29 +46,26 @@ struct ScheduleEditorScreen: View {
                     ForEach(state.types, id: \.self) { Text($0.label).tag($0) }
                 }
                 .pickerStyle(.segmented)
-                TextField("Name", text: $title, prompt: Text(state.namePlaceholder))
-                    .onChange(of: title) { _, value in screen.setTitle(value: value) }
+                BufferedEditorTitleField("Name", initial: f.title, prompt: state.namePlaceholder,
+                                         draft: titleDraft) { screen.setTitle(value: $0) }
+                    .focused($focusedField, equals: .title)
                 LabeledContent("Amount") {
                     TextField("0.00", text: $amount)
+                        .focused($focusedField, equals: .amount)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
                         .onChange(of: amount) { _, value in screen.setAmountText(value: value) }
                 }
-                Picker(state.accountLabel, selection: Binding(get: { f.accountId }, set: { screen.setAccount(id: $0) })) {
-                    ForEach(state.accounts, id: \.id) { Text($0.label).tag(Optional($0.id)) }
-                }
+                EditorChoicePicker(state.accountLabel, selection: Binding(get: { f.accountId }, set: { screen.setAccount(id: $0) }),
+                                   choices: state.accounts)
                 .disabled(state.accounts.isEmpty)
                 if state.isTransfer {
-                    Picker("To account", selection: Binding(get: { f.toAccountId }, set: { screen.setToAccount(id: $0) })) {
-                        Text("Choose…").tag(String?.none)
-                        ForEach(state.toAccountChoices, id: \.id) { Text($0.label).tag(Optional($0.id)) }
-                    }
+                    EditorChoicePicker("To account", selection: Binding(get: { f.toAccountId }, set: { screen.setToAccount(id: $0) }),
+                                       choices: state.toAccountChoices, noneLabel: "Choose…")
                     .disabled(state.accounts.count < 2)
                 }
-                Picker("Category", selection: Binding(get: { f.categoryId }, set: { screen.setCategory(id: $0) })) {
-                    Text("Uncategorized").tag(String?.none)
-                    ForEach(state.categories, id: \.id) { Text($0.label).tag(Optional($0.id)) }
-                }
+                EditorChoicePicker("Category", selection: Binding(get: { f.categoryId }, set: { screen.setCategory(id: $0) }),
+                                   choices: state.categories, noneLabel: "Uncategorized")
             } footer: {
                 if let hint = state.accountHint ?? (state.isTransfer ? state.toAccountHint : nil) {
                     Text(hint)
@@ -111,6 +114,7 @@ struct ScheduleEditorScreen: View {
             Section {
                 Toggle("Auto-pay", isOn: Binding(get: { f.autoPay }, set: { screen.setAutoPay(value: $0) }))
                 TextField("Notes", text: $notes, axis: .vertical)
+                    .focused($focusedField, equals: .notes)
                     .lineLimit(2...6)
                     .onChange(of: notes) { _, value in screen.setNotes(value: value) }
             } header: {
@@ -134,8 +138,11 @@ struct ScheduleEditorScreen: View {
                     let on = (Int(state.effectiveWeekdayMask) & (1 << Int(day.index))) != 0
                     Button(String(day.shortLabel.prefix(2))) { screen.toggleWeekday(index: day.index) }
                         .buttonStyle(.bordered)
+                        .controlSize(.small)
                         .tint(on ? .accentColor : .secondary)
                         .font(.footnote.weight(on ? .semibold : .regular))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                         .accessibilityLabel(day.fullLabel)
                         .accessibilityAddTraits(on ? .isSelected : [])
                 }
@@ -145,6 +152,7 @@ struct ScheduleEditorScreen: View {
             if !f.lastDay {
                 LabeledContent("Day of month") {
                     TextField("1–31", text: $monthDay)
+                        .focused($focusedField, equals: .monthDay)
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
                         .foregroundStyle(state.monthDayError ? .red : .primary)
@@ -167,7 +175,7 @@ struct ScheduleEditorScreen: View {
         guard !loaded, model.state.load == .ready else { return }
         loaded = true
         let f = model.state.fields
-        title = f.title
+        titleDraft.value = f.title
         amount = f.amountText
         monthDay = f.monthDayText
         notes = f.notes

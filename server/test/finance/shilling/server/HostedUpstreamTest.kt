@@ -127,6 +127,12 @@ class HostedUpstreamTest {
         Stub().use { stub ->
             val lookup = SupabaseHouseholdMembershipLookup(stub.url, "synthetic")
             assertEquals("house-1", lookup.householdIdForUser("user-1"))
+            stub.role = "[]"
+            assertNull(lookup.householdIdForUser("user-1"))
+            stub.role = """[{"role":"owner"}]"""
+            stub.roleStatus = 503
+            assertFailsWith<HostedUpstreamUnavailableException> { lookup.householdIdForUser("user-1") }
+            stub.roleStatus = 200
             stub.membership = "[]"
             assertNull(lookup.householdIdForUser("user-1"))
             stub.membershipStatus = 503
@@ -154,6 +160,8 @@ class HostedUpstreamTest {
         @Volatile var jwksStatus = 200
         @Volatile var membershipStatus = 200
         @Volatile var membership = """[{"household_id":"house-1"}]"""
+        @Volatile var roleStatus = 200
+        @Volatile var role = """[{"role":"owner"}]"""
         @Volatile var stallBody = false
         private val executor = Executors.newCachedThreadPool { runnable -> Thread(runnable, "synthetic-upstream").apply { isDaemon = true } }
         private val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0).apply {
@@ -161,11 +169,13 @@ class HostedUpstreamTest {
             createContext("/") { exchange ->
                 try {
                     val isJwks = exchange.requestURI.path.endsWith("jwks.json")
+                    val isRole = exchange.requestURI.path.endsWith("hosted_space_memberships")
                     if (isJwks) jwksCalls.incrementAndGet()
                     Thread.sleep(delayMillis)
-                    val body = (if (isJwks) jwks else membership).toByteArray()
+                    val body = (if (isJwks) jwks else if (isRole) role else membership).toByteArray()
                     exchange.responseHeaders.add("Content-Type", "application/json")
-                    exchange.sendResponseHeaders(if (isJwks) jwksStatus else membershipStatus, if (stallBody) 0 else body.size.toLong())
+                    val status = if (isJwks) jwksStatus else if (isRole) roleStatus else membershipStatus
+                    exchange.sendResponseHeaders(status, if (stallBody) 0 else body.size.toLong())
                     if (stallBody) {
                         exchange.responseBody.write('{'.code)
                         exchange.responseBody.flush()

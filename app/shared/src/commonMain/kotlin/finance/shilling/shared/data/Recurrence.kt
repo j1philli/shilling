@@ -51,16 +51,19 @@ sealed class Recurrence {
 /**
  * Generate projected occurrences for the given schedule in [rangeStart, rangeEnd).
  * Excludes dates that already have postings or are marked skipped via exceptions, and
- * applies override amounts/accounts when provided.
+ * applies override amounts/accounts when provided. Stops after [limit] results so
+ * callers asking for the next occurrence do not expand the rest of the window.
  */
 fun generateOccurrences(
     schedule: Schedule,
     rangeStart: LocalDate,
     rangeEnd: LocalDate,
     exceptions: Map<LocalDate, ScheduleException> = emptyMap(),
-    postedDates: Set<LocalDate> = emptySet()
+    postedDates: Set<LocalDate> = emptySet(),
+    limit: Int = Int.MAX_VALUE
 ): List<ScheduledTx> {
-    if (rangeStart >= rangeEnd) return emptyList()
+    require(limit >= 0)
+    if (rangeStart >= rangeEnd || limit == 0) return emptyList()
     val effectiveStart = maxOf(schedule.startDate, rangeStart)
     val endDateLimit = schedule.endDate
     if (endDateLimit != null && endDateLimit < effectiveStart) return emptyList()
@@ -68,7 +71,7 @@ fun generateOccurrences(
     val recurrence = Recurrence.fromSchedule(schedule)
     val items = mutableListOf<ScheduledTx>()
     var cursor = effectiveStart
-    while (cursor < rangeEnd) {
+    while (cursor < rangeEnd && items.size < limit) {
         if (endDateLimit != null && cursor > endDateLimit) break
         if (matches(schedule, recurrence, cursor)) {
             val exception = exceptions[cursor]

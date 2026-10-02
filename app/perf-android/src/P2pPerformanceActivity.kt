@@ -79,7 +79,9 @@ class P2pPerformanceActivity : Activity() {
                 var openedChannel: WebRtcDataChannel? = null
                 var pressureWaits = 0
                 var pressureWaitNanos = 0L
-                val manager = WebRtcConnectionManager(webRtcClient, signaling, "z-pixel", onChannelOpen = { openedChannel = it }, delayFn = { ms ->
+                val status = PeerConnectionStatus()
+                scope.launch { status.connectedPeerIds.collect { Log.i("ShillingP2p", "SHILLING_PEERS pixel=$it") } }
+                val manager = WebRtcConnectionManager(webRtcClient, signaling, "z-pixel", status, onChannelOpen = { openedChannel = it }, delayFn = { ms ->
                     val start = System.nanoTime()
                     delay(ms)
                     if (ms == 10L) {

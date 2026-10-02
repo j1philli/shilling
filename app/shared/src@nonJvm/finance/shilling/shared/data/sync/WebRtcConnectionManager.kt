@@ -671,6 +671,7 @@ class WebRtcConnectionManager(
                         } else if (ch.label == "data") {
                             log.d { "[RTC] DataChannelEvent.Open for existing channel $peerId (offerer path)" }
                         }
+                        if (ch.label == "data") onChannelOpen(ch)
                         markPeerReady(peerId)
                     }
                     is DataChannelEvent.Closed -> {

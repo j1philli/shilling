@@ -131,16 +131,16 @@ class HomeViewModel(
         accountRepository.watchAll(),
         categoryRepository.watchAll(),
         scheduleRepository.watchAll(),
-        receiptRepository.watchAll(),
-        postingRepository.watchBetween(today.minus(1, DateTimeUnit.YEAR), today.plus(1, DateTimeUnit.DAY))
+        receiptRepository.watchCounts(),
+        postingRepository.watchRecentBetween(today.minus(1, DateTimeUnit.YEAR), today.plus(1, DateTimeUnit.DAY), limit = 3)
     ) { accounts, categories, schedules, receipts, recent ->
         initial.copy(
             totalBalance = accounts.sumOf { it.balance },
             accountCount = accounts.size,
             categoryCount = categories.size,
             scheduleBreakdown = schedules.groupingBy { it.type }.eachCount(),
-            receiptCount = receipts.size,
-            unattachedReceipts = receipts.count { it.receipt.postingId == null },
+            receiptCount = receipts.total,
+            unattachedReceipts = receipts.unattached,
             recent = mergeTransferLegs(recent).take(3).map { it.toUi() }
         )
     }

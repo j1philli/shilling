@@ -54,7 +54,10 @@ suspend fun ensureLocalSchemaReady(
     ).await()
     val hasSpaceRegistry = driver.executeQuery(null, "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='local_spaces';",
         { cursor -> cursor.next(); QueryResult.Value(cursor.getLong(0) == 1L) }, 0).await()
-    if (currentVersion == expectedVersion && hasRequiredTables && hasSpaceColumn && hasSpaceRegistry) return
+    if (currentVersion == expectedVersion && hasRequiredTables && hasSpaceColumn && hasSpaceRegistry) {
+        installProjectionIndexes(driver)
+        return
+    }
 
     // Native drivers may update user_version before this bootstrap runs. Recognize
     // the exact legacy layout rather than interpreting that bump as a migration.
@@ -86,13 +89,15 @@ suspend fun ensureLocalSchemaReady(
         } finally {
             driver.execute(null, "PRAGMA foreign_keys = ON;", 0).await()
         }
+        installProjectionIndexes(driver)
         log.i { "Migrated existing finance data to space-scoped keys" }
         return
     }
 
     val existingTables = driver.executeQuery(
         null,
-        "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%';",
+        // SQLiteOpenHelper creates android_metadata before opening a new app database.
+        "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' AND name != 'android_metadata';",
         { cursor ->
             cursor.next()
             QueryResult.Value(cursor.getLong(0) ?: 0L)
@@ -106,4 +111,10 @@ suspend fun ensureLocalSchemaReady(
 
     ShillingDatabase.Schema.create(driver).await()
     driver.execute(null, "PRAGMA user_version = $expectedVersion;", 0).await()
+}
+
+private suspend fun installProjectionIndexes(driver: SqlDriver) {
+    driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_change_log_entity_latest ON change_log(" +
+        "household_id, entity_type, entity_id, timestamp DESC, change_id DESC);", 0).await()
+    driver.execute(null, "CREATE INDEX IF NOT EXISTS postings_pair_idx ON postings(space_id, pair_id);", 0).await()
 }
