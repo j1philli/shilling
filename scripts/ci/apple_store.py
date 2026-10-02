@@ -135,6 +135,7 @@ def apply_saved_compliance(api, build):
 
 
 def upload(api, candidate, directory, output):
+    Path(output).unlink(missing_ok=True)
     if os.environ.get("BUILD_VCS_BRANCH") != "main":
         raise ValueError("TestFlight uploads must run on main")
     # Validate the selected internal group before uploading anything.
