@@ -36,6 +36,10 @@ class ReleaseTests(unittest.TestCase):
             patch.object(release, "ROOT", self.root),
             patch.object(release, "run", side_effect=self.fake_run),
             patch.object(release, "github_get", side_effect=self.github_get),
+            patch.object(release, "load_candidate", return_value={"build_number": "42", "commit": COMMIT}),
+            patch.object(release, "AppleAPI"),
+            patch.object(release, "approval", return_value={"apple_build_id": "apple-42"}),
+            patch.object(release, "promote"),
             patch.dict(os.environ, {"SHILLING_RELEASE_MODE": "full", "SHILLING_RELEASE_DRY_RUN": "0",
                 "BUILD_VCS_BRANCH": "main", "GITHUB_TOKEN": "test", "GHCR_TOKEN": "test",
                 "CLOUDFLARE_ACCOUNT_ID": "test", "CLOUDFLARE_API_TOKEN": "test",
@@ -196,6 +200,43 @@ class ReleaseTests(unittest.TestCase):
         self.assertEqual(image_call[1]["SHILLING_RELEASE_TARGETS"], "web")
         self.assertTrue(any("scripts/ci/deploy-hosted-web.sh" in c for c in self.commands()))
         self.assertFalse((self.root / "release-output/compose.yaml").exists())
+
+    def test_pending_apple_approval_blocks_every_remote_mutation(self):
+        with patch.object(release, "approval", side_effect=ValueError("iOS approval pending")):
+            with self.assertRaisesRegex(ValueError, "approval pending"):
+                release.main()
+        self.assertFalse(any(c[0] in ("gh", "bash", "docker") for c in self.commands()))
+        release.promote.assert_not_called()
+
+    def test_preview_reports_pending_approval_without_promoting(self):
+        os.environ["SHILLING_RELEASE_DRY_RUN"] = "1"
+        with patch.object(release, "approval", side_effect=ValueError("iOS approval pending")):
+            release.main()
+        release.promote.assert_not_called()
+        self.assertFalse(self.published())
+
+    def test_ios_only_promotes_before_github_publication(self):
+        os.environ.update(SHILLING_RELEASE_MODE="single", SHILLING_RELEASE_TARGET="ios")
+        def promote(*args):
+            self.assertFalse(self.published())
+        release.promote.side_effect = promote
+        release.main()
+        release.promote.assert_called_once()
+        self.assertTrue(self.published())
+        self.assertFalse(any("publish-release-images.sh" in " ".join(c) for c in self.commands()))
+
+    def test_apple_promotion_failure_keeps_github_draft(self):
+        release.promote.side_effect = RuntimeError("Apple unavailable")
+        with self.assertRaisesRegex(RuntimeError, "Apple unavailable"):
+            release.main()
+        self.assertFalse(self.published())
+
+    def test_non_ios_release_never_contacts_apple(self):
+        os.environ.update(SHILLING_RELEASE_MODE="single", SHILLING_RELEASE_TARGET="web")
+        release.main()
+        release.AppleAPI.assert_not_called()
+        release.approval.assert_not_called()
+        release.promote.assert_not_called()
 
     def test_invalid_target_is_rejected(self):
         with self.assertRaises(ValueError):
