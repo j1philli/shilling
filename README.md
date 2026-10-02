@@ -56,3 +56,5 @@ For security issues, follow [SECURITY.md](SECURITY.md).
 Shilling is licensed under the [GNU Affero General Public License v3.0 only](LICENSE) (`AGPL-3.0-only`). If you distribute a modified version or offer a modified version as a network service, the license has source-sharing requirements. Contributions upstream are welcome, but the license does not require a fork to submit a pull request here.
 
 Bundled and inlined third-party components retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+Optional product analytics is described in the [usage analytics privacy notice](docs/privacy.mdx) and [analytics setup guide](docs/product-analytics.mdx).

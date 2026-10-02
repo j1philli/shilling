@@ -102,6 +102,7 @@ fun startIosKoin() {
         ensureLocalSchemaReady(driver, logTag = "iOS")
     }
     initKoin(module {
+        single { finance.shilling.shared.data.analytics.ProductAnalyticsEnvironment(developmentBuild = isDebugBuild()) }
         single { AppSessionConfig(logTag = "iOS", authRedirectUrl = "shilling.finance://auth-callback") }
         single { ShillingDatabase(driver) }
         single { Settings() }

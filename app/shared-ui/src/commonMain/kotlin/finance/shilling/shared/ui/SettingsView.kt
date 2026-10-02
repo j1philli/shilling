@@ -25,6 +25,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -83,6 +85,19 @@ fun SettingsView(
                 }
             }
 
+            ListSectionHeader("Product analytics")
+            ShillingCard {
+                Text("Share usage events")
+                Text(state.analyticsNotice, style = MaterialTheme.typography.bodySmall)
+                Switch(
+                    modifier = Modifier.semantics { contentDescription = "Share usage events" },
+                    checked = state.analyticsConsent,
+                    onCheckedChange = viewModel::setAnalyticsConsent,
+                    enabled = state.analyticsConfigured
+                )
+                if (!state.analyticsConfigured) Text("Available after a PostHog project is configured.")
+            }
+
             ListSectionHeader("About")
             ShillingCard(
                 modifier = Modifier.clickable {
@@ -103,6 +118,7 @@ fun SettingsView(
             if (showDeveloperTools && developer != null) {
                 ListSectionHeader("Developer tools")
                 DeveloperToolsSection(developer, viewModel)
+                AnalyticsConfigSection(viewModel)
             }
         }
     }
@@ -220,6 +236,22 @@ private fun DevicesSection(state: HostedDevicesUiState, viewModel: HostedDevices
             }
         }
         OutlinedButton(onClick = viewModel::refresh) { Text("Refresh devices") }
+    }
+}
+
+@Composable
+private fun AnalyticsConfigSection(viewModel: SettingsViewModel) {
+    var host by remember { mutableStateOf(viewModel.analyticsHost) }
+    var token by remember { mutableStateOf(viewModel.analyticsProjectToken) }
+    val snackbar = LocalSnackbarController.current
+    ShillingCard {
+        Text("PostHog project", style = MaterialTheme.typography.titleMedium)
+        OutlinedTextField(value = host, onValueChange = { host = it }, label = { Text("HTTPS host") })
+        OutlinedTextField(value = token, onValueChange = { token = it }, label = { Text("Project token") })
+        Button(onClick = {
+            val valid = viewModel.saveAnalyticsConfig(host, token)
+            snackbar.show(if (valid) "PostHog project saved" else "Enter an HTTPS host and project token")
+        }) { Text("Save PostHog project") }
     }
 }
 

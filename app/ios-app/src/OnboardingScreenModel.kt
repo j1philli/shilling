@@ -59,6 +59,7 @@ class OnboardingScreenModel : IosViewModelHost() {
     fun open(route: OnboardingRoute) = viewModel.open(route)
     fun back() = viewModel.back()
     fun getStarted() = viewModel.getStarted()
+    fun setAnalyticsConsent(value: Boolean) = viewModel.setAnalyticsConsent(value)
     fun confirmDestructive() = viewModel.confirmDestructive()
     fun dismissDestructive() = viewModel.dismissDestructive()
     fun setSelfHostedUrl(value: String) = viewModel.setSelfHostedUrl(value)

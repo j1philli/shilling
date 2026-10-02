@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import finance.shilling.shared.data.Account
 import finance.shilling.shared.data.Category
 import finance.shilling.shared.data.IdGenerator
+import finance.shilling.shared.data.analytics.ProductAnalytics
+import finance.shilling.shared.data.analytics.ProductEvent
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -166,7 +168,8 @@ data class AccountEditorUiState(
 class AccountEditorViewModel(
     private val accountId: String?,
     private val accountRepository: AccountRepository,
-    private val idGenerator: IdGenerator
+    private val idGenerator: IdGenerator,
+    private val analytics: ProductAnalytics
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         if (accountId == null) AccountEditorUiState(EditorLoad.READY, isNew = true, title = "New account")
@@ -217,6 +220,7 @@ class AccountEditorViewModel(
         val balance = current.balance ?: return null
         if (!current.saveEnabled) return null
         accountRepository.upsert(Account(id = existing?.id ?: idGenerator.newId(), name = current.name.trim(), balance = balance))
+        if (existing == null) analytics.captureAsync(ProductEvent.ACCOUNT_CREATED)
         return if (existing == null) "Account added" else "Account updated"
     }
 

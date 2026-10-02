@@ -129,6 +129,12 @@ private fun webPlatformModule(db: ShillingDatabase) = module {
             logTag = "Sync"
         )
     }
+    single {
+        finance.shilling.shared.data.analytics.ProductAnalyticsEnvironment(
+            developmentBuild = document.querySelector("meta[name=shilling-development-build]")
+                ?.getAttribute("content") == "true"
+        )
+    }
     single { Settings() }
     single<IdGenerator> { WasmIdGenerator() }
     single<ReceiptFileStore> { WasmReceiptFileStore(get()) }

@@ -110,6 +110,10 @@ class SettingsScreenModel : IosViewModelHost() {
     }
     fun saveServerUrl(url: String): String = viewModel.saveServerUrl(url)
     fun saveHouseholdId(id: String): String = viewModel.saveHouseholdId(id)
+    fun setAnalyticsConsent(value: Boolean) = viewModel.setAnalyticsConsent(value)
+    fun saveAnalyticsConfig(host: String, projectToken: String): Boolean = viewModel.saveAnalyticsConfig(host, projectToken)
+    val analyticsHost: String get() = viewModel.analyticsHost
+    val analyticsProjectToken: String get() = viewModel.analyticsProjectToken
 
     @NativeCoroutines
     suspend fun submitCredentials(mode: HostedCredentialsMode, email: String, password: String): CredentialsOutcome {
