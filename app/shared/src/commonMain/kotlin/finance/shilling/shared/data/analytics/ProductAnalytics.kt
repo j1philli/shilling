@@ -20,9 +20,9 @@ private const val TOKEN_KEY = "posthog_project_token"
 private const val CONSENT_KEY = "posthog_consent"
 private const val ANONYMOUS_ID_KEY = "posthog_anonymous_id"
 
-// Fill these public client values when a PostHog project exists. Local settings override them.
-private const val DEFAULT_POSTHOG_HOST = ""
-private const val DEFAULT_POSTHOG_PROJECT_TOKEN = ""
+// Public ingestion values for production project 633922. Local settings override them.
+private const val DEFAULT_POSTHOG_HOST = "https://us.i.posthog.com"
+private const val DEFAULT_POSTHOG_PROJECT_TOKEN = "phc_qD4tBfu3ZbwRjPgT2zqG3TsTh8rVLmvWsuVFGbzTfdkj"
 
 /** Only these event names and fixed, non-financial properties may leave the device. */
 enum class ProductEvent(val wireName: String) {
@@ -34,11 +34,17 @@ enum class ProductEvent(val wireName: String) {
     RECEIPT_ATTACHED("receipt_attached")
 }
 
+/** Development consent and installation identity must not inherit production settings. */
+data class ProductAnalyticsEnvironment(val developmentBuild: Boolean = false)
+
 class ProductAnalytics(
     private val settings: Settings,
     private val idGenerator: IdGenerator,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    environment: ProductAnalyticsEnvironment = ProductAnalyticsEnvironment()
 ) {
+    private val consentKey = if (environment.developmentBuild) "posthog_development_consent" else CONSENT_KEY
+    private val anonymousIdKey = if (environment.developmentBuild) "posthog_development_anonymous_id" else ANONYMOUS_ID_KEY
     private val deliveryScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     /** Dispatch independently of a screen that may close as soon as its action succeeds. */
@@ -56,8 +62,8 @@ class ProductAnalytics(
         set(value) = settings.putString(TOKEN_KEY, value.trim())
 
     var consent: Boolean
-        get() = settings.getBoolean(CONSENT_KEY, false)
-        set(value) = settings.putBoolean(CONSENT_KEY, value)
+        get() = settings.getBoolean(consentKey, false)
+        set(value) = settings.putBoolean(consentKey, value)
 
     val configured: Boolean
         get() = host.startsWith("https://") && projectToken.isNotBlank()
@@ -65,8 +71,8 @@ class ProductAnalytics(
     suspend fun capture(event: ProductEvent, kind: String? = null) {
         if (!consent || !configured) return
         // An independent random installation ID; never use auth, device, or household IDs.
-        val anonymousId = settings.getStringOrNull(ANONYMOUS_ID_KEY)
-            ?: idGenerator.newId().also { settings.putString(ANONYMOUS_ID_KEY, it) }
+        val anonymousId = settings.getStringOrNull(anonymousIdKey)
+            ?: idGenerator.newId().also { settings.putString(anonymousIdKey, it) }
         val properties = buildJsonObject {
             put("$" + "process_person_profile", false)
             if (event == ProductEvent.ONBOARDING_COMPLETED && kind in setOf("guest", "hosted", "self_hosted")) {

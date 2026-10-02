@@ -25,6 +25,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -85,8 +87,10 @@ fun SettingsView(
 
             ListSectionHeader("Product analytics")
             ShillingCard {
-                Text("Share usage events to help improve Shilling. No amounts, names, or receipt contents are sent.")
+                Text("Share usage events")
+                Text(state.analyticsNotice, style = MaterialTheme.typography.bodySmall)
                 Switch(
+                    modifier = Modifier.semantics { contentDescription = "Share usage events" },
                     checked = state.analyticsConsent,
                     onCheckedChange = viewModel::setAnalyticsConsent,
                     enabled = state.analyticsConfigured

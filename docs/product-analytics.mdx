@@ -1,6 +1,8 @@
 # Product analytics
 
-Shilling has a small, opt-in PostHog funnel. It is disabled until a PostHog host and project token are saved in **Settings → Developer tools → PostHog project** and **Share usage events** is enabled on that device. Developer tools appear in debug builds or after tapping About seven times. Use the project token from PostHog project settings, not a personal API key. The host must be HTTPS. Shilling sends events directly to that host; it does not send them through the signaling server. Once a project exists, set the two empty `DEFAULT_POSTHOG_*` constants in `ProductAnalytics.kt` for release builds. Local settings can override those defaults. When configured, fresh installs see the analytics choice during onboarding, before the first funnel event.
+Shilling has a small, opt-in PostHog funnel. Builds default to the production **Default project** (ID `633922`) using `https://us.i.posthog.com` and its public project token. Sending is disabled until **Share usage events** is enabled on that device. Fresh installs see the analytics choice during onboarding, before the first funnel event.
+
+Local settings can override the defaults in **Settings → Developer tools → PostHog project**. Developer tools appear in debug builds or after tapping About seven times. Use the project token from PostHog project settings, not a personal API key. The host must be HTTPS. Shilling sends events directly to that host; it does not send them through the signaling server. The ingestion host and request format follow [PostHog's capture API](https://posthog.com/docs/api/capture).
 
 The sender is shared Kotlin and uses PostHog's event ingestion API. It works across the app's Android, iOS, and Wasm targets without a native SDK linkage step. Delivery is best effort; events are not queued while the host is unavailable. No events are backfilled from before consent or configuration.
 
@@ -17,8 +19,57 @@ The sender is shared Kotlin and uses PostHog's event ingestion API. It works acr
 
 Only these event names and fixed property values are allowed. The sender creates a random installation ID separate from authentication, device, and household IDs. It requests no PostHog person profile. It never sends balances, amounts, transaction descriptions, account or category names, filenames, receipt content, CSV content, household IDs, or raw errors. Autocapture, session replay, and error capture are not installed.
 
+The [usage analytics privacy notice](./privacy.mdx) explains consent, the installation identifier, and PostHog IP/location enrichment. The same disclosure appears in onboarding and Settings on both native iOS and Compose.
+
 ## PostHog reports
 
-After configuring a project, create a funnel with `onboarding_completed` → `account_created` → either `schedule_created` or `posting_created` as the activation step. Break down the first step by `mode`; `schedule_created` can also be broken down by `type`. The optional later actions `csv_import_completed` and `receipt_attached` work better as separate feature adoption trends, since many users will not use them in that order. Use `schedule_created` or `posting_created` for a weekly retention report.
+The [Shilling product analytics dashboard](https://us.posthog.com/project/633922/dashboard/2159054) contains:
 
-Development and production should use different PostHog projects when possible. If using PostHog Cloud's one-project free plan, leave development devices opted out to keep test events out of production reports.
+- **Activation by onboarding mode:** `onboarding_completed` → `account_created` → either `schedule_created` or `posting_created`, in order within 14 days, over the last 30 days. The breakdown uses `mode` from the onboarding step.
+- **Feature adoption:** daily distinct installations performing each of the six events over the last 30 days. CSV import and receipt attachment do not need to happen in sequence.
+- **Schedule creation by type:** daily distinct installations creating schedules, broken down by `expense`, `income`, or `transfer`.
+- **CSV import adoption** and **receipt attachment adoption:** standalone daily trends for each optional feature, counting distinct installations rather than imported rows or attachment count.
+- **Weekly posting retention:** first-time `posting_created` cohorts returning to create another manual transaction, over eight weekly intervals. This measures manual transaction creation, not app visits or automatically generated postings.
+
+Reports count consenting installations, not people or households, and cannot join activity across devices. The activation funnel excludes installations whose onboarding happened before consent. Its definition is saved as the proposed Data Catalog metric `shilling_activation`; it is not a human-approved canonical metric. Retention is saved as an insight because the Data Catalog does not support `RetentionQuery` definitions.
+
+The [integration verification dashboard](https://us.posthog.com/project/633922/dashboard/2159155) contains synthetic web, Android, and native iOS UI smoke-test results from October 1, 2026. It includes installations `2439d3ae-9c64-42ee-97bb-67c0c7d9323c` (web) and `2ae2a2ba-452e-4a67-acee-ed0fdd04f2f2` (Android), and `295917E2-345A-46D5-90A9-940A296FF2D9` (iOS); the production dashboard excludes all three installations using a dashboard-level filter. Opening a shared saved insight directly does not apply its dashboard's filter. Single-day test data cannot establish weekly retention.
+
+Live web verification confirmed nine ingested events: guest onboarding, one budget account, three schedule types, one manual transaction, two receipt attachments (transaction and new receipt editor), and one completed import containing two CSV rows. Account, schedule and transaction edits emitted no creation events. Consent off prevented requests before and after opting in, and a blocked PostHog connection did not prevent saving an account. The browser sender contained only the documented property allowlist; PostHog additionally enriched ingested events with IP and GeoIP properties. The initial web run did not exercise native UIs. The follow-up Android and native iOS UI runs below cover all six triggers; successful hosted and self-hosted onboarding completion is still unverified.
+
+| Verified event | Ingested count | Checked values / paths |
+| --- | ---: | --- |
+| `onboarding_completed` | 1 | `mode=guest` |
+| `account_created` | 1 | Budget account form |
+| `schedule_created` | 3 | One each of `expense`, `income`, `transfer` |
+| `posting_created` | 1 | One-off transaction form |
+| `csv_import_completed` | 1 | One import containing two selected rows |
+| `receipt_attached` | 2 | Transaction editor and new receipt editor |
+
+All nine web records used the same independent installation ID and PostHog's `propertyless` person mode. The verification dashboard's adoption charts count distinct installations, so two receipt events appear as one adopting installation. The refreshed funnel shows three synthetic installations completing all three steps; this is a test result, not a production conversion estimate.
+
+To repeat ingestion verification from a new build, opt in during onboarding, then create an account and a schedule or transaction. Check the events in project `633922` and the dashboard. Turning consent off must stop subsequent delivery.
+
+Development builds start opted out using their own consent and installation ID settings; production consent is never inherited. Android uses its debuggable flag, iOS uses the Kotlin debug binary flag, and web/desktop use the Wasm Debug build variant written into `index.html`. Explicit development opt-in persists within development builds. The smoke-test browser was left opted out. Other existing devices adopt the separate development consent setting when updated to this build.
+
+Development and production should use different PostHog projects when possible. With the shared project, leave development devices opted out unless deliberately verifying capture, and exclude any further test installation IDs from the production dashboard.
+
+## Android UI and privacy review — October 1, 2026
+
+A fresh Android 16 (API 36) emulator completed guest onboarding, budget account creation, expense/income/transfer schedule creation, transaction creation, receipt attachment from the transaction editor and from a new receipt editor, and a two-row CSV import. PostHog confirmed nine ingested events under the separate Android test installation above: the same counts as the web table. Account, schedule, and transaction edits did not add creation events. CSV rows did not add `posting_created` events.
+
+The emulator started opted out. After enabling sharing in onboarding, all six triggers arrived. Switching sharing off in Settings and creating another budget account left `account_created` at one. A transaction also saved successfully while the configured analytics host was `https://posthog.invalid`; it added no ingested event. The production host was restored, and the emulator was left opted out again; the off state persisted after a cold relaunch.
+
+All nine Android events used `propertyless` person mode. Complete ingested properties contained only the sender allowlist plus PostHog IP/GeoIP enrichment; no amounts, names, filenames, receipt or CSV contents, household IDs, or error text appeared.
+
+The privacy disclosure now appears before opt-in on landing and self-hosted onboarding, and in Settings, using shared copy across Compose and native iOS. It names PostHog, US processing, the random installation identifier, IP/approximate-location enrichment, excluded budget content, and what turning sharing off does. Compose onboarding is scrollable, and consent switches have accessibility labels. Web landing, sign-in, and self-hosted validation screens and Android landing, self-hosted validation, Settings, editors, file pickers, and import confirmation were exercised.
+
+Native iOS compilation and the simulator app build passed. CoreSimulator initially stopped responding; after an explicitly approved service restart and a restart of the isolated QA simulator, native iOS UI smoke testing completed. Successful hosted authentication, successful self-hosted onboarding completion, and physical-device camera/photo flows are not covered by these smoke tests.
+
+## Native iOS UI verification — October 1, 2026
+
+An isolated iPhone 16 Pro simulator on iOS 18.6 completed all six triggers through the native SwiftUI screens. PostHog received exactly nine events under installation `295917E2-345A-46D5-90A9-940A296FF2D9`: guest onboarding, one budget account, expense/income/transfer schedules, one manual transaction, two receipt attachments (transaction editor and new receipt editor), and one two-row CSV import. Imported rows added no `posting_created` events. Account, schedule, and transaction edits added no creation events.
+
+Sharing started off. A second budget account saved with sharing off added no event. A transaction saved with an unreachable analytics host added no ingested event; the production host was restored. Sharing was switched off again and remained off after a forced app relaunch. All nine captured records used `propertyless` person mode, and their complete properties contained only the documented allowlist plus PostHog IP/GeoIP enrichment.
+
+Native landing, hosted sign-in form, self-hosted invalid-URL validation, Settings privacy disclosure, account/schedule/transaction editors, Files picker, both receipt paths, CSV mapping/review/confirmation, and app relaunch were exercised. The Files extension initially showed a blank sheet; restarting the isolated simulator recovered it. The iOS test installation is included in the verification dashboard and excluded from the production dashboard. Hardware camera/photo flows and successful credential-based hosted/self-hosted onboarding remain separate release checks.

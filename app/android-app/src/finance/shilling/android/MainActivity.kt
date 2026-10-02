@@ -92,6 +92,11 @@ class MainActivity : ComponentActivity() {
         val appContext = applicationContext
         // Returns the running graph if this Activity is recreated in the same process.
         initKoin(module {
+            single {
+                finance.shilling.shared.data.analytics.ProductAnalyticsEnvironment(
+                    developmentBuild = (appContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                )
+            }
             single { AppSessionConfig(logTag = "Android", authRedirectUrl = "shilling.finance://auth-callback") }
             single { ShillingDatabase(driver) }
             single { settings }

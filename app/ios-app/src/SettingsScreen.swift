@@ -102,7 +102,7 @@ struct SettingsScreen: View {
                         set: { model.screen.setAnalyticsConsent(value: $0) }
                     ))
                     .disabled(!state.analyticsConfigured)
-                    Text("No amounts, names, or receipt contents are sent.")
+                    Text(state.analyticsNotice)
                         .font(.footnote).foregroundStyle(.secondary)
                     if !state.analyticsConfigured {
                         Text("Available after a PostHog project is configured.")

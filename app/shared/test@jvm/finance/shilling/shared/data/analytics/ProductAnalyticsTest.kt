@@ -67,8 +67,39 @@ class ProductAnalyticsTest {
         client.close()
     }
 
+    @Test
+    fun developmentStartsOptedOutEvenWhenProductionConsented() = runBlocking {
+        val settings = isolatedSettings()
+        settings.putBoolean("posthog_consent", true)
+        settings.putString("posthog_anonymous_id", "production-installation")
+        var requests = 0
+        var payload = ""
+        val client = HttpClient(MockEngine) {
+            engine {
+                addHandler { request ->
+                    requests++
+                    payload = (request.body as TextContent).text
+                    respond("", HttpStatusCode.OK)
+                }
+            }
+        }
+        val development = ProductAnalytics(settings, idGenerator, client, ProductAnalyticsEnvironment(true))
+        assertFalse(development.consent)
+        development.capture(ProductEvent.ACCOUNT_CREATED)
+        assertEquals(0, requests)
+        development.consent = true
+        development.capture(ProductEvent.ACCOUNT_CREATED)
+        assertEquals(1, requests)
+        assertEquals("random-installation-id", Json.parseToJsonElement(payload).jsonObject.getValue("distinct_id").jsonPrimitive.content)
+        development.consent = false
+        assertTrue(ProductAnalytics(settings, idGenerator, client).consent)
+        assertEquals("production-installation", settings.getStringOrNull("posthog_anonymous_id"))
+        client.close()
+    }
+
     private fun isolatedSettings() = Settings().also { settings ->
-        listOf("posthog_host", "posthog_project_token", "posthog_consent", "posthog_anonymous_id")
+        listOf("posthog_host", "posthog_project_token", "posthog_consent", "posthog_anonymous_id",
+            "posthog_development_consent", "posthog_development_anonymous_id")
             .forEach(settings::remove)
     }
 }

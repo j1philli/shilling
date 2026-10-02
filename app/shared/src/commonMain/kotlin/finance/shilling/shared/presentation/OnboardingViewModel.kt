@@ -43,6 +43,7 @@ data class OnboardingUiState(
     /** Set while the "Replace your saved budget?" confirmation is up. */
     val destructiveConfirm: ConfirmCopy? = null
 ) {
+    val analyticsNotice: String get() = ANALYTICS_PRIVACY_NOTICE
     val welcomeTitle: String get() = "Welcome to Shilling"
     val welcomeMessage: String get() =
         "Get started quickly, sign in to an existing account, or connect to your own server."

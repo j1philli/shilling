@@ -132,6 +132,7 @@ data class SettingsUiState(
     /** Unlocked by tapping About seven times (UIs also show them in debug builds). */
     val developerToolsUnlocked: Boolean = false
 ) {
+    val analyticsNotice: String get() = ANALYTICS_PRIVACY_NOTICE
     val currencyExample: String get() = "Example: ${formatCurrency(1234.5)}"
 }
 

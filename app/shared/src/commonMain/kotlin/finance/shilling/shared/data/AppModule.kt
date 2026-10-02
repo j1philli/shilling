@@ -2,6 +2,7 @@ package finance.shilling.shared.data
 
 import finance.shilling.shared.data.auth.DeviceIdentity
 import finance.shilling.shared.data.analytics.ProductAnalytics
+import finance.shilling.shared.data.analytics.ProductAnalyticsEnvironment
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.ChangeNotifier
@@ -63,7 +64,7 @@ fun initKoin(vararg modules: Module): Koin =
  * `ShillingDatabase`, `Settings`, `IdGenerator`, scoped `ReceiptFileStoreFactory`, and `HttpClient`.
  */
 val dataModule: Module = module {
-    single { ProductAnalytics(get(), get(), get()) }
+    single { ProductAnalytics(get(), get(), get(), getOrNull<ProductAnalyticsEnvironment>() ?: ProductAnalyticsEnvironment()) }
     single { DeviceIdentity(get(), get()) }
     single { ChangeNotifier() }
     single { PeerConnectionStatus() }
