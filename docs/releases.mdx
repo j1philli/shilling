@@ -16,12 +16,14 @@ targets stay at `0.1.0`. Previews use tags such as `v0.1.1-beta.1`; stable
 releases use `v0.1.1`. There is no fourth public version component.
 
 Android `versionCode` and iOS `CFBundleVersion` are separate, increasing store
-build numbers. Increase only the relevant build number for a store upload,
-including a rebuild at the same product version.
+build numbers. TeamCity sets the iOS build number to its globally increasing
+build ID in both the app and widget, without changing the checked-in defaults.
+Every main build can therefore upload at the same product version. Increase
+Android versionCode for each Play upload.
 
 Run `just set-version 0.1.1` to update all product manifests. Add `--android`
-for a Play upload and `--ios` for an App Store Connect upload. For example,
-`just set-version 0.1.1 --android --ios` prepares a full mobile release;
+for a Play upload. `--ios` advances only the local Xcode default; CI assigns its own build number. For example,
+`just set-version 0.1.2 --android` prepares a full mobile release;
 `just set-version 0.1.2 --android` prepares an Android-only patch. The command
 checks the manifests before and after the update. `just check-version` runs in
 TeamCity CI and before self-hosted image publishing. The tag must match the
@@ -32,29 +34,57 @@ version at that commit.
 | Event | Result |
 | --- | --- |
 | Push to a feature branch | CI, runtime checks, Android, Linux desktop and Windows desktop build on Linux. |
-| Merge to `main` | All targets build, including iOS and macOS; tests and Mac DMG startup checks run. **No Pages deployment or release publication.** |
+| Merge to `main` | All targets build and tests run. After the complete matrix passes, **iOS — TestFlight** uploads the exact signed IPA and distributes it to the existing internal group. No production deployment or GitHub release. |
 | Create a release tag | Identifies the tested release commit. No additional automatic build or deployment. |
 
-Packages remain in TeamCity until a release button is run. The two release jobs
+Packages remain in TeamCity; iOS main builds also become internal TestFlight betas. The two release jobs
 reuse successful builds at the same revision, or build missing dependencies.
 Both require the full matrix to pass, even for a single-target release.
 
 ## Two release buttons
 
 Prepare the shared version in the normal code PR, then merge it. For example,
-`just set-version 0.1.1 --android --ios` prepares a full release;
+`just set-version 0.1.2 --android` prepares a full release;
 `just set-version 0.1.2 --android` prepares an Android-only patch. Each public
 release needs a fresh shared version, including single-target releases.
+
+### Prepare the iOS candidate for Apple review
+
+1. Bump the shared version in a PR before testing the candidate. Once `vX.Y.Z`
+   is published on GitHub, use a fresh patch version even for an iOS-only release.
+2. Wait for **Build all targets** and **iOS — TestFlight** to pass, then test the
+   displayed iOS version/build on a device.
+3. Promote that successful TeamCity chain to **iOS — Submit for Review** using
+   its Actions / Promote controls (or Run Custom Build → Changes at that exact
+   revision). Use the same revision again for the eventual release button.
+4. The job selects that chain's exact Apple build and shared version, submits
+   for App Review, and sets **manual release after approval**. Complete the
+   App Store listing, screenshots, privacy declarations and review contact/login
+   details beforehand. Apple validation errors leave an editable draft; fix the
+   metadata and rerun on the same revision. The initial empty `1.0` draft can be
+   reused for the actual version in `VERSION`.
+5. Wait for **Pending Developer Release**, then run Full or Single Target/iOS
+   on the same tested chain. Later merges do not change the selected candidate.
+
+Each IPA has a `Shilling_X.Y.Z_ios-build.json` artifact containing its source
+commit, bundle ID, TeamCity build number and SHA-256. Promotion validates those
+against the actual IPA, then checks Apple's exact version/build association.
+It never picks an arbitrary latest Apple build, re-signs, or reuploads an IPA.
+If TeamCity artifacts have expired or an iOS rebuild produces a new build ID,
+the job fails the approval check; test and submit that new candidate explicitly.
 
 ### Full release
 
 In TeamCity, run **Release — Full** on `main`.
 
-It waits for all builds and checks, creates `vX.Y.Z` at that exact commit,
+It waits for all builds and checks, verifies that Apple approved the exact iOS
+candidate for manual release, then creates `vX.Y.Z` at that exact commit,
 collects all client packages, publishes server and web images for Linux
 amd64/arm64, deploys the server image to Coolify by immutable digest, verifies its health and
 Supabase mode, deploys the tested hosted web bundle to Pages, and publishes the
 GitHub release with packages, Compose files and an artifact hash manifest.
+It requests release of the approved iOS build before publishing the GitHub
+release. App Store availability may lag Apple’s accepted release request.
 No manual tagging, image-target parameters or asset uploads are required.
 
 ### Single-target release
@@ -65,7 +95,8 @@ Windows and macOS.
 
 Only the selected target is published. Web publishes its self-hosted image and
 deploys hosted Pages. Server publishes its image and JAR and deploys the image to Coolify. A client publishes
-its package files to GitHub. Other installed/published targets retain their
+its package files to GitHub; **iOS also releases the already-approved App Store
+build**, with the same approval gate as Full. Other installed/published targets retain their
 previous version. A single-image release omits Compose files because the two
 image versions differ.
 
@@ -75,23 +106,26 @@ Both buttons offer **Preview only (publish nothing)**. This validates and
 collects real artifacts into `release-output.zip`, showing the target selection,
 release notes and hashes without creating tags, pushing images or deploying. If Server is included,
 preview also performs a read-only Coolify configuration/connectivity check.
+For iOS, preview validates provenance and reports Apple approval readiness without
+uploading, submitting for review, or releasing. Pending approval is reported as
+blocked; credential/API failures fail the preview.
 
 The release jobs share a lock so only one can publish at a time. The version
 is read from `VERSION`, and the tag must belong to the checked-out commit on
 `main`. The job refuses to reuse a tag for another commit or target selection.
 An already-completed release is a no-op. Publishing failures leave a GitHub
-draft that can be retried with the same revision and selection. Images, Coolify and
-Pages cannot be published atomically; a failure can leave images uploaded or
+draft that can be retried with the same revision and selection. Images, Coolify, Pages and the App Store cannot be published atomically; a failure can leave images uploaded or
 hosted targets deployed while the GitHub release is still a draft. Inspect the failed
 step and rerun that exact release to finish it.
 
-**These buttons currently publish development distributions, not app-store
-releases.** Versions `0.x` are marked as GitHub prereleases. Android includes a
+**iOS releases promote an approved App Store build.** Versions `0.x` remain
+marked as GitHub prereleases; that label is separate from Apple distribution. Android includes a
 debug APK and unsigned AAB; iOS exports an App Store-signed IPA when signing is
 enabled (an unsigned app ZIP otherwise); macOS is an unsigned universal DMG; Windows is an unsigned x86_64
 NSIS installer; Linux includes x86_64 AppImage, Debian and RPM packages.
-Android/desktop signing, macOS notarization, and automated Play/TestFlight/App Store
-uploads still need setup.
+Android/desktop signing, macOS notarization, and Play upload still need setup.
+iOS TestFlight upload, App Review submission, and approved App Store promotion
+are automated by the separate jobs described above.
 Release notes state these limitations. An App Store-signed IPA is intended for
 App Store Connect upload; downloading it from GitHub does not install it on an
 iPhone. An unsigned iOS archive is also not an installable iPhone release.
@@ -155,14 +189,40 @@ runner needs an unlocked signing keychain for locally created signing keys.
 
 Signed TeamCity builds are restricted to `main`. Xcode uses the API key with
 `-allowProvisioningUpdates` for automatic provisioning and App Store export.
-Export preserves the repository's version and build number. The app and widget
+Export preserves the repository product version and the CI-assigned build number. The app and widget
 need their bundle IDs and `group.finance.shilling.app` App Group configured in
 the same Apple Developer team.
 
-This exports a signed IPA; it does **not** upload to App Store Connect or submit
-an app for review. The Full/Single Target release buttons publish the IPA as a
-GitHub asset when a signed iOS build is available. Apple upload automation is a
-separate release step and must not run on an ordinary merge to main.
+### Apple workflow configuration
+
+The existing internal TestFlight group is used; these jobs never invite testers,
+create public links, or submit builds for external beta review. Uploads use normal
+App Store-eligible export, not the “TestFlight Internal Only” option.
+
+Parent TeamCity parameters:
+
+- `env.ASC_APP_ID`: the Shilling App Store Connect app ID.
+- `env.ASC_INTERNAL_GROUP_ID`: existing internal TestFlight group.
+- `env.ASC_ENCRYPTION_REFERENCE_BUILD_ID`: a build whose encryption questionnaire
+  the owner has already completed. New uploads reuse that saved answer. Reassess
+  it after changes to cryptography or distribution territory, including France.
+- `shilling.apple.api.private.key`: **password**, non-environment parameter holding
+  the API key. Only Linux release/review configurations map it to
+  `env.ASC_API_PRIVATE_KEY`. Never make the private key an inherited environment
+  parameter: Xcode logs its build environment. Mac upload jobs use `ASC_KEY_PATH`.
+
+The Apple API helper uses pinned Python dependencies in a runner-local virtual
+environment. Upload retries reuse Apple's existing version/build; they do not
+compile again. `testflight.zip` records the Apple build ID and IPA hash.
+`ios-deployment.json` records the exact App Store release request and is attached
+to GitHub. A successful promotion means Apple accepted the release request, not
+that storefront propagation has finished. The request cannot be undone by CI.
+
+**First GA checklist:** finish listing/screenshots, privacy and age-rating
+answers, review contact/login instructions and agreements in App Store Connect.
+Keep France excluded until its encryption requirements are resolved. Then bump
+to a fresh shared version, test that main build, submit it, and wait for approval.
+CI does not fill in legal declarations or publish an unreviewed app.
 
 ### Runtime checks
 

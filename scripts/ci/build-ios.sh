@@ -44,6 +44,27 @@ bash setup-webrtc.sh
 # The Xcode project calls the Kotlin toolchain in its Build Kotlin phase.
 export KOTLIN_CLI_WRAPPER_PATH="$PWD/kotlin"
 
+# CI uses a globally increasing TeamCity ID. Keep local repository defaults intact.
+# Both plists contain literal versions, so overriding CURRENT_PROJECT_VERSION alone
+# would not update the app and widget. Restore the source files even on failure.
+version_args=()
+if [ -n "${TEAMCITY_BUILD_ID:-}" ]; then
+    [[ "$TEAMCITY_BUILD_ID" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid TeamCity build ID" >&2; exit 1; }
+    plist_backup=$(mktemp -d)
+    cp app/ios-app/src/Info.plist "$plist_backup/app.plist"
+    cp app/ios-app/ShillingWidgetExtension/Info.plist "$plist_backup/widget.plist"
+    trap 'cp "$plist_backup/app.plist" app/ios-app/src/Info.plist; cp "$plist_backup/widget.plist" app/ios-app/ShillingWidgetExtension/Info.plist; rm -rf "$plist_backup"' EXIT
+    python3 - <<'PYBUILD'
+import os, plistlib
+from pathlib import Path
+for path in (Path("app/ios-app/src/Info.plist"), Path("app/ios-app/ShillingWidgetExtension/Info.plist")):
+    info = plistlib.loads(path.read_bytes())
+    info["CFBundleVersion"] = os.environ["TEAMCITY_BUILD_ID"]
+    path.write_bytes(plistlib.dumps(info))
+PYBUILD
+    version_args=("CURRENT_PROJECT_VERSION=$TEAMCITY_BUILD_ID")
+fi
+
 xcodebuild archive \
     -project app/ios-app/module.xcodeproj \
     -scheme app \
@@ -51,6 +72,7 @@ xcodebuild archive \
     -destination 'generic/platform=iOS' \
     -archivePath "$archive_path" \
     "${signing_args[@]}" \
+    ${version_args[@]+"${version_args[@]}"} \
     ${apple_auth_args[@]+"${apple_auth_args[@]}"}
 
 app_path="$archive_path/Products/Applications/ios-app.app"
@@ -94,3 +116,7 @@ if [ -z "$ipa" ] || [ ! -s "$ipa" ]; then
     exit 1
 fi
 cp "$ipa" "$output_dir/Shilling_${version}_ios.ipa"
+
+if [ -n "${TEAMCITY_BUILD_ID:-}" ]; then
+    python3 scripts/ci/ios_provenance.py "$output_dir/Shilling_${version}_ios.ipa"
+fi
