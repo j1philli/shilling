@@ -21,6 +21,7 @@ class FinanceSpaceIsolationTest {
     }, ChangeNotifier(), object : ReceiptFileStore {
         override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {}
         override suspend fun read(receiptId: String): ByteArray? = null
+        override suspend fun openReader(receiptId: String): ReceiptFileReader? = null
         override suspend fun hasFile(receiptId: String) = false
         override suspend fun delete(receiptId: String) {}
         override suspend fun clearAll() {}
@@ -70,7 +71,7 @@ class FinanceSpaceIsolationTest {
         val next = graph(db, "new")
         old.accounts.upsert(Account("account", "Saved", 1.0))
         old.scope.retire()
-        runCatching { old.accounts.upsert(Account("account", "Stale editor", 2.0)) }
+        assertFails { old.accounts.upsert(Account("account", "Stale editor", 2.0)) }
         assertEquals("Saved", old.accounts.getAll()["account"]?.name)
         assertTrue(next.accounts.getAll().isEmpty())
     }

@@ -22,6 +22,10 @@ class ImportViewModelTest {
         val main = Executors.newSingleThreadExecutor { Thread(it, "synthetic-ui") }.asCoroutineDispatcher()
         Dispatchers.setMain(main)
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        val analyticsPreferences = java.util.prefs.Preferences.userRoot().node("shilling/tests/${java.util.UUID.randomUUID()}")
+        val analyticsClient = io.ktor.client.HttpClient(io.ktor.client.engine.mock.MockEngine { error("Analytics must remain opted out") })
+        val analytics = finance.shilling.shared.data.analytics.ProductAnalytics(com.russhwolf.settings.PreferencesSettings(analyticsPreferences),
+            object : IdGenerator { override fun newId() = "unused" }, analyticsClient)
         val owner = ViewModelStore()
         try {
             ShillingDatabase.Schema.create(driver).await()
@@ -39,7 +43,7 @@ class ImportViewModelTest {
             val day = LocalDate(2026, 9, 29)
             postings.recordAdHoc("Already here", 12.34, ScheduleType.EXPENSE, "a", null, day)
             val model = withContext(main) {
-                ImportViewModel(accountRepo, categoryRepo, postings).also { owner.put("import", it) }
+                ImportViewModel(accountRepo, categoryRepo, postings, analytics).also { owner.put("import", it) }
             }
             suspend fun awaitState(predicate: (ImportUiState) -> Boolean) =
                 withTimeout(10_000) { model.state.first(predicate) }
@@ -62,6 +66,8 @@ class ImportViewModelTest {
             awaitState { it.stage == ImportStage.NO_FILE }
         } finally {
             withContext(main) { owner.clear() }
+            analyticsClient.close()
+            analyticsPreferences.removeNode()
             driver.close()
             Dispatchers.resetMain()
             main.close()

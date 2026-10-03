@@ -3,6 +3,7 @@
     <application android:label="Shilling performance" android:allowBackup="false" android:usesCleartextTraffic="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <profileable android:shell="true" />
+        <activity android:name="finance.shilling.perf.HostedUiPerformanceActivity" android:exported="true" />
         <activity android:name="finance.shilling.perf.ReceiptListPerformanceActivity" android:exported="true" />
         <activity android:name="finance.shilling.perf.UiPerformanceActivity" android:exported="true" />
         <activity android:name="finance.shilling.perf.P2pPerformanceActivity" android:exported="true" />

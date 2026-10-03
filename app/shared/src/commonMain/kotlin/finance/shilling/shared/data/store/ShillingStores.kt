@@ -360,7 +360,7 @@ fun createPostingStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
                         date_ = key.end.toEpochDays().toLong(),
                         space_id = spaceId
                     ).asFlow().map { it.awaitAsList().map { r -> r.toDomain() } }
-                    is PostingKey.Recent -> db.postingQueries.selectRecent(key.limit.coerceAtLeast(0L), space_id = spaceId)
+                    is PostingKey.Recent -> db.postingQueries.selectRecent(space_id = spaceId, value_ = key.limit.coerceAtLeast(0L))
                         .asFlow().map { it.awaitAsList().map { r -> r.toDomain() } }
                 }
             },
@@ -395,7 +395,7 @@ fun createPostingStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
                     ).awaitAsList().forEach { posting ->
                         detachAndDeletePosting(db, spaceId, posting.id)
                     }
-                    is PostingKey.Recent -> db.postingQueries.selectRecent(key.limit.coerceAtLeast(0L), space_id = spaceId)
+                    is PostingKey.Recent -> db.postingQueries.selectRecent(space_id = spaceId, value_ = key.limit.coerceAtLeast(0L))
                         .awaitAsList()
                         .forEach { posting -> detachAndDeletePosting(db, spaceId, posting.id) }
                 }
@@ -576,14 +576,17 @@ private inline fun <Key : Any, reified Item : Any> createUpdater(
             changes.forEach { change ->
                 val entityId = change.entityId
                 if (peerSyncManager == null) {
-                    log.w { "[STORE] peerSyncManager is NULL — $entityType/$entityId not broadcast (full-state backfill covers catch-up)" }
+                    log.d { "[STORE] peerSyncManager is NULL — $entityType/$entityId not broadcast (full-state backfill covers catch-up)" }
                 } else {
-                    log.i { "[STORE] Broadcasting $entityType/$entityId via P2P" }
-                    peerSyncManager.broadcast(change)
+                    log.d { "[STORE] Broadcasting $entityType/$entityId via P2P" }
+                    try { peerSyncManager.broadcast(change) }
+                    catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+                    catch (failure: Exception) { throw PeerBroadcastFailure(failure) }
                 }
             }
             UpdaterResult.Success.Typed(Unit)
         } catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
             log.w { "[STORE] Broadcast failed: ${e::class.simpleName}: ${e.message}" }
             UpdaterResult.Error.Exception(e)
         }

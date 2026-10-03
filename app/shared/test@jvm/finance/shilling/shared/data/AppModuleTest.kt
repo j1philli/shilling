@@ -45,7 +45,6 @@ class AppModuleTest {
             single { db }
             single { settings }
             single<IdGenerator> { idGenerator }
-            single<ReceiptFileStore> { InMemoryReceiptFileStore() }
             single<finance.shilling.shared.data.store.ReceiptFileStoreFactory> { finance.shilling.shared.data.store.ReceiptFileStoreFactory { _, _ -> InMemoryReceiptFileStore() } }
         }
         val app = koinApplication { modules(platformModule, dataModule) }

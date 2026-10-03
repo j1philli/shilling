@@ -4,8 +4,9 @@
   const file = name => `finance.shilling.shared.data.sync.FileTransferMessage.${name}`;
   let pc, socket, channel, opening, active, ice = [], serial = Promise.resolve();
   const errors = [];
+  const selfId = () => window.perf.selfId || 'a-browser';
   const peerId = () => window.perf.peerId || 'z-pixel';
-  const sendSignal = (kind, fields) => socket.send(JSON.stringify({type: sig(kind), fromDeviceId: 'a-browser', toDeviceId: peerId(), ...fields}));
+  const sendSignal = (kind, fields) => socket.send(JSON.stringify({type: sig(kind), fromDeviceId: selfId(), toDeviceId: peerId(), ...fields}));
   function receive(event) {
     const processingStart = performance.now();
     if (event.data instanceof ArrayBuffer) {
@@ -80,11 +81,12 @@
         opening = () => {clearTimeout(timeout); resolve();};
       });
       socket = new WebSocket(window.perf.signalUrl || 'ws://127.0.0.1:8081/ws/signal');
-      socket.onopen = () => socket.send(JSON.stringify({type:sig('Join'),deviceId:'a-browser',householdId:'synthetic-live-perf',accessToken:null}));
+      socket.onopen = () => socket.send(JSON.stringify({type:sig('Join'),deviceId:selfId(),householdId:'synthetic-live-perf',accessToken:null}));
       let offered = false;
       socket.onmessage = event => {
         serial = serial.then(async () => {
           const m = JSON.parse(event.data);
+          if (m.fromDeviceId && m.fromDeviceId !== peerId()) return;
           if (m.type === sig('PeerList') && m.deviceIds.includes(peerId()) && !offered) {
             offered = true;
             await pc.setLocalDescription(await pc.createOffer());
@@ -117,7 +119,7 @@
     },
     async upload(mib, readback=true) {
       const started=performance.now();
-      const id='browser-upload',total=mib*1024*1024,count=Math.ceil(total/16384);
+      const id=selfId()==='a-browser'?'browser-upload':`${selfId()}-upload`,total=mib*1024*1024,count=Math.ceil(total/16384);
       const send = async message => {
         while(channel.bufferedAmount>256*1024) await new Promise(r=>setTimeout(r,5));
         channel.send(message instanceof Uint8Array ? message : JSON.stringify(message));

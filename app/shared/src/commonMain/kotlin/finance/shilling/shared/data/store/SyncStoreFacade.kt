@@ -152,7 +152,7 @@ class SyncStoreFacade(
         when (change.op) {
             ChangeOp.UPSERT -> {
                 val account = (change.payload as? ChangePayload.AccountPayload)?.account ?: return
-                accountStore.write(
+                accountStore.writeLocally(
                     StoreWriteRequest.of<AccountKey, List<Account>, Unit>(
                         AccountKey.ById(account.id),
                         listOf(account)
@@ -167,7 +167,7 @@ class SyncStoreFacade(
         when (change.op) {
             ChangeOp.UPSERT -> {
                 val category = (change.payload as? ChangePayload.CategoryPayload)?.category ?: return
-                categoryStore.write(
+                categoryStore.writeLocally(
                     StoreWriteRequest.of<CategoryKey, List<Category>, Unit>(
                         CategoryKey.ById(category.id),
                         listOf(category)
@@ -182,7 +182,7 @@ class SyncStoreFacade(
         when (change.op) {
             ChangeOp.UPSERT -> {
                 val schedule = (change.payload as? ChangePayload.SchedulePayload)?.schedule ?: return
-                scheduleStore.write(
+                scheduleStore.writeLocally(
                     StoreWriteRequest.of<ScheduleKey, List<Schedule>, Unit>(
                         ScheduleKey.ById(schedule.id),
                         listOf(schedule)
@@ -197,7 +197,7 @@ class SyncStoreFacade(
         when (change.op) {
             ChangeOp.UPSERT -> {
                 val exception = (change.payload as? ChangePayload.ScheduleExceptionPayload)?.exception ?: return
-                scheduleExceptionStore.write(
+                scheduleExceptionStore.writeLocally(
                     StoreWriteRequest.of<ScheduleExceptionKey, List<ScheduleException>, Unit>(
                         ScheduleExceptionKey.ByKey(exception.scheduleId, exception.date),
                         listOf(exception)
@@ -222,7 +222,7 @@ class SyncStoreFacade(
         when (change.op) {
             ChangeOp.UPSERT -> {
                 val posting = (change.payload as? ChangePayload.PostingPayload)?.posting ?: return
-                postingStore.write(
+                postingStore.writeLocally(
                     StoreWriteRequest.of<PostingKey, List<Posting>, Unit>(
                         PostingKey.ById(posting.id),
                         listOf(posting)
@@ -237,7 +237,7 @@ class SyncStoreFacade(
         when (change.op) {
             ChangeOp.UPSERT -> {
                 val receipt = (change.payload as? ChangePayload.ReceiptPayload)?.receipt ?: return
-                receiptStore.write(
+                receiptStore.writeLocally(
                     StoreWriteRequest.of<ReceiptKey, List<Receipt>, Unit>(
                         ReceiptKey.ById(receipt.id),
                         listOf(receipt)

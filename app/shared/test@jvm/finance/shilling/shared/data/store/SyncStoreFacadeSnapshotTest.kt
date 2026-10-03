@@ -13,10 +13,10 @@ class SyncStoreFacadeSnapshotTest {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         ShillingDatabase.Schema.create(driver).await()
         val db = ShillingDatabase(driver)
-        db.accountQueries.upsert("versioned", "Checking", 100.0)
-        db.accountQueries.upsert("new", "Savings", 200.0)
+        db.accountQueries.upsert("versioned", "Checking", 100.0, "__local__").await()
+        db.accountQueries.upsert("new", "Savings", 200.0, "__local__").await()
         db.changeLogQueries.insert(
-            household_id = "__local_sync__",
+            household_id = LOCAL_SPACE_ID,
             change_id = "older",
             entity_type = "ACCOUNT",
             entity_id = "versioned",
@@ -25,7 +25,7 @@ class SyncStoreFacadeSnapshotTest {
             payload_json = null
         )
         db.changeLogQueries.insert(
-            household_id = "__local_sync__",
+            household_id = LOCAL_SPACE_ID,
             change_id = "latest",
             entity_type = "ACCOUNT",
             entity_id = "versioned",

@@ -166,7 +166,7 @@ class Store5BehaviourTest {
         val db = openDb()
         val ids = (0 until 450).map { "schedule-$it" }
         ids.forEach { id ->
-            db.scheduleExceptionQueries.upsert(id, 20000L, 1L, null, null, null)
+            db.scheduleExceptionQueries.upsert(id, 20000L, 1L, null, null, null, "__local__").await()
         }
         val repo = ScheduleRepository(ChangeNotifier(), createScheduleStore(db), createScheduleExceptionStore(db))
         val exceptions = repo.getExceptions(ids + ids.first() + "missing")
@@ -192,13 +192,13 @@ class Store5BehaviourTest {
         val repo = PostingRepository(ids, notifier, store, accounts, createCategoryStore(db), createScheduleStore(db), sync)
         val date = LocalDate(2026, 1, 1)
         val beforeVersion = notifier.version.value
-        repo.bulkImport(List(450) { Triple("Row $it", if (it % 2 == 0) -12.0 else 12.0, date) }, "a", null)
+        repo.bulkImport(List(2450) { Triple("Row $it", if (it % 2 == 0) -12.0 else 12.0, date) }, "a", null)
         val rows = repo.getBetween(date, LocalDate(2026, 1, 2))
-        assertEquals(450, rows.size)
-        assertEquals(450, rows.map { it.id }.toSet().size)
+        assertEquals(2450, rows.size)
+        assertEquals(2450, rows.map { it.id }.toSet().size)
         assertEquals(rows.map { it.id }.toSet(), broadcasts.map { it.entityId }.toSet())
-        assertEquals(450, broadcasts.size)
-        assertEquals(225, rows.count { it.type == ScheduleType.EXPENSE })
+        assertEquals(2450, broadcasts.size)
+        assertEquals(1225, rows.count { it.type == ScheduleType.EXPENSE })
         assertTrue(rows.all { it.amount == 12.0 })
         assertTrue(rows.all { db.latestEntityVersion(finance.shilling.shared.data.sync.EntityType.POSTING, it.id) != null })
         assertEquals(20, repo.loadRecentPostings(20).size)
@@ -211,7 +211,7 @@ class Store5BehaviourTest {
         var nextId = 0
         val ids = object : IdGenerator {
             override fun newId(): String {
-                check(++nextId <= 200) { "Synthetic later-batch failure" }
+                check(++nextId <= 1000) { "Synthetic later-batch failure" }
                 return "row-$nextId"
             }
         }
@@ -221,9 +221,9 @@ class Store5BehaviourTest {
         val repo = PostingRepository(ids, notifier, createPostingStore(db), accounts, createCategoryStore(db), createScheduleStore(db))
         val version = notifier.version.value
         val date = LocalDate(2026, 1, 1)
-        val result = runCatching { repo.bulkImport(List(450) { Triple("Row", -1.0, date) }, "a", null) }
+        val result = runCatching { repo.bulkImport(List(2450) { Triple("Row", -1.0, date) }, "a", null) }
         assertTrue(result.isFailure)
-        assertEquals(200, repo.getBetween(date, LocalDate(2026, 1, 2)).size)
+        assertEquals(1000, repo.getBetween(date, LocalDate(2026, 1, 2)).size)
         assertEquals(version + 1, notifier.version.value)
     }
 

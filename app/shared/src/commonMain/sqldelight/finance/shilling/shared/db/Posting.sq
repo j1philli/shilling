@@ -19,6 +19,12 @@ CREATE INDEX postings_pair_idx ON postings(space_id, pair_id);
 selectAll:
 SELECT * FROM postings WHERE space_id = :space_id ORDER BY date DESC;
 
+-- GLOB's literal prefix uses postings_pair_idx; materialize only linked legs.
+selectLinkedInSpaces:
+SELECT * FROM postings
+WHERE space_id IN :spaces AND pair_id GLOB 'space-transfer:*'
+ORDER BY date DESC, rowid ASC;
+
 selectById:
 SELECT * FROM postings WHERE id = ? AND space_id = :space_id;
 

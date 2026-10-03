@@ -3,7 +3,7 @@ const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {spawn,execFileSync}=require('node:child_process'),http=require('node:http'),WebSocket=require('ws');
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 (async()=>{
-  if(['RAW','COMPARE','UPLOAD_ONLY','IDLE_ONLY','RECONNECTS'].filter(name=>process.env[name]).length>1)
+  if(['RAW','COMPARE','UPLOAD_ONLY','IDLE_ONLY','RECONNECTS','SOAK_ROUNDS'].filter(name=>process.env[name]).length>1)
     throw Error('Select only one RAW, COMPARE, UPLOAD_ONLY, IDLE_ONLY or RECONNECTS workload');
   if(process.env.RECONNECTS && (!Number.isInteger(Number(process.env.RECONNECTS)) || Number(process.env.RECONNECTS)<1 || Number(process.env.RECONNECTS)>100))
     throw Error('RECONNECTS requires an integer from 1 to 100');
@@ -40,6 +40,10 @@ const delay=ms=>new Promise(r=>setTimeout(r,ms));
       if(!['ws:','wss:'].includes(signalUrl.protocol)) throw Error('SIGNAL_URL must use ws or wss');
       await evaluate(`perf.signalUrl=${JSON.stringify(signalUrl.href)}`);
     }
+    if(process.env.BROWSER_ID) {
+      if(!['a-browser','b-browser'].includes(process.env.BROWSER_ID)) throw Error('Use synthetic browser IDs');
+      await evaluate(`perf.selfId=${JSON.stringify(process.env.BROWSER_ID)}`);
+    }
     if(process.env.PEER_ID) await evaluate(`perf.peerId=${JSON.stringify(process.env.PEER_ID)}`);
     if(process.env.CONNECT_SETTLE_MS) {
       const ms=Number(process.env.CONNECT_SETTLE_MS);
@@ -50,6 +54,25 @@ const delay=ms=>new Promise(r=>setTimeout(r,ms));
     if(process.env.MEDIA_BUFFER_PROBE) await evaluate('perf.mediaBufferProbe=true');
     if(process.env.RAW) await evaluate('perf.rawChunks=true');
     await output('connect','perf.connect()');
+    if(process.env.SOAK_ROUNDS) {
+      const rounds=Number(process.env.SOAK_ROUNDS);
+      if(!Number.isInteger(rounds)||rounds<1||rounds>100) throw Error('SOAK_ROUNDS must be 1–100');
+      await command('Performance.enable');
+      for(let round=0;round<rounds;round++) {
+        await output(`receive_50MiB_round${round}`, 'perf.request(50)');
+        await output(`upload_10MiB_round${round}`, 'perf.upload(10)');
+        if(round%3===2) {
+          await output(`interrupt_50MiB_round${round}`, 'perf.request(50,64)');
+          await output(`reconnect_round${round}`, 'perf.connect()');
+          await output(`retry_50MiB_round${round}`, 'perf.request(50)');
+        }
+        console.log(JSON.stringify({workload:'soak_sample',round,wallTimeMs:Date.now(),metrics:await command('Performance.getMetrics'),route:await evaluate('perf.stats()')}));
+        await delay(10000);
+      }
+      await output('browser_errors','perf.errors');
+      if((await evaluate('perf.errors')).length) throw Error('Browser reported protocol errors');
+      return;
+    }
     if(process.env.IDLE_ONLY) {
       await delay(Number(process.env.IDLE_ONLY)*1000);
       await output('browser_errors','perf.errors');

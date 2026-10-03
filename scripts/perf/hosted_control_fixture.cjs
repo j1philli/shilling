@@ -66,7 +66,7 @@ sockets.on('connection', socket => {
     const type = message.type?.startsWith(prefix) ? message.type.slice(prefix.length) : '';
     if (type === 'Join' && !device) {
       const allowed = ['z-pixel', 'z-iphone'];
-      if (process.env.BROWSER_PROBE === '1') allowed.push('a-browser');
+      if (process.env.BROWSER_PROBE === '1') allowed.push('a-browser', 'b-browser');
       if (message.householdId !== 'synthetic-live-perf' || !allowed.includes(message.deviceId))
         return socket.close(1008, 'Synthetic devices only');
       device = message.deviceId;

@@ -36,8 +36,13 @@ class ReceiptFileStoreTest {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         try {
             ShillingDatabase.Schema.create(driver).await()
-            val files = Store5ReceiptFileStore(SqlReceiptFileStorage(ShillingDatabase(driver)), { _, _, _ -> })
-            files.store("receipt", "receipt.png", byteArrayOf(1, 2, 3))
+            driver.execute(null, "PRAGMA foreign_keys=ON", 0)
+            val db = ShillingDatabase(driver)
+            val files = Store5ReceiptFileStore(SqlReceiptFileStorage(db), { _, _, _ -> })
+            assertFails { files.store("orphan", "receipt.png", byteArrayOf(1)) }
+            val receipts = ReceiptRepository(ChangeNotifier(), createReceiptStore(db))
+            receipts.saveWithFile(finance.shilling.shared.data.Receipt("receipt", null, "receipt.png", "receipt.png", 1),
+                files, byteArrayOf(1, 2, 3))
             assertTrue(files.hasFile("receipt"))
             assertContentEquals(byteArrayOf(1, 2, 3), files.read("receipt"))
             val reader = assertNotNull(files.openReader("receipt"))
@@ -50,6 +55,25 @@ class ReceiptFileStoreTest {
         } finally {
             driver.close()
         }
+    }
+
+    @Test
+    fun failedFileWriteRollsBackNewReceiptAndPartialFile() = runBlocking {
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        try {
+            ShillingDatabase.Schema.create(driver).await()
+            val db = ShillingDatabase(driver)
+            val storage = MemoryStorage().apply { failWrites = true }
+            val files = Store5ReceiptFileStore(storage, { _, _, _ -> })
+            val receipts = ReceiptRepository(ChangeNotifier(), createReceiptStore(db))
+            val receipt = finance.shilling.shared.data.Receipt("failed", null, "file.png", "file.png", 1)
+            assertFails { receipts.saveWithFile(receipt, files, byteArrayOf(1, 2)) }
+            assertFalse(files.hasFile(receipt.id))
+            assertTrue(createReceiptStore(db).readLocalSourceOfTruth(ReceiptKey.ById(receipt.id)).isEmpty())
+            storage.failWrites = false
+            receipts.saveWithFile(receipt, files, byteArrayOf(3))
+            assertContentEquals(byteArrayOf(3), files.read(receipt.id))
+        } finally { driver.close() }
     }
 
     @Test
@@ -97,7 +121,11 @@ class ReceiptFileStoreTest {
         private val files = mutableMapOf<String, ByteArray>()
         var reads = 0
         var failRangeReads = false
-        override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) { files[receiptId] = bytes }
+        var failWrites = false
+        override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {
+            files[receiptId] = bytes
+            check(!failWrites) { "Synthetic partial write failure" }
+        }
         override suspend fun read(receiptId: String): ByteArray? { reads++; return files[receiptId] }
         override suspend fun size(receiptId: String) = files[receiptId]?.size?.toLong()
         override suspend fun readRange(receiptId: String, offset: Long, byteCount: Int): ByteArray? {

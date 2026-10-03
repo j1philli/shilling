@@ -61,7 +61,12 @@ private object PerformancePeer {
         require(receiver in listOf("adapter", "ktor"))
         scope.launch {
             try {
-                val driver = provideNativeDriver()
+                val schema = object : app.cash.sqldelight.db.SqlSchema<app.cash.sqldelight.db.QueryResult.Value<Unit>> {
+                    override val version = ShillingDatabase.Schema.version
+                    override fun create(driver: app.cash.sqldelight.db.SqlDriver) = app.cash.sqldelight.db.QueryResult.Value(Unit)
+                    override fun migrate(driver: app.cash.sqldelight.db.SqlDriver, oldVersion: Long, newVersion: Long, vararg callbacks: app.cash.sqldelight.db.AfterVersion) = app.cash.sqldelight.db.QueryResult.Value(Unit)
+                }
+                val driver = app.cash.sqldelight.driver.native.NativeSqliteDriver(schema, "p2p-synthetic.db")
                 ensureLocalSchemaReady(driver, logTag = "iOS-Perf")
                 val db = ShillingDatabase(driver)
                 val notifier = ChangeNotifier()

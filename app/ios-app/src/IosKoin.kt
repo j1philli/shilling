@@ -87,7 +87,6 @@ fun startIosKoin() {
         single { ShillingDatabase(driver) }
         single { Settings() }
         single<IdGenerator> { IosIdGenerator() }
-        single<ReceiptFileStore> { IosReceiptFileStore() }
         single<finance.shilling.shared.data.store.ReceiptFileStoreFactory> {
             finance.shilling.shared.data.store.ReceiptFileStoreFactory { id, legacy -> IosReceiptFileStore(if (legacy) null else id) }
         }

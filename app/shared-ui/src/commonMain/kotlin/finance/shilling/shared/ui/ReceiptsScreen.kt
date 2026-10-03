@@ -123,7 +123,11 @@ fun ReceiptEditor(
     initialFile: PlatformFile? = null,
     onInitialFileConsumed: () -> Unit = {}
 ) {
-    val viewModel = koinViewModel<ReceiptEditorViewModel>(key = "receipt-${receiptId ?: "new"}") { parametersOf(receiptId) }
+    val owner = remember(receiptId) { object : androidx.lifecycle.ViewModelStoreOwner {
+        override val viewModelStore = androidx.lifecycle.ViewModelStore()
+    } }
+    androidx.compose.runtime.DisposableEffect(owner) { onDispose { owner.viewModelStore.clear() } }
+    val viewModel = koinViewModel<ReceiptEditorViewModel>(viewModelStoreOwner = owner) { parametersOf(receiptId) }
     val state by viewModel.state.collectAsState()
     val snackbar = LocalSnackbarController.current
     val pickers = LocalReceiptPickers.current
@@ -154,9 +158,15 @@ fun ReceiptEditor(
             saveEnabled = state.saveEnabled,
             onSave = {
                 scope.launch {
-                    viewModel.save()?.let {
-                        snackbar.show(it)
-                        onSaved()
+                    try {
+                        viewModel.save()?.let {
+                            snackbar.show(it)
+                            onSaved()
+                        }
+                    } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                        throw cancelled
+                    } catch (_: Exception) {
+                        snackbar.show("Couldn't save this receipt. Please try again.")
                     }
                 }
             },

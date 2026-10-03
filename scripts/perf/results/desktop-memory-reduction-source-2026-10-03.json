@@ -1,0 +1,13 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "app/shared/src@wasmJs/finance/shilling/shared/data/store/DatabaseWorker.kt": "bd020e0e7d4166b5271aa6f6b6e8cb6cdde82e1345184609fff82d7baa1348b7",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/data/store/PostingRepository.kt": "a16116c76a37cd92476383e168b4b8ff41f7cb88bd862ba93fcaf61f3add442e",
+    "app/shared/src@nonJvm/finance/shilling/shared/data/sync/WebRtcConnectionManager.kt": "21b63e2666818b408e18bc76814a66c4213d78fde3707ba6054f0317962978c3",
+    "app/web-app/index.html": "6fad0ade9ffc318f5fd84c1efaf915182497acc5c3f1f97264a7ef352a666d92",
+    "app/web-app/sqldelight.worker.js": "4ef70cbb55dcd7ff7bbaace1b1c353d2155183dfe9740f2c1992eb43216f67f8",
+    "app/perf-web/src/wasmJsMain/kotlin/finance/shilling/perf/Main.kt": "bbbe6c1316710734f199f4f4980f5df5a46ef2ed381db0f1caf2283500d9fcf8",
+    "scripts/perf/build_desktop_memory.sh": "e55d903a3a9bfa373383c1cfd915628d78ff7d7f47f8b930f7a7c1d909c3858a",
+    "scripts/perf/profile_desktop_memory.py": "8b9dc5aadf5a6688322b313ee8f99b82f9dfa276979b0a24aaade8b4fcd28c32"
+  }
+}

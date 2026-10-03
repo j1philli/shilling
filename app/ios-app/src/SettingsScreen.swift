@@ -38,7 +38,7 @@ final class SettingsModel: ObservableObject {
     }
 
     func observeSpaces() async {
-        do { for try await value in asyncSequence(for: screen.spacesStateFlow) { spacesState = value } } catch {}
+        do { for try await value in asyncSequence(for: screen.spacesStateFlow) { if spacesState !== value { spacesState = value } } } catch {}
     }
 
     func loadBilling() async {
@@ -127,7 +127,9 @@ struct SettingsScreen: View {
         }
         .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .task { await model.observe() }
-        .task { await model.observeSpaces() }
+        .task(id: scenePhase) {
+            if scenePhase == .active { await model.observeSpaces() }
+        }
         .onAppear { transferLink = model.screen.createTransferId(); transferDate = model.screen.transferToday }
         .task(id: scenePhase) {
             if scenePhase == .active { await model.observeDevices() }

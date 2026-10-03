@@ -52,7 +52,7 @@ class ScheduleRepository(
     }
 
     suspend fun upsert(schedule: Schedule) {
-        store.write(StoreWriteRequest.of<ScheduleKey, List<Schedule>, Unit>(ScheduleKey.ById(schedule.id), listOf(schedule)))
+        store.writeLocally(StoreWriteRequest.of<ScheduleKey, List<Schedule>, Unit>(ScheduleKey.ById(schedule.id), listOf(schedule)))
         notifier.notifyChanged()
     }
 
@@ -63,7 +63,7 @@ class ScheduleRepository(
     }
 
     suspend fun upsertException(exception: ScheduleException) {
-        exceptionStore.write(
+        exceptionStore.writeLocally(
             StoreWriteRequest.of<ScheduleExceptionKey, List<ScheduleException>, Unit>(
                 ScheduleExceptionKey.ByKey(exception.scheduleId, exception.date),
                 listOf(exception)

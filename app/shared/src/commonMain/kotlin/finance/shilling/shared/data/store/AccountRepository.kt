@@ -26,7 +26,7 @@ class AccountRepository(
             .associateBy { it.id as String? }
 
     suspend fun upsert(account: Account) {
-        store.write(StoreWriteRequest.of<AccountKey, List<Account>, Unit>(AccountKey.ById(account.id), listOf(account)))
+        store.writeLocally(StoreWriteRequest.of<AccountKey, List<Account>, Unit>(AccountKey.ById(account.id), listOf(account)))
         notifier.notifyChanged()
     }
 

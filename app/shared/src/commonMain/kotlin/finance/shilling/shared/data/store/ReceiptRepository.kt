@@ -1,6 +1,9 @@
 package finance.shilling.shared.data.store
 
 import finance.shilling.shared.data.Receipt
+import finance.shilling.shared.data.ReceiptFileStore
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import finance.shilling.shared.data.ReceiptWithPosting
 import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.EntityType
@@ -26,8 +29,23 @@ class ReceiptRepository(
     fun watchByPosting(postingId: String): Flow<List<Receipt>> = store.watchCached(ReceiptKey.ByPosting(postingId)).flowOn(Dispatchers.Default)
 
     suspend fun save(receipt: Receipt) {
-        store.write(StoreWriteRequest.of<ReceiptKey, List<Receipt>, Unit>(ReceiptKey.ById(receipt.id), listOf(receipt)))
+        store.writeLocally(StoreWriteRequest.of<ReceiptKey, List<Receipt>, Unit>(ReceiptKey.ById(receipt.id), listOf(receipt)))
         notifier.notifyChanged()
+    }
+
+    /** Metadata must exist before SQL-backed bytes can satisfy their scoped foreign key. */
+    suspend fun saveWithFile(receipt: Receipt, files: ReceiptFileStore, bytes: ByteArray) {
+        check(store.readLocalSourceOfTruth(ReceiptKey.ById(receipt.id)).isEmpty()) { "Receipt already exists" }
+        try {
+            save(receipt)
+            files.store(receipt.id, receipt.originalName, bytes)
+        } catch (failure: Throwable) {
+            withContext(NonCancellable) {
+                runCatching { files.delete(receipt.id) }.exceptionOrNull()?.let(failure::addSuppressed)
+                runCatching { delete(receipt.id) }.exceptionOrNull()?.let(failure::addSuppressed)
+            }
+            throw failure
+        }
     }
 
     suspend fun delete(receiptId: String) {
@@ -64,7 +82,7 @@ class ReceiptRepository(
 
     private suspend fun writeUpdatedReceipt(receiptId: String, update: Receipt.() -> Receipt) {
         val receipt = store.readLocalSourceOfTruth(ReceiptKey.ById(receiptId)).firstOrNull()?.update() ?: return
-        store.write(
+        store.writeLocally(
             StoreWriteRequest.of<ReceiptKey, List<Receipt>, Unit>(
                 ReceiptKey.ById(receiptId),
                 listOf(receipt)

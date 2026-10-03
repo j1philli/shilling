@@ -32,4 +32,4 @@ for trace in traces:
 if not classpath or not java:
     sys.exit("No shared JVM test classpath found; run ./scripts/ci/run-jvm-tests.sh first")
 subprocess.run([java, "-cp", ":".join(classpath),
-                "finance.shilling.shared.presentation.ActivityProjectionBenchmark"], check=True, cwd=root)
+                (sys.argv[1] if len(sys.argv) > 1 else "finance.shilling.shared.presentation.ActivityProjectionBenchmark")], check=True, cwd=root)

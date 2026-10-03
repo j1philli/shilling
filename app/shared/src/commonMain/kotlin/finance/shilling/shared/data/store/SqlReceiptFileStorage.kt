@@ -1,5 +1,6 @@
 package finance.shilling.shared.data.store
 
+import app.cash.sqldelight.async.coroutines.await
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
 import finance.shilling.shared.db.ShillingDatabase
 
@@ -14,7 +15,7 @@ class SqlReceiptFileStorage(private val db: ShillingDatabase, private val spaceI
             "heif" -> "image/heif"
             else -> "application/octet-stream"
         }
-        db.receiptFileQueries.upsert(receiptId, bytes, bytes.size.toLong(), mimeType, space_id = spaceId)
+        db.receiptFileQueries.upsert(receiptId, bytes, bytes.size.toLong(), mimeType, space_id = spaceId).await()
     }
 
     override suspend fun read(receiptId: String): ByteArray? =

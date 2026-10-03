@@ -74,6 +74,7 @@ val dataModule: Module = module {
             get<finance.shilling.shared.data.store.ReceiptFileStoreFactory>()
         )
     }
+    factory<ReceiptFileStore> { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.files }
     single { finance.shilling.shared.data.store.LinkedTransferStore(get(), get(), get(), get()) }
     factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.sync }
     factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.accountsStore }

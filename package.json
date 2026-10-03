@@ -4,7 +4,8 @@
   "description": "Kotlin Multiplatform household budgeting app",
   "private": true,
   "scripts": {
-    "test": "just test"
+    "test": "just test",
+    "test:web": "node --test app/web-app/test/*.test.cjs"
   },
   "keywords": [],
   "author": "",

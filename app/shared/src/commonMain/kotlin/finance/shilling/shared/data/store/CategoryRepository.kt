@@ -24,7 +24,7 @@ class CategoryRepository(
     suspend fun getAll(): List<Category> = store.readLocalSourceOfTruth(CategoryKey.All)
 
     suspend fun upsert(category: Category) {
-        store.write(StoreWriteRequest.of<CategoryKey, List<Category>, Unit>(CategoryKey.ById(category.id), listOf(category)))
+        store.writeLocally(StoreWriteRequest.of<CategoryKey, List<Category>, Unit>(CategoryKey.ById(category.id), listOf(category)))
         notifier.notifyChanged()
     }
 

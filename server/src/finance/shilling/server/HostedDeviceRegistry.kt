@@ -157,8 +157,10 @@ fun Route.hostedDevicesRoute(
                 return@delete
             }
             runCatching {
-                devices.remove(householdId, deviceId)
-                hub.evict(householdId, deviceId)
+                hub.withMembershipPolicy {
+                    devices.remove(householdId, deviceId)
+                    hub.evict(householdId, deviceId)
+                }
             }
                 .onSuccess { call.respond(HttpStatusCode.NoContent) }
                 .onFailure { call.respond(HttpStatusCode.ServiceUnavailable, mapOf("error" to "Hosted devices unavailable")) }

@@ -973,3 +973,21 @@ tables. All six bootstrap tests passed, including the new Android case, and
 the installed Pixel fixture initialized successfully.
 
 [Hosted polling samples, lifecycle checks and byte verification](../scripts/perf/results/hosted-settings-and-peer-lifecycle-2026-10-01.json).
+
+## October 2: Plan transition followup
+
+The isolated SE fixture's fixed Overview count became stale: the native List
+rendered 1,363 items, while the check required 1,005–1,009. The fixture now
+captures the initial rendered count and uses it to identify Overview and By day
+on later section switches. Three fresh production-layout processes completed
+all twelve phases with no Main-thread database queries, no reads on repeat
+visits and no listeners after Plan closed.
+
+Schedule section switches still had the largest median maximum display callback
+gaps: 78.4 ms on first visits and 76.0 ms on repeats. Suppressing List animations
+in an isolated variant made several repeat gaps worse, so that prototype was
+reverted. The attempted new Animation Hitches trace did not finish exporting;
+callback gaps are not a substitute for rendering-hitch intervals. The earlier
+valid hitch traces remain the rendering reference.
+
+[October 2 Plan comparison](../scripts/perf/results/native-ios-plan-followup-2026-10-02.json).

@@ -139,12 +139,14 @@ class WebRtcConnectionManager(
 
     override suspend fun broadcast(change: ChangeMessage) {
         val text = json.encodeToString(change)
-        val channelStates = peers.keys.map { pid ->
-            val ch = dataChannels[pid]
-            "$pid=${ch?.state ?: "NO_CHANNEL"}"
+        log.d {
+            val channelStates = peers.keys.map { pid ->
+                val ch = dataChannels[pid]
+                "$pid=${ch?.state ?: "NO_CHANNEL"}"
+            }
+            val outboundCount = peers.keys.count { outboundChannel(it) != null }
+            "[RTC] broadcast ${change.entityType}/${change.op} id=${change.entityId} — peers=${peers.size} open=$outboundCount channels=[$channelStates]"
         }
-        val outboundCount = peers.keys.count { outboundChannel(it) != null }
-        log.i { "[RTC] broadcast ${change.entityType}/${change.op} id=${change.entityId} — peers=${peers.size} open=$outboundCount channels=[$channelStates]" }
 
         var p2pSuccess = false
         val deadPeers = mutableListOf<String>()
@@ -153,7 +155,7 @@ class WebRtcConnectionManager(
             try {
                 channel.send(text)
                 p2pSuccess = true
-                log.i { "[RTC] >>> Sent ${change.entityType}/${change.op} to $peerId (${text.length} chars)" }
+                log.d { "[RTC] >>> Sent ${change.entityType}/${change.op} to $peerId (${text.length} chars)" }
             } catch (e: Throwable) {
                 log.w { "[RTC] Send failed to $peerId: ${e::class.simpleName}: ${e.message}" }
                 deadPeers.add(peerId)
@@ -166,7 +168,7 @@ class WebRtcConnectionManager(
             if (!alreadyQueued) {
                 pendingChanges.add(change)
             }
-            log.w { "[RTC] No P2P channels available — queued ${change.entityType}/${change.op} (pending=${pendingChanges.size})" }
+            log.d { "[RTC] No P2P channels available — queued ${change.entityType}/${change.op} (pending=${pendingChanges.size})" }
         }
     }
 
@@ -314,7 +316,7 @@ class WebRtcConnectionManager(
                 try {
                     channel.send(text)
                     delivered = true
-                    log.i { "[RTC] Drained ${change.entityType}/${change.op} to $peerId" }
+                    log.d { "[RTC] Drained ${change.entityType}/${change.op} to $peerId" }
                 } catch (e: Throwable) {
                     log.w { "[RTC] Drain send failed for $peerId: ${e::class.simpleName}" }
                 }

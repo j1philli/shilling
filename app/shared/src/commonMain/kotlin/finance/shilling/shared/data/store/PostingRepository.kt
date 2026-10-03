@@ -119,7 +119,7 @@ class PostingRepository(
 
     suspend fun record(posting: Posting) {
         require(posting.pairId?.startsWith(SPACE_TRANSFER_PREFIX) != true && getById(posting.id)?.pairId?.startsWith(SPACE_TRANSFER_PREFIX) != true) { "Edit a linked space transfer from Finance spaces in Settings." }
-        store.write(
+        store.writeLocally(
             StoreWriteRequest.of<PostingKey, List<Posting>, Unit>(
                 PostingKey.ById(posting.id),
                 listOf(posting)
@@ -159,7 +159,7 @@ class PostingRepository(
             pairId = null, title = title,
             categoryId = categoryId?.takeIf { it.isNotBlank() }
         )
-        store.write(
+        store.writeLocally(
             StoreWriteRequest.of<PostingKey, List<Posting>, Unit>(
                 PostingKey.ById(id),
                 listOf(posting)
@@ -173,10 +173,12 @@ class PostingRepository(
         accountId: String,
         categoryId: String?
     ) {
-        // Bound transaction size and Store5 invalidations without retaining a second
-        // full import as Posting objects. Updaters still emit one P2P change per row.
+        // Bound transaction size without retaining the full import as Posting objects.
+        // Web/desktop durably exports the whole SQLite DB at each commit, including
+        // the updater's version-metadata commit. Larger batches avoid a snapshot storm.
+        // Updaters still emit one P2P change per row after the database transaction.
         try {
-            items.chunked(200).forEach { batch ->
+            items.asSequence().chunked(1000).forEach { batch ->
                 val postings = batch.map { (title, amount, date) ->
                     Posting(
                         id = idGenerator.newId(), scheduleId = null,
@@ -186,7 +188,7 @@ class PostingRepository(
                         categoryId = categoryId?.takeIf { it.isNotBlank() }
                     )
                 }
-                store.write(StoreWriteRequest.of<PostingKey, List<Posting>, Unit>(PostingKey.All, postings))
+                store.writeLocally(StoreWriteRequest.of<PostingKey, List<Posting>, Unit>(PostingKey.All, postings))
                 yield()
             }
 

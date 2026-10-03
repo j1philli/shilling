@@ -135,7 +135,7 @@ class Store5ReceiptFileStore(
     )
 
     override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {
-        store.write(StoreWriteRequest.of<FileKey, FileValue, Unit>(
+        store.writeLocally(StoreWriteRequest.of<FileKey, FileValue, Unit>(
             FileKey.Contents(receiptId), FileValue(bytes, fileName, true)
         ))
     }
@@ -198,7 +198,7 @@ class Store5ReceiptFileStore(
     }
 
     private suspend fun writeStage(key: FileKey, value: FileValue) {
-        store.write(StoreWriteRequest.of<FileKey, FileValue, Unit>(key, value))
+        store.writeLocally(StoreWriteRequest.of<FileKey, FileValue, Unit>(key, value))
     }
 
     override suspend fun hasFile(receiptId: String): Boolean =

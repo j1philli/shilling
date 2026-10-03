@@ -196,8 +196,12 @@ class P2pPerformanceActivity : Activity() {
                 output.text = "Synthetic WebRTC peer ready. Waiting for browser peer."
                 Log.i("ShillingP2p", JSONObject().put("status", "ready").put("memory", memoryProbe()).toString())
                 scope.launch {
+                    // PSS collection itself costs CPU. Disable it for idle/energy
+                    // measurements, or choose a slower interval for long soaks.
+                    val interval = intent.getLongExtra("memorySampleMs", 1_000L)
+                    if (interval <= 0) return@launch
                     while (isActive) {
-                        delay(1_000)
+                        delay(interval)
                         Log.i("ShillingP2p", JSONObject().put("memory", memoryProbe())
                             .put("pressureWaits", pressureWaits).put("pressureWaitMs", pressureWaitNanos / 1_000_000.0)
                             .toString())

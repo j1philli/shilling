@@ -43,7 +43,8 @@ let saveTimer = null;
 let inTransaction = false;
 let transactionDirty = false;
 let dirty = false;
-let saving = false;
+let saving = null;
+let persistenceFailure = null;
 
 function isReadOnlySql(sql) {
   const statement = sql.replace(/^\s*(?:(?:--[^\n]*\n)|(?:\/\*[\s\S]*?\*\/))*/, "").trim();
@@ -53,9 +54,31 @@ function isReadOnlySql(sql) {
     (/^PRAGMA\b/i.test(statement) && !statement.includes("="));
 }
 
+// sql.js returns BLOB columns as fresh Uint8Arrays. Transfer their backing
+// buffers to the app instead of cloning large receipt files between threads.
+function resultBuffers(results) {
+  const buffers = new Set();
+  for (const result of results) {
+    for (const row of result.values) {
+      for (const value of row) {
+        if (value instanceof Uint8Array && value.buffer instanceof ArrayBuffer) {
+          buffers.add(value.buffer);
+        }
+      }
+    }
+  }
+  return [...buffers];
+}
+
 function armSave(delay = 100) {
-  if (saveTimer === null && !saving && !inTransaction) {
-    saveTimer = setTimeout(persistDatabase, delay);
+  if (saveTimer === null && !saving && !inTransaction && !persistenceFailure) {
+    saveTimer = setTimeout(() => {
+      saveTimer = null;
+      persistDatabase().catch(err => {
+        console.error("Failed to persist database to IndexedDB:", err);
+        if (!persistenceFailure) armSave(1000);
+      });
+    }, delay);
   }
 }
 
@@ -64,25 +87,38 @@ function scheduleSave() {
   armSave();
 }
 
-async function persistDatabase() {
-  saveTimer = null;
-  if (!dirty || !db || !idb || inTransaction || saving) return;
+function persistDatabase() {
+  if (saving) return saving;
+  if (!dirty || !db || !idb || inTransaction) return Promise.resolve();
   dirty = false;
-  saving = true;
-  let retryDelay = 100;
-  try {
+  saving = (async () => {
     const foreignKeys = db.exec("PRAGMA foreign_keys;")[0]?.values[0]?.[0] ?? 1;
     const data = db.export();
-    // sql.js export resets connection pragmas. Keep the scoped schema constraints active.
+    // sql.js export resets connection pragmas. Keep scoped constraints active.
     db.run(`PRAGMA foreign_keys = ${foreignKeys ? "ON" : "OFF"};`);
     await saveToIndexedDB(idb, data);
-  } catch (err) {
+  })().catch(err => {
     dirty = true;
-    retryDelay = 1000;
-    console.error("Failed to persist database to IndexedDB:", err);
-  } finally {
-    saving = false;
-    if (dirty) armSave(retryDelay);
+    throw err;
+  }).finally(() => { saving = null; });
+  return saving.then(() => { if (dirty) armSave(); });
+}
+
+async function flushDatabase() {
+  // A transaction is acknowledged only after its snapshot is durable. Wait for
+  // an older snapshot first so it cannot overwrite this commit out of order.
+  try {
+    if (saving) await saving;
+    if (saveTimer !== null) clearTimeout(saveTimer);
+    saveTimer = null;
+    await persistDatabase();
+  } catch (err) {
+    // SQLite has committed in memory. Do not continue from this divergent state
+    // or silently retry a failed migration; a fresh worker reloads durable data.
+    persistenceFailure = err;
+    if (saveTimer !== null) clearTimeout(saveTimer);
+    saveTimer = null;
+    throw err;
   }
 }
 
@@ -100,6 +136,7 @@ async function createDatabase() {
 
 async function onModuleReady() {
   const data = this.data;
+  if (persistenceFailure) throw persistenceFailure;
 
   switch (data && data.action) {
     case "exec":
@@ -118,7 +155,7 @@ async function onModuleReady() {
       return postMessage({
         id: data.id,
         results: results
-      });
+      }, resultBuffers([results]));
     case "begin_transaction":
       const beginResults = db.exec("BEGIN TRANSACTION;");
       inTransaction = true;
@@ -130,9 +167,9 @@ async function onModuleReady() {
     case "end_transaction": {
       const txResults = db.exec("END TRANSACTION;");
       inTransaction = false;
-      if (transactionDirty) scheduleSave();
-      else if (dirty) armSave();
+      if (transactionDirty) dirty = true;
       transactionDirty = false;
+      await flushDatabase();
       return postMessage({
         id: data.id,
         results: txResults

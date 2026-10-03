@@ -175,6 +175,15 @@ function threadSnapshot(workload) {
       counters.membership++;await delay(membershipDelay);status=membershipStatus;
       const house=url.searchParams.get('user_id')?.match(/user-h(\d+)-/)?.[1];
       body=status===200 && house!==undefined ? [{household_id:`house-${house}`}]:[];
+    } else if(url.pathname==='/rest/v1/hosted_space_memberships') {
+      body=[{role:'owner'}];
+    } else if(url.pathname==='/rest/v1/rpc/manage_hosted_space') {
+      let input='';for await(const chunk of req)input+=chunk;
+      const actor=JSON.parse(input).p_actor;
+      const house=actor.match(/user-h(\d+)-/)?.[1];
+      body={activeSpaceId:`house-${house}`,spaces:[{id:`house-${house}`,name:'Synthetic',kind:'home',role:'owner'}],requiresSpaceSelection:false};
+    } else if(url.pathname==='/rest/v1/rpc/register_hosted_device') {
+      body=true;
     } else { status=404;body={}; }
     res.writeHead(status,{'Content-Type':'application/json'});res.end(JSON.stringify(body));
   });

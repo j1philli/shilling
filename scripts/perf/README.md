@@ -455,3 +455,172 @@ SIGNAL_URL=ws://127.0.0.1:18083/ws/signal PEER_ID=z-iphone UPLOAD_ONLY=1 \
 
 This uploads 1 MiB through native Store5 and verifies the returned bytes over
 WebRTC. It is a correctness check, not a before/after throughput comparison.
+
+## Finance spaces and linked transfers
+
+After the JVM suite compiles the shared tests, run the production Store5 projection
+and its original reference on the same synthetic database:
+
+```sh
+./scripts/ci/run-jvm-tests.sh
+python3 scripts/perf/bench_activity_projection.py finance.shilling.shared.data.store.SpacePerformanceBenchmark
+```
+
+The benchmark seeds 50,000 ordinary postings per space and a linked pair through
+Store5. It alternates twelve reference/indexed measurements, checks equivalent
+results, switches spaces one hundred times, verifies retired scopes and selected
+accounts, and waits for SQL listener cleanup. Activation timing excludes screen
+rendering. Keep timed comparisons separate from builds and profilers.
+
+## Release browser receipt previews
+
+```sh
+npm ci --ignore-scripts --prefix scripts/ci/smoke
+SHILLING_DB_NAME=shilling-performance-audit SHILLING_DEV_TOOLS=true bash build-web.sh
+python3 scripts/perf/generate_receipt_images.py /tmp
+LABEL=current SCREENSHOT_DIR=/tmp node scripts/perf/profile_web_receipts.cjs web-app-dist /tmp
+```
+
+The generator creates deterministic, exact-size 10 and 50 MiB synthetic PNGs using
+only the Python standard library. The harness requires locally installed Chrome
+and the pinned Playwright dependencies from `scripts/ci/smoke`. It serves only the
+selected build on a random loopback port, uses a fresh browser context, and blocks
+non-loopback requests. Production Shilling databases and browser profiles are
+not opened.
+
+The UI imports both files, checks SQL byte lengths, verifies actual decoded image
+pixels from screenshots, opens and closes each preview three times, tests a Close
+icon hover and a fresh empty receipt editor, checks Blob URL cleanup, and verifies
+the files after reload. Optional full screenshots go to `SCREENSHOT_DIR`, which
+must already exist. Failures print the current accessibility tree and save an
+editor screenshot under `/tmp`.
+
+Metrics cover onboarding/home readiness, save-to-persistence latency, rendered
+preview latency, main-thread long tasks and sampled **main JS heap**. They do not
+measure total file-picker time, process/GPU/Wasm/worker memory, peak memory, or
+production network startup. `BASELINE_DIALOG=1` permits the original Compose
+preview's known accessibility failure after dialog close and reloads between
+those samples. It is only for measuring an archived baseline, not a passing
+regression configuration.
+
+## Sustained receipt transfers
+
+Start the isolated native P2P fixture and a signaling fixture as described above.
+For the hosted-control fixture, `BROWSER_PROBE=1` admits the two synthetic browser
+identities. Use the actual local fixture URL; no payload bytes use this URL.
+
+```sh
+SIGNAL_URL=ws://127.0.0.1:18083/ws/signal SOAK_ROUNDS=10 node scripts/perf/bench_live_webrtc.cjs
+# Run the next two commands in separate terminals for simultaneous browser peers.
+SIGNAL_URL=ws://127.0.0.1:18083/ws/signal BROWSER_ID=a-browser SOAK_ROUNDS=5 node scripts/perf/bench_live_webrtc.cjs
+SIGNAL_URL=ws://127.0.0.1:18083/ws/signal BROWSER_ID=b-browser SOAK_ROUNDS=5 node scripts/perf/bench_live_webrtc.cjs
+# After those clients exit, use the iPhone fixture instead.
+SIGNAL_URL=ws://127.0.0.1:18083/ws/signal PEER_ID=z-iphone SOAK_ROUNDS=5 node scripts/perf/bench_live_webrtc.cjs
+```
+
+Each of 1–100 rounds downloads 50 MiB, uploads and reads back 10 MiB, and waits ten
+seconds. Every third round interrupts another 50 MiB download after 64 chunks,
+reconnects, and verifies a full retry. Browser identities have distinct upload
+receipt IDs. Every received byte is checked. The upload result times **readback
+only**. Metrics and route samples include local addresses; sanitize them before
+committing output.
+
+Android `P2pPerformanceActivity` accepts `--el memorySampleMs 10000` for lower-cost
+PSS sampling or `--el memorySampleMs 0` to disable it for idle CPU measurements.
+The default one-second PSS probe can materially perturb CPU measurements. The
+isolated iOS fixture accepts `--perf-soak`; its opt-in ten-second process sampler
+writes RSS, cumulative CPU, thermal state and lifecycle events to
+`Documents/p2p-soak.jsonl`. CPU percentages require a wall-time interval and are
+normalized to one core; they are not battery estimates.
+
+## Actual hosted device removal UI
+
+Build, sign and install the isolated Release `perf-android` APK first. Then run:
+
+```sh
+ANDROID_SERIAL=<Pixel-serial> node scripts/perf/hosted_ui_fixture.cjs --launch-android
+```
+
+This generates disposable signing keys and credentials, starts a loopback hosted
+stub and the production Ktor server on port 18085, establishes two synthetic
+signaling sessions, installs an ADB reverse, and launches the actual Settings UI
+in `HostedUiPerformanceActivity`. The normal Shilling app and its data are not
+used. Open Devices and use Remove on `synthetic-peer`.
+
+A successful run emits `remove-verified` only after the registry deletion, policy
+socket close and removal notification all occur. Also verify Settings updates
+from 2 / 2 to 1 / 2 and no longer lists the removed peer. Stop the fixture with
+SIGTERM to terminate its server and delete its temporary token file; remove the
+owned ADB reverse afterward. This exercises hosted control metadata only.
+
+The October finance-space, browser, device and server findings are in
+[the followup report](../../docs/performance-followup-2026-10-01.md).
+
+## Isolated desktop receipt memory
+
+Build the release web frontend with a dedicated database name, then bundle the
+Tauri app with `finance.shilling.perf.desktop` as its identifier. Start
+`node scripts/perf/desktop_control_fixture.cjs` and onboard that isolated app
+to `http://127.0.0.1:18091`. The fixture listens on loopback and serves only
+configuration, empty ICE metadata and an empty signaling peer list. It never
+accepts receipt bytes. Import the PNGs from `generate_receipt_images.py` through
+the desktop UI, then open and close the 50 MiB preview several times.
+
+Sample both the Tauri host and its WebKit WebContent process at short intervals
+with `ps -o pid,rss`. Identify the WebContent PID immediately after launching
+the isolated app; other apps may also have WebContent processes. `vmmap -summary
+<pid>` can show the resident and swapped region groups while the preview is
+visible. RSS and VM regions do not give allocation stacks or a decode-only
+latency. Record a settled sample after leaving the receipt editor. The October
+2 [sampled curve](results/desktop-webcontent-memory-2026-10-02.json) contains
+four 50 MiB preview cycles.
+
+## Desktop memory across screens
+
+Run `npm run test:web` for the SQL worker persistence and request-lifecycle
+regressions. The desktop/web entry point uses `createDatabaseWorker` to release
+SQLDelight 2.4.0's per-request callbacks; see the
+[October 3 memory reduction](../../docs/desktop-memory-reduction-2026-10-03.md).
+
+For a shorter import-only diagnostic, build with
+`SHILLING_MEMORY_WORKLOAD=csv SHILLING_MEMORY_SQL_PROFILE=true` before the command
+below. The optional probe reports SQL request/row counts and full-database
+snapshot counts/bytes at phase boundaries. It does not retain row data. Snapshot
+byte totals are cumulative copying work, not resident memory. Omit both variables
+for the full screen benchmark. Run only one instance of the benchmark bundle;
+multiple instances share its database and phase log and invalidate a comparison.
+
+`bash scripts/perf/build_desktop_memory.sh` builds the separate **Shilling Memory
+Perf** bundle (`finance.shilling.perf.memory`) and the `perf-web` entry point.
+Start the loopback `desktop_control_fixture.cjs`, then launch that bundle. Its
+first launch seeds 20 accounts, 40 categories, 1,000 schedules, 10,000 postings
+and 250 receipt metadata records through the production Store5 repositories.
+Restart after the seed-complete message to exclude seeding allocations from the
+screen measurements. It uses the dedicated `shilling-memory-fixture-v1` database.
+
+The fixture renders the production app shell and screens. After a 20-second
+attachment window, it visits Home, weekly/monthly Plan, Schedules, Categories,
+Accounts, Activity, Receipts and Settings twice, then four editors. It loads and
+imports a synthetic 10,000-row CSV through `ImportViewModel`, returns to Home
+and Activity, and finishes with an idle interval. CSV timing excludes the native
+file picker. The import adds records to the fixture database, so subsequent
+runs start with more than 10,000 postings; use a new dedicated database/bundle
+or explicitly reset only the benchmark sandbox for matched comparisons.
+
+Identify the new host, WebContent, GPU and Networking PIDs immediately after
+launch, then run:
+
+```sh
+python3 scripts/perf/profile_desktop_memory.py \
+  --host-pid HOST --web-pid WEB --gpu-pid GPU --network-pid NETWORK \
+  --phase-log "$HOME/Library/Logs/finance.shilling.perf.memory/Shilling Memory Perf.log" \
+  --output /tmp/shilling-desktop-memory.json
+```
+
+The sampler reads RSS approximately every 250 ms and takes `vmmap -summary`
+physical-footprint snapshots at the fixture's READY markers. It exits on
+COMPLETE. Without `--phase-log`, type phase names to take snapshots and `quit`
+to finish. RSS may fall because macOS swaps or compresses memory; it is not a
+substitute for footprint or an allocation-retention trace. Large virtual Wasm
+reservations are not committed RAM. Other apps sharing the Mac can affect RSS,
+collection and swapping, so use footprint and repeat runs before claiming gains.

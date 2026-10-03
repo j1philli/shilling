@@ -36,7 +36,10 @@ object NativeUiFixture {
         metrics = UiQueryDriver(provideNativeDriver())
         ensureLocalSchemaReady(metrics)
         val settings = Settings()
+        settings.putBoolean("posthog_consent", false)
+        settings.putBoolean("posthog_development_consent", false)
         val args = NSProcessInfo.processInfo.arguments.map { it.toString() }
+        val hostedToken = args.indexOf("--ui-hosted-token").takeIf { it >= 0 }?.let { args.getOrNull(it + 1) } ?: "synthetic-token"
         val hostedUrl = args.indexOf("--ui-hosted-server").takeIf { it >= 0 }?.let { args.getOrNull(it + 1) }
         if (hostedUrl != null) {
             require(hostedUrl.startsWith("http://")) { "Use the local synthetic hosted fixture" }
@@ -46,15 +49,16 @@ object NativeUiFixture {
             single { ShillingDatabase(metrics) }
             single { settings }
             single<IdGenerator> { IosIdGenerator() }
-            single<ReceiptFileStore> { IosReceiptFileStore() }
+            single<ReceiptFileStoreFactory> { ReceiptFileStoreFactory { space, legacy -> IosReceiptFileStore(if (legacy) null else space) } }
+            single { finance.shilling.shared.presentation.SpaceSelectionCallback { error("Fixture space selection disabled") } }
             single { createSyncHttpClient() }
             single { CloudRelayCallback { settings.putBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, it) } }
             single<SessionState> {
                 val auth = if (hostedUrl == null) NoOpAuthService("synthetic-device") else
                     object : AuthService by NoOpAuthService("synthetic-device") {
                         override val authState = MutableStateFlow(AuthState(true, "synthetic-user", null,
-                            UserTier.ANONYMOUS, "synthetic-token", true, "synthetic-device"))
-                        override suspend fun refreshTokenIfNeeded(): String = "synthetic-token"
+                            UserTier.ANONYMOUS, hostedToken, true, "synthetic-device"))
+                        override suspend fun refreshTokenIfNeeded(): String = hostedToken
                     }
                 object : SessionState {
                     override val phase = MutableStateFlow<SessionPhase>(SessionPhase.Ready(auth,
@@ -69,7 +73,7 @@ object NativeUiFixture {
             single { HouseholdIdCallback { error("Fixture network disabled") } }
         })
         val day = today()
-        val seedVersion = "native-ui-1-$day"
+        val seedVersion = "native-ui-spaces-2-$day"
         if (settings.getStringOrNull("native-ui-seed") != seedVersion) {
             graph.get<LocalDataWiper>().wipe()
             val accounts = graph.get<AccountRepository>()

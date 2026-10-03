@@ -66,6 +66,7 @@ final class NativeUiPerformanceController: UIViewController {
                 }
                 let minimum = screen == "activity" ? 7000 : screen == "receipts" ? 250 : 1000
                 let list = try await waitForList(minimum: minimum)
+                let initialPlanItems = screen == "plan" ? itemCount(list) : 0
                 // Allow the populated collection to reach a display callback before ending load.
                 await pause(0.05)
                 end(screen, "load", extra: ["listItems": itemCount(list), "visibleCells": list.visibleCells.count])
@@ -102,8 +103,10 @@ final class NativeUiPerformanceController: UIViewController {
                     end(screen, "idle")
                     if args.contains("--ui-check-navigation") {
                         // Exercise resubscription after Overview has stopped, then each section.
-                        for (title, minimum, maximum) in [("Overview", 1005, 1010), ("By category", 40, 100),
-                                                         ("By day", 1005, 1010), ("Schedules", 1000, 1003),
+                        for (title, minimum, maximum) in [("Overview", initialPlanItems - 1, initialPlanItems + 2),
+                                                         ("By category", 40, 100),
+                                                         ("By day", initialPlanItems - 1, initialPlanItems + 2),
+                                                         ("Schedules", 1000, 1003),
                                                          ("Categories", 41, 42), ("Accounts", 11, 12)] {
                             try selectSegment(title)
                             let rendered = try await waitForList(minimum: minimum, maximum: maximum)
@@ -514,12 +517,12 @@ final class NativeUiPerformanceController: UIViewController {
 
     private func runPlanTransitions() async throws {
         mount(AnyView(PlanScreen()))
-        _ = try await waitForList(minimum: 1005, maximum: 1010)
+        let overviewItems = itemCount(try await waitForList(minimum: 1000))
         await pause(0.5)
         for cycle in 0..<2 {
             for (title, minimum, maximum) in [("Schedules", 1000, 1003), ("Categories", 41, 42),
-                                             ("Accounts", 11, 12), ("Overview", 1005, 1010),
-                                             ("By category", 40, 100), ("By day", 1005, 1010)] {
+                                             ("Accounts", 11, 12), ("Overview", overviewItems - 1, overviewItems + 2),
+                                             ("By category", 40, 100), ("By day", overviewItems - 1, overviewItems + 2)] {
                 begin("plan-transitions", title)
                 try selectSegment(title)
                 let list = try await waitForList(minimum: minimum, maximum: maximum)
@@ -718,7 +721,9 @@ final class NativeUiPerformanceController: UIViewController {
                 .first(where: { itemCount($0) >= minimum && itemCount($0) < maximum && !$0.visibleCells.isEmpty }) { return list }
             await pause(0.05)
         }
-        throw FixtureError("No populated native list rendered within 30 seconds")
+        let observed = descendants(view).compactMap { $0 as? UICollectionView }
+            .map { "items=\(itemCount($0)),visible=\($0.visibleCells.count)" }
+        throw FixtureError("No populated native list rendered within 30 seconds (expected \(minimum)..<\(maximum), observed \(observed))")
     }
 
     private func itemCount(_ list: UICollectionView) -> Int {

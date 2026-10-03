@@ -6,6 +6,7 @@ repositories:
   - id: maven-central-canonical
     url: https://repo.maven.apache.org/maven2
 dependencies:
+  - ../../core
   - ../shared
   - ../shared-ui
   - $libs.activity.compose

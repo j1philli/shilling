@@ -1,0 +1,4878 @@
+{
+  "publicMain": "82d94a6",
+  "syntheticOnly": true,
+  "scope": "Physical SE and Pixel 6, local Release web, JVM and local production Ktor server. 16 Pro excluded.",
+  "spaces": [
+    {
+      "variant": "original",
+      "postings": "100000",
+      "round": "0",
+      "elapsedMs": 457.1185
+    },
+    {
+      "variant": "indexed",
+      "postings": "100000",
+      "round": "0",
+      "elapsedMs": 1.424375
+    },
+    {
+      "variant": "indexed",
+      "postings": "100000",
+      "round": "1",
+      "elapsedMs": 1.332584
+    },
+    {
+      "variant": "original",
+      "postings": "100000",
+      "round": "1",
+      "elapsedMs": 362.613791
+    },
+    {
+      "variant": "original",
+      "postings": "100000",
+      "round": "2",
+      "elapsedMs": 378.892209
+    },
+    {
+      "variant": "indexed",
+      "postings": "100000",
+      "round": "2",
+      "elapsedMs": 2.456167
+    },
+    {
+      "variant": "indexed",
+      "postings": "100000",
+      "round": "3",
+      "elapsedMs": 1.987
+    },
+    {
+      "variant": "original",
+      "postings": "100000",
+      "round": "3",
+      "elapsedMs": 387.021792
+    },
+    {
+      "variant": "original",
+      "postings": "100000",
+      "round": "4",
+      "elapsedMs": 387.148125
+    },
+    {
+      "variant": "indexed",
+      "postings": "100000",
+      "round": "4",
+      "elapsedMs": 1.900209
+    },
+    {
+      "variant": "indexed",
+      "postings": "100000",
+      "round": "5",
+      "elapsedMs": 2.415375
+    },
+    {
+      "variant": "original",
+      "postings": "100000",
+      "round": "5",
+      "elapsedMs": 388.918333
+    },
+    {
+      "variant": "original",
+      "postings": "100000",
+      "round": "6",
+      "elapsedMs": 393.416208
+    },
+    {
+      "variant": "indexed",
+      "postings": "100000",
+      "round": "6",
+      "elapsedMs": 1.68425
+    },
+    {
+      "variant": "indexed",
+      "postings": "100000",
+      "round": "7",
+      "elapsedMs": 6.328583
+    },
+    {
+      "variant": "original",
+      "postings": "100000",
+      "round": "7",
+      "elapsedMs": 368.918
+    },
+    {
+      "variant": "original",
+      "postings": "100000",
+      "round": "8",
+      "elapsedMs": 376.4595
+    },
+    {
+      "variant": "indexed",
+      "postings": "100000",
+      "round": "8",
+      "elapsedMs": 2.047333
+    },
+    {
+      "variant": "indexed",
+      "postings": "100000",
+      "round": "9",
+      "elapsedMs": 2.836458
+    },
+    {
+      "variant": "original",
+      "postings": "100000",
+      "round": "9",
+      "elapsedMs": 387.136875
+    },
+    {
+      "variant": "original",
+      "postings": "100000",
+      "round": "10",
+      "elapsedMs": 386.802125
+    },
+    {
+      "variant": "indexed",
+      "postings": "100000",
+      "round": "10",
+      "elapsedMs": 1.143875
+    },
+    {
+      "variant": "indexed",
+      "postings": "100000",
+      "round": "11",
+      "elapsedMs": 2.269
+    },
+    {
+      "variant": "original",
+      "postings": "100000",
+      "round": "11",
+      "elapsedMs": 370.341708
+    },
+    {
+      "variant": "switch",
+      "round": "0",
+      "elapsedMs": 3.175792
+    },
+    {
+      "variant": "switch",
+      "round": "1",
+      "elapsedMs": 1.418791
+    },
+    {
+      "variant": "switch",
+      "round": "2",
+      "elapsedMs": 0.833083
+    },
+    {
+      "variant": "switch",
+      "round": "3",
+      "elapsedMs": 0.747875
+    },
+    {
+      "variant": "switch",
+      "round": "4",
+      "elapsedMs": 1.144
+    },
+    {
+      "variant": "switch",
+      "round": "5",
+      "elapsedMs": 0.939708
+    },
+    {
+      "variant": "switch",
+      "round": "6",
+      "elapsedMs": 1.214459
+    },
+    {
+      "variant": "switch",
+      "round": "7",
+      "elapsedMs": 0.793041
+    },
+    {
+      "variant": "switch",
+      "round": "8",
+      "elapsedMs": 1.18225
+    },
+    {
+      "variant": "switch",
+      "round": "9",
+      "elapsedMs": 2.6105
+    },
+    {
+      "variant": "switch",
+      "round": "10",
+      "elapsedMs": 1.717208
+    },
+    {
+      "variant": "switch",
+      "round": "11",
+      "elapsedMs": 1.962583
+    },
+    {
+      "variant": "switch",
+      "round": "12",
+      "elapsedMs": 3.399083
+    },
+    {
+      "variant": "switch",
+      "round": "13",
+      "elapsedMs": 2.233833
+    },
+    {
+      "variant": "switch",
+      "round": "14",
+      "elapsedMs": 1.197584
+    },
+    {
+      "variant": "switch",
+      "round": "15",
+      "elapsedMs": 2.262583
+    },
+    {
+      "variant": "switch",
+      "round": "16",
+      "elapsedMs": 1.126375
+    },
+    {
+      "variant": "switch",
+      "round": "17",
+      "elapsedMs": 1.434583
+    },
+    {
+      "variant": "switch",
+      "round": "18",
+      "elapsedMs": 2.130917
+    },
+    {
+      "variant": "switch",
+      "round": "19",
+      "elapsedMs": 0.909125
+    },
+    {
+      "variant": "switch",
+      "round": "20",
+      "elapsedMs": 0.452542
+    },
+    {
+      "variant": "switch",
+      "round": "21",
+      "elapsedMs": 0.318
+    },
+    {
+      "variant": "switch",
+      "round": "22",
+      "elapsedMs": 1.559792
+    },
+    {
+      "variant": "switch",
+      "round": "23",
+      "elapsedMs": 1.944625
+    },
+    {
+      "variant": "switch",
+      "round": "24",
+      "elapsedMs": 1.902458
+    },
+    {
+      "variant": "switch",
+      "round": "25",
+      "elapsedMs": 2.278792
+    },
+    {
+      "variant": "switch",
+      "round": "26",
+      "elapsedMs": 1.433542
+    },
+    {
+      "variant": "switch",
+      "round": "27",
+      "elapsedMs": 0.915541
+    },
+    {
+      "variant": "switch",
+      "round": "28",
+      "elapsedMs": 0.71675
+    },
+    {
+      "variant": "switch",
+      "round": "29",
+      "elapsedMs": 0.84675
+    },
+    {
+      "variant": "switch",
+      "round": "30",
+      "elapsedMs": 0.586667
+    },
+    {
+      "variant": "switch",
+      "round": "31",
+      "elapsedMs": 0.474
+    },
+    {
+      "variant": "switch",
+      "round": "32",
+      "elapsedMs": 0.456875
+    },
+    {
+      "variant": "switch",
+      "round": "33",
+      "elapsedMs": 1.007792
+    },
+    {
+      "variant": "switch",
+      "round": "34",
+      "elapsedMs": 1.010291
+    },
+    {
+      "variant": "switch",
+      "round": "35",
+      "elapsedMs": 0.367167
+    },
+    {
+      "variant": "switch",
+      "round": "36",
+      "elapsedMs": 1.697167
+    },
+    {
+      "variant": "switch",
+      "round": "37",
+      "elapsedMs": 0.572958
+    },
+    {
+      "variant": "switch",
+      "round": "38",
+      "elapsedMs": 0.599958
+    },
+    {
+      "variant": "switch",
+      "round": "39",
+      "elapsedMs": 0.494166
+    },
+    {
+      "variant": "switch",
+      "round": "40",
+      "elapsedMs": 0.670417
+    },
+    {
+      "variant": "switch",
+      "round": "41",
+      "elapsedMs": 0.522333
+    },
+    {
+      "variant": "switch",
+      "round": "42",
+      "elapsedMs": 0.819625
+    },
+    {
+      "variant": "switch",
+      "round": "43",
+      "elapsedMs": 0.570917
+    },
+    {
+      "variant": "switch",
+      "round": "44",
+      "elapsedMs": 0.601167
+    },
+    {
+      "variant": "switch",
+      "round": "45",
+      "elapsedMs": 0.897084
+    },
+    {
+      "variant": "switch",
+      "round": "46",
+      "elapsedMs": 0.939875
+    },
+    {
+      "variant": "switch",
+      "round": "47",
+      "elapsedMs": 0.55825
+    },
+    {
+      "variant": "switch",
+      "round": "48",
+      "elapsedMs": 0.309708
+    },
+    {
+      "variant": "switch",
+      "round": "49",
+      "elapsedMs": 0.63775
+    },
+    {
+      "variant": "switch",
+      "round": "50",
+      "elapsedMs": 0.343708
+    },
+    {
+      "variant": "switch",
+      "round": "51",
+      "elapsedMs": 0.285458
+    },
+    {
+      "variant": "switch",
+      "round": "52",
+      "elapsedMs": 0.554917
+    },
+    {
+      "variant": "switch",
+      "round": "53",
+      "elapsedMs": 0.6685
+    },
+    {
+      "variant": "switch",
+      "round": "54",
+      "elapsedMs": 0.460584
+    },
+    {
+      "variant": "switch",
+      "round": "55",
+      "elapsedMs": 0.755875
+    },
+    {
+      "variant": "switch",
+      "round": "56",
+      "elapsedMs": 0.639083
+    },
+    {
+      "variant": "switch",
+      "round": "57",
+      "elapsedMs": 0.762375
+    },
+    {
+      "variant": "switch",
+      "round": "58",
+      "elapsedMs": 0.605541
+    },
+    {
+      "variant": "switch",
+      "round": "59",
+      "elapsedMs": 0.421292
+    },
+    {
+      "variant": "switch",
+      "round": "60",
+      "elapsedMs": 0.669625
+    },
+    {
+      "variant": "switch",
+      "round": "61",
+      "elapsedMs": 0.455375
+    },
+    {
+      "variant": "switch",
+      "round": "62",
+      "elapsedMs": 0.586458
+    },
+    {
+      "variant": "switch",
+      "round": "63",
+      "elapsedMs": 0.708
+    },
+    {
+      "variant": "switch",
+      "round": "64",
+      "elapsedMs": 0.841209
+    },
+    {
+      "variant": "switch",
+      "round": "65",
+      "elapsedMs": 0.93875
+    },
+    {
+      "variant": "switch",
+      "round": "66",
+      "elapsedMs": 0.262583
+    },
+    {
+      "variant": "switch",
+      "round": "67",
+      "elapsedMs": 0.561083
+    },
+    {
+      "variant": "switch",
+      "round": "68",
+      "elapsedMs": 0.663875
+    },
+    {
+      "variant": "switch",
+      "round": "69",
+      "elapsedMs": 0.959458
+    },
+    {
+      "variant": "switch",
+      "round": "70",
+      "elapsedMs": 0.734
+    },
+    {
+      "variant": "switch",
+      "round": "71",
+      "elapsedMs": 0.783917
+    },
+    {
+      "variant": "switch",
+      "round": "72",
+      "elapsedMs": 0.547334
+    },
+    {
+      "variant": "switch",
+      "round": "73",
+      "elapsedMs": 0.636042
+    },
+    {
+      "variant": "switch",
+      "round": "74",
+      "elapsedMs": 1.34175
+    },
+    {
+      "variant": "switch",
+      "round": "75",
+      "elapsedMs": 0.61425
+    },
+    {
+      "variant": "switch",
+      "round": "76",
+      "elapsedMs": 0.435333
+    },
+    {
+      "variant": "switch",
+      "round": "77",
+      "elapsedMs": 0.376458
+    },
+    {
+      "variant": "switch",
+      "round": "78",
+      "elapsedMs": 0.813959
+    },
+    {
+      "variant": "switch",
+      "round": "79",
+      "elapsedMs": 0.674166
+    },
+    {
+      "variant": "switch",
+      "round": "80",
+      "elapsedMs": 1.135375
+    },
+    {
+      "variant": "switch",
+      "round": "81",
+      "elapsedMs": 0.506625
+    },
+    {
+      "variant": "switch",
+      "round": "82",
+      "elapsedMs": 0.562541
+    },
+    {
+      "variant": "switch",
+      "round": "83",
+      "elapsedMs": 0.528083
+    },
+    {
+      "variant": "switch",
+      "round": "84",
+      "elapsedMs": 0.439375
+    },
+    {
+      "variant": "switch",
+      "round": "85",
+      "elapsedMs": 0.955917
+    },
+    {
+      "variant": "switch",
+      "round": "86",
+      "elapsedMs": 0.703
+    },
+    {
+      "variant": "switch",
+      "round": "87",
+      "elapsedMs": 0.343375
+    },
+    {
+      "variant": "switch",
+      "round": "88",
+      "elapsedMs": 0.794709
+    },
+    {
+      "variant": "switch",
+      "round": "89",
+      "elapsedMs": 0.343625
+    },
+    {
+      "variant": "switch",
+      "round": "90",
+      "elapsedMs": 0.393208
+    },
+    {
+      "variant": "switch",
+      "round": "91",
+      "elapsedMs": 0.352958
+    },
+    {
+      "variant": "switch",
+      "round": "92",
+      "elapsedMs": 0.472083
+    },
+    {
+      "variant": "switch",
+      "round": "93",
+      "elapsedMs": 0.71475
+    },
+    {
+      "variant": "switch",
+      "round": "94",
+      "elapsedMs": 0.715666
+    },
+    {
+      "variant": "switch",
+      "round": "95",
+      "elapsedMs": 0.800792
+    },
+    {
+      "variant": "switch",
+      "round": "96",
+      "elapsedMs": 1.273916
+    },
+    {
+      "variant": "switch",
+      "round": "97",
+      "elapsedMs": 1.42075
+    },
+    {
+      "variant": "switch",
+      "round": "98",
+      "elapsedMs": 0.606459
+    },
+    {
+      "variant": "switch",
+      "round": "99",
+      "elapsedMs": 1.091584
+    }
+  ],
+  "singlePixelSoak": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.014
+      }
+    },
+    {
+      "workload": "receive_50MiB_round0",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 75.69999992847443,
+        "milliseconds": 5297.799999952316
+      }
+    },
+    {
+      "workload": "upload_10MiB_round0",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 12.299999356269836,
+        "milliseconds": 1102.7000000476837
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 0,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 2794,
+        "JSHeapUsedSize": 1418364,
+        "JSHeapTotalSize": 2621440
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.01,
+        "bytesReceived": 68811423,
+        "bytesSent": 15491178,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 3844,
+            "bytesReceived": 62981633
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round1",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 65.69999933242798,
+        "milliseconds": 6380.799999952316
+      }
+    },
+    {
+      "workload": "upload_10MiB_round1",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 10.9000004529953,
+        "milliseconds": 1108
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 1,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 1892,
+        "JSHeapUsedSize": 1100440,
+        "JSHeapTotalSize": 2621440
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.011,
+        "bytesReceived": 137238372,
+        "bytesSent": 29063625,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 7688,
+            "bytesReceived": 125963266
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 60.09999978542328,
+        "milliseconds": 6081.600000023842
+      }
+    },
+    {
+      "workload": "upload_10MiB_round2",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 12.299999594688416,
+        "milliseconds": 1420.3999999761581
+      }
+    },
+    {
+      "workload": "interrupt_50MiB_round2",
+      "result": {
+        "status": "interrupted",
+        "bytes": 1048576,
+        "milliseconds": 99
+      }
+    },
+    {
+      "workload": "reconnect_round2",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.005
+      }
+    },
+    {
+      "workload": "retry_50MiB_round2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 61.30000174045563,
+        "milliseconds": 4720.799999952316
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 2,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 1205,
+        "JSHeapUsedSize": 1053080,
+        "JSHeapTotalSize": 2097152
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.008,
+        "bytesReceived": 56923117,
+        "bytesSent": 1609757,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 3202,
+            "bytesReceived": 52480249
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round3",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 59.599998235702515,
+        "milliseconds": 5287
+      }
+    },
+    {
+      "workload": "upload_10MiB_round3",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 10.09999930858612,
+        "milliseconds": 988.5
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 3,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 1434,
+        "JSHeapUsedSize": 1038248,
+        "JSHeapTotalSize": 2097152
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.017,
+        "bytesReceived": 124849950,
+        "bytesSent": 16840619,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 7046,
+            "bytesReceived": 115461882
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round4",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 59.39999973773956,
+        "milliseconds": 5110.899999976158
+      }
+    },
+    {
+      "workload": "upload_10MiB_round4",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 11.600000023841858,
+        "milliseconds": 1193.7000000476837
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 4,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 1460,
+        "JSHeapUsedSize": 1022432,
+        "JSHeapTotalSize": 2097152
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.01,
+        "bytesReceived": 193098545,
+        "bytesSent": 30125175,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 10890,
+            "bytesReceived": 178443515
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round5",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 62.09999883174896,
+        "milliseconds": 5537.200000047684
+      }
+    },
+    {
+      "workload": "upload_10MiB_round5",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 12.399999499320984,
+        "milliseconds": 1043.5
+      }
+    },
+    {
+      "workload": "interrupt_50MiB_round5",
+      "result": {
+        "status": "interrupted",
+        "bytes": 1048576,
+        "milliseconds": 106.5
+      }
+    },
+    {
+      "workload": "reconnect_round5",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.006
+      }
+    },
+    {
+      "workload": "retry_50MiB_round5",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 70.09999787807465,
+        "milliseconds": 5797.399999976158
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 5,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 1170,
+        "JSHeapUsedSize": 1060228,
+        "JSHeapTotalSize": 2097152
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.013,
+        "bytesReceived": 58279424,
+        "bytesSent": 1780381,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 3202,
+            "bytesReceived": 52480249
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round6",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 71.60000193119049,
+        "milliseconds": 5576.799999952316
+      }
+    },
+    {
+      "workload": "upload_10MiB_round6",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 13.400000095367432,
+        "milliseconds": 1080.6000000238419
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 6,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 1455,
+        "JSHeapUsedSize": 1057832,
+        "JSHeapTotalSize": 2097152
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.011,
+        "bytesReceived": 126816462,
+        "bytesSent": 17485257,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 7046,
+            "bytesReceived": 115461882
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round7",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 64.60000026226044,
+        "milliseconds": 5427.600000023842
+      }
+    },
+    {
+      "workload": "upload_10MiB_round7",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 12.700000524520874,
+        "milliseconds": 1185
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 7,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 1613,
+        "JSHeapUsedSize": 1081476,
+        "JSHeapTotalSize": 2097152
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.015,
+        "bytesReceived": 195358477,
+        "bytesSent": 30780558,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 10890,
+            "bytesReceived": 178443515
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round8",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 65.79999923706055,
+        "milliseconds": 5363
+      }
+    },
+    {
+      "workload": "upload_10MiB_round8",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 12.899999380111694,
+        "milliseconds": 1091
+      }
+    },
+    {
+      "workload": "interrupt_50MiB_round8",
+      "result": {
+        "status": "interrupted",
+        "bytes": 1048576,
+        "milliseconds": 134.29999995231628
+      }
+    },
+    {
+      "workload": "reconnect_round8",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.008
+      }
+    },
+    {
+      "workload": "retry_50MiB_round8",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 66.19999933242798,
+        "milliseconds": 5913.200000047684
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 8,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 1157,
+        "JSHeapUsedSize": 1057644,
+        "JSHeapTotalSize": 2097152
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.009,
+        "bytesReceived": 57381828,
+        "bytesSent": 1734776,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 3202,
+            "bytesReceived": 52480249
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round9",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 62.50000059604645,
+        "milliseconds": 5946.200000047684
+      }
+    },
+    {
+      "workload": "upload_10MiB_round9",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 13.69999885559082,
+        "milliseconds": 1350.1000000238419
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 9,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 1437,
+        "JSHeapUsedSize": 1058492,
+        "JSHeapTotalSize": 2097152
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.014,
+        "bytesReceived": 125438710,
+        "bytesSent": 18025943,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 7046,
+            "bytesReceived": 115461882
+          }
+        ]
+      }
+    },
+    {
+      "workload": "browser_errors",
+      "result": []
+    }
+  ],
+  "threePeerSoak": {
+    "a": [
+      {
+        "workload": "connect",
+        "result": {
+          "connected": true
+        }
+      },
+      {
+        "workload": "receive_50MiB_round0",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 80.20000123977661,
+          "milliseconds": 6251.5
+        }
+      },
+      {
+        "workload": "upload_10MiB_round0",
+        "result": {
+          "status": "complete",
+          "bytes": 10485760,
+          "chunks": 640,
+          "binaryFrames": 640,
+          "receiverProcessingMs": 18.09999966621399,
+          "milliseconds": 4268.5
+        }
+      },
+      {
+        "workload": "soak_sample",
+        "round": 0,
+        "metrics": {
+          "Documents": 1,
+          "JSEventListeners": 7,
+          "Nodes": 7,
+          "RTCPeerConnections": 1,
+          "ArrayBufferContents": 2794,
+          "JSHeapUsedSize": 1424832,
+          "JSHeapTotalSize": 2883584
+        },
+        "route": {
+          "connectionState": "connected",
+          "channelState": "open",
+          "rtt": 0.012,
+          "bytesReceived": 69414388,
+          "bytesSent": 17784030,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 3844,
+              "bytesReceived": 62981633
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_round1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 63.09999930858612,
+          "milliseconds": 6810.700000047684
+        }
+      },
+      {
+        "workload": "upload_10MiB_round1",
+        "result": {
+          "status": "complete",
+          "bytes": 10485760,
+          "chunks": 640,
+          "binaryFrames": 640,
+          "receiverProcessingMs": 12.599999189376831,
+          "milliseconds": 4372.600000023842
+        }
+      },
+      {
+        "workload": "soak_sample",
+        "round": 1,
+        "metrics": {
+          "Documents": 1,
+          "JSEventListeners": 7,
+          "Nodes": 7,
+          "RTCPeerConnections": 1,
+          "ArrayBufferContents": 2345,
+          "JSHeapUsedSize": 1213544,
+          "JSHeapTotalSize": 2621440
+        },
+        "route": {
+          "connectionState": "connected",
+          "channelState": "open",
+          "rtt": 0.017,
+          "bytesReceived": 137588324,
+          "bytesSent": 31152806,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 7688,
+              "bytesReceived": 125963266
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_round2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 60.30000019073486,
+          "milliseconds": 6004.700000047684
+        }
+      },
+      {
+        "workload": "upload_10MiB_round2",
+        "result": {
+          "status": "complete",
+          "bytes": 10485760,
+          "chunks": 640,
+          "binaryFrames": 640,
+          "receiverProcessingMs": 17.700000286102295,
+          "milliseconds": 3233.899999976158
+        }
+      },
+      {
+        "workload": "interrupt_50MiB_round2",
+        "result": {
+          "status": "interrupted",
+          "bytes": 1048576,
+          "milliseconds": 124.70000004768372
+        }
+      },
+      {
+        "workload": "reconnect_round2",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.006
+        }
+      },
+      {
+        "workload": "retry_50MiB_round2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 69.59999966621399,
+          "milliseconds": 6234
+        }
+      },
+      {
+        "workload": "soak_sample",
+        "round": 2,
+        "metrics": {
+          "Documents": 1,
+          "JSEventListeners": 7,
+          "Nodes": 7,
+          "RTCPeerConnections": 1,
+          "ArrayBufferContents": 1191,
+          "JSHeapUsedSize": 1049280,
+          "JSHeapTotalSize": 2097152
+        },
+        "route": {
+          "connectionState": "connected",
+          "channelState": "open",
+          "rtt": 0.011,
+          "bytesReceived": 57460123,
+          "bytesSent": 1668396,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 3202,
+              "bytesReceived": 52480249
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_round3",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 57.999998807907104,
+          "milliseconds": 6209.800000071526
+        }
+      },
+      {
+        "workload": "upload_10MiB_round3",
+        "result": {
+          "status": "complete",
+          "bytes": 10485760,
+          "chunks": 640,
+          "binaryFrames": 640,
+          "receiverProcessingMs": 16.800000548362732,
+          "milliseconds": 4186.5
+        }
+      },
+      {
+        "workload": "soak_sample",
+        "round": 3,
+        "metrics": {
+          "Documents": 1,
+          "JSEventListeners": 7,
+          "Nodes": 7,
+          "RTCPeerConnections": 1,
+          "ArrayBufferContents": 1524,
+          "JSHeapUsedSize": 1066368,
+          "JSHeapTotalSize": 2097152
+        },
+        "route": {
+          "connectionState": "connected",
+          "channelState": "open",
+          "rtt": 0.016,
+          "bytesReceived": 125511120,
+          "bytesSent": 17398711,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 7046,
+              "bytesReceived": 115461882
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_round4",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 71.5,
+          "milliseconds": 6447
+        }
+      },
+      {
+        "workload": "upload_10MiB_round4",
+        "result": {
+          "status": "complete",
+          "bytes": 10485760,
+          "chunks": 640,
+          "binaryFrames": 640,
+          "receiverProcessingMs": 18.2999986410141,
+          "milliseconds": 5526
+        }
+      },
+      {
+        "workload": "soak_sample",
+        "round": 4,
+        "metrics": {
+          "Documents": 1,
+          "JSEventListeners": 7,
+          "Nodes": 7,
+          "RTCPeerConnections": 1,
+          "ArrayBufferContents": 1493,
+          "JSHeapUsedSize": 1054788,
+          "JSHeapTotalSize": 2097152
+        },
+        "route": {
+          "connectionState": "connected",
+          "channelState": "open",
+          "rtt": 0.01,
+          "bytesReceived": 193638679,
+          "bytesSent": 30946167,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 10890,
+              "bytesReceived": 178443515
+            }
+          ]
+        }
+      },
+      {
+        "workload": "browser_errors",
+        "result": []
+      }
+    ],
+    "b": [
+      {
+        "workload": "connect",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.051
+        }
+      },
+      {
+        "workload": "receive_50MiB_round0",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 76.60000205039978,
+          "milliseconds": 11127.399999976158
+        }
+      },
+      {
+        "workload": "upload_10MiB_round0",
+        "result": {
+          "status": "complete",
+          "bytes": 10485760,
+          "chunks": 640,
+          "binaryFrames": 640,
+          "receiverProcessingMs": 14.90000057220459,
+          "milliseconds": 1326.7999999523163
+        }
+      },
+      {
+        "workload": "soak_sample",
+        "round": 0,
+        "metrics": {
+          "Documents": 1,
+          "JSEventListeners": 7,
+          "Nodes": 7,
+          "RTCPeerConnections": 1,
+          "ArrayBufferContents": 932,
+          "JSHeapUsedSize": 889620,
+          "JSHeapTotalSize": 2359296
+        },
+        "route": {
+          "connectionState": "connected",
+          "channelState": "open",
+          "rtt": 0.012,
+          "bytesReceived": 69745037,
+          "bytesSent": 16407323,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 3844,
+              "bytesReceived": 62982917
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_round1",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 69.89999949932098,
+          "milliseconds": 9862.5
+        }
+      },
+      {
+        "workload": "upload_10MiB_round1",
+        "result": {
+          "status": "complete",
+          "bytes": 10485760,
+          "chunks": 640,
+          "binaryFrames": 640,
+          "receiverProcessingMs": 11.100000023841858,
+          "milliseconds": 879.1999999284744
+        }
+      },
+      {
+        "workload": "soak_sample",
+        "round": 1,
+        "metrics": {
+          "Documents": 1,
+          "JSEventListeners": 7,
+          "Nodes": 7,
+          "RTCPeerConnections": 1,
+          "ArrayBufferContents": 2770,
+          "JSHeapUsedSize": 1409140,
+          "JSHeapTotalSize": 2621440
+        },
+        "route": {
+          "connectionState": "connected",
+          "channelState": "open",
+          "rtt": 0.015,
+          "bytesReceived": 137300860,
+          "bytesSent": 29907370,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 7688,
+              "bytesReceived": 125965834
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_round2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 67.30000233650208,
+          "milliseconds": 8750.800000071526
+        }
+      },
+      {
+        "workload": "upload_10MiB_round2",
+        "result": {
+          "status": "complete",
+          "bytes": 10485760,
+          "chunks": 640,
+          "binaryFrames": 640,
+          "receiverProcessingMs": 13.799999952316284,
+          "milliseconds": 7032.100000023842
+        }
+      },
+      {
+        "workload": "interrupt_50MiB_round2",
+        "result": {
+          "status": "interrupted",
+          "bytes": 1048576,
+          "milliseconds": 127
+        }
+      },
+      {
+        "workload": "reconnect_round2",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.005
+        }
+      },
+      {
+        "workload": "retry_50MiB_round2",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 62.49999976158142,
+          "milliseconds": 4904.800000071526
+        }
+      },
+      {
+        "workload": "soak_sample",
+        "round": 2,
+        "metrics": {
+          "Documents": 1,
+          "JSEventListeners": 7,
+          "Nodes": 7,
+          "RTCPeerConnections": 1,
+          "ArrayBufferContents": 759,
+          "JSHeapUsedSize": 878728,
+          "JSHeapTotalSize": 2097152
+        },
+        "route": {
+          "connectionState": "connected",
+          "channelState": "open",
+          "rtt": 0.009,
+          "bytesReceived": 56621030,
+          "bytesSent": 1592012,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 3202,
+              "bytesReceived": 52480249
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_round3",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 74.10000038146973,
+          "milliseconds": 4946.700000047684
+        }
+      },
+      {
+        "workload": "upload_10MiB_round3",
+        "result": {
+          "status": "complete",
+          "bytes": 10485760,
+          "chunks": 640,
+          "binaryFrames": 640,
+          "receiverProcessingMs": 10.399999380111694,
+          "milliseconds": 1033.9000000953674
+        }
+      },
+      {
+        "workload": "soak_sample",
+        "round": 3,
+        "metrics": {
+          "Documents": 1,
+          "JSEventListeners": 7,
+          "Nodes": 7,
+          "RTCPeerConnections": 1,
+          "ArrayBufferContents": 641,
+          "JSHeapUsedSize": 856064,
+          "JSHeapTotalSize": 1835008
+        },
+        "route": {
+          "connectionState": "connected",
+          "channelState": "open",
+          "rtt": 0.005,
+          "bytesReceived": 125172035,
+          "bytesSent": 16072428,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 7046,
+              "bytesReceived": 115463166
+            }
+          ]
+        }
+      },
+      {
+        "workload": "receive_50MiB_round4",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "binaryFrames": 3200,
+          "receiverProcessingMs": 76.99999916553497,
+          "milliseconds": 10316.299999952316
+        }
+      },
+      {
+        "workload": "upload_10MiB_round4",
+        "result": {
+          "status": "complete",
+          "bytes": 10485760,
+          "chunks": 640,
+          "binaryFrames": 640,
+          "receiverProcessingMs": 14.300000786781311,
+          "milliseconds": 1519.3000000715256
+        }
+      },
+      {
+        "workload": "soak_sample",
+        "round": 4,
+        "metrics": {
+          "Documents": 1,
+          "JSEventListeners": 7,
+          "Nodes": 7,
+          "RTCPeerConnections": 1,
+          "ArrayBufferContents": 1421,
+          "JSHeapUsedSize": 1041156,
+          "JSHeapTotalSize": 2097152
+        },
+        "route": {
+          "connectionState": "connected",
+          "channelState": "open",
+          "rtt": 0.008,
+          "bytesReceived": 193404433,
+          "bytesSent": 29782930,
+          "channels": [
+            {
+              "label": "data",
+              "messagesReceived": 10890,
+              "bytesReceived": 178446083
+            }
+          ]
+        }
+      },
+      {
+        "workload": "browser_errors",
+        "result": []
+      }
+    ],
+    "independentUploadIds": true
+  },
+  "pixelIdleWithoutPssSampler": [
+    {
+      "phase": "foreground",
+      "start": {
+        "cpuSeconds": 0.42,
+        "rssMiB": 155.78125,
+        "threads": 48
+      },
+      "end": {
+        "cpuSeconds": 0.44,
+        "rssMiB": 155.99609375,
+        "threads": 46
+      },
+      "cpuPercentOneCore": 0.06638139199067303
+    },
+    {
+      "phase": "background",
+      "start": {
+        "cpuSeconds": 0.44,
+        "rssMiB": 155.99609375,
+        "threads": 46
+      },
+      "end": {
+        "cpuSeconds": 0.48,
+        "rssMiB": 155.8359375,
+        "threads": 46
+      },
+      "cpuPercentOneCore": 0.1328658301445084
+    }
+  ],
+  "pixelAfterThreePeerSoak": {
+    "afterThreePeerSoak": true,
+    "pssMiB": 76.462890625,
+    "rssMiB": 202.453125
+  },
+  "server": [
+    {
+      "workload": "cold_jwks_500",
+      "result": {
+        "count": 500,
+        "p50Ms": 479.63,
+        "p95Ms": 567.79,
+        "p99Ms": 570.77,
+        "statuses": {
+          "200": 500
+        },
+        "jwksRequests": 1,
+        "membershipRequests": 500,
+        "membershipDelayMs": 25,
+        "jwksDelayMs": 200
+      }
+    },
+    {
+      "workload": "warm_membership_10_run1",
+      "result": {
+        "count": 10,
+        "p50Ms": 33.6,
+        "p95Ms": 33.84,
+        "p99Ms": 33.84,
+        "statuses": {
+          "200": 10
+        },
+        "jwksRequests": 0,
+        "membershipRequests": 10,
+        "membershipDelayMs": 25,
+        "jwksDelayMs": 200
+      }
+    },
+    {
+      "workload": "warm_membership_100_run1",
+      "result": {
+        "count": 100,
+        "p50Ms": 59.7,
+        "p95Ms": 66.13,
+        "p99Ms": 66.52,
+        "statuses": {
+          "200": 100
+        },
+        "jwksRequests": 0,
+        "membershipRequests": 100,
+        "membershipDelayMs": 25,
+        "jwksDelayMs": 200
+      }
+    },
+    {
+      "workload": "warm_membership_500_run1",
+      "result": {
+        "count": 500,
+        "p50Ms": 181.66,
+        "p95Ms": 209.27,
+        "p99Ms": 212.7,
+        "statuses": {
+          "200": 500
+        },
+        "jwksRequests": 0,
+        "membershipRequests": 500,
+        "membershipDelayMs": 25,
+        "jwksDelayMs": 200
+      }
+    },
+    {
+      "workload": "authenticated_joins_1_households",
+      "result": {
+        "count": 5,
+        "p50Ms": 57.58,
+        "p95Ms": 58.43,
+        "p99Ms": 58.43,
+        "households": 1,
+        "peersPerHouse": 5,
+        "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+      }
+    },
+    {
+      "workload": "authenticated_joins_10_households",
+      "result": {
+        "count": 50,
+        "p50Ms": 103.48,
+        "p95Ms": 126.37,
+        "p99Ms": 129.66,
+        "households": 10,
+        "peersPerHouse": 5,
+        "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+      }
+    },
+    {
+      "workload": "authenticated_joins_100_households",
+      "result": {
+        "count": 500,
+        "p50Ms": 601.19,
+        "p95Ms": 817.5,
+        "p99Ms": 835.55,
+        "households": 100,
+        "peersPerHouse": 5,
+        "includes": "WebSocket open, authorization, Join and directed Offer/Answer echo"
+      }
+    },
+    {
+      "workload": "authenticated_reconnects",
+      "result": {
+        "count": 30,
+        "p50Ms": 40.43,
+        "p95Ms": 49.56,
+        "p99Ms": 49.94,
+        "households": 10,
+        "rounds": 3,
+        "replacedClosedBeforeReply": 27,
+        "replacementSurvivedOldClose": 30
+      }
+    },
+    {
+      "workload": "threads_during_slow_upstream",
+      "result": {
+        "threads": 222,
+        "defaultDispatcherThreads": 39,
+        "blockingHttpStacks": 0
+      }
+    },
+    {
+      "workload": "slow_upstream_100",
+      "result": {
+        "count": 100,
+        "p50Ms": 1561.34,
+        "p95Ms": 1572.64,
+        "p99Ms": 1575.69,
+        "statuses": {
+          "200": 100
+        },
+        "jwksRequests": 0,
+        "membershipRequests": 100,
+        "membershipDelayMs": 1500,
+        "jwksDelayMs": 200
+      }
+    },
+    {
+      "workload": "upstream_deadline_10",
+      "result": {
+        "count": 10,
+        "p50Ms": 5041.52,
+        "p95Ms": 5043.55,
+        "p99Ms": 5043.55,
+        "statuses": {
+          "503": 10
+        },
+        "jwksRequests": 0,
+        "membershipRequests": 10,
+        "membershipDelayMs": 7000,
+        "jwksDelayMs": 200
+      }
+    },
+    {
+      "workload": "upstream_failure_10",
+      "result": {
+        "count": 10,
+        "p50Ms": 34.36,
+        "p95Ms": 35.02,
+        "p99Ms": 35.02,
+        "statuses": {
+          "503": 10
+        },
+        "jwksRequests": 0,
+        "membershipRequests": 10,
+        "membershipDelayMs": 25,
+        "jwksDelayMs": 200
+      }
+    },
+    {
+      "workload": "rotated_key_100",
+      "result": {
+        "count": 100,
+        "p50Ms": 256.37,
+        "p95Ms": 260.01,
+        "p99Ms": 260.39,
+        "statuses": {
+          "200": 100
+        },
+        "jwksRequests": 1,
+        "membershipRequests": 100,
+        "membershipDelayMs": 25,
+        "jwksDelayMs": 200
+      }
+    },
+    {
+      "workload": "complete",
+      "result": {
+        "synthetic": true,
+        "transport": "control-plane HTTP metadata and WebSocket signaling only",
+        "fixedChecks": true,
+        "records": 13
+      }
+    }
+  ],
+  "hostedRemove": {
+    "event": "remove-verified",
+    "registryRemoved": true,
+    "peerPolicyClosed": true,
+    "survivorReceivedRemoval": true,
+    "requests": {
+      "registryReads": 45,
+      "registryDeletes": 1
+    },
+    "uiVerified": "Pixel production Settings showed Free plan 1 / 2 and synthetic-device; removed peer and Remove device button absent."
+  },
+  "nativeIos": {
+    "plan": [
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 2.2739303333801217,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "Schedules",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 3.0978893333813176,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "cpuMs": 164.98999999999998,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 10,
+          "mainThreadQueries": 0,
+          "queries": 6,
+          "rows": {
+            "accounts": 10,
+            "bookkeeping": 0,
+            "categories": 40,
+            "schedules": 1000
+          },
+          "tables": {
+            "accounts": 1,
+            "bookkeeping": 3,
+            "categories": 1,
+            "schedules": 1
+          }
+        },
+        "displayCallbacks": 33,
+        "elapsedMs": 670.8803750225343,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 1002,
+        "maxCallbackGapMs": 100.14979168772697,
+        "p95CallbackGapMs": 20.56266664294526,
+        "phase": "Schedules",
+        "residentMiB": 103.234375,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 3.7695430000312626,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "Categories",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 3.771694583352655,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "cpuMs": 117.54599999999994,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 11,
+          "mainThreadQueries": 0,
+          "queries": 2,
+          "rows": {
+            "bookkeeping": 0,
+            "categories": 40
+          },
+          "tables": {
+            "bookkeeping": 1,
+            "categories": 1
+          }
+        },
+        "displayCallbacks": 34,
+        "elapsedMs": 633.3375833346508,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 41,
+        "maxCallbackGapMs": 59.80662500951439,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "Categories",
+        "residentMiB": 107.0625,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 4.405188750009984,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "Accounts",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 4.407389375031926,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "cpuMs": 116.90199999999962,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 2,
+          "rows": {
+            "accounts": 10,
+            "bookkeeping": 0
+          },
+          "tables": {
+            "accounts": 1,
+            "bookkeeping": 1
+          }
+        },
+        "displayCallbacks": 32,
+        "elapsedMs": 607.8114583506249,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 11,
+        "maxCallbackGapMs": 60.29316666536033,
+        "p95CallbackGapMs": 16.667416668497026,
+        "phase": "Accounts",
+        "residentMiB": 110.921875,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 5.015302833344322,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "Overview",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 5.0171826666919515,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "cpuMs": 98.85900000000004,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 31,
+        "elapsedMs": 614.4648333429359,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "listItems": 1005,
+        "maxCallbackGapMs": 16.977333347313106,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "Overview",
+        "residentMiB": 111.15625,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 5.631734375027008,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "By category",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 5.633673375006765,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "cpuMs": 109.98300000000016,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 31,
+        "elapsedMs": 595.5917500541545,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 45,
+        "maxCallbackGapMs": 57.09754169220105,
+        "p95CallbackGapMs": 16.667416668497026,
+        "phase": "By category",
+        "residentMiB": 113.84375,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 6.229340374993626,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "By day",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 6.231339041667525,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "cpuMs": 94.25399999999983,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 35,
+        "elapsedMs": 604.9796666484326,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 1005,
+        "maxCallbackGapMs": 33.457333338446915,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "By day",
+        "residentMiB": 113.90625,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 6.836405166715849,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "Schedules",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 6.838664583337959,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "cpuMs": 101.10300000000016,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 30,
+        "elapsedMs": 592.0943333185278,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 1002,
+        "maxCallbackGapMs": 49.80395833263174,
+        "p95CallbackGapMs": 16.667416668497026,
+        "phase": "Schedules",
+        "residentMiB": 114.375,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 7.430868541705422,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "Categories",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 7.433109125006013,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "cpuMs": 88.60500000000027,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 31,
+        "elapsedMs": 604.4792500324547,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 41,
+        "maxCallbackGapMs": 27.00679167173803,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "Categories",
+        "residentMiB": 114.59375,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 8.037648791680112,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "Accounts",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 8.039761624997482,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "cpuMs": 90.109,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 33,
+        "elapsedMs": 605.4929583333433,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 11,
+        "maxCallbackGapMs": 28.028416680172086,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "Accounts",
+        "residentMiB": 114.640625,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 8.645340875023976,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "Overview",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 8.647345125034917,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "cpuMs": 84.96499999999996,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 33,
+        "elapsedMs": 604.4722916558385,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 1005,
+        "maxCallbackGapMs": 68.4516666806303,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "Overview",
+        "residentMiB": 114.671875,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 9.251879666699097,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "By category",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 9.253979666682426,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "cpuMs": 98.163,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 33,
+        "elapsedMs": 607.8644583467394,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 45,
+        "maxCallbackGapMs": 48.32574998727068,
+        "p95CallbackGapMs": 16.66745834518224,
+        "phase": "By category",
+        "residentMiB": 115.09375,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 9.861945208336692,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "By day",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 9.864277500018943,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "cpuMs": 96.2719999999999,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 34,
+        "elapsedMs": 588.1541666458361,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 1005,
+        "maxCallbackGapMs": 34.1901250067167,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "By day",
+        "residentMiB": 115.875,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 10.452518750040326,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "database": {
+          "activeListeners": 0,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "event": "plan-closed",
+        "sinceStartSeconds": 16.720392875024118,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 16.723076083348133,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.04389891668688506,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "Schedules",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 0.6839800416491926,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "cpuMs": 217.04100000000005,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 10,
+          "mainThreadQueries": 0,
+          "queries": 6,
+          "rows": {
+            "accounts": 10,
+            "bookkeeping": 0,
+            "categories": 40,
+            "schedules": 1000
+          },
+          "tables": {
+            "accounts": 1,
+            "bookkeeping": 3,
+            "categories": 1,
+            "schedules": 1
+          }
+        },
+        "displayCallbacks": 33,
+        "elapsedMs": 671.7594999936409,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 1002,
+        "maxCallbackGapMs": 37.89604164194316,
+        "p95CallbackGapMs": 23.70979165425524,
+        "phase": "Schedules",
+        "residentMiB": 96.203125,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 1.3561121666571125,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "Categories",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 1.3583075416390784,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "cpuMs": 118.29699999999998,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 11,
+          "mainThreadQueries": 0,
+          "queries": 2,
+          "rows": {
+            "bookkeeping": 0,
+            "categories": 40
+          },
+          "tables": {
+            "bookkeeping": 1,
+            "categories": 1
+          }
+        },
+        "displayCallbacks": 33,
+        "elapsedMs": 615.3662499855272,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 41,
+        "maxCallbackGapMs": 60.40562497219071,
+        "p95CallbackGapMs": 16.667625051923096,
+        "phase": "Categories",
+        "residentMiB": 100.46875,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 1.9738314999849536,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "Accounts",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 1.9759611666668206,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "cpuMs": 116.75499999999994,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 2,
+          "rows": {
+            "accounts": 10,
+            "bookkeeping": 0
+          },
+          "tables": {
+            "accounts": 1,
+            "bookkeeping": 1
+          }
+        },
+        "displayCallbacks": 34,
+        "elapsedMs": 632.4015833088197,
+        "event": "measurement",
+        "gapsOver25ms": 2,
+        "listItems": 11,
+        "maxCallbackGapMs": 57.508124969899654,
+        "p95CallbackGapMs": 16.667416668497026,
+        "phase": "Accounts",
+        "residentMiB": 104.59375,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 2.6085322916624136,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "Overview",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 2.6106221666559577,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "cpuMs": 86.99100000000004,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 32,
+        "elapsedMs": 602.4300000281073,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 1005,
+        "maxCallbackGapMs": 65.2690416900441,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "Overview",
+        "residentMiB": 104.765625,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 3.21316904167179,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "By category",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 3.2152859999914654,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "cpuMs": 107.302,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 34,
+        "elapsedMs": 604.5547082903795,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 45,
+        "maxCallbackGapMs": 54.157249978743494,
+        "p95CallbackGapMs": 16.66745834518224,
+        "phase": "By category",
+        "residentMiB": 108.3125,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 3.819899541675113,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "By day",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 3.822051208349876,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "cpuMs": 91.69500000000008,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 33,
+        "elapsedMs": 577.8918750002049,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "listItems": 1005,
+        "maxCallbackGapMs": 16.667500021867454,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "By day",
+        "residentMiB": 105.953125,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 4.4000467083533294,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "Schedules",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 4.402244458324276,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "cpuMs": 100.73399999999988,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 29,
+        "elapsedMs": 596.4711250271648,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 1002,
+        "maxCallbackGapMs": 28.931125008966774,
+        "p95CallbackGapMs": 16.66745834518224,
+        "phase": "Schedules",
+        "residentMiB": 106.4375,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 4.998800666653551,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "Categories",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 5.001016708323732,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "cpuMs": 90.24999999999994,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 31,
+        "elapsedMs": 607.6444166828878,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 41,
+        "maxCallbackGapMs": 26.718958339188248,
+        "p95CallbackGapMs": 16.66745834518224,
+        "phase": "Categories",
+        "residentMiB": 106.609375,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 5.608734250010457,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "Accounts",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 5.610722750017885,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "cpuMs": 88.24500000000013,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 33,
+        "elapsedMs": 607.1494166390039,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 11,
+        "maxCallbackGapMs": 66.89600000390783,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "Accounts",
+        "residentMiB": 106.640625,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 6.217972958344035,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "Overview",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 6.220061375002842,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "cpuMs": 85.99999999999986,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 31,
+        "elapsedMs": 573.607083351817,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 1005,
+        "maxCallbackGapMs": 25.43587499530986,
+        "p95CallbackGapMs": 16.667541698552668,
+        "phase": "Overview",
+        "residentMiB": 106.671875,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 6.793789833318442,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "By category",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 6.795955083332956,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "cpuMs": 86.89900000000006,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 34,
+        "elapsedMs": 597.424041654449,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 45,
+        "maxCallbackGapMs": 37.318125017918646,
+        "p95CallbackGapMs": 16.667583375237882,
+        "phase": "By category",
+        "residentMiB": 107.34375,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 7.393516791635193,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "By day",
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 7.395999958331231,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "cpuMs": 92.96100000000007,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 12,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 34,
+        "elapsedMs": 594.6074166567996,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "listItems": 1005,
+        "maxCallbackGapMs": 33.33483333699405,
+        "p95CallbackGapMs": 16.667416668497026,
+        "phase": "By day",
+        "residentMiB": 108.0625,
+        "screen": "plan-transitions",
+        "sinceStartSeconds": 7.990665125020314,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "database": {
+          "activeListeners": 0,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "event": "plan-closed",
+        "sinceStartSeconds": 14.080300249974243,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 14.082142916682642,
+        "thermalState": 0,
+        "processRun": 2
+      }
+    ],
+    "keyboard": [
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.5856850833515637,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "schedule-category-menu",
+        "screen": "editor-choices",
+        "sinceStartSeconds": 1.756048166716937,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "choices": 41,
+        "cpuMs": 71.55299999999976,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 3,
+        "elapsedMs": 163.7513333116658,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.667541698552668,
+        "p95CallbackGapMs": 16.667541640345007,
+        "phase": "schedule-category-menu",
+        "residentMiB": 106.890625,
+        "screen": "editor-choices",
+        "sinceStartSeconds": 1.9196770417038351,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "schedule-category-menu",
+        "screen": "editor-choices",
+        "sinceStartSeconds": 2.914067291712854,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "choices": 41,
+        "cpuMs": 67.01800000000003,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 2,
+        "elapsedMs": 114.55366667360067,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 20.61758330091834,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "schedule-category-menu",
+        "residentMiB": 109.921875,
+        "screen": "editor-choices",
+        "sinceStartSeconds": 3.0284710000269115,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "schedule-category-menu",
+        "screen": "editor-choices",
+        "sinceStartSeconds": 4.014986333379056,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "choices": 41,
+        "cpuMs": 68.17899999999977,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 3,
+        "elapsedMs": 115.79274997347966,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 18.81404162850231,
+        "p95CallbackGapMs": 16.667500021867454,
+        "phase": "schedule-category-menu",
+        "residentMiB": 110.125,
+        "screen": "editor-choices",
+        "sinceStartSeconds": 4.130660541704856,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "accountChoices": 10,
+        "categoryChoices": 41,
+        "database": {
+          "activeListeners": 0,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "directFocusSwitchChecked": true,
+        "editor": "schedule",
+        "event": "choices-checked",
+        "keyboardDoneChecks": 2,
+        "sinceStartSeconds": 10.821527458378114,
+        "thermalState": 0,
+        "transferChoices": 9,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "transaction-category-menu",
+        "screen": "editor-choices",
+        "sinceStartSeconds": 11.737842666683719,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "choices": 41,
+        "cpuMs": 63.672000000000395,
+        "database": {
+          "activeListeners": 7,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 3,
+        "elapsedMs": 112.83825000282377,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.667416668497026,
+        "p95CallbackGapMs": 16.667416668497026,
+        "phase": "transaction-category-menu",
+        "residentMiB": 128.59375,
+        "screen": "editor-choices",
+        "sinceStartSeconds": 11.85062066669343,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "transaction-category-menu",
+        "screen": "editor-choices",
+        "sinceStartSeconds": 12.844536541670095,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "choices": 41,
+        "cpuMs": 67.80200000000036,
+        "database": {
+          "activeListeners": 7,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 2,
+        "elapsedMs": 114.70954166725278,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 24.970916681922972,
+        "p95CallbackGapMs": 16.667624993715435,
+        "phase": "transaction-category-menu",
+        "residentMiB": 129.78125,
+        "screen": "editor-choices",
+        "sinceStartSeconds": 12.95919633336598,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "begin",
+        "phase": "transaction-category-menu",
+        "screen": "editor-choices",
+        "sinceStartSeconds": 13.939279333339073,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "choices": 41,
+        "cpuMs": 66.84499999999983,
+        "database": {
+          "activeListeners": 7,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 3,
+        "elapsedMs": 112.80733329476789,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.66758331703022,
+        "p95CallbackGapMs": 16.66758331703022,
+        "phase": "transaction-category-menu",
+        "residentMiB": 129.859375,
+        "screen": "editor-choices",
+        "sinceStartSeconds": 14.052058375033084,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "accountChoices": 10,
+        "categoryChoices": 41,
+        "database": {
+          "activeListeners": 0,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "directFocusSwitchChecked": true,
+        "editor": "transaction",
+        "event": "choices-checked",
+        "keyboardDoneChecks": 2,
+        "sinceStartSeconds": 20.0644197500078,
+        "thermalState": 0,
+        "transferChoices": 9,
+        "processRun": 1
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 20.068435541703366,
+        "thermalState": 0,
+        "processRun": 1
+      },
+      {
+        "event": "seeded",
+        "postings": 10000,
+        "receipts": 250,
+        "schedules": 1000,
+        "sinceStartSeconds": 0.05050691665383056,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "schedule-category-menu",
+        "screen": "editor-choices",
+        "sinceStartSeconds": 0.9900691666407511,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "choices": 41,
+        "cpuMs": 79.87599999999995,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 2,
+        "elapsedMs": 127.86904169479385,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "maxCallbackGapMs": 27.306083356961608,
+        "p95CallbackGapMs": 16.66745834518224,
+        "phase": "schedule-category-menu",
+        "residentMiB": 89.96875,
+        "screen": "editor-choices",
+        "sinceStartSeconds": 1.1177769166533835,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "schedule-category-menu",
+        "screen": "editor-choices",
+        "sinceStartSeconds": 2.0874206666485406,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "choices": 41,
+        "cpuMs": 66.58600000000004,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 3,
+        "elapsedMs": 110.39820831501856,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.667541640345007,
+        "p95CallbackGapMs": 16.667541640345007,
+        "phase": "schedule-category-menu",
+        "residentMiB": 94.34375,
+        "screen": "editor-choices",
+        "sinceStartSeconds": 2.1976630833232775,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "schedule-category-menu",
+        "screen": "editor-choices",
+        "sinceStartSeconds": 3.155142374977004,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "choices": 41,
+        "cpuMs": 65.16599999999984,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 3,
+        "elapsedMs": 111.74949997803196,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.667541698552668,
+        "p95CallbackGapMs": 16.667541640345007,
+        "phase": "schedule-category-menu",
+        "residentMiB": 94.671875,
+        "screen": "editor-choices",
+        "sinceStartSeconds": 3.2666952916188166,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "accountChoices": 10,
+        "categoryChoices": 41,
+        "database": {
+          "activeListeners": 0,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "directFocusSwitchChecked": true,
+        "editor": "schedule",
+        "event": "choices-checked",
+        "keyboardDoneChecks": 2,
+        "sinceStartSeconds": 9.909195916668978,
+        "thermalState": 0,
+        "transferChoices": 9,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "transaction-category-menu",
+        "screen": "editor-choices",
+        "sinceStartSeconds": 10.78564437496243,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "choices": 41,
+        "cpuMs": 61.87699999999996,
+        "database": {
+          "activeListeners": 7,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 3,
+        "elapsedMs": 111.07966664712876,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 17.06787501461804,
+        "p95CallbackGapMs": 16.66758331703022,
+        "phase": "transaction-category-menu",
+        "residentMiB": 117.0625,
+        "screen": "editor-choices",
+        "sinceStartSeconds": 10.896669708308764,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "transaction-category-menu",
+        "screen": "editor-choices",
+        "sinceStartSeconds": 11.864594249986112,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "choices": 41,
+        "cpuMs": 65.99099999999991,
+        "database": {
+          "activeListeners": 7,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 2,
+        "elapsedMs": 109.98470830963925,
+        "event": "measurement",
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 19.821916706860065,
+        "p95CallbackGapMs": 16.667541640345007,
+        "phase": "transaction-category-menu",
+        "residentMiB": 118.4375,
+        "screen": "editor-choices",
+        "sinceStartSeconds": 11.974551666644402,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "event": "begin",
+        "phase": "transaction-category-menu",
+        "screen": "editor-choices",
+        "sinceStartSeconds": 12.938108624948654,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "choices": 41,
+        "cpuMs": 67.15500000000007,
+        "database": {
+          "activeListeners": 7,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 2,
+        "elapsedMs": 113.34862501826137,
+        "event": "measurement",
+        "gapsOver25ms": 1,
+        "maxCallbackGapMs": 28.47254165681079,
+        "p95CallbackGapMs": 16.667541640345007,
+        "phase": "transaction-category-menu",
+        "residentMiB": 118.515625,
+        "screen": "editor-choices",
+        "sinceStartSeconds": 13.051434791646898,
+        "thermalState": 0,
+        "processRun": 2
+      },
+      {
+        "accountChoices": 10,
+        "categoryChoices": 41,
+        "database": {
+          "activeListeners": 0,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "directFocusSwitchChecked": true,
+        "editor": "transaction",
+        "event": "choices-checked",
+        "keyboardDoneChecks": 2,
+        "sinceStartSeconds": 19.0470309999655,
+        "thermalState": 0,
+        "transferChoices": 9,
+        "processRun": 2
+      },
+      {
+        "event": "complete",
+        "sinceStartSeconds": 19.05059874994913,
+        "thermalState": 0,
+        "processRun": 2
+      }
+    ],
+    "planHitches": {
+      "hitches": 20,
+      "maxHitchMs": 83.34,
+      "types": {
+        "Expensive Commit(s)": 9,
+        "Commit to Render latency": 5,
+        "Pre-Commit(s) latency": 6
+      },
+      "samples": [
+        {
+          "startSeconds": 0.6914,
+          "durationMs": 34.193,
+          "type": "Expensive Commit(s)",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 0.7589,
+          "durationMs": 83.34,
+          "type": "Commit to Render latency",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 0.8756,
+          "durationMs": 16.667,
+          "type": "Commit to Render latency",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 1.4256,
+          "durationMs": 50.007,
+          "type": "Expensive Commit(s)",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 1.4923,
+          "durationMs": 50.003,
+          "type": "Commit to Render latency",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 2.1257,
+          "durationMs": 50.0,
+          "type": "Expensive Commit(s)",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 2.709,
+          "durationMs": 16.669,
+          "type": "Expensive Commit(s)",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 2.7424,
+          "durationMs": 33.335,
+          "type": "Commit to Render latency",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 3.3091,
+          "durationMs": 50.002,
+          "type": "Pre-Commit(s) latency",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 3.9258,
+          "durationMs": 50.0,
+          "type": "Pre-Commit(s) latency",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 4.5425,
+          "durationMs": 16.667,
+          "type": "Expensive Commit(s)",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 5.0758,
+          "durationMs": 66.671,
+          "type": "Expensive Commit(s)",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 5.7092,
+          "durationMs": 50.002,
+          "type": "Pre-Commit(s) latency",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 6.3092,
+          "durationMs": 50.003,
+          "type": "Pre-Commit(s) latency",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 6.8926,
+          "durationMs": 66.671,
+          "type": "Pre-Commit(s) latency",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 7.5426,
+          "durationMs": 16.67,
+          "type": "Expensive Commit(s)",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 8.1426,
+          "durationMs": 16.671,
+          "type": "Expensive Commit(s)",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 8.7093,
+          "durationMs": 50.005,
+          "type": "Commit to Render latency",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 8.726,
+          "durationMs": 50.003,
+          "type": "Pre-Commit(s) latency",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 23.8934,
+          "durationMs": 16.686,
+          "type": "Expensive Commit(s)",
+          "severity": "Moderate"
+        }
+      ],
+      "note": "Rendering-context intervals can overlap; durations are not a wall-time ratio."
+    },
+    "keyboardHitches": {
+      "hitches": 56,
+      "maxHitchMs": 116.669,
+      "types": {
+        "Delay Frame Swap": 45,
+        "Commit to Render latency": 2,
+        "Expensive Commit(s)": 8,
+        "Expensive Commit(s) - Delay Frame Swap": 1
+      },
+      "samples": [
+        {
+          "startSeconds": 0.7998,
+          "durationMs": 30.895,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 0.8807,
+          "durationMs": 33.332,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 0.9307,
+          "durationMs": 50.0,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 0.9973,
+          "durationMs": 116.669,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 1.914,
+          "durationMs": 33.335,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 2.3474,
+          "durationMs": 83.34,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 2.9641,
+          "durationMs": 50.002,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 3.4475,
+          "durationMs": 83.34,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 4.5309,
+          "durationMs": 100.003,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 4.5309,
+          "durationMs": 16.662,
+          "type": "Delay Frame Swap",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 5.1642,
+          "durationMs": 33.335,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 5.7809,
+          "durationMs": 16.666,
+          "type": "Delay Frame Swap",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 6.2809,
+          "durationMs": 50.003,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 6.8996,
+          "durationMs": 14.713,
+          "type": "Delay Frame Swap",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 7.0477,
+          "durationMs": 16.668,
+          "type": "Delay Frame Swap",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 7.081,
+          "durationMs": 50.005,
+          "type": "Commit to Render latency",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 7.081,
+          "durationMs": 16.671,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 7.0977,
+          "durationMs": 50.003,
+          "type": "Commit to Render latency",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 7.781,
+          "durationMs": 33.335,
+          "type": "Expensive Commit(s)",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 7.781,
+          "durationMs": 16.667,
+          "type": "Delay Frame Swap",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 8.1977,
+          "durationMs": 83.34,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 8.2644,
+          "durationMs": 33.334,
+          "type": "Expensive Commit(s)",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 8.5311,
+          "durationMs": 100.005,
+          "type": "Expensive Commit(s) - Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 8.5311,
+          "durationMs": 33.332,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 8.9311,
+          "durationMs": 16.67,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 9.2978,
+          "durationMs": 33.338,
+          "type": "Expensive Commit(s)",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 9.2978,
+          "durationMs": 16.671,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 9.2978,
+          "durationMs": 50.006,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 9.7311,
+          "durationMs": 66.674,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 10.7645,
+          "durationMs": 66.675,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 10.8645,
+          "durationMs": 66.672,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 11.1979,
+          "durationMs": 16.666,
+          "type": "Delay Frame Swap",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 11.3479,
+          "durationMs": 16.667,
+          "type": "Delay Frame Swap",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 12.1313,
+          "durationMs": 83.338,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 12.1313,
+          "durationMs": 16.667,
+          "type": "Delay Frame Swap",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 12.7646,
+          "durationMs": 50.003,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 13.248,
+          "durationMs": 83.337,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 13.848,
+          "durationMs": 50.003,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 14.3147,
+          "durationMs": 100.004,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 14.3147,
+          "durationMs": 16.666,
+          "type": "Delay Frame Swap",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 14.9314,
+          "durationMs": 33.337,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 15.5481,
+          "durationMs": 33.335,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 16.1648,
+          "durationMs": 83.342,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 16.2648,
+          "durationMs": 33.335,
+          "type": "Expensive Commit(s)",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 16.2648,
+          "durationMs": 16.667,
+          "type": "Delay Frame Swap",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 16.9648,
+          "durationMs": 33.336,
+          "type": "Expensive Commit(s)",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 16.9648,
+          "durationMs": 16.672,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 16.9648,
+          "durationMs": 50.004,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 17.3815,
+          "durationMs": 83.34,
+          "type": "Delay Frame Swap",
+          "severity": "High"
+        },
+        {
+          "startSeconds": 17.4482,
+          "durationMs": 33.335,
+          "type": "Expensive Commit(s)",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 17.6982,
+          "durationMs": 16.671,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 17.7149,
+          "durationMs": 33.331,
+          "type": "Expensive Commit(s)",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 18.1149,
+          "durationMs": 16.674,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 18.4816,
+          "durationMs": 33.333,
+          "type": "Expensive Commit(s)",
+          "severity": "Moderate"
+        },
+        {
+          "startSeconds": 18.4816,
+          "durationMs": 16.665,
+          "type": "Delay Frame Swap",
+          "severity": "Low"
+        },
+        {
+          "startSeconds": 18.9149,
+          "durationMs": 33.334,
+          "type": "Delay Frame Swap",
+          "severity": "Moderate"
+        }
+      ],
+      "note": "Rendering-context intervals can overlap; durations are not a wall-time ratio."
+    }
+  },
+  "webBaseline": [
+    {
+      "label": "data-uri",
+      "workload": "fresh_onboarding_ready",
+      "elapsedMs": 894.5926670000001,
+      "longTasks": 3,
+      "maxLongTaskMs": 117,
+      "totalLongTaskMs": 311,
+      "mainJsHeapBytes": 15174448
+    },
+    {
+      "label": "data-uri",
+      "workload": "warm_home_ready",
+      "elapsedMs": 409.904125,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "totalLongTaskMs": 0,
+      "mainJsHeapBytes": 15617952
+    },
+    {
+      "label": "data-uri",
+      "workload": "receipt_import",
+      "mib": 10,
+      "elapsedMs": 948.2649999856949,
+      "longTasks": 1,
+      "maxLongTaskMs": 103,
+      "totalLongTaskMs": 103,
+      "mainJsHeapBytes": 27906504
+    },
+    {
+      "label": "data-uri",
+      "workload": "receipt_preview",
+      "mib": 10,
+      "round": 0,
+      "elapsedMs": 1665.6349999904633,
+      "longTasks": 2,
+      "maxLongTaskMs": 1388,
+      "totalLongTaskMs": 1474,
+      "mainJsHeapBytes": 367757132
+    },
+    {
+      "label": "data-uri",
+      "workload": "baseline_dialog_accessibility",
+      "mib": 10,
+      "round": 0,
+      "remainingButtons": 0
+    },
+    {
+      "label": "data-uri",
+      "workload": "receipt_preview",
+      "mib": 10,
+      "round": 1,
+      "elapsedMs": 1084.625,
+      "longTasks": 1,
+      "maxLongTaskMs": 772,
+      "totalLongTaskMs": 772,
+      "mainJsHeapBytes": 357731452
+    },
+    {
+      "label": "data-uri",
+      "workload": "baseline_dialog_accessibility",
+      "mib": 10,
+      "round": 1,
+      "remainingButtons": 0
+    },
+    {
+      "label": "data-uri",
+      "workload": "receipt_preview",
+      "mib": 10,
+      "round": 2,
+      "elapsedMs": 1101.0599999427795,
+      "longTasks": 1,
+      "maxLongTaskMs": 825,
+      "totalLongTaskMs": 825,
+      "mainJsHeapBytes": 358227116
+    },
+    {
+      "label": "data-uri",
+      "workload": "baseline_dialog_accessibility",
+      "mib": 10,
+      "round": 2,
+      "remainingButtons": 0
+    },
+    {
+      "label": "data-uri",
+      "workload": "receipt_import",
+      "mib": 50,
+      "elapsedMs": 1288.789999961853,
+      "longTasks": 2,
+      "maxLongTaskMs": 232,
+      "totalLongTaskMs": 460,
+      "mainJsHeapBytes": 424375696
+    },
+    {
+      "label": "data-uri",
+      "workload": "receipt_preview",
+      "mib": 50,
+      "round": 0,
+      "elapsedMs": 5416.909999966621,
+      "longTasks": 2,
+      "maxLongTaskMs": 4250,
+      "totalLongTaskMs": 4484,
+      "mainJsHeapBytes": 1891700364
+    },
+    {
+      "label": "data-uri",
+      "workload": "baseline_dialog_accessibility",
+      "mib": 50,
+      "round": 0,
+      "remainingButtons": 0
+    },
+    {
+      "label": "data-uri",
+      "workload": "receipt_preview",
+      "mib": 50,
+      "round": 1,
+      "elapsedMs": 4697.7300000190735,
+      "longTasks": 2,
+      "maxLongTaskMs": 4135,
+      "totalLongTaskMs": 4371,
+      "mainJsHeapBytes": 1839294116
+    },
+    {
+      "label": "data-uri",
+      "workload": "baseline_dialog_accessibility",
+      "mib": 50,
+      "round": 1,
+      "remainingButtons": 0
+    },
+    {
+      "label": "data-uri",
+      "workload": "receipt_preview",
+      "mib": 50,
+      "round": 2,
+      "elapsedMs": 4470.72000002861,
+      "longTasks": 2,
+      "maxLongTaskMs": 3905,
+      "totalLongTaskMs": 4135,
+      "mainJsHeapBytes": 1839873864
+    },
+    {
+      "label": "data-uri",
+      "workload": "baseline_dialog_accessibility",
+      "mib": 50,
+      "round": 2,
+      "remainingButtons": 0
+    },
+    {
+      "label": "data-uri",
+      "workload": "complete",
+      "durableReceiptBytes": [
+        10485760,
+        52428800
+      ],
+      "pageErrors": []
+    }
+  ],
+  "webBrowserDialogInitial": [
+    {
+      "label": "browser-dialog",
+      "workload": "fresh_onboarding_ready",
+      "elapsedMs": 684.1268329999998,
+      "longTasks": 3,
+      "maxLongTaskMs": 90,
+      "totalLongTaskMs": 212,
+      "mainJsHeapBytes": 14950908
+    },
+    {
+      "label": "browser-dialog",
+      "workload": "warm_home_ready",
+      "elapsedMs": 411.3903329999998,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "totalLongTaskMs": 0,
+      "mainJsHeapBytes": 15495828
+    },
+    {
+      "label": "browser-dialog",
+      "workload": "receipt_import",
+      "mib": 10,
+      "elapsedMs": 436.2000000476837,
+      "longTasks": 1,
+      "maxLongTaskMs": 101,
+      "totalLongTaskMs": 101,
+      "mainJsHeapBytes": 27535460
+    },
+    {
+      "label": "browser-dialog",
+      "workload": "receipt_preview",
+      "mib": 10,
+      "round": 0,
+      "elapsedMs": 325.5349999666214,
+      "longTasks": 2,
+      "maxLongTaskMs": 85,
+      "totalLongTaskMs": 167,
+      "mainJsHeapBytes": 42040384
+    },
+    {
+      "label": "browser-dialog",
+      "workload": "receipt_preview",
+      "mib": 10,
+      "round": 1,
+      "elapsedMs": 265.0900000333786,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "totalLongTaskMs": 0,
+      "mainJsHeapBytes": 28077544
+    },
+    {
+      "label": "browser-dialog",
+      "workload": "receipt_preview",
+      "mib": 10,
+      "round": 2,
+      "elapsedMs": 252.625,
+      "longTasks": 1,
+      "maxLongTaskMs": 50,
+      "totalLongTaskMs": 50,
+      "mainJsHeapBytes": 63937360
+    },
+    {
+      "label": "browser-dialog",
+      "workload": "receipt_import",
+      "mib": 50,
+      "elapsedMs": 1290.9750000238419,
+      "longTasks": 2,
+      "maxLongTaskMs": 239,
+      "totalLongTaskMs": 464,
+      "mainJsHeapBytes": 94028816
+    },
+    {
+      "label": "browser-dialog",
+      "workload": "receipt_preview",
+      "mib": 50,
+      "round": 0,
+      "elapsedMs": 771.9349999427795,
+      "longTasks": 2,
+      "maxLongTaskMs": 238,
+      "totalLongTaskMs": 474,
+      "mainJsHeapBytes": 150508372
+    },
+    {
+      "label": "browser-dialog",
+      "workload": "receipt_preview",
+      "mib": 50,
+      "round": 1,
+      "elapsedMs": 733.5500000715256,
+      "longTasks": 2,
+      "maxLongTaskMs": 237,
+      "totalLongTaskMs": 467,
+      "mainJsHeapBytes": 72015796
+    },
+    {
+      "label": "browser-dialog",
+      "workload": "receipt_preview",
+      "mib": 50,
+      "round": 2,
+      "elapsedMs": 704.045000076294,
+      "longTasks": 2,
+      "maxLongTaskMs": 245,
+      "totalLongTaskMs": 472,
+      "mainJsHeapBytes": 72496672
+    },
+    {
+      "label": "browser-dialog",
+      "workload": "complete",
+      "durableReceiptBytes": [
+        10485760,
+        52428800
+      ],
+      "pageErrors": []
+    }
+  ],
+  "notes": [
+    "Upload timings cover readback only; they are not upload throughput.",
+    "Heap samples from Chrome Performance.getMetrics cover the main JS heap, not total process/GPU/Wasm memory or peak memory.",
+    "Native display callbacks are not rendering hitches. Hitches-summary contexts can overlap.",
+    "Idle CPU is aggregate process CPU normalized to one core over separate 30-second windows. It is not a battery estimate.",
+    "SE local-network approval restored connectivity; its five-round soak and three post-resume downloads passed.",
+    "Final web measurements ran alongside WebRTC soak clients; earlier browser-dialog samples provide an independent repeat. No CPU-intensive build ran during the final web measurement.",
+    "SE background CPU interval includes entering background and resuming; foreground idle had connected peers. Pixel idle had no active browser transfer peer."
+  ],
+  "webFinal": [
+    {
+      "label": "final-web",
+      "workload": "fresh_onboarding_ready",
+      "elapsedMs": 860.7363750000004,
+      "longTasks": 3,
+      "maxLongTaskMs": 96,
+      "totalLongTaskMs": 221,
+      "mainJsHeapBytes": 14941396
+    },
+    {
+      "label": "final-web",
+      "workload": "warm_home_ready",
+      "elapsedMs": 375.3467500000006,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "totalLongTaskMs": 0,
+      "mainJsHeapBytes": 15483692
+    },
+    {
+      "label": "final-web",
+      "workload": "receipt_import",
+      "mib": 10,
+      "elapsedMs": 378.7999999523163,
+      "longTasks": 1,
+      "maxLongTaskMs": 102,
+      "totalLongTaskMs": 102,
+      "mainJsHeapBytes": 26871436
+    },
+    {
+      "label": "final-web",
+      "workload": "receipt_preview",
+      "mib": 10,
+      "round": 0,
+      "elapsedMs": 339.4099999666214,
+      "longTasks": 2,
+      "maxLongTaskMs": 85,
+      "totalLongTaskMs": 170,
+      "mainJsHeapBytes": 41294212
+    },
+    {
+      "label": "final-web",
+      "workload": "receipt_preview",
+      "mib": 10,
+      "round": 1,
+      "elapsedMs": 265.27999997138977,
+      "longTasks": 1,
+      "maxLongTaskMs": 55,
+      "totalLongTaskMs": 55,
+      "mainJsHeapBytes": 28016584
+    },
+    {
+      "label": "final-web",
+      "workload": "receipt_preview",
+      "mib": 10,
+      "round": 2,
+      "elapsedMs": 260.31500005722046,
+      "longTasks": 0,
+      "maxLongTaskMs": 0,
+      "totalLongTaskMs": 0,
+      "mainJsHeapBytes": 63669296
+    },
+    {
+      "label": "final-web",
+      "workload": "receipt_import",
+      "mib": 50,
+      "elapsedMs": 1347.4950000047684,
+      "longTasks": 2,
+      "maxLongTaskMs": 239,
+      "totalLongTaskMs": 473,
+      "mainJsHeapBytes": 85724844
+    },
+    {
+      "label": "final-web",
+      "workload": "receipt_preview",
+      "mib": 50,
+      "round": 0,
+      "elapsedMs": 820.6999999284744,
+      "longTasks": 2,
+      "maxLongTaskMs": 232,
+      "totalLongTaskMs": 460,
+      "mainJsHeapBytes": 133743464
+    },
+    {
+      "label": "final-web",
+      "workload": "receipt_preview",
+      "mib": 50,
+      "round": 1,
+      "elapsedMs": 733.8899999856949,
+      "longTasks": 2,
+      "maxLongTaskMs": 241,
+      "totalLongTaskMs": 479,
+      "mainJsHeapBytes": 71374352
+    },
+    {
+      "label": "final-web",
+      "workload": "receipt_preview",
+      "mib": 50,
+      "round": 2,
+      "elapsedMs": 703.5800000429153,
+      "longTasks": 2,
+      "maxLongTaskMs": 237,
+      "totalLongTaskMs": 462,
+      "mainJsHeapBytes": 71918544
+    },
+    {
+      "label": "final-web",
+      "workload": "complete",
+      "durableReceiptBytes": [
+        10485760,
+        52428800
+      ],
+      "pageErrors": []
+    }
+  ],
+  "webFinalChecks": [
+    "Rendered noise image checked from screenshot pixels",
+    "Three opens and closes per size",
+    "No image object URLs retained after close",
+    "Close icon hovered for 800ms before editor close",
+    "New editor has no selected file",
+    "10 and 50 MiB blobs verified after database reload",
+    "No page errors"
+  ],
+  "spaceCleanup": {
+    "switches": 100,
+    "activeListenersAtEnd": 0
+  },
+  "seSoak": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "prflx",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.006
+      }
+    },
+    {
+      "workload": "receive_50MiB_round0",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 60.300002217292786,
+        "milliseconds": 3682.7999999523163
+      }
+    },
+    {
+      "workload": "upload_10MiB_round0",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 11.800000071525574,
+        "milliseconds": 564
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 0,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 2794,
+        "JSHeapUsedSize": 1384812,
+        "JSHeapTotalSize": 2621440
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.016,
+        "bytesReceived": 70882886,
+        "bytesSent": 13525709,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 3844,
+            "bytesReceived": 63002177
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round1",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 58.899998903274536,
+        "milliseconds": 3409.0999999046326
+      }
+    },
+    {
+      "workload": "upload_10MiB_round1",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 9.700000405311584,
+        "milliseconds": 693.6000000238419
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 1,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 1208,
+        "JSHeapUsedSize": 945312,
+        "JSHeapTotalSize": 2097152
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.008,
+        "bytesReceived": 138918301,
+        "bytesSent": 26581609,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 7688,
+            "bytesReceived": 126004354
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 61.300002336502075,
+        "milliseconds": 4001.600000023842
+      }
+    },
+    {
+      "workload": "upload_10MiB_round2",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 13.300000190734863,
+        "milliseconds": 592.5
+      }
+    },
+    {
+      "workload": "interrupt_50MiB_round2",
+      "result": {
+        "status": "interrupted",
+        "bytes": 1048576,
+        "milliseconds": 67.10000002384186
+      }
+    },
+    {
+      "workload": "reconnect_round2",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.006
+      }
+    },
+    {
+      "workload": "retry_50MiB_round2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 72.00000047683716,
+        "milliseconds": 3019.399999976158
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 2,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 263,
+        "JSHeapUsedSize": 706488,
+        "JSHeapTotalSize": 1835008
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.013,
+        "bytesReceived": 63683498,
+        "bytesSent": 2186405,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 3202,
+            "bytesReceived": 52480249
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round3",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 71.99999988079071,
+        "milliseconds": 3442.600000023842
+      }
+    },
+    {
+      "workload": "upload_10MiB_round3",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 14.699999809265137,
+        "milliseconds": 586.2000000476837
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 3,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 1466,
+        "JSHeapUsedSize": 1016676,
+        "JSHeapTotalSize": 2097152
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.009,
+        "bytesReceived": 131921150,
+        "bytesSent": 15219596,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 7046,
+            "bytesReceived": 115482426
+          }
+        ]
+      }
+    },
+    {
+      "workload": "receive_50MiB_round4",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 79.20000004768372,
+        "milliseconds": 2999.600000023842
+      }
+    },
+    {
+      "workload": "upload_10MiB_round4",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 17.199999570846558,
+        "milliseconds": 634.3000000715256
+      }
+    },
+    {
+      "workload": "soak_sample",
+      "round": 4,
+      "metrics": {
+        "Documents": 1,
+        "JSEventListeners": 7,
+        "Nodes": 7,
+        "RTCPeerConnections": 1,
+        "ArrayBufferContents": 1443,
+        "JSHeapUsedSize": 1029056,
+        "JSHeapTotalSize": 2097152
+      },
+      "route": {
+        "connectionState": "connected",
+        "channelState": "open",
+        "rtt": 0.015,
+        "bytesReceived": 200530372,
+        "bytesSent": 28295702,
+        "channels": [
+          {
+            "label": "data",
+            "messagesReceived": 10890,
+            "bytesReceived": 178484603
+          }
+        ]
+      }
+    },
+    {
+      "workload": "browser_errors",
+      "result": []
+    }
+  ],
+  "seResumeTransfers": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true
+      }
+    },
+    {
+      "workload": "receive_50MiB_run1",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 59.900001883506775,
+        "milliseconds": 3180.600000023842
+      }
+    },
+    {
+      "workload": "receive_50MiB_run2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 64.40000009536743,
+        "milliseconds": 3797.5
+      }
+    },
+    {
+      "workload": "receive_50MiB_run3",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 62.700000286102295,
+        "milliseconds": 4107.399999976158
+      }
+    }
+  ],
+  "seProcessSamples": [
+    {
+      "cpuSeconds": 8.152551,
+      "event": "periodic",
+      "thermalState": 0,
+      "residentMiB": 71.484375,
+      "elapsedSeconds": 0.22887110710144043
+    },
+    {
+      "event": "periodic",
+      "cpuSeconds": 11.26363,
+      "residentMiB": 99.953125,
+      "thermalState": 0,
+      "elapsedSeconds": 10.227873086929321
+    },
+    {
+      "event": "periodic",
+      "cpuSeconds": 11.593907,
+      "residentMiB": 100.15625,
+      "thermalState": 0,
+      "elapsedSeconds": 20.22790813446045
+    },
+    {
+      "event": "periodic",
+      "residentMiB": 101.125,
+      "thermalState": 0,
+      "cpuSeconds": 14.430787,
+      "elapsedSeconds": 30.228501081466675
+    },
+    {
+      "event": "periodic",
+      "thermalState": 0,
+      "cpuSeconds": 18.137887,
+      "residentMiB": 103,
+      "elapsedSeconds": 40.227416038513184
+    },
+    {
+      "thermalState": 0,
+      "residentMiB": 103,
+      "event": "periodic",
+      "cpuSeconds": 19.767414,
+      "elapsedSeconds": 50.228344202041626
+    },
+    {
+      "thermalState": 0,
+      "event": "periodic",
+      "cpuSeconds": 22.852219,
+      "residentMiB": 105.578125,
+      "elapsedSeconds": 60.2282600402832
+    },
+    {
+      "thermalState": 0,
+      "residentMiB": 104.75,
+      "event": "periodic",
+      "cpuSeconds": 24.603564,
+      "elapsedSeconds": 70.22728204727173
+    },
+    {
+      "event": "periodic",
+      "residentMiB": 105.609375,
+      "thermalState": 0,
+      "cpuSeconds": 25.596859,
+      "elapsedSeconds": 80.22809100151062
+    },
+    {
+      "event": "periodic",
+      "residentMiB": 102.21875,
+      "thermalState": 0,
+      "cpuSeconds": 25.958789,
+      "elapsedSeconds": 90.22807002067566
+    },
+    {
+      "thermalState": 0,
+      "residentMiB": 98.734375,
+      "cpuSeconds": 26.195376,
+      "event": "periodic",
+      "elapsedSeconds": 100.22801303863525
+    },
+    {
+      "cpuSeconds": 26.280002,
+      "event": "periodic",
+      "thermalState": 0,
+      "residentMiB": 99.328125,
+      "elapsedSeconds": 110.22788405418396
+    },
+    {
+      "cpuSeconds": 26.35176,
+      "residentMiB": 99.21875,
+      "thermalState": 0,
+      "event": "periodic",
+      "elapsedSeconds": 120.22780394554138
+    },
+    {
+      "cpuSeconds": 26.42403,
+      "residentMiB": 98.53125,
+      "thermalState": 0,
+      "event": "periodic",
+      "elapsedSeconds": 130.2269630432129
+    },
+    {
+      "cpuSeconds": 26.493061,
+      "residentMiB": 98.515625,
+      "thermalState": 0,
+      "event": "periodic",
+      "elapsedSeconds": 140.22761607170105
+    },
+    {
+      "cpuSeconds": 26.572699,
+      "residentMiB": 98.46875,
+      "thermalState": 0,
+      "event": "periodic",
+      "elapsedSeconds": 150.22685027122498
+    },
+    {
+      "cpuSeconds": 26.651742,
+      "residentMiB": 98.46875,
+      "thermalState": 0,
+      "event": "periodic",
+      "elapsedSeconds": 160.22746014595032
+    },
+    {
+      "cpuSeconds": 26.803806,
+      "residentMiB": 98.46875,
+      "thermalState": 0,
+      "event": "periodic",
+      "elapsedSeconds": 170.22733092308044
+    },
+    {
+      "event": "periodic",
+      "thermalState": 0,
+      "cpuSeconds": 26.956454,
+      "residentMiB": 100.265625,
+      "elapsedSeconds": 180.22732305526733
+    },
+    {
+      "event": "periodic",
+      "thermalState": 0,
+      "residentMiB": 100.15625,
+      "cpuSeconds": 27.048829,
+      "elapsedSeconds": 190.22716403007507
+    },
+    {
+      "event": "periodic",
+      "thermalState": 0,
+      "residentMiB": 98.859375,
+      "cpuSeconds": 27.263156,
+      "elapsedSeconds": 200.2271101474762
+    },
+    {
+      "event": "UIApplicationDidEnterBackgroundNotification",
+      "cpuSeconds": 27.353908,
+      "thermalState": 0,
+      "residentMiB": 99.328125,
+      "elapsedSeconds": 202.23899102210999
+    },
+    {
+      "event": "periodic",
+      "thermalState": 0,
+      "residentMiB": 100,
+      "cpuSeconds": 27.38819,
+      "elapsedSeconds": 236.2406361103058
+    },
+    {
+      "cpuSeconds": 27.46084,
+      "event": "UIApplicationDidBecomeActiveNotification",
+      "thermalState": 0,
+      "residentMiB": 101.984375,
+      "elapsedSeconds": 236.69356513023376
+    },
+    {
+      "thermalState": 0,
+      "event": "periodic",
+      "cpuSeconds": 27.572782,
+      "residentMiB": 104.46875,
+      "elapsedSeconds": 240.226820230484
+    },
+    {
+      "thermalState": 0,
+      "event": "periodic",
+      "cpuSeconds": 27.682179,
+      "residentMiB": 105.125,
+      "elapsedSeconds": 250.22665214538574
+    }
+  ],
+  "seIdle": {
+    "foregroundWithPeers": {
+      "elapsedSeconds": 19.999787092208862,
+      "cpuSeconds": 0.3067019999999978,
+      "cpuPercentOneCore": 1.5335263249851143
+    },
+    "backgroundIncludingResume": {
+      "elapsedSeconds": 34.45457410812378,
+      "cpuSeconds": 0.10693200000000047,
+      "cpuPercentOneCore": 0.31035647012913675
+    },
+    "thermalStates": [
+      0
+    ]
+  },
+  "pixelAfterFinalThreePeerSoak": {
+    "pssMiB": 85.8359375,
+    "rssMiB": 212.65234375
+  },
+  "verification": {
+    "jvmTests": 184,
+    "jvmReports": 6,
+    "webUi": "passed",
+    "workerPersistence": "passed",
+    "webDatabaseRollbackReload": "passed",
+    "sqliteMigrations": "passed",
+    "architectureGuard": "passed",
+    "androidRelease": "passed",
+    "webRelease": "passed",
+    "iosRelease": "passed",
+    "desktopRelease": "passed",
+    "desktopRendering": "verified in a visible native Tauri window on 2026-10-02; 10 MiB and 50 MiB synthetic receipts imported and previewed"
+  },
+  "desktopVisibleFollowup20261002": {
+    "target": "isolated macOS Tauri release app with synthetic local control-plane fixture",
+    "importedSyntheticPngMiB": [
+      10,
+      50
+    ],
+    "recordsPersistedAcrossAppRestart": true,
+    "fiftyMiBPreviewRenderedAfterRestart": true,
+    "fiftyMiBPreviewKeypressToRenderedInspectorScreenshotMs": [
+      986,
+      1015,
+      1011
+    ],
+    "timingLimit": "Includes computer-use keypress, screenshot capture, and inspector waiting; not isolated decode or frame time",
+    "webContentRssKiBSamples": {
+      "afterFirstPreviewClosed": 98432,
+      "afterRepeatedPreviewOpenings": 960784,
+      "afterClosingSelectedEditorAndNavigating": 554800,
+      "afterSettlingOnHome": 39872
+    },
+    "memoryLimit": "RSS snapshots only. Falling RSS does not establish released allocations: a later desktop receipt run retained 716.8 MiB physical footprint after settling. WebKit cache, swapping and collection effects are not isolated.",
+    "composeDeleteConfirmationAccessibilityTreeLostUntilRestart": true
+  }
+}

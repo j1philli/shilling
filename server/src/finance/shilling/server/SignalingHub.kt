@@ -9,6 +9,8 @@ import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.channels.Channel
 import java.util.concurrent.atomic.AtomicInteger
@@ -24,7 +26,18 @@ class SignalingHub(
 ) {
     init { require(queueCapacity > 0 && sendTimeoutMillis > 0) }
     private val membershipPolicy = Mutex()
-    suspend fun <T> withMembershipPolicy(action: suspend () -> T): T = membershipPolicy.withLock { action() }
+    private val joinPermits = Semaphore(32)
+
+    // Independent admissions may overlap their upstream lookups. Membership
+    // mutations drain admissions before changing policy and evicting sessions.
+    suspend fun <T> withJoinPolicy(action: suspend () -> T): T = joinPermits.withPermit { action() }
+    suspend fun <T> withMembershipPolicy(action: suspend () -> T): T = membershipPolicy.withLock {
+        var acquired = 0
+        try {
+            repeat(32) { joinPermits.acquire(); acquired++ }
+            action()
+        } finally { repeat(acquired) { joinPermits.release() } }
+    }
 
     private class Peer(val session: WebSocketSession, capacity: Int) {
         val queue = Channel<String>(capacity)
@@ -178,7 +191,7 @@ fun Routing.signalingRoute(
                                 close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Already joined"))
                                 return@webSocket
                             }
-                            val joined = hub.withMembershipPolicy {
+                            val joined = hub.withJoinPolicy {
                                 if (tokenVerifier != null) {
                                     when (val result = authorizeHostedJoin(tokenVerifier, householdLookup, msg.accessToken, msg.householdId)) {
                                         is JoinAuthorizationResult.Authorized -> {
@@ -191,12 +204,12 @@ fun Routing.signalingRoute(
                                             }.getOrDefault(false)
                                             if (!admitted) {
                                                 close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Device allowance or active space selection unavailable"))
-                                                return@withMembershipPolicy false
+                                                return@withJoinPolicy false
                                             }
                                         }
                                         is JoinAuthorizationResult.Rejected -> {
                                             close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, result.reason))
-                                            return@withMembershipPolicy false
+                                            return@withJoinPolicy false
                                         }
                                     }
                                 }

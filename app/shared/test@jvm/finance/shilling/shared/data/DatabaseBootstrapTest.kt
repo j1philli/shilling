@@ -57,7 +57,7 @@ class DatabaseBootstrapTest {
         driver.execute(null, "DROP INDEX idx_change_log_entity_latest;", 0)
         driver.execute(null, "DROP INDEX postings_pair_idx;", 0)
         val db = ShillingDatabase(driver)
-        db.accountQueries.upsert("acct-1", "Checking", 123.45)
+        db.accountQueries.upsert("acct-1", "Checking", 123.45, "__local__").await()
 
         ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
 

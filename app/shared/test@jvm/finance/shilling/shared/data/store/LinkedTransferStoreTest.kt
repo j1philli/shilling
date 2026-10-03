@@ -14,8 +14,7 @@ import java.util.prefs.Preferences
 import kotlin.test.*
 
 class LinkedTransferStoreTest {
-    private class Fixture {
-        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+    internal class Fixture(val driver: app.cash.sqldelight.db.SqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)) {
         val db = ShillingDatabase(driver)
         val preferences = Preferences.userRoot().node("shilling/tests/${UUID.randomUUID()}")
         val settings = PreferencesSettings(preferences)
@@ -24,6 +23,7 @@ class LinkedTransferStoreTest {
         val files = object : ReceiptFileStore {
             override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {}
             override suspend fun read(receiptId: String): ByteArray? = null
+            override suspend fun openReader(receiptId: String): ReceiptFileReader? = null
             override suspend fun hasFile(receiptId: String) = false
             override suspend fun delete(receiptId: String) {}
             override suspend fun clearAll() {}
@@ -53,6 +53,9 @@ class LinkedTransferStoreTest {
         try {
             val transfer = f.transfer()
             f.transfers.save(transfer)
+            assertEquals(listOf(transfer), f.transfers.list(setOf("home", "business")))
+            assertTrue(f.transfers.list(setOf("home")).isEmpty(), "A list must not read an unauthorized partner space")
+            assertTrue(f.transfers.list(emptySet()).isEmpty())
             f.transfers.save(transfer)
             assertEquals(1, f.graphs.current.postings.getBetween(transfer.debit.date, LocalDate(2026, 10, 2)).size)
             assertEquals(transfer, f.transfers.get(transfer.key))

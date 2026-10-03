@@ -4,6 +4,7 @@ modules:
   - app/ios-platform
   - app/perf-android
   - app/perf-ios
+  - app/perf-web
   - app/shared
   - app/shared-ui
   - app/web-app

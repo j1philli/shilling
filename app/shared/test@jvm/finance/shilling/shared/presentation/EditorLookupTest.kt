@@ -41,6 +41,10 @@ class EditorLookupTest {
                 return sqlite.executeQuery(identifier, sql, mapper, parameters, binders)
             }
         }
+        val analyticsPreferences = java.util.prefs.Preferences.userRoot().node("shilling/tests/${java.util.UUID.randomUUID()}")
+        val analyticsClient = io.ktor.client.HttpClient(io.ktor.client.engine.mock.MockEngine { error("Analytics must remain opted out") })
+        val analytics = finance.shilling.shared.data.analytics.ProductAnalytics(com.russhwolf.settings.PreferencesSettings(analyticsPreferences),
+            object : IdGenerator { override fun newId() = "unused" }, analyticsClient)
         val owner = ViewModelStore()
         val models = mutableListOf<ViewModel>()
         fun <T : ViewModel> own(model: T): T = model.also { owner.put("${models.size}", it); models += it }
@@ -66,10 +70,10 @@ class EditorLookupTest {
             postings.record(debit)
             postings.record(debit.copy(id = "move_cr", type = ScheduleType.INCOME, accountId = "b"))
             val category = withContext(main) { own(CategoryEditorViewModel("c", categories, ids)) }
-            val account = withContext(main) { own(AccountEditorViewModel("b", accounts, ids)) }
-            val schedule = withContext(main) { own(ScheduleEditorViewModel("s", null, schedules, accounts, categories, ids)) }
+            val account = withContext(main) { own(AccountEditorViewModel("b", accounts, ids, analytics)) }
+            val schedule = withContext(main) { own(ScheduleEditorViewModel("s", null, schedules, accounts, categories, ids, analytics)) }
             val transaction = withContext(main) { own(TransactionEditorViewModel("move_cr", postings, accounts, categories,
-                receipts, Store5ReceiptFileStore(SqlReceiptFileStorage(db), { _, _, _ -> }), ids)) }
+                receipts, Store5ReceiptFileStore(SqlReceiptFileStorage(db), { _, _, _ -> }), ids, analytics)) }
             withTimeout(10_000) {
                 assertEquals("Essentials", category.state.first { it.load == EditorLoad.READY }.name)
                 assertEquals(formatAmountInput(250.0), account.state.first { it.load == EditorLoad.READY }.balanceText)
@@ -115,6 +119,8 @@ class EditorLookupTest {
         } finally {
             withContext(main) { owner.clear() }
             models.forEach { it.viewModelScope.coroutineContext.job.join() }
+            analyticsClient.close()
+            analyticsPreferences.removeNode()
             driver.close()
             Dispatchers.resetMain()
             main.close()

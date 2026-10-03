@@ -192,15 +192,14 @@ class TransactionEditorViewModel(
     suspend fun attachReceipt(fileName: String, bytes: ByteArray): String? {
         val postingId = debitId.value ?: return null
         val receiptId = idGenerator.newId()
-        fileStore.store(receiptId, fileName, bytes)
-        receiptRepository.save(
+        receiptRepository.saveWithFile(
             Receipt(
                 id = receiptId,
                 postingId = postingId,
                 filePath = fileName,
                 originalName = fileName,
                 addedAt = Clock.System.now().toEpochMilliseconds()
-            )
+            ), fileStore, bytes
         )
         analytics.captureAsync(ProductEvent.RECEIPT_ATTACHED)
         return "Receipt attached"
