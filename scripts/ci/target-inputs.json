@@ -1,0 +1,37 @@
+{
+  "groups": {
+    "all": ["ios", "android", "web", "linux", "windows", "macos", "server"],
+    "clients": ["ios", "android", "web", "linux", "windows", "macos"],
+    "compose": ["android", "web", "linux", "windows", "macos"],
+    "webBundle": ["web", "linux", "windows", "macos"],
+    "desktop": ["linux", "windows", "macos"]
+  },
+  "rules": [
+    {"paths": ["docs/*", "plans/*", "scripts/perf/*", "app/perf-*", ".github/*", ".superset/*", ".mcp.json", "conductor.json", "AGENTS.md", "CLAUDE.md", "CONTRIBUTING.md", "README.md", "SECURITY.md", ".gitignore", ".gitkeep", ".envrc", "Brewfile", "justfile"], "targets": []},
+    {"paths": ["app/shared/test@*", "app/shared/src/commonTest/*", "app/shared-ui/test@*", "core/test/*", "core/test@*", "server/test/*", "server/test@*", "scripts/ci/tests/*", "scripts/ci/fixtures/*", "scripts/ci/smoke/*", "scripts/ci/smoke-*", "scripts/ci/test-*", "scripts/ci/run-jvm-tests.sh", "scripts/ci/accept-successful-junit-reports.sh", "scripts/enforce-architecture.sh"], "targets": []},
+    {"paths": ["app/ios-app/*", "app/ios-platform/*", "setup-webrtc.sh", "scripts/ci/build-ios.sh", "scripts/ci/check-ios-archive.py", "scripts/ci/ios_provenance.py", "scripts/ci/apple_store.py", "scripts/ci/apple-python.sh", "scripts/ci/apple-requirements.txt"], "targets": ["ios"]},
+    {"paths": ["app/android-app/*", "scripts/ci/build-android.sh", "scripts/ci/ensure-android-sdk.sh"], "targets": ["android"]},
+    {"paths": ["app/shared/src@android/*", "app/shared/src/androidMain/*", "app/shared-ui/src@android/*", "app/shared-ui/src/androidMain/*", "app/shared-ui/src@nativeBilling/*"], "targets": ["android"]},
+    {"paths": ["app/shared/src@iosSimulatorArm64/*", "app/shared-ui/src@ios*/*"], "targets": []},
+    {"paths": ["app/shared/src@ios*/*", "app/shared/src/iosMain/*", "app/shared/src@apple/*", "app/shared/src@native/*"], "targets": ["ios"]},
+    {"paths": ["app/shared/src@wasmJs/*", "app/shared/src/wasmJsMain/*", "app/shared-ui/src@wasmJs/*", "app/web-app/*", "build-web.sh", "package.json", "package-lock.json"], "targets": ["webBundle"]},
+    {"paths": ["app/shared-ui/*"], "targets": ["compose"]},
+    {"paths": ["app/shared/src@jvm/*", "app/shared/src/jvmMain/*"], "targets": []},
+    {"paths": ["app/shared/*"], "targets": ["clients"]},
+    {"paths": ["server/*", "supabase/*", "scripts/ci/deploy-coolify.py"], "targets": ["server"]},
+    {"paths": ["src-tauri/*"], "targets": ["desktop"]},
+    {"paths": ["scripts/ci/build-desktop-linux.sh"], "targets": ["linux"]},
+    {"paths": ["scripts/ci/build-desktop-windows.sh", "scripts/ci/check-windows-agent.ps1", "scripts/ci/setup-windows-agent.ps1"], "targets": ["windows"]},
+    {"paths": ["scripts/ci/build-desktop-macos.sh"], "targets": ["macos"]},
+    {"paths": ["scripts/ci/check-macos-agent.sh", "scripts/ci/setup-macos-agent.sh"], "targets": ["ios", "macos"]},
+    {"paths": ["scripts/ci/check-linux-agent.sh", "scripts/ci/setup-linux-agent.sh"], "targets": ["android", "webBundle", "server"]},
+    {"paths": ["scripts/ci/check-linux-web-agent.sh"], "targets": ["webBundle"]},
+    {"paths": ["scripts/ci/deploy-hosted-web.sh", "scripts/ci/ensure-pages-domain.mjs", "scripts/ci/prepare-self-host-web.mjs", "serve.json"], "targets": ["web"]},
+    {"paths": ["Dockerfile", ".dockerignore", "deploy/*", "scripts/ci/publish-release-images.sh"], "targets": ["web", "server"]},
+    {"paths": ["icons/*/ios/*"], "targets": ["ios"]},
+    {"paths": ["icons/*/android/*"], "targets": ["android"]},
+    {"paths": ["icons/*/web/*"], "targets": ["webBundle"]},
+    {"paths": ["icons/*/tauri/*"], "targets": ["desktop"]},
+    {"paths": ["icons/*", "scripts/generate-icons.sh"], "targets": ["clients"]}
+  ]
+}

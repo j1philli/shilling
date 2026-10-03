@@ -186,14 +186,36 @@ object IosBuild : BuildType({
     }
 })
 
+// Every beta track gets its own last-successful publication baseline. Future
+// Android/desktop tracks can wrap their publisher with this same helper.
+object BetaPublication {
+    fun configure(build: BuildType, target: String, channel: String, command: String) = with(build) {
+        maxRunningBuilds = 1
+        artifactRules += "\nbeta-output/beta-state.json => .\nbeta-output/beta-decision.json => ."
+        params {
+            param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
+            param("env.BETA_TEAMCITY_URL", "%teamcity.serverUrl%")
+            param("env.BETA_TEAMCITY_BUILD_TYPE", "%system.teamcity.buildType.id%")
+            param("env.BETA_TEAMCITY_USER", "%system.teamcity.auth.userId%")
+            password("env.BETA_TEAMCITY_PASSWORD", "%system.teamcity.auth.password%", display = ParameterDisplay.HIDDEN)
+            checkbox("env.SHILLING_BETA_FORCE", "0", label = "Publish even if target inputs are unchanged",
+                display = ParameterDisplay.PROMPT, checked = "1", unchecked = "0")
+        }
+        steps {
+            script {
+                name = "Publish $target beta when target inputs changed"
+                scriptContent = "python3 scripts/ci/publish_beta.py --target $target --channel $channel -- $command"
+            }
+        }
+    }
+}
+
 // The finish trigger and snapshot dependency keep the upload on the exact
 // successful main chain. No recompilation, and no upload from release preview.
 object IosTestFlight : BuildType({
     name = "iOS — TestFlight"
-    description = "Upload the exact successful main IPA to the internal TestFlight group"
-    maxRunningBuilds = 1
+    description = "Upload the tested main IPA only when iOS inputs changed since the last delivered beta"
     artifactRules = "apple-output/** => testflight.zip"
-    params { param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%") }
     vcs { root(DslContext.settingsRoot) }
     triggers {
         finishBuildTrigger {
@@ -216,10 +238,11 @@ object IosTestFlight : BuildType({
     }
     steps {
         script {
-            name = "Upload and distribute tested iOS build"
-            scriptContent = "bash scripts/ci/apple-python.sh scripts/ci/apple_store.py upload"
+            name = "Clear previous TestFlight receipt"
+            scriptContent = "rm -f apple-output/testflight.json"
         }
     }
+    BetaPublication.configure(this, "ios", "testflight", "bash scripts/ci/apple-python.sh scripts/ci/apple_store.py upload")
     requirements { contains("teamcity.agent.jvm.os.name", "Mac") }
 })
 

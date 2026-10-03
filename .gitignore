@@ -75,4 +75,6 @@ supabase/.temp/
 .cache/
 
 release-output/
+apple-output/
+beta-output/
 __pycache__/

@@ -34,12 +34,64 @@ version at that commit.
 | Event | Result |
 | --- | --- |
 | Push to a feature branch | CI, runtime checks, Android, Linux desktop and Windows desktop build on Linux. |
-| Merge to `main` | All targets build and tests run. After the complete matrix passes, **iOS — TestFlight** uploads the exact signed IPA and distributes it to the existing internal group. No production deployment or GitHub release. |
+| Merge to `main` | All targets build and tests run. After the complete matrix passes, **iOS — TestFlight** uploads the exact signed IPA only if iOS inputs changed since the last delivered beta. No production deployment or GitHub release. |
 | Create a release tag | Identifies the tested release commit. No additional automatic build or deployment. |
 
-Packages remain in TeamCity; iOS main builds also become internal TestFlight betas. The two release jobs
+Packages remain in TeamCity; changed iOS main builds also become internal TestFlight betas. The two release jobs
 reuse successful builds at the same revision, or build missing dependencies.
 Both require the full matrix to pass, even for a single-target release.
+
+### Target-aware beta publication
+
+The publication gate compares committed build inputs with the last successfully
+delivered beta for that target and channel, rather than comparing only the latest
+two commits. Failed uploads leave those changes pending. A skipped job carries
+forward the previous delivered fingerprint, so repeated docs-only merges stay
+skipped. Git paths, object IDs and file modes detect edits, additions, deletions,
+renames and dependency/submodule updates. Generated build numbers, signing
+timestamps and the Git commit ID itself do not force another upload.
+
+`scripts/ci/target-inputs.json` is the shared dependency map for `ios`, `android`,
+`web`, `linux`, `windows`, `macos` and `server`. First matching rule wins; names
+in `targets` expand through `groups`. Unrecognized paths affect every target.
+
+| Changes | Beta targets affected |
+| --- | --- |
+| Native iOS app, widget or iOS platform module | iOS |
+| Android app or shared Android-specific sources | Android |
+| Shared data/domain code | All clients (core models also affect server) |
+| Compose UI | Android, web and desktop; native iOS does not depend on it |
+| Web app or shared Wasm sources | Web and all desktop apps |
+| Tauri shell | All desktop apps |
+| Server or Supabase code | Server |
+| Docs, tests or performance harnesses | None |
+| Shared version, dependency catalog, toolchain or TeamCity configuration | All targets, conservatively |
+
+Update this map when module dependencies or source-set aliases change. This is
+a conservative source-input check, not proof that compiled binaries are identical.
+Agent/toolchain installations and CI parameter changes outside Git require the
+**Publish even if target inputs are unchanged** checkbox on a custom beta run.
+That checkbox can also upload a specific tested chain needed for App Review.
+
+Every beta job publishes `beta-decision.json` (publish/skip, reason, changed
+paths, previous delivered commit) and `beta-state.json` (the delivered input
+fingerprint). It reads the latter from its own latest successful main job using
+TeamCity's temporary build credentials. Authentication/API failures fail the job;
+a first run, legacy run without state, or cleaned-up state artifact publishes
+once to establish a new baseline. Keep these small artifacts under the project's
+artifact retention policy. Jobs are serialized to keep baseline updates ordered.
+
+Future Android and desktop beta jobs can use the same `BetaPublication.configure(build,
+target, channel, command)` TeamCity helper around their publisher after a successful
+matrix. Each target/channel needs its own build configuration and credentials for
+its destination; the helper supplies the gate, report artifacts, serialization,
+and manual override. Only TestFlight is connected to a publisher today.
+
+The full build matrix still runs on main, and manual GA release behavior is
+unchanged. For iOS review/release, select the original chain that actually uploaded
+the tested IPA. A later skipped chain has its own unuploaded IPA and cannot stand
+in for that candidate; explicitly force its TestFlight upload and test it first
+if that later chain must be promoted.
 
 ## Two release buttons
 
