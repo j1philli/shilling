@@ -1,0 +1,37 @@
+# Standalone synthetic benchmark app. No access to the user's Shilling sandbox.
+product: android/app
+repositories:
+  - id: google-canonical
+    url: https://dl.google.com/dl/android/maven2
+  - id: maven-central-canonical
+    url: https://repo.maven.apache.org/maven2
+dependencies:
+  - ../../core
+  - ../shared
+  - ../shared-ui
+  - $libs.activity.compose
+  - $libs.compose.runtime
+  - $libs.compose.ui
+  - $libs.compose.foundation
+  - $libs.koin.compose
+  - $libs.koin.core
+  - $libs.coroutines.core
+  - $libs.datetime
+  - $libs.sqldelight.runtime
+  - $libs.sqldelight.async.extensions
+  - $libs.kermit
+  - $libs.ktor.client.okhttp
+  - $libs.ktor.client.websockets
+  - $libs.ktor.client.webrtc
+settings:
+  compose:
+    enabled: true
+    version: 1.12.0
+  kotlin:
+    version: "2.4.20"
+  android:
+    compileSdk: 37
+    minSdk: 28
+    targetSdk: 35
+    namespace: finance.shilling.perf
+    applicationId: finance.shilling.perf

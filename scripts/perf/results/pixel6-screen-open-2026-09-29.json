@@ -1,0 +1,1157 @@
+{
+  "date": "2026-09-29",
+  "device": "Pixel 6",
+  "scope": "Private-based worktree at 73ace52 with local audit changes; separate Release benchmark APK, production Store5 repositories and shared Compose screens",
+  "fixture": {
+    "synthetic": true,
+    "postings": 10000,
+    "weeklySchedules": 1000,
+    "isolatedAppId": "finance.shilling.perf",
+    "reusesSeededDatabase": true,
+    "forceStoppedBetweenSamples": true,
+    "searchAndNavigationExcluded": true
+  },
+  "metrics": {
+    "firstFrame": "Android FrameMetrics.TOTAL_DURATION for the first frame after setContent",
+    "contentReady": "Compose LaunchedEffect after observing first nonempty flow result; not proof of draw",
+    "scroll": "gfxinfo reset after populated UI, then ten 350-ms upward swipes",
+    "memory": "dumpsys meminfo steady snapshot after opening, not peak"
+  },
+  "measurementLimits": [
+    "Local release fixture rebuilds its Koin scope on each process launch; it does not measure navigation inside the normal app.",
+    "First frame can precede populated content.",
+    "UIAutomator verifies populated data after the content-ready event but adds delay and is outside the reported readiness timer.",
+    "Device clock, thermal state, OS scheduling and caches were not controlled beyond force-stopping between samples.",
+    "Steady PSS/RSS snapshots are not peak memory.",
+    "No iPhone app UI measured in this pass."
+  ],
+  "runs": {
+    "baseline": [
+      {
+        "screen": "history",
+        "run": 1,
+        "fixture": {
+          "screen": "history",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 22
+        },
+        "contentReady": {
+          "screen": "history",
+          "status": "contentReady",
+          "sinceRenderMs": 149
+        },
+        "initialFrames": [
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 177,
+            "durationMs": 156.186232
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 188,
+            "durationMs": 68.926214
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 199,
+            "durationMs": 4.120655
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 534,
+            "durationMs": 11.043292
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 5,
+            "sinceRenderMs": 545,
+            "durationMs": 2.734763
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 6,
+          "jankyFrames": 1,
+          "p95Ms": 150,
+          "p99Ms": 150
+        },
+        "steadyMemory": {
+          "pssKiB": 85540,
+          "rssKiB": 207696
+        },
+        "populatedScreenVerified": true
+      },
+      {
+        "screen": "weekly",
+        "run": 1,
+        "fixture": {
+          "screen": "weekly",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 23
+        },
+        "contentReady": {
+          "screen": "weekly",
+          "status": "contentReady",
+          "sinceRenderMs": 117
+        },
+        "initialFrames": [
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 138,
+            "durationMs": 105.613956
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 149,
+            "durationMs": 52.653886
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 528,
+            "durationMs": 10.149165
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 540,
+            "durationMs": 2.089667
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 5,
+          "jankyFrames": 1,
+          "p95Ms": 105,
+          "p99Ms": 105
+        },
+        "steadyMemory": {
+          "pssKiB": 77768,
+          "rssKiB": 199456
+        },
+        "populatedScreenVerified": true
+      },
+      {
+        "screen": "history",
+        "run": 2,
+        "fixture": {
+          "screen": "history",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 25
+        },
+        "contentReady": {
+          "screen": "history",
+          "status": "contentReady",
+          "sinceRenderMs": 153
+        },
+        "initialFrames": [
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 184,
+            "durationMs": 162.835319
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 195,
+            "durationMs": 75.611777
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 206,
+            "durationMs": 15.858941
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 510,
+            "durationMs": 10.615995
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 5,
+            "sinceRenderMs": 519,
+            "durationMs": 2.934955
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 6,
+          "jankyFrames": 2,
+          "p95Ms": 150,
+          "p99Ms": 150
+        },
+        "steadyMemory": {
+          "pssKiB": 85411,
+          "rssKiB": 207560
+        },
+        "populatedScreenVerified": true
+      },
+      {
+        "screen": "weekly",
+        "run": 2,
+        "fixture": {
+          "screen": "weekly",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 24
+        },
+        "contentReady": {
+          "screen": "weekly",
+          "status": "contentReady",
+          "sinceRenderMs": 115
+        },
+        "initialFrames": [
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 128,
+            "durationMs": 113.863665
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 138,
+            "durationMs": 53.420958
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 517,
+            "durationMs": 11.083179
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 529,
+            "durationMs": 2.00978
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 5,
+          "jankyFrames": 1,
+          "p95Ms": 113,
+          "p99Ms": 113
+        },
+        "steadyMemory": {
+          "pssKiB": 77967,
+          "rssKiB": 199544
+        },
+        "populatedScreenVerified": true
+      },
+      {
+        "screen": "history",
+        "run": 3,
+        "fixture": {
+          "screen": "history",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 22
+        },
+        "contentReady": {
+          "screen": "history",
+          "status": "contentReady",
+          "sinceRenderMs": 149
+        },
+        "initialFrames": [
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 197,
+            "durationMs": 173.509934
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 208,
+            "durationMs": 87.778705
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 218,
+            "durationMs": 27.080738
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 520,
+            "durationMs": 15.704519
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 5,
+            "sinceRenderMs": 532,
+            "durationMs": 5.982099
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 6,
+          "jankyFrames": 1,
+          "p95Ms": 150,
+          "p99Ms": 150
+        },
+        "steadyMemory": {
+          "pssKiB": 85491,
+          "rssKiB": 207556
+        },
+        "populatedScreenVerified": true
+      },
+      {
+        "screen": "weekly",
+        "run": 3,
+        "fixture": {
+          "screen": "weekly",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 26
+        },
+        "contentReady": {
+          "screen": "weekly",
+          "status": "contentReady",
+          "sinceRenderMs": 113
+        },
+        "initialFrames": [
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 130,
+            "durationMs": 109.421463
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 141,
+            "durationMs": 49.669887
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 523,
+            "durationMs": 14.2146
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 532,
+            "durationMs": 3.785729
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 5,
+          "jankyFrames": 1,
+          "p95Ms": 109,
+          "p99Ms": 109
+        },
+        "steadyMemory": {
+          "pssKiB": 78017,
+          "rssKiB": 199600
+        },
+        "populatedScreenVerified": true
+      }
+    ],
+    "both_background_candidate_rejected_for_weekly": [
+      {
+        "screen": "history",
+        "run": 1,
+        "fixture": {
+          "screen": "history",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 21
+        },
+        "contentReady": {
+          "screen": "history",
+          "status": "contentReady",
+          "sinceRenderMs": 145
+        },
+        "initialFrames": [
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 117,
+            "durationMs": 104.379935
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 128,
+            "durationMs": 50.533715
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 139,
+            "durationMs": 7.820471
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 161,
+            "durationMs": 21.115362
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 5,
+            "sinceRenderMs": 172,
+            "durationMs": 13.863699
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 8,
+          "jankyFrames": 1,
+          "p95Ms": 105,
+          "p99Ms": 105
+        },
+        "steadyMemory": {
+          "pssKiB": 86235,
+          "rssKiB": 208032
+        },
+        "populatedScreenVerified": true
+      },
+      {
+        "screen": "weekly",
+        "run": 1,
+        "fixture": {
+          "screen": "weekly",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 22
+        },
+        "contentReady": {
+          "screen": "weekly",
+          "status": "contentReady",
+          "sinceRenderMs": 143
+        },
+        "initialFrames": [
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 85,
+            "durationMs": 71.087521
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 96,
+            "durationMs": 27.644603
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 163,
+            "durationMs": 28.778885
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 174,
+            "durationMs": 22.418956
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 5,
+            "sinceRenderMs": 545,
+            "durationMs": 13.854177
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 7,
+          "jankyFrames": 2,
+          "p95Ms": 69,
+          "p99Ms": 69
+        },
+        "steadyMemory": {
+          "pssKiB": 77736,
+          "rssKiB": 199224
+        },
+        "populatedScreenVerified": true
+      },
+      {
+        "screen": "history",
+        "run": 2,
+        "fixture": {
+          "screen": "history",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 21
+        },
+        "contentReady": {
+          "screen": "history",
+          "status": "contentReady",
+          "sinceRenderMs": 149
+        },
+        "initialFrames": [
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 119,
+            "durationMs": 99.535492
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 130,
+            "durationMs": 56.070783
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 141,
+            "durationMs": 2.903895
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 163,
+            "durationMs": 23.089315
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 5,
+            "sinceRenderMs": 175,
+            "durationMs": 15.210378
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 8,
+          "jankyFrames": 2,
+          "p95Ms": 97,
+          "p99Ms": 97
+        },
+        "steadyMemory": {
+          "pssKiB": 86225,
+          "rssKiB": 208076
+        },
+        "populatedScreenVerified": true
+      },
+      {
+        "screen": "weekly",
+        "run": 2,
+        "fixture": {
+          "screen": "weekly",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 22
+        },
+        "contentReady": {
+          "screen": "weekly",
+          "status": "contentReady",
+          "sinceRenderMs": 144
+        },
+        "initialFrames": [
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 86,
+            "durationMs": 67.795448
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 97,
+            "durationMs": 24.754823
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 163,
+            "durationMs": 28.868435
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 174,
+            "durationMs": 23.00425
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 5,
+            "sinceRenderMs": 520,
+            "durationMs": 9.013379
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 7,
+          "jankyFrames": 2,
+          "p95Ms": 65,
+          "p99Ms": 65
+        },
+        "steadyMemory": {
+          "pssKiB": 77740,
+          "rssKiB": 199268
+        },
+        "populatedScreenVerified": true
+      },
+      {
+        "screen": "history",
+        "run": 3,
+        "fixture": {
+          "screen": "history",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 22
+        },
+        "contentReady": {
+          "screen": "history",
+          "status": "contentReady",
+          "sinceRenderMs": 148
+        },
+        "initialFrames": [
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 131,
+            "durationMs": 106.231881
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 142,
+            "durationMs": 65.198672
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 153,
+            "durationMs": 21.380181
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 164,
+            "durationMs": 21.878724
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 5,
+            "sinceRenderMs": 175,
+            "durationMs": 14.406432
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 8,
+          "jankyFrames": 1,
+          "p95Ms": 105,
+          "p99Ms": 105
+        },
+        "steadyMemory": {
+          "pssKiB": 86344,
+          "rssKiB": 208148
+        },
+        "populatedScreenVerified": true
+      },
+      {
+        "screen": "weekly",
+        "run": 3,
+        "fixture": {
+          "screen": "weekly",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 24
+        },
+        "contentReady": {
+          "screen": "weekly",
+          "status": "contentReady",
+          "sinceRenderMs": 129
+        },
+        "initialFrames": [
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 95,
+            "durationMs": 74.845274
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 106,
+            "durationMs": 31.227405
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 139,
+            "durationMs": 27.16348
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 150,
+            "durationMs": 21.728683
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 5,
+            "sinceRenderMs": 521,
+            "durationMs": 9.064111
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 7,
+          "jankyFrames": 2,
+          "p95Ms": 73,
+          "p99Ms": 73
+        },
+        "steadyMemory": {
+          "pssKiB": 78685,
+          "rssKiB": 200184
+        },
+        "populatedScreenVerified": true
+      }
+    ],
+    "retained_history_background": [
+      {
+        "screen": "history",
+        "run": 1,
+        "fixture": {
+          "screen": "history",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 26
+        },
+        "contentReady": {
+          "screen": "history",
+          "status": "contentReady",
+          "sinceRenderMs": 137
+        },
+        "initialFrames": [
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 135,
+            "durationMs": 107.192509
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 146,
+            "durationMs": 64.139692
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 157,
+            "durationMs": 40.046405
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 168,
+            "durationMs": 11.687037
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 5,
+            "sinceRenderMs": 524,
+            "durationMs": 13.930096
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 7,
+          "jankyFrames": 1,
+          "p95Ms": 105,
+          "p99Ms": 105
+        },
+        "steadyMemory": {
+          "pssKiB": 86099,
+          "rssKiB": 207980
+        },
+        "populatedScreenVerified": true,
+        "scrollGfxinfo": {
+          "frames": 332,
+          "jankyFrames": 0,
+          "p95Ms": 7,
+          "p99Ms": 8
+        }
+      },
+      {
+        "screen": "weekly",
+        "run": 1,
+        "fixture": {
+          "screen": "weekly",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 21
+        },
+        "contentReady": {
+          "screen": "weekly",
+          "status": "contentReady",
+          "sinceRenderMs": 118
+        },
+        "initialFrames": [
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 132,
+            "durationMs": 113.261287
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 143,
+            "durationMs": 53.152958
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 511,
+            "durationMs": 11.99338
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 522,
+            "durationMs": 1.5124
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 5,
+          "jankyFrames": 2,
+          "p95Ms": 113,
+          "p99Ms": 113
+        },
+        "steadyMemory": {
+          "pssKiB": 78334,
+          "rssKiB": 199824
+        },
+        "populatedScreenVerified": true,
+        "scrollGfxinfo": {
+          "frames": 340,
+          "jankyFrames": 0,
+          "p95Ms": 7,
+          "p99Ms": 12
+        }
+      },
+      {
+        "screen": "history",
+        "run": 2,
+        "fixture": {
+          "screen": "history",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 21
+        },
+        "contentReady": {
+          "screen": "history",
+          "status": "contentReady",
+          "sinceRenderMs": 140
+        },
+        "initialFrames": [
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 133,
+            "durationMs": 110.609359
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 143,
+            "durationMs": 67.90376
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 154,
+            "durationMs": 35.407483
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 165,
+            "durationMs": 15.776042
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 5,
+            "sinceRenderMs": 514,
+            "durationMs": 10.84874
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 7,
+          "jankyFrames": 2,
+          "p95Ms": 109,
+          "p99Ms": 109
+        },
+        "steadyMemory": {
+          "pssKiB": 86134,
+          "rssKiB": 207992
+        },
+        "populatedScreenVerified": true,
+        "scrollGfxinfo": {
+          "frames": 335,
+          "jankyFrames": 0,
+          "p95Ms": 7,
+          "p99Ms": 9
+        }
+      },
+      {
+        "screen": "weekly",
+        "run": 2,
+        "fixture": {
+          "screen": "weekly",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 24
+        },
+        "contentReady": {
+          "screen": "weekly",
+          "status": "contentReady",
+          "sinceRenderMs": 115
+        },
+        "initialFrames": [
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 137,
+            "durationMs": 108.54686
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 147,
+            "durationMs": 54.532404
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 518,
+            "durationMs": 13.382656
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 530,
+            "durationMs": 3.11504
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 5,
+          "jankyFrames": 1,
+          "p95Ms": 109,
+          "p99Ms": 109
+        },
+        "steadyMemory": {
+          "pssKiB": 78242,
+          "rssKiB": 199748
+        },
+        "populatedScreenVerified": true,
+        "scrollGfxinfo": {
+          "frames": 338,
+          "jankyFrames": 0,
+          "p95Ms": 7,
+          "p99Ms": 10
+        }
+      },
+      {
+        "screen": "history",
+        "run": 3,
+        "fixture": {
+          "screen": "history",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 22
+        },
+        "contentReady": {
+          "screen": "history",
+          "status": "contentReady",
+          "sinceRenderMs": 125
+        },
+        "initialFrames": [
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 129,
+            "durationMs": 110.582388
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 140,
+            "durationMs": 66.978528
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 556,
+            "durationMs": 16.971721
+          },
+          {
+            "screen": "history",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 564,
+            "durationMs": 6.810861
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 5,
+          "jankyFrames": 2,
+          "p95Ms": 109,
+          "p99Ms": 109
+        },
+        "steadyMemory": {
+          "pssKiB": 86211,
+          "rssKiB": 208088
+        },
+        "populatedScreenVerified": true,
+        "scrollGfxinfo": {
+          "frames": 349,
+          "jankyFrames": 0,
+          "p95Ms": 7,
+          "p99Ms": 8
+        }
+      },
+      {
+        "screen": "weekly",
+        "run": 3,
+        "fixture": {
+          "screen": "weekly",
+          "status": "fixtureReady",
+          "seeded": false,
+          "setupMs": 26
+        },
+        "contentReady": {
+          "screen": "weekly",
+          "status": "contentReady",
+          "sinceRenderMs": 116
+        },
+        "initialFrames": [
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 1,
+            "sinceRenderMs": 135,
+            "durationMs": 107.930088
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 2,
+            "sinceRenderMs": 146,
+            "durationMs": 54.67572
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 3,
+            "sinceRenderMs": 537,
+            "durationMs": 12.767862
+          },
+          {
+            "screen": "weekly",
+            "status": "initialFrame",
+            "index": 4,
+            "sinceRenderMs": 552,
+            "durationMs": 2.482231
+          }
+        ],
+        "coldGfxinfo": {
+          "frames": 5,
+          "jankyFrames": 1,
+          "p95Ms": 105,
+          "p99Ms": 105
+        },
+        "steadyMemory": {
+          "pssKiB": 78215,
+          "rssKiB": 199712
+        },
+        "populatedScreenVerified": true,
+        "scrollGfxinfo": {
+          "frames": 338,
+          "jankyFrames": 1,
+          "p95Ms": 8,
+          "p99Ms": 11
+        }
+      }
+    ]
+  }
+}

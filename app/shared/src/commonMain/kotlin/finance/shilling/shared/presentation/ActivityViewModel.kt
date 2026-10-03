@@ -2,6 +2,8 @@ package finance.shilling.shared.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import finance.shilling.shared.data.PostingWithDetails
 import finance.shilling.shared.data.ScheduleType
 import finance.shilling.shared.data.store.PostingRepository
@@ -87,7 +89,7 @@ class ActivityViewModel(postingRepository: PostingRepository) : ViewModel() {
                 )
             }
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ActivityUiState())
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ActivityUiState())
 
     fun setRange(months: Int) {
         range.value = ACTIVITY_RANGES.firstOrNull { it.months == months } ?: return
@@ -120,6 +122,11 @@ internal fun MergedRow.toUi(): ActivityRowUi {
 /** Collapses each transfer's debit and credit legs into one row (from the debit's side). */
 internal fun mergeTransferLegs(postings: List<PostingWithDetails>): List<MergedRow> {
     val byId = postings.associateBy { it.posting.id }
+    // Ad-hoc transfers share pairId, without the scheduled _dr/_cr id suffix.
+    // Index once instead of searching the full history for every transfer.
+    val adHocByPair = postings.asSequence()
+        .filter { it.posting.scheduleId == null && it.posting.pairId != null }
+        .groupBy { it.posting.pairId }
     val consumed = mutableSetOf<String>()
     return postings.mapNotNull { item ->
         val p = item.posting
@@ -128,7 +135,7 @@ internal fun mergeTransferLegs(postings: List<PostingWithDetails>): List<MergedR
             p.id.endsWith("_dr") -> byId[p.id.removeSuffix("_dr") + "_cr"]
             p.id.endsWith("_cr") -> byId[p.id.removeSuffix("_cr") + "_dr"]
             p.scheduleId == null && p.pairId != null ->
-                postings.firstOrNull { it.posting.pairId == p.pairId && it.posting.id != p.id && it.posting.scheduleId == null }
+                adHocByPair[p.pairId]?.firstOrNull { it.posting.id != p.id }
             else -> null
         }
         if (partner == null) return@mapNotNull MergedRow(item, p.type, null)

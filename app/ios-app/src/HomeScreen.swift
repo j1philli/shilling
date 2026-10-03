@@ -3,9 +3,15 @@ import KotlinModules
 
 /// Native Home: the same tiles and copy as the Compose Home, driven by the shared `HomeViewModel`.
 struct HomeScreen: View {
-    @StateObject private var model = HomeModel()
+    @StateObject private var model: HomeModel
     @Environment(\.horizontalSizeClass) private var sizeClass
     let onDestination: (HomeDestination) -> Void
+
+    init(createModel: @escaping @MainActor () -> HomeModel = { HomeModel() },
+         onDestination: @escaping (HomeDestination) -> Void) {
+        _model = StateObject(wrappedValue: createModel())
+        self.onDestination = onDestination
+    }
 
     var body: some View {
         let state = model.state
@@ -116,7 +122,7 @@ struct HomeScreen: View {
 
     private func monthTile(_ state: HomeUiState) -> some View {
         HomeTile(label: "This month", value: state.monthValue, caption: state.monthCaption,
-                 systemImage: "chart.bar", tint: state.monthNet >= 0 ? .green : .red) {
+                 systemImage: "chart.bar", tint: state.monthNet >= 0 ? .green : .red, valueLines: 1) {
             onDestination(.month)
         }
     }
@@ -173,16 +179,18 @@ private struct HomeTile<Extra: View>: View {
     let caption: String?
     let systemImage: String
     let tint: Color
+    let valueLines: Int
     let action: () -> Void
     @ViewBuilder let extra: Extra
 
-    init(label: String, value: String, caption: String?, systemImage: String, tint: Color,
+    init(label: String, value: String, caption: String?, systemImage: String, tint: Color, valueLines: Int = 2,
          action: @escaping () -> Void, @ViewBuilder extra: () -> Extra = { EmptyView() }) {
         self.label = label
         self.value = value
         self.caption = caption
         self.systemImage = systemImage
         self.tint = tint
+        self.valueLines = valueLines
         self.action = action
         self.extra = extra()
     }
@@ -198,7 +206,8 @@ private struct HomeTile<Extra: View>: View {
                         Text(value)
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(tint == .secondary ? Color.primary : tint)
-                            .lineLimit(2)
+                            .lineLimit(valueLines)
+                            .minimumScaleFactor(valueLines == 1 ? 0.6 : 1)
                         if let caption {
                             Text(caption)
                                 .font(.footnote)

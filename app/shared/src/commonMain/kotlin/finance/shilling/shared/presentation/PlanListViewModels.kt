@@ -7,10 +7,12 @@ import finance.shilling.shared.data.ScheduleType
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.ScheduleRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -53,6 +55,8 @@ class SchedulesViewModel(
         categoryRepository.watchAll(),
         filter
     ) { schedules, accounts, categories, selected ->
+        val accountsById = accounts.associateBy { it.id }
+        val categoriesById = categories.associateBy { it.id }
         val visible = schedules.filter { selected == null || it.type == selected }
             .sortedWith(compareBy<Schedule> { it.type.ordinal }.thenBy { it.title.lowercase() })
         SchedulesUiState(
@@ -61,17 +65,17 @@ class SchedulesViewModel(
                 ScheduleGroupUi(
                     header = if (selected == null) type.pluralLabel else null,
                     rows = group.map { schedule ->
-                        val source = accounts.firstOrNull { it.id == schedule.accountId }?.name ?: "No account"
-                        val category = categories.firstOrNull { it.id == schedule.categoryId }
+                        val source = accountsById[schedule.accountId]?.name ?: "No account"
+                        val category = categoriesById[schedule.categoryId]
                         val ended = schedule.endDate?.let { it < today } == true
                         ScheduleRowUi(
                             id = schedule.id,
                             title = schedule.title,
                             supporting = buildList {
-                                add(if (ended) "Ended ${formatDate(schedule.endDate!!)}" else describeRecurrence(schedule))
+                                add(if (ended) "Ended ${formatDate(schedule.endDate!!, today)}" else describeRecurrence(schedule))
                                 add(
                                     if (schedule.type == ScheduleType.TRANSFER) {
-                                        "$source → ${accounts.firstOrNull { it.id == schedule.counterAccountId }?.name ?: "No account"}"
+                                        "$source → ${accountsById[schedule.counterAccountId]?.name ?: "No account"}"
                                     } else source
                                 )
                                 category?.let { add(it.name) }
@@ -89,7 +93,8 @@ class SchedulesViewModel(
                 actionLabel = "Add schedule"
             )
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SchedulesUiState())
+    }.flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SchedulesUiState())
 
     fun setFilter(type: ScheduleType?) {
         filter.value = type
@@ -112,7 +117,8 @@ class CategoriesViewModel(categoryRepository: CategoryRepository) : ViewModel() 
                 "Add category"
             )
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CategoriesUiState())
+    }.flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CategoriesUiState())
 }
 
 // ─── Accounts ────────────────────────────────────────────────────────────────
@@ -137,5 +143,6 @@ class AccountsViewModel(accountRepository: AccountRepository) : ViewModel() {
                 "Add account"
             )
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AccountsUiState())
+    }.flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AccountsUiState())
 }

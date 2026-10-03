@@ -12,6 +12,10 @@ import finance.shilling.shared.data.ScheduleType
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.PostingRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -119,6 +123,8 @@ class ImportViewModel(
         .map { i -> Triple(i.content, CsvColumnMapping(i.dateCol, i.descCol, i.amountCol, i.dateFormat), i.hasHeader) }
         .distinctUntilChanged()
         .map { (content, mapping, hasHeader) -> content?.let { CsvImporter.parseAll(it, mapping, hasHeader) }.orEmpty() }
+        .flowOn(Dispatchers.Default)
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), replay = 1)
 
     // Rows matching an existing transaction in the target account (same date, amount, description).
     private val duplicates = combine(rows, input.map { it.accountId }.distinctUntilChanged()) { r, a -> r to a }
@@ -215,10 +221,11 @@ class ImportViewModel(
                 destructive = false
             )
         )
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, ImportUiState())
+    }.flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ImportUiState())
 
     /** Loads a CSV file and guesses its column roles and date format. */
-    fun loadFile(fileName: String, bytes: ByteArray) {
+    suspend fun loadFile(fileName: String, bytes: ByteArray) = withContext(Dispatchers.Default) {
         val content = bytes.decodeToString()
         val headers = CsvImporter.parseHeaders(content)
         val dateCol = guessColumn(headers, "date", "posted", fallback = 0)
@@ -250,15 +257,15 @@ class ImportViewModel(
         input.update { it.copy(categoryOverrides = it.categoryOverrides + (rowIndex to categoryId)) }
 
     /** Imports the selected rows and resets; returns the confirmation. */
-    suspend fun import(): String? {
+    suspend fun import(): String? = withContext(Dispatchers.Default) {
         val current = state.value
-        val target = current.accountId ?: return null
+        val target = current.accountId ?: return@withContext null
         val i = input.value
         val selected = current.rows.filter { it.included }.map { it.rowIndex }.toSet()
-        val content = i.content ?: return null
+        val content = i.content ?: return@withContext null
         val toImport = CsvImporter.parseAll(content, CsvColumnMapping(i.dateCol, i.descCol, i.amountCol, i.dateFormat), i.hasHeader)
             .filter { it.isValid && it.rowIndex in selected }
-        if (toImport.isEmpty()) return null
+        if (toImport.isEmpty()) return@withContext null
         toImport.groupBy { i.categoryFor(it.rowIndex) }.forEach { (categoryId, group) ->
             postingRepository.bulkImport(
                 items = group.map { Triple(it.parsedDescription!!, it.parsedAmount!!, it.parsedDate!!) },
@@ -269,7 +276,7 @@ class ImportViewModel(
         val accountName = current.accounts.firstOrNull { it.id == target }?.label ?: "this account"
         input.value = Input(accountId = target)
         analytics.captureAsync(ProductEvent.CSV_IMPORT_COMPLETED)
-        return "Imported ${toImport.size} transactions into $accountName"
+        "Imported ${toImport.size} transactions into $accountName"
     }
 }
 

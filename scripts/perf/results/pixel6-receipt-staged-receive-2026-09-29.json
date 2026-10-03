@@ -1,0 +1,111 @@
+{
+  "scope": "Pixel 6 physical, Release isolated fixture, synthetic receipts, local WebRTC P2P, 2026-09-29",
+  "bytesPerUpload": 52428800,
+  "chunkBytes": 16384,
+  "receiveOnly": {
+    "buffered": {
+      "peakVmHwmKiB": [
+        255548,
+        251668,
+        250104
+      ],
+      "medianPeakVmHwmKiB": 251668,
+      "elapsedMs": [
+        12224.2,
+        12591.3,
+        12227.7
+      ],
+      "medianElapsedMs": 12227.7,
+      "commitsObserved": true,
+      "allBrowserSendsComplete": true,
+      "allHostUdp": true
+    },
+    "staged": {
+      "peakVmHwmKiB": [
+        221844,
+        221624,
+        221992
+      ],
+      "medianPeakVmHwmKiB": 221844,
+      "elapsedMs": [
+        12107.9,
+        12689.4,
+        11735.2
+      ],
+      "medianElapsedMs": 12107.9,
+      "commitsObserved": true,
+      "allBrowserSendsComplete": true,
+      "allHostUdp": true
+    }
+  },
+  "verifiedRoundTrip": {
+    "buffered": {
+      "peakVmHwmKiB": 277196,
+      "status": "complete",
+      "bytes": 52428800,
+      "chunks": 3200,
+      "binaryFrames": 3200,
+      "elapsedMs": 6412,
+      "commitObserved": true
+    },
+    "staged": {
+      "peakVmHwmKiB": 288584,
+      "status": "complete",
+      "bytes": 52428800,
+      "chunks": 3200,
+      "binaryFrames": 3200,
+      "elapsedMs": 6009.6,
+      "commitObserved": true
+    }
+  },
+  "fullSuite": [
+    {
+      "workload": "receive_1MiB_run1",
+      "status": "complete",
+      "bytes": 1048576,
+      "errors": null
+    },
+    {
+      "workload": "receive_10MiB_run1",
+      "status": "complete",
+      "bytes": 10485760,
+      "errors": null
+    },
+    {
+      "workload": "receive_50MiB_run1",
+      "status": "complete",
+      "bytes": 52428800,
+      "errors": null
+    },
+    {
+      "workload": "receive_1MiB_emulated_slow_link",
+      "status": "complete",
+      "bytes": 1048576,
+      "errors": null
+    },
+    {
+      "workload": "interrupt_50MiB",
+      "status": "interrupted",
+      "bytes": 1048576,
+      "errors": null
+    },
+    {
+      "workload": "retry_50MiB",
+      "status": "complete",
+      "bytes": 52428800,
+      "errors": null
+    },
+    {
+      "workload": "upload_and_readback_1MiB",
+      "status": "complete",
+      "bytes": 1048576,
+      "errors": null
+    },
+    {
+      "workload": "browser_errors",
+      "status": null,
+      "bytes": null,
+      "errors": []
+    }
+  ]
+}

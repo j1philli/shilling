@@ -3,18 +3,19 @@ package finance.shilling.shared.data.usecase
 import finance.shilling.shared.data.*
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
-import finance.shilling.shared.data.store.ChangeNotifier
 import finance.shilling.shared.data.store.PostingRepository
 import finance.shilling.shared.data.store.ScheduleRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.*
 import kotlin.time.Clock
 
 class ComputeWindowUseCase(
-    private val notifier: ChangeNotifier,
     private val accountRepository: AccountRepository,
     private val categoryRepository: CategoryRepository,
     private val scheduleRepository: ScheduleRepository,
@@ -34,10 +35,20 @@ class ComputeWindowUseCase(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun watchWindow(start: LocalDate, end: LocalDate): Flow<List<ScheduledTxWithAccount>> =
-        notifier.version.flatMapLatest {
-            flow { emit(loadWindow(start, end)) }
-        }
+    fun watchWindow(start: LocalDate, end: LocalDate): Flow<List<ScheduledTxWithAccount>> {
+        val schedulesWithExceptions = scheduleRepository.watchIntersecting(start, end)
+            .flatMapLatest { schedules ->
+                scheduleRepository.watchExceptions(schedules.map { it.id })
+                    .map { exceptions -> schedules to exceptions }
+            }
+        return combine(
+            accountRepository.watchAll(), categoryRepository.watchAll(),
+            postingRepository.watchPostingsBetween(start, end), schedulesWithExceptions
+        ) { accounts, categories, postings, (schedules, exceptions) ->
+            buildWindow(start, end, accounts.associateBy { it.id as String? },
+                categories.associateBy { it.id }, schedules, exceptions, postings)
+        }.flowOn(Dispatchers.Default)
+    }
 
     fun watchWindowForComingFriday(): Flow<List<ScheduledTxWithAccount>> =
         watchUpcomingWindow(DayOfWeek.FRIDAY)
@@ -101,6 +112,19 @@ class ComputeWindowUseCase(
         val scheduleIds = schedules.map { it.id }
         val exceptions = scheduleRepository.getExceptions(scheduleIds)
         val postings = postingRepository.getBetween(start, end)
+        return buildWindow(start, end, accounts, categories, schedules, exceptions, postings)
+    }
+
+    private fun buildWindow(
+        start: LocalDate,
+        end: LocalDate,
+        accounts: Map<String?, Account>,
+        categories: Map<String, Category>,
+        schedules: List<Schedule>,
+        exceptions: Map<String, List<ScheduleException>>,
+        postings: List<Posting>
+    ): List<ScheduledTxWithAccount> {
+        if (schedules.isEmpty()) return emptyList()
         val postedDatesBySchedule: Map<String, Set<LocalDate>> = postings
             .filter { it.scheduleId != null }
             .groupBy { it.scheduleId!! }

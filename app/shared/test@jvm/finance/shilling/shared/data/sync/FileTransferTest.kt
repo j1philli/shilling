@@ -1,9 +1,8 @@
 package finance.shilling.shared.data.sync
 
 import finance.shilling.shared.data.ReceiptFileStore
-import java.util.Base64
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import finance.shilling.shared.data.asReceiptReader
+import kotlinx.coroutines.flow.toList
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.startCoroutine
@@ -32,6 +31,7 @@ class FileTransferTest {
         }
 
         override suspend fun read(receiptId: String): ByteArray? = files[receiptId]
+        override suspend fun openReader(receiptId: String) = read(receiptId)?.asReceiptReader()
 
         override suspend fun hasFile(receiptId: String): Boolean = receiptId in files
 
@@ -51,7 +51,7 @@ class FileTransferTest {
         val store = InMemoryFileStore()
         val ftm = FileTransferManager(store)
 
-        val result = ftm.prepareTransfer("nonexistent", "file.jpg")
+        val result = ftm.prepareTransfer("nonexistent", "file.jpg")?.toList()
         assertNull(result, "prepareTransfer should return null when file is not in store")
     }
 
@@ -64,7 +64,7 @@ class FileTransferTest {
         val bytes = ByteArray(1024) { it.toByte() }
         store.store("r-1", "photo.jpg", bytes)
 
-        val messages = ftm.prepareTransfer("r-1", "photo.jpg")
+        val messages = ftm.prepareTransfer("r-1", "photo.jpg")?.toList()
         assertNotNull(messages)
 
         // Should be: 1 header + 1 chunk + 1 complete = 3 messages
@@ -96,7 +96,7 @@ class FileTransferTest {
         val bytes = ByteArray(100_000) { (it % 256).toByte() }
         store.store("r-big", "big.pdf", bytes)
 
-        val messages = ftm.prepareTransfer("r-big", "big.pdf")
+        val messages = ftm.prepareTransfer("r-big", "big.pdf")?.toList()
         assertNotNull(messages)
 
         val expectedChunks = (100_000 + FileTransferManager.CHUNK_SIZE - 1) / FileTransferManager.CHUNK_SIZE
@@ -109,7 +109,7 @@ class FileTransferTest {
     }
 
     @Test
-    fun serializedChunkStaysUnderSafeEnvelope() = runBlockingTest {
+    fun binaryFrameStaysUnderSafeEnvelope() = runBlockingTest {
         val store = InMemoryFileStore()
         val ftm = FileTransferManager(store)
 
@@ -117,21 +117,12 @@ class FileTransferTest {
         val bytes = ByteArray(FileTransferManager.CHUNK_SIZE) { (it % 256).toByte() }
         store.store("r-safe-chunk", "safe.bin", bytes)
 
-        val messages = ftm.prepareTransfer("r-safe-chunk", "safe.bin")
+        val messages = ftm.prepareTransfer("r-safe-chunk", "safe.bin")?.toList()
         assertNotNull(messages)
 
         val chunk = messages.filterIsInstance<FileTransferMessage.FileChunk>().first()
-        val json = Json {
-            encodeDefaults = true
-            ignoreUnknownKeys = true
-        }
-        val encoded = json.encodeToString<FileTransferMessage>(chunk)
-
-        assertTrue(
-            encoded.length <= FileTransferManager.MAX_SAFE_SERIALIZED_CHUNK_CHARS,
-            "Serialized chunk length=${encoded.length} exceeded " +
-                "safe limit=${FileTransferManager.MAX_SAFE_SERIALIZED_CHUNK_CHARS}"
-        )
+        val encoded = BinaryFileChunkCodec.encode(chunk)
+        assertTrue(encoded.size < 18 * 1024, "Binary frame exceeded safe envelope")
     }
 
     /**
@@ -152,7 +143,7 @@ class FileTransferTest {
         senderStore.store("r-test", "receipt.jpg", originalBytes)
 
         // Sender prepares transfer
-        val messages = sender.prepareTransfer("r-test", "receipt.jpg")
+        val messages = sender.prepareTransfer("r-test", "receipt.jpg")?.toList()
         assertNotNull(messages)
 
         // Receiver processes all messages
@@ -177,6 +168,35 @@ class FileTransferTest {
     }
 
     @Test
+    fun streamedTransferAcceptsReorderingAndIgnoresDuplicates() = runBlockingTest {
+        val source = InMemoryFileStore()
+        val target = InMemoryFileStore()
+        val original = ByteArray(FileTransferManager.CHUNK_SIZE * 2 + 7) { (it % 251).toByte() }
+        source.store("r", "receipt.bin", original)
+        val messages = FileTransferManager(source).prepareTransfer("r", "receipt.bin")!!.toList()
+        val receiver = FileTransferManager(target)
+        receiver.handleHeader(messages.first() as FileTransferMessage.FileHeader)
+        val chunks = messages.filterIsInstance<FileTransferMessage.FileChunk>()
+        for (chunk in chunks.reversed()) {
+            receiver.handleChunk(chunk)
+            receiver.handleChunk(chunk)
+        }
+        assertTrue(receiver.finalizeTransfer("r", "receipt.bin"))
+        assertTrue(original.contentEquals(target.read("r")!!))
+    }
+
+    @Test
+    fun invalidChunksCannotCompleteOrOverwriteAReceipt() = runBlockingTest {
+        val target = InMemoryFileStore()
+        val receiver = FileTransferManager(target)
+        receiver.handleHeader(FileTransferMessage.FileHeader("r", 10, 1))
+        assertFalse(receiver.handleChunk(FileTransferMessage.FileChunk("r", 0, byteArrayOf())))
+        assertFalse(receiver.handleChunk(FileTransferMessage.FileChunk("r", 0, ByteArray(3))))
+        assertFalse(receiver.finalizeTransfer("r", "receipt.bin"))
+        assertFalse(target.hasFile("r"))
+    }
+
+    @Test
     fun finalizeTransferFailsWithMissingSession() = runBlockingTest {
         val store = InMemoryFileStore()
         val ftm = FileTransferManager(store)
@@ -191,9 +211,9 @@ class FileTransferTest {
         val ftm = FileTransferManager(store)
 
         // Start a session but don't send all chunks
-        ftm.handleHeader(FileTransferMessage.FileHeader("r-partial", 100_000, 7))
-        ftm.handleChunk(FileTransferMessage.FileChunk("r-partial", 0, Base64.getEncoder().encodeToString(ByteArray(FileTransferManager.CHUNK_SIZE))))
-        // Remaining chunks are missing.
+        ftm.handleHeader(FileTransferMessage.FileHeader("r-partial", FileTransferManager.CHUNK_SIZE * 3, 3))
+        ftm.handleChunk(FileTransferMessage.FileChunk("r-partial", 0, ByteArray(FileTransferManager.CHUNK_SIZE)))
+        // Missing chunk 1 and 2
 
         val ok = ftm.finalizeTransfer("r-partial", "file.jpg")
         assertFalse(ok, "finalizeTransfer should fail with incomplete chunks")
@@ -219,13 +239,13 @@ class FileTransferTest {
         val ftm = FileTransferManager(store)
 
         ftm.handleHeader(FileTransferMessage.FileHeader("bad-header", 10, 2))
-        assertFalse(ftm.handleChunk(FileTransferMessage.FileChunk("bad-header", 0, "AAAA")))
+        assertFalse(ftm.handleChunk(FileTransferMessage.FileChunk("bad-header", 0, ByteArray(3))))
         assertFalse(ftm.finalizeTransfer("bad-header", "file.jpg"))
 
         ftm.handleHeader(FileTransferMessage.FileHeader("valid-header", 10, 1))
-        assertFalse(ftm.handleChunk(FileTransferMessage.FileChunk("valid-header", 0, "%invalid")))
-        assertFalse(ftm.handleChunk(FileTransferMessage.FileChunk("valid-header", 0, "AAAA")))
-        assertFalse(ftm.handleChunk(FileTransferMessage.FileChunk("valid-header", 0, "A".repeat(40_000))))
+        assertFalse(ftm.handleChunk(FileTransferMessage.FileChunk("valid-header", 0, ByteArray(0))))
+        assertFalse(ftm.handleChunk(FileTransferMessage.FileChunk("valid-header", 0, ByteArray(3))))
+        assertFalse(ftm.handleChunk(FileTransferMessage.FileChunk("valid-header", 0, ByteArray(40_000))))
         assertFalse(ftm.finalizeTransfer("valid-header", "file.jpg"))
         assertFalse(store.hasFile("valid-header"))
     }

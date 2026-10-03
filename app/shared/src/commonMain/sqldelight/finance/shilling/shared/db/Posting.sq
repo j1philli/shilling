@@ -14,12 +14,22 @@ CREATE TABLE postings(
 );
 
 CREATE INDEX postings_date_idx ON postings(space_id, date);
+CREATE INDEX postings_pair_idx ON postings(space_id, pair_id);
 
 selectAll:
 SELECT * FROM postings WHERE space_id = :space_id ORDER BY date DESC;
 
+-- GLOB's literal prefix uses postings_pair_idx; materialize only linked legs.
+selectLinkedInSpaces:
+SELECT * FROM postings
+WHERE space_id IN :spaces AND pair_id GLOB 'space-transfer:*'
+ORDER BY date DESC, rowid ASC;
+
 selectById:
 SELECT * FROM postings WHERE id = ? AND space_id = :space_id;
+
+selectRecent:
+SELECT * FROM postings WHERE space_id = :space_id ORDER BY date DESC LIMIT ?;
 
 selectBetween:
 SELECT * FROM postings
@@ -53,6 +63,73 @@ LEFT JOIN categories c1 ON s.category_id = c1.id AND c1.space_id = p.space_id
 LEFT JOIN categories c2 ON p.category_id = c2.id AND c2.space_id = p.space_id WHERE p.space_id = :space_id
 ORDER BY p.date DESC
 LIMIT ?;
+
+-- Keep the existing stable order within a date while bounding the rows materialized in Kotlin.
+-- Two candidates per displayed entry suffice; each entry consumes at most one partner.
+selectRecentActivity:
+WITH recent AS (
+  SELECT * FROM postings
+  WHERE date >= :startDay AND date < :endDay AND space_id = :space_id
+  ORDER BY date DESC, rowid ASC
+  LIMIT :rowLimit
+), selected AS (
+  SELECT id FROM recent
+  UNION
+  SELECT CASE
+    WHEN substr(r.id, -3) = '_dr' THEN substr(r.id, 1, length(r.id) - 3) || '_cr'
+    WHEN substr(r.id, -3) = '_cr' THEN substr(r.id, 1, length(r.id) - 3) || '_dr'
+    WHEN r.schedule_id IS NULL AND r.pair_id IS NOT NULL THEN (
+      SELECT p.id FROM postings p
+      WHERE p.space_id = r.space_id AND p.schedule_id IS NULL AND p.pair_id = r.pair_id AND p.id != r.id
+        AND p.date >= :startDay AND p.date < :endDay
+      ORDER BY p.date DESC, p.rowid ASC
+      LIMIT 1
+    )
+  END FROM recent r
+)
+SELECT p.id, p.schedule_id, p.type, p.account_id, p.date, p.amount, p.pair_id, p.title, p.category_id,
+       s.title AS schedule_title,
+       a.name AS account_name,
+       COALESCE(c2.name, c1.name) AS cat_name,
+       CASE WHEN c2.id IS NOT NULL THEN c2.color ELSE c1.color END AS cat_color
+FROM postings p
+LEFT JOIN schedules s ON p.schedule_id = s.id AND s.space_id = p.space_id
+LEFT JOIN accounts a ON p.account_id = a.id AND a.space_id = p.space_id
+LEFT JOIN categories c1 ON s.category_id = c1.id AND c1.space_id = p.space_id
+LEFT JOIN categories c2 ON p.category_id = c2.id AND c2.space_id = p.space_id
+WHERE p.space_id = :space_id AND p.id IN (SELECT id FROM selected)
+  AND p.date >= :startDay AND p.date < :endDay
+ORDER BY p.date DESC, p.rowid ASC;
+
+selectByIdWithDetails:
+SELECT p.id, p.schedule_id, p.type, p.account_id, p.date, p.amount, p.pair_id, p.title, p.category_id,
+       s.title AS schedule_title,
+       a.name AS account_name,
+       COALESCE(c2.name, c1.name) AS cat_name,
+       CASE WHEN c2.id IS NOT NULL THEN c2.color ELSE c1.color END AS cat_color
+FROM postings p
+LEFT JOIN schedules s ON p.schedule_id = s.id AND s.space_id = p.space_id
+LEFT JOIN accounts a ON p.account_id = a.id AND a.space_id = p.space_id
+LEFT JOIN categories c1 ON s.category_id = c1.id AND c1.space_id = p.space_id
+LEFT JOIN categories c2 ON p.category_id = c2.id AND c2.space_id = p.space_id
+WHERE p.id = :postingId AND p.space_id = :space_id;
+
+-- Preserve the date/row order of the previous date-window scan while using pair_id.
+selectTransferPartnerWithDetails:
+SELECT p.id, p.schedule_id, p.type, p.account_id, p.date, p.amount, p.pair_id, p.title, p.category_id,
+       s.title AS schedule_title,
+       a.name AS account_name,
+       COALESCE(c2.name, c1.name) AS cat_name,
+       CASE WHEN c2.id IS NOT NULL THEN c2.color ELSE c1.color END AS cat_color
+FROM postings p
+LEFT JOIN schedules s ON p.schedule_id = s.id AND s.space_id = p.space_id
+LEFT JOIN accounts a ON p.account_id = a.id AND a.space_id = p.space_id
+LEFT JOIN categories c1 ON s.category_id = c1.id AND c1.space_id = p.space_id
+LEFT JOIN categories c2 ON p.category_id = c2.id AND c2.space_id = p.space_id
+WHERE p.pair_id = :pairId AND p.id != :postingId AND p.space_id = :space_id
+  AND p.date >= :startDay AND p.date < :endDay
+ORDER BY p.date ASC, p.rowid ASC
+LIMIT 1;
 
 upsert {
   INSERT OR IGNORE INTO postings(id, schedule_id, type, account_id, date, amount, pair_id, title, category_id, space_id) VALUES (:id, :schedule_id, :type, :account_id, :date, :amount, :pair_id, :title, :category_id, :space_id);

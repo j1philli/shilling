@@ -5,27 +5,75 @@ import KMPNativeCoroutinesCore
 
 /// Observes one Kotlin `StateFlow` for SwiftUI and closes its screen model when released.
 @MainActor
-final class FlowModel<State, Screen: IosViewModelHost>: ObservableObject {
+final class FlowModel<State: AnyObject, Screen: IosViewModelHost>: ObservableObject {
     @Published private(set) var state: State
     let screen: Screen
     private let flow: NativeFlow<State, Error, KotlinUnit>
 
-    init(screen: Screen, initial: State, flow: @escaping NativeFlow<State, Error, KotlinUnit>) {
+    // Construct the Kotlin host inside StateObject's deferred initializer. Creating it in
+    // a View.init local would allocate a new ViewModelStore on every SwiftUI view rebuild.
+    init(create: () -> Screen, state: (Screen) -> State,
+         flow: (Screen) -> NativeFlow<State, Error, KotlinUnit>) {
+        let screen = create()
         self.screen = screen
-        self.state = initial
-        self.flow = flow
+        self.state = state(screen)
+        self.flow = flow(screen)
     }
 
     func observe() async {
         do {
             for try await value in asyncSequence(for: flow) {
-                state = value
+                // StateFlow replays the snapshot already installed by init, and
+                // replays again when navigation restarts the task. Avoid rebuilding
+                // the form for the very same immutable Kotlin state object.
+                if state !== value { state = value }
             }
         } catch {}
     }
 
     deinit {
         screen.close()
+    }
+}
+
+/// Keeps keystrokes local to the field so large editor forms need not rebuild on every key.
+@MainActor
+final class EditorTextDraft {
+    var value = ""
+}
+
+struct BufferedEditorTitleField: View {
+    let label: String
+    let prompt: String?
+    let draft: EditorTextDraft
+    let onChange: (String) -> Void
+
+    @State private var text: String
+    @State private var pending: DispatchWorkItem?
+
+    init(_ label: String, initial: String, prompt: String? = nil,
+         draft: EditorTextDraft, onChange: @escaping (String) -> Void) {
+        self.label = label
+        self.prompt = prompt
+        self.draft = draft
+        self.onChange = onChange
+        _text = State(initialValue: initial)
+    }
+
+    var body: some View {
+        TextField(label, text: $text, prompt: prompt.map(Text.init))
+            .onAppear { draft.value = text }
+            .onChange(of: text) { _, value in
+                draft.value = value
+                pending?.cancel()
+                let update = DispatchWorkItem { onChange(value) }
+                pending = update
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.12, execute: update)
+            }
+            .onDisappear {
+                pending?.cancel()
+                pending = nil
+            }
     }
 }
 
@@ -38,6 +86,9 @@ struct EditorChrome<Content: View>: View {
     let missingMessage: String
     let saveEnabled: Bool
     let delete: ConfirmCopy?
+    // Large forms can keep keyboard accessory creation/release outside navigation
+    // by supplying their actual field focus. Done remains available while editing.
+    var showsKeyboardDone = true
     let onSave: () async -> Void
     let onDelete: () async -> Void
     @ViewBuilder let content: Content
@@ -76,10 +127,12 @@ struct EditorChrome<Content: View>: View {
         .modifier(NavigationSubtitle(text: subtitle))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Done") {
-                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            if showsKeyboardDone {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
                 }
             }
             ToolbarItem(placement: .confirmationAction) {
@@ -119,8 +172,9 @@ struct CategoryEditorScreen: View {
     let onDone: (String) -> Void
 
     init(categoryId: String?, onDone: @escaping (String) -> Void) {
-        let screen = CategoryEditorScreenModel(categoryId: categoryId)
-        _model = StateObject(wrappedValue: FlowModel(screen: screen, initial: screen.state, flow: screen.stateFlow))
+        _model = StateObject(wrappedValue: FlowModel(
+            create: { CategoryEditorScreenModel(categoryId: categoryId) }, state: { $0.state }, flow: { $0.stateFlow }
+        ))
         self.onDone = onDone
     }
 
@@ -194,8 +248,9 @@ struct AccountEditorScreen: View {
     let onDone: (String) -> Void
 
     init(accountId: String?, onDone: @escaping (String) -> Void) {
-        let screen = AccountEditorScreenModel(accountId: accountId)
-        _model = StateObject(wrappedValue: FlowModel(screen: screen, initial: screen.state, flow: screen.stateFlow))
+        _model = StateObject(wrappedValue: FlowModel(
+            create: { AccountEditorScreenModel(accountId: accountId) }, state: { $0.state }, flow: { $0.stateFlow }
+        ))
         self.onDone = onDone
     }
 

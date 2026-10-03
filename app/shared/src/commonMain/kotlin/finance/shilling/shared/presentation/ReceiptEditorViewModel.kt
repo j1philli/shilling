@@ -210,8 +210,7 @@ class ReceiptEditorViewModel(
         val picked = file.value ?: return null
         val id = idGenerator.newId()
         val storedName = f.name.trim()
-        fileStore.store(id, storedName, picked.bytes)
-        receiptRepository.save(
+        receiptRepository.saveWithFile(
             Receipt(
                 id = id,
                 postingId = pendingAttach.value?.posting?.id,
@@ -221,7 +220,7 @@ class ReceiptEditorViewModel(
                 notes = notes,
                 receiptDate = f.receiptDateEpochDay,
                 amount = amount
-            )
+            ), fileStore, picked.bytes
         )
         if (pendingAttach.value != null) analytics.captureAsync(ProductEvent.RECEIPT_ATTACHED)
         return "Receipt saved"

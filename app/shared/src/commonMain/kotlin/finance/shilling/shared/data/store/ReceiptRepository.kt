@@ -1,38 +1,51 @@
 package finance.shilling.shared.data.store
 
 import finance.shilling.shared.data.Receipt
+import finance.shilling.shared.data.ReceiptFileStore
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import finance.shilling.shared.data.ReceiptWithPosting
-import finance.shilling.shared.data.Schedule
 import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.EntityType
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.datetime.LocalDate
+import kotlinx.coroutines.flow.flowOn
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
+
+data class ReceiptCounts(val total: Int, val unattached: Int)
 
 @OptIn(ExperimentalStoreApi::class)
 class ReceiptRepository(
     private val notifier: ChangeNotifier,
     private val store: ReceiptStore,
-    private val postingStore: PostingStore,
-    private val scheduleStore: ScheduleStore,
     private val sync: StoreSyncDeps? = null
 ) {
     fun watchAll(): Flow<List<ReceiptWithPosting>> =
-        combine(
-            store.watchCached(ReceiptKey.All),
-            postingStore.watchCached(PostingKey.All),
-            scheduleStore.watchCached(ScheduleKey.All)
-        ) { receipts, postings, schedules ->
-            receipts.toReceiptWithPosting(postings, schedules)
-        }
+        store.watchWithPostings().flowOn(Dispatchers.Default)
 
-    fun watchByPosting(postingId: String): Flow<List<Receipt>> = store.watchCached(ReceiptKey.ByPosting(postingId))
+    fun watchCounts(): Flow<ReceiptCounts> = store.watchCounts().flowOn(Dispatchers.Default)
+
+    fun watchByPosting(postingId: String): Flow<List<Receipt>> = store.watchCached(ReceiptKey.ByPosting(postingId)).flowOn(Dispatchers.Default)
 
     suspend fun save(receipt: Receipt) {
-        store.write(StoreWriteRequest.of<ReceiptKey, List<Receipt>, Unit>(ReceiptKey.ById(receipt.id), listOf(receipt)))
+        store.writeLocally(StoreWriteRequest.of<ReceiptKey, List<Receipt>, Unit>(ReceiptKey.ById(receipt.id), listOf(receipt)))
         notifier.notifyChanged()
+    }
+
+    /** Metadata must exist before SQL-backed bytes can satisfy their scoped foreign key. */
+    suspend fun saveWithFile(receipt: Receipt, files: ReceiptFileStore, bytes: ByteArray) {
+        check(store.readLocalSourceOfTruth(ReceiptKey.ById(receipt.id)).isEmpty()) { "Receipt already exists" }
+        try {
+            save(receipt)
+            files.store(receipt.id, receipt.originalName, bytes)
+        } catch (failure: Throwable) {
+            withContext(NonCancellable) {
+                runCatching { files.delete(receipt.id) }.exceptionOrNull()?.let(failure::addSuppressed)
+                runCatching { delete(receipt.id) }.exceptionOrNull()?.let(failure::addSuppressed)
+            }
+            throw failure
+        }
     }
 
     suspend fun delete(receiptId: String) {
@@ -69,7 +82,7 @@ class ReceiptRepository(
 
     private suspend fun writeUpdatedReceipt(receiptId: String, update: Receipt.() -> Receipt) {
         val receipt = store.readLocalSourceOfTruth(ReceiptKey.ById(receiptId)).firstOrNull()?.update() ?: return
-        store.write(
+        store.writeLocally(
             StoreWriteRequest.of<ReceiptKey, List<Receipt>, Unit>(
                 ReceiptKey.ById(receiptId),
                 listOf(receipt)
@@ -77,21 +90,4 @@ class ReceiptRepository(
         )
     }
 
-    private fun List<Receipt>.toReceiptWithPosting(
-        postings: List<finance.shilling.shared.data.Posting>,
-        schedules: List<Schedule>
-    ): List<ReceiptWithPosting> {
-        val postingsById = postings.associateBy { it.id }
-        val schedulesById = schedules.associateBy { it.id }
-
-        return map { receipt ->
-            val posting = receipt.postingId?.let(postingsById::get)
-            val schedule = posting?.scheduleId?.let(schedulesById::get)
-            ReceiptWithPosting(
-                receipt = receipt,
-                postingTitle = posting?.title ?: schedule?.title,
-                postingDate = posting?.date?.let(LocalDate::toString)
-            )
-        }
-    }
 }

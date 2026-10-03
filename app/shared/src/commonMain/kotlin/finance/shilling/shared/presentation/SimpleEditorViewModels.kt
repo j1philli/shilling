@@ -94,7 +94,7 @@ class CategoryEditorViewModel(
     init {
         if (categoryId != null) {
             viewModelScope.launch {
-                val category = categoryRepository.watchAll().first().firstOrNull { it.id == categoryId }
+                val category = categoryRepository.watchById(categoryId).first()
                 existing = category
                 _state.value = if (category == null) {
                     _state.value.copy(load = EditorLoad.MISSING)
@@ -116,7 +116,7 @@ class CategoryEditorViewModel(
                 if (category != null) {
                     // Deleted elsewhere (e.g. on another device) while open: show it as deleted, since saving
                     // would bring it back.
-                    categoryRepository.watchAll().first { list -> list.none { it.id == categoryId } }
+                    categoryRepository.watchById(categoryId).first { it == null }
                     _state.update { it.copy(load = EditorLoad.MISSING) }
                 }
             }
@@ -181,7 +181,7 @@ class AccountEditorViewModel(
     init {
         if (accountId != null) {
             viewModelScope.launch {
-                val account = accountRepository.watchAll().first().firstOrNull { it.id == accountId }
+                val account = accountRepository.watchById(accountId).first()
                 existing = account
                 _state.value = if (account == null) {
                     _state.value.copy(load = EditorLoad.MISSING)
@@ -204,7 +204,7 @@ class AccountEditorViewModel(
                 if (account != null) {
                     // Deleted elsewhere (e.g. on another device) while open: show it as deleted, since saving
                     // would bring it back.
-                    accountRepository.watchAll().first { list -> list.none { it.id == accountId } }
+                    accountRepository.watchById(accountId).first { it == null }
                     _state.update { it.copy(load = EditorLoad.MISSING) }
                 }
             }

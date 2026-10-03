@@ -10,7 +10,6 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TooltipIconButton(
     onClick: () -> Unit,
@@ -19,13 +18,24 @@ fun TooltipIconButton(
     enabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    TooltipBox(
-        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-        tooltip = { PlainTooltip { Text(tooltip) } },
-        state = rememberTooltipState()
-    ) {
+    PlatformTooltip(tooltip, enabled) {
         IconButton(onClick = onClick, modifier = modifier, enabled = enabled) {
             content()
         }
     }
+}
+
+@Composable
+internal expect fun PlatformTooltip(tooltip: String, enabled: Boolean, content: @Composable () -> Unit)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun DefaultPlatformTooltip(tooltip: String, enabled: Boolean, content: @Composable () -> Unit) {
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+        tooltip = { PlainTooltip { Text(tooltip) } },
+        state = rememberTooltipState(),
+        enableUserInput = enabled,
+        content = content
+    )
 }

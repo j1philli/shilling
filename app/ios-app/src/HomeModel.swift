@@ -16,7 +16,8 @@ final class HomeModel: ObservableObject {
     func observe() async {
         do {
             for try await value in asyncSequence(for: screen.stateFlow) {
-                state = value
+                // StateFlow replays its current object when a tab becomes visible again.
+                if state !== value { state = value }
             }
         } catch {
             // Cancelled with the view; nothing to report.

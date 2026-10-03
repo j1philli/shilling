@@ -1,0 +1,168 @@
+{
+  "scope": "Pixel 6 physical, Release isolated fixture, synthetic receipts, local WebRTC P2P, 2026-09-29",
+  "bytesPerTransfer": 52428800,
+  "frameBytes": 16384,
+  "send": {
+    "buffered": {
+      "repeats": 3,
+      "initialVmHwmKiB": 152088,
+      "peakVmHwmKiB": 350360,
+      "maxSampledPssKiB": 245678,
+      "maxSampledJavaHeapBytes": 188567728,
+      "elapsedMs": [
+        5923.1,
+        5738,
+        6804.4
+      ],
+      "medianElapsedMs": 5923.1,
+      "allByteVerified": true,
+      "hostUdp": true
+    },
+    "nativeRange": {
+      "repeats": 3,
+      "initialVmHwmKiB": 152816,
+      "peakVmHwmKiB": 290420,
+      "maxSampledPssKiB": 178145,
+      "maxSampledJavaHeapBytes": 118878480,
+      "elapsedMs": [
+        5041.6,
+        5930.5,
+        5811.1
+      ],
+      "medianElapsedMs": 5811.1,
+      "allByteVerified": true,
+      "hostUdp": true
+    }
+  },
+  "uploadReadback": {
+    "buffered": {
+      "repeats": 1,
+      "initialVmHwmKiB": 152568,
+      "peakVmHwmKiB": 324228,
+      "maxSampledPssKiB": 197364,
+      "maxSampledJavaHeapBytes": 138358960,
+      "elapsedMs": [
+        5730.3
+      ],
+      "medianElapsedMs": 5730.3,
+      "allByteVerified": true,
+      "hostUdp": true
+    },
+    "nativeRange": {
+      "repeats": 1,
+      "initialVmHwmKiB": 152820,
+      "peakVmHwmKiB": 326056,
+      "maxSampledPssKiB": 192271,
+      "maxSampledJavaHeapBytes": 133267632,
+      "elapsedMs": [
+        6531.4
+      ],
+      "medianElapsedMs": 6531.4,
+      "allByteVerified": true,
+      "hostUdp": true
+    }
+  },
+  "retrySuite": [
+    {
+      "workload": "receive_1MiB_run1",
+      "status": "complete",
+      "bytes": 1048576,
+      "chunks": 64,
+      "errors": null
+    },
+    {
+      "workload": "receive_10MiB_run1",
+      "status": "complete",
+      "bytes": 10485760,
+      "chunks": 640,
+      "errors": null
+    },
+    {
+      "workload": "receive_50MiB_run1",
+      "status": "complete",
+      "bytes": 52428800,
+      "chunks": 3200,
+      "errors": null
+    },
+    {
+      "workload": "receive_1MiB_emulated_slow_link",
+      "status": "complete",
+      "bytes": 1048576,
+      "chunks": 64,
+      "errors": null
+    },
+    {
+      "workload": "interrupt_50MiB",
+      "status": "interrupted",
+      "bytes": 1048576,
+      "chunks": null,
+      "errors": null
+    },
+    {
+      "workload": "retry_50MiB",
+      "status": "complete",
+      "bytes": 52428800,
+      "chunks": 3200,
+      "errors": null
+    },
+    {
+      "workload": "upload_and_readback_1MiB",
+      "status": "complete",
+      "bytes": 1048576,
+      "chunks": 64,
+      "errors": null
+    },
+    {
+      "workload": "browser_errors",
+      "status": null,
+      "bytes": null,
+      "chunks": null,
+      "errors": []
+    }
+  ],
+  "sqlRangeCandidate": {
+    "engine": "sql.js in Node, local synthetic in-memory SQLite",
+    "rangeBytes": 262144,
+    "samples": [
+      {
+        "mib": 1,
+        "wholeReadMs": [
+          4.414667,
+          1.466375,
+          2.899167
+        ],
+        "rangeReadMs": [
+          11.892334,
+          9.190291,
+          8.589625
+        ]
+      },
+      {
+        "mib": 10,
+        "wholeReadMs": [
+          13.650542,
+          47.2565,
+          18.101375
+        ],
+        "rangeReadMs": [
+          179.529792,
+          71.607167,
+          54.991833
+        ]
+      },
+      {
+        "mib": 50,
+        "wholeReadMs": [
+          368.888125,
+          140.224167,
+          246.939167
+        ],
+        "rangeReadMs": [
+          2752.571,
+          2658.376583,
+          2290.365333
+        ]
+      }
+    ]
+  }
+}

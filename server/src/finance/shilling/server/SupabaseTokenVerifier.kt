@@ -6,10 +6,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respond
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -19,7 +18,6 @@ import java.math.BigInteger
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.security.AlgorithmParameters
 import java.security.KeyFactory
 import java.security.PublicKey
@@ -30,6 +28,7 @@ import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
 import java.security.spec.RSAPublicKeySpec
 import java.time.Instant
+import java.time.Clock
 import java.time.Duration
 import java.util.Base64
 
@@ -47,14 +46,16 @@ interface AccessTokenVerifier {
 }
 
 class SupabaseTokenVerifier(
-    private val authConfig: AuthConfig
+    private val authConfig: AuthConfig,
+    private val httpClient: HttpClient = hostedHttpClient,
+    private val requestTimeout: Duration = hostedRequestTimeout,
+    private val clock: Clock = Clock.systemUTC()
 ) : AccessTokenVerifier {
     private val json = Json { ignoreUnknownKeys = true }
-    private val httpClient = HttpClient.newBuilder()
-        .connectTimeout(Duration.ofSeconds(3))
-        .build()
     private val cacheMutex = Mutex()
     private var jwksCache: CachedJwks? = null
+    private var forcedRefreshAfter: Instant = Instant.EPOCH
+    private var failedRefreshUntil: Instant = Instant.EPOCH
 
     override suspend fun verifyUserToken(token: String): VerifiedSupabaseUser? {
         if (token.length > 16_384) return null
@@ -108,7 +109,7 @@ class SupabaseTokenVerifier(
             val payload = decodeJsonObject(parts[1]) ?: return null
             val kid = header.jsonPrimitive("kid") ?: return null
             val alg = header.jsonPrimitive("alg") ?: return null
-            val key = currentJwks().keys.firstOrNull { it.kid == kid } ?: return null
+            val key = currentJwks(kid).keys.firstOrNull { it.kid == kid } ?: return null
             val publicKey = buildPublicKey(key) ?: return null
 
             val verifierName = signatureAlgorithmName(alg, key.kty) ?: return null
@@ -124,7 +125,7 @@ class SupabaseTokenVerifier(
             if (issuer != expectedIssuer) return null
 
             val exp = payload.jsonLong("exp") ?: return null
-            if (Instant.now().epochSecond >= exp) return null
+            if (clock.instant().epochSecond >= exp) return null
             if (payload.jsonPrimitive("role") != "authenticated") return null
             val audience = payload["aud"]
             if (audience !is JsonPrimitive || audience.content != "authenticated") return null
@@ -137,37 +138,56 @@ class SupabaseTokenVerifier(
                 expiresAtEpochSeconds = exp
             )
         }.getOrElse { error ->
-            authLog.w { "Token verification failed: ${error.message}" }
+            if (error is CancellationException) throw error
+            if (error !is HostedUpstreamUnavailableException) {
+                authLog.w { "Token verification failed: ${error::class.simpleName}" }
+            }
             null
         }
     }
 
-    private suspend fun currentJwks(): JwksResponse {
-        val cached = cacheMutex.withLock {
-            jwksCache?.takeIf { !it.isExpired() }?.response
+    // Hold the suspending mutex through refresh: cold/expired concurrent misses
+    // share one fetch. A short failure backoff also coalesces failed refreshes.
+    private suspend fun currentJwks(kid: String): JwksResponse = cacheMutex.withLock {
+        val now = clock.instant()
+        val cached = jwksCache?.takeIf { now < it.expiresAt }
+        if (cached != null) {
+            if (cached.response.keys.any { it.kid == kid } || now < forcedRefreshAfter) {
+                return@withLock cached.response
+            }
+            // Permit key rotation before the 10-minute TTL, while limiting
+            // attacker-chosen unknown key IDs to one forced refresh per 30s.
+            forcedRefreshAfter = now.plusSeconds(30)
         }
-        if (cached != null) return cached
-
+        if (now < failedRefreshUntil) {
+            throw HostedUpstreamUnavailableException("JWKS refresh temporarily unavailable")
+        }
         val supabaseUrl = authConfig.supabaseUrl ?: error("Supabase URL required for JWKS verification")
         val request = HttpRequest.newBuilder()
             .uri(URI.create(supabaseUrl.trimEnd('/') + "/auth/v1/.well-known/jwks.json"))
-            .timeout(Duration.ofSeconds(5))
+            .timeout(requestTimeout)
             .header("Accept", "application/json")
             .GET()
             .build()
 
-        val response = withContext(Dispatchers.IO) {
-            httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        try {
+            val response = httpClient.sendHostedRequest(request, requestTimeout)
+            if (response.statusCode() !in 200..299) {
+                throw HostedUpstreamUnavailableException("JWKS fetch failed with status ${response.statusCode()}")
+            }
+            val parsed = json.decodeFromString<JwksResponse>(response.body())
+            val fetchedAt = clock.instant()
+            jwksCache = CachedJwks(parsed, fetchedAt.plusSeconds(600))
+            if (parsed.keys.none { it.kid == kid }) forcedRefreshAfter = fetchedAt.plusSeconds(30)
+            failedRefreshUntil = Instant.EPOCH
+            parsed
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: Exception) {
+            failedRefreshUntil = clock.instant().plusSeconds(1)
+            authLog.w { "JWKS refresh unavailable: ${failure::class.simpleName}" }
+            throw HostedUpstreamUnavailableException("JWKS refresh unavailable", failure)
         }
-        if (response.statusCode() !in 200..299) {
-            error("JWKS fetch failed with status ${response.statusCode()}")
-        }
-
-        val parsed = json.decodeFromString<JwksResponse>(response.body())
-        cacheMutex.withLock {
-            jwksCache = CachedJwks(parsed, Instant.now().plusSeconds(600))
-        }
-        return parsed
     }
 
     private fun buildPublicKey(key: JwkKey): PublicKey? =
@@ -259,6 +279,4 @@ private data class JwkKey(
 private data class CachedJwks(
     val response: JwksResponse,
     val expiresAt: Instant
-) {
-    fun isExpired(): Boolean = Instant.now() >= expiresAt
-}
+)

@@ -37,12 +37,17 @@ dependencies@nonJvm:
   - $libs.ktor.client.webrtc
 
 dependencies@android:
+  - androidx.sqlite:sqlite-framework:2.5.1
+  - androidx.sqlite:sqlite:2.5.1
   - $libs.kotlin.test.junit
 
 dependencies@jvm:
   - $libs.kotlin.test.junit
   - $libs.sqldelight.sqlite.driver
   - $libs.ktor.client.mock
+
+test-dependencies@jvm:
+  - $libs.coroutines.test
 
 plugins:
   sqldelight:

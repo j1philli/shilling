@@ -21,14 +21,23 @@ final class PlanModel: ObservableObject {
         pendingRequest = screen.pendingRequest
     }
 
-    func observe() async {
-        await withTaskGroup(of: Void.self) { group in
-            group.addTask { await self.collect(self.screen.overviewStateFlow) { self.overview = $0 } }
-            group.addTask { await self.collect(self.screen.schedulesStateFlow) { self.schedules = $0 } }
-            group.addTask { await self.collect(self.screen.categoriesStateFlow) { self.categories = $0 } }
-            group.addTask { await self.collect(self.screen.accountsStateFlow) { self.accounts = $0 } }
-            group.addTask { await self.collect(self.screen.pendingRequestFlow) { self.pendingRequest = $0 } }
+    func observe(_ section: PlanSection) async {
+        // Cancelling the section task releases its Kotlin subscription, allowing
+        // WhileSubscribed to stop queries and projections for hidden sections.
+        switch section {
+        case .schedules:
+            await collect(screen.schedulesStateFlow) { if self.schedules !== $0 { self.schedules = $0 } }
+        case .categories:
+            await collect(screen.categoriesStateFlow) { if self.categories !== $0 { self.categories = $0 } }
+        case .accounts:
+            await collect(screen.accountsStateFlow) { if self.accounts !== $0 { self.accounts = $0 } }
+        default:
+            await collect(screen.overviewStateFlow) { if self.overview !== $0 { self.overview = $0 } }
         }
+    }
+
+    func observeRequests() async {
+        await collect(screen.pendingRequestFlow) { if self.pendingRequest !== $0 { self.pendingRequest = $0 } }
     }
 
     private func collect<T>(_ flow: @escaping NativeFlow<T, Error, KotlinUnit>, _ apply: @escaping @MainActor (T) -> Void) async {
@@ -133,7 +142,8 @@ struct PlanScreen: View {
         } message: {
             Text(amountEdit?.prompt.message ?? "")
         }
-        .task { await model.observe() }
+        .task(id: section) { await model.observe(section) }
+        .task { await model.observeRequests() }
         .onChange(of: model.pendingRequest) { _, request in apply(request) }
         .onAppear { apply(model.pendingRequest) }
     }

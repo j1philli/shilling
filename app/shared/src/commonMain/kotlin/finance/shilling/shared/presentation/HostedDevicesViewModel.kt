@@ -17,12 +17,20 @@ import finance.shilling.shared.data.sync.PeerConnectionStatus
 import finance.shilling.shared.data.sync.ServerApi
 import finance.shilling.shared.session.SessionState
 import io.ktor.client.HttpClient
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 data class DeviceDisplay(
     val deviceId: String,
@@ -66,6 +74,14 @@ class HostedDevicesViewModel(
     private var currentDeviceId = ""
     private var registered = emptyList<RegisteredDevice>()
     private var entitlements: HostedEntitlementsResponse? = null
+    private val refreshRequests = Channel<Unit>(Channel.CONFLATED)
+
+    private data class Identity(
+        val userId: String?,
+        val deviceId: String,
+        val isAuthenticated: Boolean,
+        val isAnonymous: Boolean
+    )
 
     init {
         viewModelScope.launch {
@@ -75,13 +91,18 @@ class HostedDevicesViewModel(
             sessionState.phase.collectLatest { phase ->
                 if (phase !is SessionPhase.Ready) {
                     authService = null
+                    currentUserId = null
+                    currentDeviceId = ""
                     registered = emptyList()
                     entitlements = null
                     mutableState.value = HostedDevicesUiState()
                     return@collectLatest
                 }
                 authService = phase.authService
-                phase.authService.authState.collectLatest { auth ->
+                // Token refreshes do not change the displayed identity or restart polling.
+                phase.authService.authState.map {
+                    Identity(it.userId, it.deviceId, it.isAuthenticated, it.isAnonymous)
+                }.distinctUntilChanged().collectLatest { auth ->
                     currentUserId = auth.userId
                     currentDeviceId = auth.deviceId
                     registered = emptyList()
@@ -96,10 +117,24 @@ class HostedDevicesViewModel(
                         loading = !phase.selfHosted && auth.isAuthenticated
                     )
                     if (phase.selfHosted || !auth.isAuthenticated) return@collectLatest
-                    while (true) {
-                        loadDevices()
-                        delay(15_000)
-                    }
+                    // Native tabs retain their models. Keep network work scoped to an
+                    // active UI subscription, including cancellation of in-flight requests.
+                    mutableState.subscriptionCount.map { it > 0 }.distinctUntilChanged()
+                        .collectLatest { observed ->
+                            if (!observed) return@collectLatest
+                            var billing: HostedBillingConfig? = null
+                            var billingServer: String? = null
+                            refreshRequests.tryReceive()
+                            while (currentCoroutineContext().isActive) {
+                                val url = serverUrl()
+                                if (url != billingServer) billing = null
+                                billing = loadDevices(phase.authService, url, billing)
+                                billingServer = url
+                                // One loop owns refreshes; repeated taps cannot launch
+                                // overlapping loads or a queue of redundant requests.
+                                withTimeoutOrNull(15_000) { refreshRequests.receive() }
+                            }
+                        }
                 }
             }
         }
@@ -112,27 +147,35 @@ class HostedDevicesViewModel(
     }
 
     fun refresh() {
-        viewModelScope.launch { loadDevices() }
+        refreshRequests.trySend(Unit)
     }
 
     suspend fun removeDevice(deviceId: String): String {
         val service = authService ?: return "Sign in to manage devices"
         return runCatching {
             ServerApi(httpClient, serverUrl(), service).removeDevice(deviceId)
-            loadDevices()
+            refresh()
             "Device removed"
-        }.getOrElse { it.message ?: "Could not remove device" }
+        }.getOrElse {
+            if (it is CancellationException) throw it
+            it.message ?: "Could not remove device"
+        }
     }
 
-    private suspend fun loadDevices() {
-        val service = authService ?: return
-        val userId = currentUserId
-        val api = ServerApi(httpClient, serverUrl(), service)
-        try {
-            val plan = api.fetchEntitlements()
-            val details = api.fetchDeviceDetails()
-            val billing = api.fetchBillingConfig()
-            if (service !== authService || userId != currentUserId) return
+    private suspend fun loadDevices(
+        service: AuthService,
+        url: String,
+        cachedBilling: HostedBillingConfig?
+    ): HostedBillingConfig? {
+        val api = ServerApi(httpClient, url, service)
+        return try {
+            val (plan, details, billing) = coroutineScope {
+                val plan = async { api.fetchEntitlements() }
+                val details = async { api.fetchDeviceDetails() }
+                val billing = async { cachedBilling ?: api.fetchBillingConfig() }
+                Triple(plan.await(), details.await(), billing.await())
+            }
+            currentCoroutineContext().ensureActive()
             entitlements = plan
             registered = details
             mutableState.value = state.value.copy(
@@ -147,9 +190,12 @@ class HostedDevicesViewModel(
                 error = null
             )
             publishDevices()
+            billing
         } catch (error: Exception) {
             if (error is CancellationException) throw error
+            currentCoroutineContext().ensureActive()
             mutableState.value = state.value.copy(loading = false, error = error.message ?: "Could not load devices")
+            cachedBilling
         }
     }
 

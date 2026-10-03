@@ -74,6 +74,7 @@ val dataModule: Module = module {
             get<finance.shilling.shared.data.store.ReceiptFileStoreFactory>()
         )
     }
+    factory<ReceiptFileStore> { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.files }
     single { finance.shilling.shared.data.store.LinkedTransferStore(get(), get(), get(), get()) }
     factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.sync }
     factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.accountsStore }
@@ -88,8 +89,8 @@ val dataModule: Module = module {
     factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.schedules }
     factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.postings }
     factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.receipts }
-    factory { ComputeWindowUseCase(get(), get(), get(), get(), get()) }
-    factory { ComputeBudgetUseCase(get(), get(), get()) }
+    factory { ComputeWindowUseCase(get(), get(), get(), get()) }
+    factory { ComputeBudgetUseCase(get(), get()) }
 
     viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { ActivityViewModel(get()) }

@@ -1,0 +1,728 @@
+{
+  "date": "2026-09-30",
+  "device": "Pixel 6",
+  "build": "Release, isolated finance.shilling.perf",
+  "fixture": {
+    "accounts": 1,
+    "categories": 1,
+    "postings": 10000,
+    "weeklySchedules": 1000,
+    "synthetic": true
+  },
+  "summary": {
+    "home": {
+      "samples": 3,
+      "medianContentReadyMs": 97,
+      "medianFirstFrameMs": 84.49,
+      "totalColdFrames": 19,
+      "totalColdJankyFrames": 7,
+      "totalScrollFrames": 0,
+      "totalScrollJankyFrames": 0,
+      "medianPssMiB": 86.82
+    },
+    "activity": {
+      "samples": 3,
+      "medianContentReadyMs": 160,
+      "medianFirstFrameMs": 98.46,
+      "totalColdFrames": 24,
+      "totalColdJankyFrames": 8,
+      "totalScrollFrames": 1050,
+      "totalScrollJankyFrames": 0,
+      "medianPssMiB": 101.6
+    },
+    "plan": {
+      "samples": 3,
+      "medianContentReadyMs": 121,
+      "medianFirstFrameMs": 105.75,
+      "totalColdFrames": 18,
+      "totalColdJankyFrames": 8,
+      "totalScrollFrames": 1036,
+      "totalScrollJankyFrames": 0,
+      "medianPssMiB": 89.51
+    }
+  },
+  "runs": [
+    {
+      "screen": "home",
+      "run": 1,
+      "fixture": {
+        "screen": "home",
+        "status": "fixtureReady",
+        "seeded": false,
+        "setupMs": 30
+      },
+      "contentReady": {
+        "screen": "home",
+        "status": "contentReady",
+        "sinceRenderMs": 91
+      },
+      "initialFrames": [
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 1,
+          "sinceRenderMs": 154,
+          "durationMs": 130.151538
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 2,
+          "sinceRenderMs": 164,
+          "durationMs": 87.772888
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 3,
+          "sinceRenderMs": 513,
+          "durationMs": 11.785326
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 4,
+          "sinceRenderMs": 523,
+          "durationMs": 1.866759
+        }
+      ],
+      "coldGfxinfo": {
+        "frames": 5,
+        "jankyFrames": 2,
+        "p95Ms": 129,
+        "p99Ms": 129
+      },
+      "steadyMemory": {
+        "pssKiB": 86705,
+        "rssKiB": 205968
+      },
+      "populatedScreenVerified": true,
+      "scrollGfxinfo": {
+        "frames": 0,
+        "jankyFrames": 0,
+        "p95Ms": null,
+        "p99Ms": null
+      },
+      "scrollNote": "Home fits on screen. Swipes rendered no frames; no scroll-performance conclusion."
+    },
+    {
+      "screen": "activity",
+      "run": 1,
+      "fixture": {
+        "screen": "activity",
+        "status": "fixtureReady",
+        "seeded": false,
+        "setupMs": 19
+      },
+      "contentReady": {
+        "screen": "activity",
+        "status": "contentReady",
+        "sinceRenderMs": 167
+      },
+      "initialFrames": [
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 1,
+          "sinceRenderMs": 128,
+          "durationMs": 103.078682
+        },
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 2,
+          "sinceRenderMs": 138,
+          "durationMs": 70.514613
+        },
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 3,
+          "sinceRenderMs": 149,
+          "durationMs": 19.829994
+        },
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 4,
+          "sinceRenderMs": 217,
+          "durationMs": 34.256385
+        },
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 5,
+          "sinceRenderMs": 228,
+          "durationMs": 23.787417
+        }
+      ],
+      "coldGfxinfo": {
+        "frames": 8,
+        "jankyFrames": 3,
+        "p95Ms": 101,
+        "p99Ms": 101
+      },
+      "steadyMemory": {
+        "pssKiB": 104098,
+        "rssKiB": 223788
+      },
+      "populatedScreenVerified": true,
+      "scrollGfxinfo": {
+        "frames": 347,
+        "jankyFrames": 0,
+        "p95Ms": 7,
+        "p99Ms": 8
+      }
+    },
+    {
+      "screen": "plan",
+      "run": 1,
+      "fixture": {
+        "screen": "plan",
+        "status": "fixtureReady",
+        "seeded": false,
+        "setupMs": 19
+      },
+      "contentReady": {
+        "screen": "plan",
+        "status": "contentReady",
+        "sinceRenderMs": 139
+      },
+      "initialFrames": [
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 1,
+          "sinceRenderMs": 147,
+          "durationMs": 121.467643
+        },
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 2,
+          "sinceRenderMs": 158,
+          "durationMs": 69.060259
+        },
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 3,
+          "sinceRenderMs": 202,
+          "durationMs": 42.488343
+        },
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 4,
+          "sinceRenderMs": 515,
+          "durationMs": 15.310803
+        },
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 5,
+          "sinceRenderMs": 526,
+          "durationMs": 5.267719
+        }
+      ],
+      "coldGfxinfo": {
+        "frames": 6,
+        "jankyFrames": 2,
+        "p95Ms": 121,
+        "p99Ms": 121
+      },
+      "steadyMemory": {
+        "pssKiB": 92979,
+        "rssKiB": 213440
+      },
+      "populatedScreenVerified": true,
+      "scrollGfxinfo": {
+        "frames": 346,
+        "jankyFrames": 0,
+        "p95Ms": 9,
+        "p99Ms": 11
+      }
+    },
+    {
+      "screen": "home",
+      "run": 2,
+      "fixture": {
+        "screen": "home",
+        "status": "fixtureReady",
+        "seeded": false,
+        "setupMs": 17
+      },
+      "contentReady": {
+        "screen": "home",
+        "status": "contentReady",
+        "sinceRenderMs": 98
+      },
+      "initialFrames": [
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 1,
+          "sinceRenderMs": 107,
+          "durationMs": 84.492924
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 2,
+          "sinceRenderMs": 118,
+          "durationMs": 30.715486
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 3,
+          "sinceRenderMs": 140,
+          "durationMs": 20.311985
+        }
+      ],
+      "coldGfxinfo": {
+        "frames": 7,
+        "jankyFrames": 2,
+        "p95Ms": 85,
+        "p99Ms": 85
+      },
+      "steadyMemory": {
+        "pssKiB": 89027,
+        "rssKiB": 208196
+      },
+      "populatedScreenVerified": true,
+      "scrollGfxinfo": {
+        "frames": 0,
+        "jankyFrames": 0,
+        "p95Ms": null,
+        "p99Ms": null
+      },
+      "scrollNote": "Home fits on screen. Swipes rendered no frames; no scroll-performance conclusion."
+    },
+    {
+      "screen": "activity",
+      "run": 2,
+      "fixture": {
+        "screen": "activity",
+        "status": "fixtureReady",
+        "seeded": false,
+        "setupMs": 19
+      },
+      "contentReady": {
+        "screen": "activity",
+        "status": "contentReady",
+        "sinceRenderMs": 160
+      },
+      "initialFrames": [
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 1,
+          "sinceRenderMs": 114,
+          "durationMs": 90.033272
+        },
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 2,
+          "sinceRenderMs": 125,
+          "durationMs": 58.335061
+        },
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 3,
+          "sinceRenderMs": 136,
+          "durationMs": 7.007793
+        },
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 4,
+          "sinceRenderMs": 203,
+          "durationMs": 25.66989
+        },
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 5,
+          "sinceRenderMs": 215,
+          "durationMs": 15.079992
+        }
+      ],
+      "coldGfxinfo": {
+        "frames": 8,
+        "jankyFrames": 3,
+        "p95Ms": 89,
+        "p99Ms": 89
+      },
+      "steadyMemory": {
+        "pssKiB": 104035,
+        "rssKiB": 224116
+      },
+      "populatedScreenVerified": true,
+      "scrollGfxinfo": {
+        "frames": 351,
+        "jankyFrames": 0,
+        "p95Ms": 7,
+        "p99Ms": 9
+      }
+    },
+    {
+      "screen": "plan",
+      "run": 2,
+      "fixture": {
+        "screen": "plan",
+        "status": "fixtureReady",
+        "seeded": false,
+        "setupMs": 20
+      },
+      "contentReady": {
+        "screen": "plan",
+        "status": "contentReady",
+        "sinceRenderMs": 121
+      },
+      "initialFrames": [
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 1,
+          "sinceRenderMs": 128,
+          "durationMs": 105.754729
+        },
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 2,
+          "sinceRenderMs": 139,
+          "durationMs": 53.608149
+        },
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 3,
+          "sinceRenderMs": 184,
+          "durationMs": 40.8291
+        },
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 4,
+          "sinceRenderMs": 552,
+          "durationMs": 22.48698
+        },
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 5,
+          "sinceRenderMs": 564,
+          "durationMs": 14.131182
+        }
+      ],
+      "coldGfxinfo": {
+        "frames": 6,
+        "jankyFrames": 3,
+        "p95Ms": 105,
+        "p99Ms": 105
+      },
+      "steadyMemory": {
+        "pssKiB": 91372,
+        "rssKiB": 211716
+      },
+      "populatedScreenVerified": true,
+      "scrollGfxinfo": {
+        "frames": 348,
+        "jankyFrames": 0,
+        "p95Ms": 9,
+        "p99Ms": 12
+      }
+    },
+    {
+      "screen": "home",
+      "run": 3,
+      "fixture": {
+        "screen": "home",
+        "status": "fixtureReady",
+        "seeded": false,
+        "setupMs": 23
+      },
+      "contentReady": {
+        "screen": "home",
+        "status": "contentReady",
+        "sinceRenderMs": 97
+      },
+      "initialFrames": [
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 1,
+          "sinceRenderMs": 97,
+          "durationMs": 78.427196
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 2,
+          "sinceRenderMs": 108,
+          "durationMs": 35.714738
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 3,
+          "sinceRenderMs": 141,
+          "durationMs": 16.916991
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 4,
+          "sinceRenderMs": 152,
+          "durationMs": 7.650732
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 5,
+          "sinceRenderMs": 523,
+          "durationMs": 11.158036
+        }
+      ],
+      "coldGfxinfo": {
+        "frames": 7,
+        "jankyFrames": 3,
+        "p95Ms": 77,
+        "p99Ms": 77
+      },
+      "steadyMemory": {
+        "pssKiB": 88906,
+        "rssKiB": 208068
+      },
+      "populatedScreenVerified": true,
+      "scrollGfxinfo": {
+        "frames": 0,
+        "jankyFrames": 0,
+        "p95Ms": null,
+        "p99Ms": null
+      },
+      "scrollNote": "Home fits on screen. Swipes rendered no frames; no scroll-performance conclusion."
+    },
+    {
+      "screen": "activity",
+      "run": 3,
+      "fixture": {
+        "screen": "activity",
+        "status": "fixtureReady",
+        "seeded": false,
+        "setupMs": 17
+      },
+      "contentReady": {
+        "screen": "activity",
+        "status": "contentReady",
+        "sinceRenderMs": 157
+      },
+      "initialFrames": [
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 1,
+          "sinceRenderMs": 127,
+          "durationMs": 98.460426
+        },
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 2,
+          "sinceRenderMs": 138,
+          "durationMs": 65.911568
+        },
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 3,
+          "sinceRenderMs": 149,
+          "durationMs": 14.684058
+        },
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 4,
+          "sinceRenderMs": 193,
+          "durationMs": 25.836591
+        },
+        {
+          "screen": "activity",
+          "status": "initialFrame",
+          "index": 5,
+          "sinceRenderMs": 205,
+          "durationMs": 15.282466
+        }
+      ],
+      "coldGfxinfo": {
+        "frames": 8,
+        "jankyFrames": 2,
+        "p95Ms": 97,
+        "p99Ms": 97
+      },
+      "steadyMemory": {
+        "pssKiB": 103974,
+        "rssKiB": 224044
+      },
+      "populatedScreenVerified": true,
+      "scrollGfxinfo": {
+        "frames": 352,
+        "jankyFrames": 0,
+        "p95Ms": 7,
+        "p99Ms": 9
+      }
+    },
+    {
+      "screen": "plan",
+      "run": 3,
+      "fixture": {
+        "screen": "plan",
+        "status": "fixtureReady",
+        "seeded": false,
+        "setupMs": 17
+      },
+      "contentReady": {
+        "screen": "plan",
+        "status": "contentReady",
+        "sinceRenderMs": 118
+      },
+      "initialFrames": [
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 1,
+          "sinceRenderMs": 128,
+          "durationMs": 98.773042
+        },
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 2,
+          "sinceRenderMs": 139,
+          "durationMs": 54.877532
+        },
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 3,
+          "sinceRenderMs": 184,
+          "durationMs": 39.418176
+        },
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 4,
+          "sinceRenderMs": 543,
+          "durationMs": 22.289983
+        },
+        {
+          "screen": "plan",
+          "status": "initialFrame",
+          "index": 5,
+          "sinceRenderMs": 552,
+          "durationMs": 12.207259
+        }
+      ],
+      "coldGfxinfo": {
+        "frames": 6,
+        "jankyFrames": 3,
+        "p95Ms": 97,
+        "p99Ms": 97
+      },
+      "steadyMemory": {
+        "pssKiB": 91660,
+        "rssKiB": 211952
+      },
+      "populatedScreenVerified": true,
+      "scrollGfxinfo": {
+        "frames": 342,
+        "jankyFrames": 0,
+        "p95Ms": 8,
+        "p99Ms": 10
+      }
+    }
+  ],
+  "finalHomeSmoke": [
+    {
+      "screen": "home",
+      "run": 1,
+      "fixture": {
+        "screen": "home",
+        "status": "fixtureReady",
+        "seeded": false,
+        "setupMs": 15
+      },
+      "contentReady": {
+        "screen": "home",
+        "status": "contentReady",
+        "sinceRenderMs": 90
+      },
+      "initialFrames": [
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 1,
+          "sinceRenderMs": 100,
+          "durationMs": 87.532517
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 2,
+          "sinceRenderMs": 110,
+          "durationMs": 32.639247
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 3,
+          "sinceRenderMs": 132,
+          "durationMs": 19.015274
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 4,
+          "sinceRenderMs": 143,
+          "durationMs": 8.884837
+        },
+        {
+          "screen": "home",
+          "status": "initialFrame",
+          "index": 5,
+          "sinceRenderMs": 550,
+          "durationMs": 16.193582
+        }
+      ],
+      "coldGfxinfo": {
+        "frames": 7,
+        "jankyFrames": 2,
+        "p95Ms": 85,
+        "p99Ms": 85
+      },
+      "steadyMemory": {
+        "pssKiB": 87044,
+        "rssKiB": 207220
+      },
+      "populatedScreenVerified": true,
+      "scrollGfxinfo": {
+        "frames": 0,
+        "jankyFrames": 0,
+        "p95Ms": null,
+        "p99Ms": null
+      },
+      "scrollNote": "No frames rendered during swipes; no scroll performance conclusion."
+    }
+  ],
+  "notes": [
+    "Frames come from Android FrameMetrics and gfxinfo; populated content was verified using UIAutomator.",
+    "Content-ready precedes verification and is not a draw time.",
+    "Home fits on this device, so no Home scroll percentile is reported.",
+    "Cold opening still includes expensive first Compose frames; no general startup speedup claim.",
+    "The monthly currency value now scales on one line; before and after screenshots were inspected."
+  ]
+}

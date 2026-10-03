@@ -13,7 +13,10 @@ import finance.shilling.shared.session.SessionState
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.statement.bodyAsText
-import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -42,7 +45,13 @@ class HostedSpacesViewModel(
 ) : ViewModel() {
     private val _state = MutableStateFlow(HostedSpacesUiState())
     val state: StateFlow<HostedSpacesUiState> = _state
-    init { refresh() }
+    init {
+        viewModelScope.launch {
+            _state.subscriptionCount.map { it > 0 }.distinctUntilChanged().collectLatest { visible ->
+                if (visible) load()
+            }
+        }
+    }
     private fun api(): ServerApi? {
         val ready = session.phase.value as? SessionPhase.Ready ?: return null
         if (ready.selfHosted) return null
@@ -53,8 +62,16 @@ class HostedSpacesViewModel(
         val api = api() ?: return
         if (_state.value.busy) return
         _state.value = _state.value.copy(busy = true, error = null)
-        try { _state.value = details(api, api.fetchSpaces()) }
+        try {
+            val (data, gold) = coroutineScope {
+                val spaces = async { api.fetchSpaces() }
+                val entitlement = async { isGold(api) }
+                spaces.await() to entitlement.await()
+            }
+            _state.value = details(data, gold)
+        }
         catch (error: Exception) { if (error is CancellationException) throw error; _state.value = _state.value.copy(busy = false, error = "Finance spaces unavailable. Retry when connected.") }
+        finally { _state.value = _state.value.copy(busy = false) }
     }
     suspend fun execute(command: HostedSpaceCommand): String {
         val api = api() ?: return "Sign in to manage hosted finance spaces."
@@ -62,8 +79,9 @@ class HostedSpacesViewModel(
         _state.value = _state.value.copy(busy = true, error = null)
         return try {
             val data = api.spaceCommand(command)
-            _state.value = details(api, data)
+            val next = details(data, isGold(api))
             if (command.action in setOf("select", "create", "accept", "leave", "remove")) selection.apply(data)
+            _state.value = next
             if (data.invitationCode != null) "Invitation created. Share the code with the invited person." else "Finance spaces updated."
         } catch (error: Exception) {
             if (error is CancellationException) throw error
@@ -73,12 +91,18 @@ class HostedSpacesViewModel(
             val text = message ?: "Could not update finance spaces. Refresh to check whether the action completed."
             _state.value = _state.value.copy(busy = false, error = text)
             text
-        }
+        } finally { _state.value = _state.value.copy(busy = false) }
     }
-    private suspend fun details(api: ServerApi, data: HostedSpacesResponse): HostedSpacesUiState {
-        val gold = runCatching { api.fetchEntitlements().accountPlan == finance.shilling.core.auth.HostedPlan.GOLD }.getOrDefault(false)
+    private suspend fun isGold(api: ServerApi): Boolean = try {
+        api.fetchEntitlements().accountPlan == finance.shilling.core.auth.HostedPlan.GOLD
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (_: Exception) { false }
+
+    private suspend fun details(data: HostedSpacesResponse, gold: Boolean): HostedSpacesUiState = withContext(Dispatchers.Default) {
         val accounts = if (gold) data.spaces.flatMap { space -> graphs.accountsInSpace(space.id).map { SpaceAccountChoice(space.id, it.id, "${space.name} · ${it.name}") } } else emptyList()
-        return HostedSpacesUiState(data = data, gold = gold, accounts = accounts, transfers = if (gold) transfers.list(data.spaces.map { it.id }.toSet()) else emptyList())
+        HostedSpacesUiState(data = data, gold = gold, accounts = accounts,
+            transfers = if (gold) transfers.list(data.spaces.map { it.id }.toSet()) else emptyList())
     }
     val transferToday: String = today().toString()
     fun newTransferId(): String = finance.shilling.shared.data.store.SPACE_TRANSFER_PREFIX + ids.newId()
@@ -87,8 +111,12 @@ class HostedSpacesViewModel(
         if (_state.value.busy) return "A space action is already in progress."
         _state.value = _state.value.copy(busy = true, error = null)
         return try {
-            val data = api.fetchSpaces()
-            check(api.fetchEntitlements().accountPlan == finance.shilling.core.auth.HostedPlan.GOLD) { "Linked space transfers require Gold." }
+            val (data, gold) = coroutineScope {
+                val spaces = async { api.fetchSpaces() }
+                val entitlement = async { isGold(api) }
+                spaces.await() to entitlement.await()
+            }
+            check(gold) { "Linked space transfers require Gold." }
             val authorized = data.spaces.map { it.id }.toSet()
             check(fromSpace in authorized && toSpace in authorized && graphs.current.id in setOf(fromSpace, toSpace)) { "Open a transfer space and choose two spaces you belong to." }
             val key = finance.shilling.shared.data.store.LinkedTransferKey(linkId, fromSpace, toSpace)
@@ -102,14 +130,14 @@ class HostedSpacesViewModel(
                 val credit = debit.copy(id = "$linkId:credit", type = finance.shilling.shared.data.ScheduleType.INCOME, accountId = toAccount)
                 transfers.save(finance.shilling.shared.data.store.LinkedTransfer(key, debit, credit))
             }
-            _state.value = details(api, data)
+            _state.value = details(data, gold)
             if (delete) "Linked transfer deleted from both spaces." else "Linked transfer saved in both spaces."
         } catch (error: Exception) {
             if (error is CancellationException) throw error
             val message = if (error is IllegalArgumentException || error is IllegalStateException) error.message ?: "Invalid transfer" else "Could not update linked transfer. Refresh both spaces before retrying."
             _state.value = _state.value.copy(busy = false, error = message)
             message
-        }
+        } finally { _state.value = _state.value.copy(busy = false) }
     }
 
 }

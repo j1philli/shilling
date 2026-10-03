@@ -1,0 +1,15 @@
+product:
+  type: kmp/lib
+  platforms: [iosArm64, iosSimulatorArm64]
+
+dependencies:
+  - ../shared
+  - $libs.coroutines.core
+  - $libs.sqldelight.native.driver
+  - $libs.ktor.client.webrtc
+  - $libs.kermit
+
+settings:
+  kotlin:
+    version: "2.4.20"
+    compileIncrementally: true

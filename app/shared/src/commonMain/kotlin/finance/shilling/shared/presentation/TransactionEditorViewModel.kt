@@ -105,7 +105,8 @@ class TransactionEditorViewModel(
             f
         }
         build(fields, l, accounts.map { Choice(it.id, it.name) }, categories.map { Choice(it.id, it.name) }, attached)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, TransactionEditorUiState(load = form.load, isNew = postingId == null))
+    }.stateIn(viewModelScope, SharingStarted.Eagerly,
+        TransactionEditorUiState(load = form.load, isNew = postingId == null, fields = form.fields))
 
     init {
         if (postingId != null) {
@@ -151,7 +152,7 @@ class TransactionEditorViewModel(
     fun setCategory(id: String?) = form.update { it.copy(categoryId = id) }
 
     suspend fun save(): String? {
-        if (!state.value.saveEnabled) return null
+        if (form.load != EditorLoad.READY || !canSave(form.fields)) return null
         val f = form.fields
         val amount = parseAmountInput(f.amountText) ?: return null
         val from = f.accountId ?: return null
@@ -191,15 +192,14 @@ class TransactionEditorViewModel(
     suspend fun attachReceipt(fileName: String, bytes: ByteArray): String? {
         val postingId = debitId.value ?: return null
         val receiptId = idGenerator.newId()
-        fileStore.store(receiptId, fileName, bytes)
-        receiptRepository.save(
+        receiptRepository.saveWithFile(
             Receipt(
                 id = receiptId,
                 postingId = postingId,
                 filePath = fileName,
                 originalName = fileName,
                 addedAt = Clock.System.now().toEpochMilliseconds()
-            )
+            ), fileStore, bytes
         )
         analytics.captureAsync(ProductEvent.RECEIPT_ATTACHED)
         return "Receipt attached"
@@ -222,8 +222,6 @@ class TransactionEditorViewModel(
         val isScheduled = details?.posting?.scheduleId != null
         val linkedSpaceTransfer = details?.posting?.pairId?.startsWith(finance.shilling.shared.data.store.SPACE_TRANSFER_PREFIX) == true
         val isTransfer = f.type == ScheduleType.TRANSFER
-        val amount = parseAmountInput(f.amountText)
-        val transferValid = !isTransfer || (f.toAccountId != null && f.toAccountId != f.accountId)
         return TransactionEditorUiState(
             load = l,
             isNew = details == null,
@@ -255,8 +253,14 @@ class TransactionEditorViewModel(
             },
             showsReceipts = details != null,
             receipts = attached.map { AttachedReceiptUi(it, "Added ${formatTimestamp(it.addedAt)}") },
-            saveEnabled = !linkedSpaceTransfer && l == EditorLoad.READY && f.title.isNotBlank() && amount != null && amount > 0 &&
-                f.accountId != null && transferValid
+            saveEnabled = l == EditorLoad.READY && canSave(f)
         )
+    }
+
+    private fun canSave(f: TransactionFields): Boolean {
+        if (existing?.posting?.pairId?.startsWith(finance.shilling.shared.data.store.SPACE_TRANSFER_PREFIX) == true) return false
+        val amount = parseAmountInput(f.amountText)
+        return f.title.isNotBlank() && amount != null && amount > 0 && f.accountId != null &&
+            (f.type != ScheduleType.TRANSFER || (f.toAccountId != null && f.toAccountId != f.accountId))
     }
 }

@@ -1,0 +1,493 @@
+{
+  "date": "2026-10-02",
+  "device": "physical iPhone SE",
+  "build": "isolated signed Release Shilling Perf with production native SwiftUI Plan",
+  "dataset": "synthetic 10,000 postings, 1,000 schedules, 40 categories, 10 accounts in Store5",
+  "method": [
+    "Three fresh processes per variant, two visits to six Plan sections per process.",
+    "Each phase ends 500 ms after its populated list appears.",
+    "Application CPU milliseconds across threads; display callback gaps are not Instruments rendering hitches.",
+    "The current cohort overlapped an Instruments capture attempt; do not interpret small cross-cohort CPU differences as a causal gain."
+  ],
+  "fixtureCorrection": "Initial Overview contains 1,363 items on October 2; the old fixed 1,005\u20131,009 check rejected a fully rendered list. The fixture now captures the rendered overview count and uses it for return visits.",
+  "outcome": "List animation suppression prototype rejected: repeat transition callback gaps worsened in four sections; production Plan restored.",
+  "instruments": "Animation Hitches recording reached its time limit but did not finalize an export; earlier valid rendering traces remain the hitch reference.",
+  "variants": {
+    "current": {
+      "runs": 3,
+      "planClosedWithZeroListeners": true,
+      "mainThreadQueries": 0,
+      "thermalStates": [
+        0
+      ],
+      "phases": {
+        "Schedules": {
+          "firstVisit": {
+            "samples": 3,
+            "medianCpuMs": 191.191,
+            "medianMaxDisplayCallbackGapMs": 78.373,
+            "maxDisplayCallbackGapMs": [
+              118.165,
+              78.373,
+              73.532
+            ],
+            "listItems": [
+              1002
+            ],
+            "queryCounts": [
+              6,
+              6,
+              6
+            ]
+          },
+          "repeatVisit": {
+            "samples": 3,
+            "medianCpuMs": 105.38,
+            "medianMaxDisplayCallbackGapMs": 76.034,
+            "maxDisplayCallbackGapMs": [
+              80.855,
+              28.884,
+              76.034
+            ],
+            "listItems": [
+              1002
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "Categories": {
+          "firstVisit": {
+            "samples": 3,
+            "medianCpuMs": 121.18,
+            "medianMaxDisplayCallbackGapMs": 60.552,
+            "maxDisplayCallbackGapMs": [
+              59.78,
+              61.847,
+              60.552
+            ],
+            "listItems": [
+              41
+            ],
+            "queryCounts": [
+              2,
+              2,
+              2
+            ]
+          },
+          "repeatVisit": {
+            "samples": 3,
+            "medianCpuMs": 95.537,
+            "medianMaxDisplayCallbackGapMs": 18.993,
+            "maxDisplayCallbackGapMs": [
+              18.993,
+              16.776,
+              22.364
+            ],
+            "listItems": [
+              41
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "Accounts": {
+          "firstVisit": {
+            "samples": 3,
+            "medianCpuMs": 124.923,
+            "medianMaxDisplayCallbackGapMs": 55.77,
+            "maxDisplayCallbackGapMs": [
+              54.118,
+              59.483,
+              55.77
+            ],
+            "listItems": [
+              11
+            ],
+            "queryCounts": [
+              2,
+              2,
+              2
+            ]
+          },
+          "repeatVisit": {
+            "samples": 3,
+            "medianCpuMs": 91.218,
+            "medianMaxDisplayCallbackGapMs": 16.668,
+            "maxDisplayCallbackGapMs": [
+              71.735,
+              16.668,
+              16.668
+            ],
+            "listItems": [
+              11
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "Overview": {
+          "firstVisit": {
+            "samples": 3,
+            "medianCpuMs": 98.074,
+            "medianMaxDisplayCallbackGapMs": 23.023,
+            "maxDisplayCallbackGapMs": [
+              71.956,
+              23.023,
+              17.84
+            ],
+            "listItems": [
+              1363
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          },
+          "repeatVisit": {
+            "samples": 3,
+            "medianCpuMs": 89.39,
+            "medianMaxDisplayCallbackGapMs": 24.493,
+            "maxDisplayCallbackGapMs": [
+              28.84,
+              21.772,
+              24.493
+            ],
+            "listItems": [
+              1363
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "By category": {
+          "firstVisit": {
+            "samples": 3,
+            "medianCpuMs": 116.112,
+            "medianMaxDisplayCallbackGapMs": 63.977,
+            "maxDisplayCallbackGapMs": [
+              65.726,
+              63.977,
+              60.163
+            ],
+            "listItems": [
+              46
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          },
+          "repeatVisit": {
+            "samples": 3,
+            "medianCpuMs": 104.391,
+            "medianMaxDisplayCallbackGapMs": 50.441,
+            "maxDisplayCallbackGapMs": [
+              50.441,
+              51.089,
+              40.474
+            ],
+            "listItems": [
+              46
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "By day": {
+          "firstVisit": {
+            "samples": 3,
+            "medianCpuMs": 101.307,
+            "medianMaxDisplayCallbackGapMs": 16.668,
+            "maxDisplayCallbackGapMs": [
+              16.668,
+              16.667,
+              33.335
+            ],
+            "listItems": [
+              1363
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          },
+          "repeatVisit": {
+            "samples": 3,
+            "medianCpuMs": 103.93,
+            "medianMaxDisplayCallbackGapMs": 16.668,
+            "maxDisplayCallbackGapMs": [
+              16.668,
+              16.667,
+              33.335
+            ],
+            "listItems": [
+              1363
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "staticTransitionsPrototype": {
+      "runs": 3,
+      "planClosedWithZeroListeners": true,
+      "mainThreadQueries": 0,
+      "thermalStates": [
+        0
+      ],
+      "phases": {
+        "Schedules": {
+          "firstVisit": {
+            "samples": 3,
+            "medianCpuMs": 166.033,
+            "medianMaxDisplayCallbackGapMs": 61.525,
+            "maxDisplayCallbackGapMs": [
+              38.001,
+              61.525,
+              71.503
+            ],
+            "listItems": [
+              1002
+            ],
+            "queryCounts": [
+              6,
+              6,
+              6
+            ]
+          },
+          "repeatVisit": {
+            "samples": 3,
+            "medianCpuMs": 102.718,
+            "medianMaxDisplayCallbackGapMs": 83.985,
+            "maxDisplayCallbackGapMs": [
+              86.572,
+              81.496,
+              83.985
+            ],
+            "listItems": [
+              1002
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "Categories": {
+          "firstVisit": {
+            "samples": 3,
+            "medianCpuMs": 118.323,
+            "medianMaxDisplayCallbackGapMs": 58.861,
+            "maxDisplayCallbackGapMs": [
+              58.665,
+              62.752,
+              58.861
+            ],
+            "listItems": [
+              41
+            ],
+            "queryCounts": [
+              2,
+              2,
+              2
+            ]
+          },
+          "repeatVisit": {
+            "samples": 3,
+            "medianCpuMs": 91.137,
+            "medianMaxDisplayCallbackGapMs": 41.587,
+            "maxDisplayCallbackGapMs": [
+              74.525,
+              28.119,
+              41.587
+            ],
+            "listItems": [
+              41
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "Accounts": {
+          "firstVisit": {
+            "samples": 3,
+            "medianCpuMs": 116.074,
+            "medianMaxDisplayCallbackGapMs": 58.04,
+            "maxDisplayCallbackGapMs": [
+              62.373,
+              56.057,
+              58.04
+            ],
+            "listItems": [
+              11
+            ],
+            "queryCounts": [
+              2,
+              2,
+              2
+            ]
+          },
+          "repeatVisit": {
+            "samples": 3,
+            "medianCpuMs": 88.502,
+            "medianMaxDisplayCallbackGapMs": 65.9,
+            "maxDisplayCallbackGapMs": [
+              65.9,
+              69.329,
+              28.604
+            ],
+            "listItems": [
+              11
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "Overview": {
+          "firstVisit": {
+            "samples": 3,
+            "medianCpuMs": 99.486,
+            "medianMaxDisplayCallbackGapMs": 73.585,
+            "maxDisplayCallbackGapMs": [
+              83.185,
+              17.859,
+              73.585
+            ],
+            "listItems": [
+              1363
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          },
+          "repeatVisit": {
+            "samples": 3,
+            "medianCpuMs": 87.206,
+            "medianMaxDisplayCallbackGapMs": 69.05,
+            "maxDisplayCallbackGapMs": [
+              70.419,
+              22.112,
+              69.05
+            ],
+            "listItems": [
+              1363
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "By category": {
+          "firstVisit": {
+            "samples": 3,
+            "medianCpuMs": 111.088,
+            "medianMaxDisplayCallbackGapMs": 53.881,
+            "maxDisplayCallbackGapMs": [
+              53.881,
+              52.488,
+              58.078
+            ],
+            "listItems": [
+              46
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          },
+          "repeatVisit": {
+            "samples": 3,
+            "medianCpuMs": 94.73,
+            "medianMaxDisplayCallbackGapMs": 48.371,
+            "maxDisplayCallbackGapMs": [
+              48.371,
+              50.958,
+              47.105
+            ],
+            "listItems": [
+              46
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "By day": {
+          "firstVisit": {
+            "samples": 3,
+            "medianCpuMs": 99.296,
+            "medianMaxDisplayCallbackGapMs": 33.335,
+            "maxDisplayCallbackGapMs": [
+              33.872,
+              33.335,
+              16.668
+            ],
+            "listItems": [
+              1363
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          },
+          "repeatVisit": {
+            "samples": 3,
+            "medianCpuMs": 97.515,
+            "medianMaxDisplayCallbackGapMs": 16.667,
+            "maxDisplayCallbackGapMs": [
+              16.667,
+              16.668,
+              16.667
+            ],
+            "listItems": [
+              1363
+            ],
+            "queryCounts": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    }
+  }
+}

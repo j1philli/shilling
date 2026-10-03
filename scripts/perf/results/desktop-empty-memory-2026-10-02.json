@@ -1,0 +1,246 @@
+{
+  "hostPid": 91347,
+  "webContentPid": 91469,
+  "rssSamples": [
+    {
+      "seconds": 0.024,
+      "hostMiB": 106.40625,
+      "webContentMiB": 246.84375
+    },
+    {
+      "seconds": 0.306,
+      "hostMiB": 106.40625,
+      "webContentMiB": 246.84375
+    },
+    {
+      "seconds": 0.6,
+      "hostMiB": 106.40625,
+      "webContentMiB": 246.84375
+    },
+    {
+      "seconds": 0.88,
+      "hostMiB": 106.453125,
+      "webContentMiB": 246.84375
+    },
+    {
+      "seconds": 1.183,
+      "hostMiB": 106.453125,
+      "webContentMiB": 246.84375
+    },
+    {
+      "seconds": 1.481,
+      "hostMiB": 106.453125,
+      "webContentMiB": 246.84375
+    },
+    {
+      "seconds": 1.781,
+      "hostMiB": 106.453125,
+      "webContentMiB": 246.84375
+    },
+    {
+      "seconds": 2.092,
+      "hostMiB": 106.453125,
+      "webContentMiB": 246.84375
+    },
+    {
+      "seconds": 2.406,
+      "hostMiB": 106.453125,
+      "webContentMiB": 246.84375
+    },
+    {
+      "seconds": 2.696,
+      "hostMiB": 106.453125,
+      "webContentMiB": 246.84375
+    },
+    {
+      "seconds": 3.029,
+      "hostMiB": 106.375,
+      "webContentMiB": 246.796875
+    },
+    {
+      "seconds": 3.327,
+      "hostMiB": 106.375,
+      "webContentMiB": 246.796875
+    },
+    {
+      "seconds": 3.608,
+      "hostMiB": 106.328125,
+      "webContentMiB": 246.796875
+    },
+    {
+      "seconds": 3.983,
+      "hostMiB": 106.359375,
+      "webContentMiB": 247.5625
+    },
+    {
+      "seconds": 4.314,
+      "hostMiB": 106.359375,
+      "webContentMiB": 247.5625
+    },
+    {
+      "seconds": 4.68,
+      "hostMiB": 106.625,
+      "webContentMiB": 247.546875
+    },
+    {
+      "seconds": 4.998,
+      "hostMiB": 106.921875,
+      "webContentMiB": 247.265625
+    },
+    {
+      "seconds": 5.352,
+      "hostMiB": 91.4375,
+      "webContentMiB": 46.625
+    },
+    {
+      "seconds": 5.684,
+      "hostMiB": 91.21875,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 6.064,
+      "hostMiB": 91.203125,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 6.465,
+      "hostMiB": 91.1875,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 6.771,
+      "hostMiB": 91.1875,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 7.101,
+      "hostMiB": 91.1875,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 7.389,
+      "hostMiB": 91.1875,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 7.681,
+      "hostMiB": 91.1875,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 7.98,
+      "hostMiB": 91.1875,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 8.38,
+      "hostMiB": 91.15625,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 8.702,
+      "hostMiB": 91.15625,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 9.025,
+      "hostMiB": 91.15625,
+      "webContentMiB": 22.03125
+    },
+    {
+      "seconds": 9.325,
+      "hostMiB": 91.1875,
+      "webContentMiB": 22.03125
+    },
+    {
+      "seconds": 9.618,
+      "hostMiB": 91.1875,
+      "webContentMiB": 22.03125
+    },
+    {
+      "seconds": 9.897,
+      "hostMiB": 91.328125,
+      "webContentMiB": 22.03125
+    },
+    {
+      "seconds": 10.2,
+      "hostMiB": 91.328125,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 10.524,
+      "hostMiB": 91.296875,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 10.807,
+      "hostMiB": 91.296875,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 11.101,
+      "hostMiB": 91.296875,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 11.394,
+      "hostMiB": 91.3125,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 11.689,
+      "hostMiB": 91.3125,
+      "webContentMiB": 22.046875
+    },
+    {
+      "seconds": 11.984,
+      "hostMiB": 91.328125,
+      "webContentMiB": 22.046875
+    }
+  ],
+  "phases": [
+    {
+      "name": "empty_home",
+      "seconds": 10.033,
+      "webContent": {
+        "footprintMiB": 276.3,
+        "lifetimePeakFootprintMiB": 333.5,
+        "JS VM Reservations": {
+          "virtualMiB": 2048.0,
+          "residentMiB": 0.0,
+          "dirtyMiB": 0.0,
+          "swappedMiB": 3.25
+        },
+        "WebKit Malloc": {
+          "virtualMiB": 12697.6,
+          "residentMiB": 1.234375,
+          "dirtyMiB": 1.203125,
+          "swappedMiB": 222.7
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 35.5,
+          "residentMiB": 0.0,
+          "dirtyMiB": 0.0,
+          "swappedMiB": 24.9
+        }
+      },
+      "host": {
+        "footprintMiB": 33.1,
+        "lifetimePeakFootprintMiB": 99.4,
+        "WebKit Malloc": {
+          "virtualMiB": 64.0,
+          "residentMiB": 0.28125,
+          "dirtyMiB": 0.28125,
+          "swappedMiB": 2.0625
+        }
+      }
+    }
+  ],
+  "date": "2026-10-02",
+  "dataset": "Empty isolated desktop database; release production web entry point with developer tools enabled.",
+  "sampling": "Initial empty Home footprint snapshot only. Later manual UI exploration excluded from this artifact.",
+  "limits": [
+    "Separate process and entry point from seeded perf-web run; an indicative empty baseline, not a matched allocation comparison.",
+    "Physical footprint includes compressed/swapped allocation accounting; low RSS does not prove release."
+  ]
+}

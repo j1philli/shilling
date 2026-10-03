@@ -29,9 +29,8 @@ data class CsvPreviewRow(
 object CsvImporter {
 
     fun parseHeaders(csvContent: String): List<String> {
-        val lines = csvContent.lines().filter { it.isNotBlank() }
-        if (lines.isEmpty()) return emptyList()
-        return parseCsvLine(lines.first())
+        val first = csvContent.lineSequence().firstOrNull { it.isNotBlank() } ?: return emptyList()
+        return parseCsvLine(first)
     }
 
     fun preview(
@@ -40,7 +39,7 @@ object CsvImporter {
         hasHeader: Boolean = true,
         maxRows: Int = 20
     ): List<CsvPreviewRow> {
-        val lines = csvContent.lines().filter { it.isNotBlank() }
+        val lines = csvContent.lineSequence().filter { it.isNotBlank() }
         val dataLines = if (hasHeader) lines.drop(1) else lines
         return dataLines.take(maxRows).mapIndexed { index, line ->
             val fields = parseCsvLine(line)
@@ -55,7 +54,7 @@ object CsvImporter {
                 parsedAmount = amount,
                 isValid = date != null && description != null && amount != null
             )
-        }
+        }.toList()
     }
 
     fun parseAll(
@@ -63,7 +62,7 @@ object CsvImporter {
         mapping: CsvColumnMapping,
         hasHeader: Boolean = true
     ): List<CsvPreviewRow> {
-        val lines = csvContent.lines().filter { it.isNotBlank() }
+        val lines = csvContent.lineSequence().filter { it.isNotBlank() }
         val dataLines = if (hasHeader) lines.drop(1) else lines
         return dataLines.mapIndexed { index, line ->
             val fields = parseCsvLine(line)
@@ -78,7 +77,7 @@ object CsvImporter {
                 parsedAmount = amount,
                 isValid = date != null && description != null && amount != null
             )
-        }
+        }.toList()
     }
 
     private fun parseCsvLine(line: String): List<String> {

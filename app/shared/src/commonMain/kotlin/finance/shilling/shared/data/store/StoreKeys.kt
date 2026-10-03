@@ -45,16 +45,25 @@ fun ScheduleKey.toBookkeepingKey(): Pair<String, String> = when (this) {
 sealed class ScheduleExceptionKey {
     data object All : ScheduleExceptionKey()
     data class ByScheduleId(val scheduleId: String) : ScheduleExceptionKey()
+    data class ByScheduleIds(val scheduleIds: List<String>) : ScheduleExceptionKey()
     data class ByKey(val scheduleId: String, val date: LocalDate) : ScheduleExceptionKey()
 }
 
 fun ScheduleExceptionKey.toBookkeepingKey(): Pair<String, String> = when (this) {
     ScheduleExceptionKey.All -> "schedule_exception" to "ALL"
     is ScheduleExceptionKey.ByScheduleId -> "schedule_exception" to "schedule_${scheduleId}"
+    is ScheduleExceptionKey.ByScheduleIds -> "schedule_exception" to "schedules_${scheduleIds.joinToString(",")}"
     is ScheduleExceptionKey.ByKey -> "schedule_exception" to "${scheduleId}_${date}"
 }
 
 // --- Posting ---
+
+/** Local read-only projections; entity writes still use PostingKey. */
+sealed class PostingDetailsKey {
+    data class ById(val id: String) : PostingDetailsKey()
+    data class Recent(val start: LocalDate, val end: LocalDate, val rowLimit: Long) : PostingDetailsKey()
+    data class TransferPartner(val pairId: String, val postingId: String, val start: LocalDate, val end: LocalDate) : PostingDetailsKey()
+}
 
 sealed class PostingKey {
     data object All : PostingKey()

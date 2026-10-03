@@ -51,6 +51,7 @@ src-tauri/gen/
 
 # wasmJs build output
 web-app-dist/
+perf-web-dist/
 desktop-artifacts/
 mobile-artifacts/
 smoke-results/

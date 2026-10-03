@@ -101,7 +101,6 @@ class MainActivity : ComponentActivity() {
             single { ShillingDatabase(driver) }
             single { settings }
             single<IdGenerator> { AndroidIdGenerator() }
-            single<ReceiptFileStore> { AndroidReceiptFileStore(appContext) }
             single<finance.shilling.shared.data.store.ReceiptFileStoreFactory> {
                 finance.shilling.shared.data.store.ReceiptFileStoreFactory { id, legacy -> AndroidReceiptFileStore(appContext, if (legacy) null else id) }
             }

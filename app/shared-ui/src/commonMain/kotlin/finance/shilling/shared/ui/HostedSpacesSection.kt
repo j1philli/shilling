@@ -2,6 +2,7 @@ package finance.shilling.shared.ui
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import finance.shilling.core.auth.HostedSpaceCommand
 import finance.shilling.shared.presentation.HostedSpacesViewModel
 import kotlinx.coroutines.launch
@@ -9,7 +10,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 internal fun HostedSpacesSection(viewModel: HostedSpacesViewModel = koinViewModel()) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle(minActiveState = androidx.lifecycle.Lifecycle.State.RESUMED)
     val scope = rememberCoroutineScope()
     val snackbar = LocalSnackbarController.current
     var name by remember { mutableStateOf("") }

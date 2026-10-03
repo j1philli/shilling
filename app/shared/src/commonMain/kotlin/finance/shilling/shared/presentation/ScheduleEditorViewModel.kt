@@ -44,10 +44,10 @@ data class ScheduleFields(
     val startEpochDay: Long = today().toEpochDays(),
     val endEpochDay: Long? = null,
     val weekdayMask: Int = 0,
-    val monthDayText: String = today().day.toString(),
+    val monthDayText: String = LocalDate.fromEpochDays(startEpochDay).day.toString(),
     val lastDay: Boolean = false,
-    val nth: Int = today().weekOfMonth(),
-    val nthWeekdayIndex: Int = today().dayOfWeek.ordinal,
+    val nth: Int = LocalDate.fromEpochDays(startEpochDay).weekOfMonth(),
+    val nthWeekdayIndex: Int = LocalDate.fromEpochDays(startEpochDay).dayOfWeek.ordinal,
     val autoPay: Boolean = false,
     val notes: String = ""
 )
@@ -118,12 +118,12 @@ class ScheduleEditorViewModel(
             f
         }
         build(fields, l, accounts.map { Choice(it.id, it.name) }, categories.map { Choice(it.id, it.name) })
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, ScheduleEditorUiState(load = form.load))
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, ScheduleEditorUiState(load = form.load, fields = form.fields))
 
     init {
         if (scheduleId != null) {
             viewModelScope.launch {
-                val schedule = scheduleRepository.watchAll().first().firstOrNull { it.id == scheduleId }
+                val schedule = scheduleRepository.watchById(scheduleId).first()
                 existing = schedule
                 if (schedule == null) {
                     form.missing()
@@ -151,7 +151,7 @@ class ScheduleEditorViewModel(
                     )
                     // Deleted elsewhere (e.g. on another device) while open: show it as deleted, since saving
                     // would bring it back.
-                    scheduleRepository.watchAll().first { list -> list.none { it.id == scheduleId } }
+                    scheduleRepository.watchById(scheduleId).first { it == null }
                     form.missing()
                 }
             }
@@ -186,7 +186,7 @@ class ScheduleEditorViewModel(
     }
 
     suspend fun save(): String? {
-        if (!state.value.saveEnabled) return null
+        if (form.load != EditorLoad.READY || !canSave(form.fields)) return null
         scheduleRepository.upsert(draft(form.fields).copy(id = existing?.id ?: idGenerator.newId()))
         if (existing == null) analytics.captureAsync(ProductEvent.SCHEDULE_CREATED, form.fields.type.name.lowercase())
         return if (existing == null) "Schedule added" else "Schedule updated"
@@ -201,7 +201,6 @@ class ScheduleEditorViewModel(
     private fun build(f: ScheduleFields, l: EditorLoad, accounts: List<Choice>, categories: List<Choice>): ScheduleEditorUiState {
         val startDate = LocalDate.fromEpochDays(f.startEpochDay)
         val endDate = f.endEpochDay?.let { LocalDate.fromEpochDays(it) }
-        val amount = parseAmountInput(f.amountText)
         val interval = f.intervalText.toIntOrNull()?.coerceAtLeast(1) ?: 1
         val monthDay = f.monthDayText.toIntOrNull()
         val isTransfer = f.type == ScheduleType.TRANSFER
@@ -211,8 +210,9 @@ class ScheduleEditorViewModel(
             if (endDate != null && endDate < startDate) add("End date is before the start date")
         }
         val draft = draft(f)
-        val from = maxOf(today(), draft.startDate)
-        val next = generateOccurrences(draft, from, from.plus(3, DateTimeUnit.YEAR)).firstOrNull()?.date
+        val reference = today()
+        val from = maxOf(reference, draft.startDate)
+        val next = generateOccurrences(draft, from, from.plus(3, DateTimeUnit.YEAR), limit = 1).firstOrNull()?.date
         val schedule = existing
         return ScheduleEditorUiState(
             load = l,
@@ -244,11 +244,19 @@ class ScheduleEditorViewModel(
             effectiveWeekdayMask = f.weekdayMask.takeIf { it != 0 } ?: (1 shl startDate.dayOfWeek.ordinal),
             monthDayError = monthDay == null || monthDay !in 1..31,
             showsEndDate = f.frequency != Frequency.ONCE,
-            nextOccurrence = next?.let { "Next: ${formatDate(it)}" } ?: "No upcoming dates",
+            nextOccurrence = next?.let { "Next: ${formatDate(it, reference)}" } ?: "No upcoming dates",
             errors = errors,
-            saveEnabled = l == EditorLoad.READY && f.title.isNotBlank() && amount != null && amount > 0 &&
-                f.accountId != null && errors.isEmpty()
+            saveEnabled = l == EditorLoad.READY && canSave(f)
         )
+    }
+
+    private fun canSave(f: ScheduleFields): Boolean {
+        val amount = parseAmountInput(f.amountText)
+        val monthDay = f.monthDayText.toIntOrNull()
+        return f.title.isNotBlank() && amount != null && amount > 0 && f.accountId != null &&
+            (f.type != ScheduleType.TRANSFER || (f.toAccountId != null && f.toAccountId != f.accountId)) &&
+            (f.frequency != Frequency.MONTHLY_BY_DAY || f.lastDay || (monthDay != null && monthDay in 1..31)) &&
+            (f.endEpochDay == null || f.endEpochDay >= f.startEpochDay)
     }
 
     private fun draft(f: ScheduleFields): Schedule {

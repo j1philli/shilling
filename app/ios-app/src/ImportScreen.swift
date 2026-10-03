@@ -12,11 +12,14 @@ struct ImportScreen: View {
     @State private var choosingFile = false
     @State private var confirming = false
     @State private var importing = false
+    @State private var loadingFile = false
+    @State private var fileReadFailed = false
     let onDone: (Toast) -> Void
 
     init(onDone: @escaping (Toast) -> Void) {
-        let screen = ImportScreenModel()
-        _model = StateObject(wrappedValue: FlowModel(screen: screen, initial: screen.state, flow: screen.stateFlow))
+        _model = StateObject(wrappedValue: FlowModel(
+            create: { ImportScreenModel() }, state: { $0.state }, flow: { $0.stateFlow }
+        ))
         self.onDone = onDone
     }
 
@@ -27,6 +30,7 @@ struct ImportScreen: View {
         Form {
             Section {
                 Button { choosingFile = true } label: { Label(state.chooseLabel, systemImage: "square.and.arrow.down") }
+                    .disabled(loadingFile || importing)
             } footer: {
                 Text(state.fileLabel ?? state.subtitle)
             }
@@ -48,7 +52,7 @@ struct ImportScreen: View {
             if state.stage == .ready {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Import") { confirming = true }
-                        .disabled(!state.importEnabled || importing)
+                        .disabled(!state.importEnabled || importing || loadingFile)
                 }
             }
         }
@@ -59,12 +63,24 @@ struct ImportScreen: View {
         }
         .fileImporter(isPresented: $choosingFile, allowedContentTypes: [.commaSeparatedText, .plainText, .text]) { result in
             guard case .success(let url) = result else { return }
-            let scoped = url.startAccessingSecurityScopedResource()
-            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            if let data = try? Data(contentsOf: url) {
-                screen.loadFile(fileName: url.lastPathComponent, data: data)
+            loadingFile = true
+            Task {
+                let scoped = url.startAccessingSecurityScopedResource()
+                defer {
+                    if scoped { url.stopAccessingSecurityScopedResource() }
+                    loadingFile = false
+                }
+                do {
+                    _ = try await asyncFunction(for: screen.loadFile(fileName: url.lastPathComponent, path: url.path))
+                } catch {
+                    fileReadFailed = true
+                }
             }
         }
+        .alert("Couldn't read CSV", isPresented: $fileReadFailed) {
+            Button("OK", role: .cancel) {}
+        }
+
         .task { await model.observe() }
     }
 

@@ -22,6 +22,7 @@ dependencies:
   - $libs.koin.core
   - $libs.koin.compose
   - $libs.koin.compose.viewmodel
+  - $libs.lifecycle.runtime.compose
   - $libs.ktor.client.core
   - $libs.ktor.client.webrtc
   - $libs.serialization.json
