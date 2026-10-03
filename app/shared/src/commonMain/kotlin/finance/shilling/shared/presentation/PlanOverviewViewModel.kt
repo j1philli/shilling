@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -134,7 +135,9 @@ class PlanOverviewViewModel(
             buildState(w, items, g, open)
         }
     }.flowOn(Dispatchers.Default)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PlanOverviewUiState())
+        .onCompletion { itemsByKey.value = emptyMap() }
+        .stateIn(viewModelScope,
+            SharingStarted.WhileSubscribed(5_000, replayExpirationMillis = 0), PlanOverviewUiState())
 
     fun setPeriod(value: PlanPeriod) {
         period.value = value

@@ -89,7 +89,10 @@ class ActivityViewModel(postingRepository: PostingRepository) : ViewModel() {
                 )
             }
         )
-    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ActivityUiState())
+    // Saved tabs keep this view model, but need not keep a full formatted history.
+    // Range/query live separately and are reapplied when the screen returns.
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope,
+        SharingStarted.WhileSubscribed(5_000, replayExpirationMillis = 0), ActivityUiState())
 
     fun setRange(months: Int) {
         range.value = ACTIVITY_RANGES.firstOrNull { it.months == months } ?: return

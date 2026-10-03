@@ -595,6 +595,21 @@ importing. Restore a completed import fixture before using it to compare cold
 idle against memory retained after the import. See the
 [import/idle follow-up](../../docs/desktop-import-idle-memory-2026-10-03.md).
 
+`SHILLING_MEMORY_RUNTIME_PROFILE=true` enables fixture-only phase counters for
+main-thread date formatter construction and Wasm linear-memory capacity. The
+probe keeps only weak references to memory objects. Linear capacity excludes
+Kotlin Wasm GC objects, SQL worker memory and rendering allocations, so it is
+not a substitute for native physical-footprint measurements. Leave the probe
+disabled for normal builds; compare runs with the same probe setting.
+
+Release web/desktop packages trim local/type/global/field debug names from the
+Kotlin Wasm artifact, retaining module/function names for stack traces. Full
+debugger names remain in the unmodified compiler package under `build/tasks`;
+Debug builds are unchanged. The memory fixture applies the same trimming by
+default. Use `SHILLING_MEMORY_TRIM_NAMES=false` only for a diagnostic control.
+The [retained-state follow-up](../../docs/desktop-retained-state-memory-2026-10-03.md)
+records the fresh control, rejected experiments, final full run and cold-idle checks.
+
 `bash scripts/perf/build_desktop_memory.sh` builds the separate **Shilling Memory
 Perf** bundle (`finance.shilling.perf.memory`) and the `perf-web` entry point.
 Start the loopback `desktop_control_fixture.cjs`, then launch that bundle. Its

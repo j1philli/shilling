@@ -68,7 +68,8 @@ class ReceiptsViewModel(receiptRepository: ReceiptRepository) : ViewModel() {
                 ReceiptFilter.ATTACHED -> ReceiptsEmpty("No attached receipts", null, showAdd = false)
             }
         )
-    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReceiptsUiState())
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope,
+        SharingStarted.WhileSubscribed(5_000, replayExpirationMillis = 0), ReceiptsUiState())
 
     fun setFilter(value: ReceiptFilter) {
         filter.value = value

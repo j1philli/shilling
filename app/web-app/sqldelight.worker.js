@@ -37,6 +37,12 @@ function saveToIndexedDB(idb, data) {
   });
 }
 
+// Only call for standalone snapshot copies after their consumer has copied them.
+// Cleanup cannot change load/commit outcomes, including on older engines.
+function releaseSnapshot(data) {
+  try { data.buffer.transfer?.(0); } catch (_) {}
+}
+
 let db = null;
 let idb = null;
 let saveTimer = null;
@@ -103,7 +109,7 @@ function persistDatabase() {
       // IndexedDB has consumed its structured clone; don't retain this full-DB
       // backing buffer until the worker's next garbage collection. Older
       // engines simply collect it normally. Cleanup must never fail a commit.
-      try { data.buffer.transfer?.(0); } catch (_) {}
+      releaseSnapshot(data);
     }
   })().catch(err => {
     dirty = true;
@@ -135,7 +141,13 @@ async function createDatabase() {
   idb = await openIndexedDB();
   const saved = await loadFromIndexedDB(idb);
   if (saved) {
-    db = new SQL.Database(saved);
+    try {
+      // SQL.js 1.14 copies this into its MEMFS file; it does not own the input.
+      // Release the IndexedDB readback instead of waiting for another worker GC.
+      db = new SQL.Database(saved);
+    } finally {
+      releaseSnapshot(saved);
+    }
   } else {
     db = new SQL.Database();
   }

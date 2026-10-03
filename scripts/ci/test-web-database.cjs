@@ -11,7 +11,7 @@ const indexedDB = { open() {
     const tx = { error: new Error('Injected IndexedDB commit failure') };
     tx.objectStore = () => ({ get() {
       const get = {};
-      setTimeout(() => { get.result = persisted; get.onsuccess(); }, 0);
+      setTimeout(() => { get.result = persisted && new Uint8Array(persisted); get.onsuccess(); }, 0);
       return get;
     }, put(bytes) {
       const put = {};

@@ -94,7 +94,7 @@ class SchedulesViewModel(
             )
         )
     }.flowOn(Dispatchers.Default)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SchedulesUiState())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000, replayExpirationMillis = 0), SchedulesUiState())
 
     fun setFilter(type: ScheduleType?) {
         filter.value = type
@@ -118,7 +118,7 @@ class CategoriesViewModel(categoryRepository: CategoryRepository) : ViewModel() 
             )
         )
     }.flowOn(Dispatchers.Default)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CategoriesUiState())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000, replayExpirationMillis = 0), CategoriesUiState())
 }
 
 // ─── Accounts ────────────────────────────────────────────────────────────────
@@ -144,5 +144,5 @@ class AccountsViewModel(accountRepository: AccountRepository) : ViewModel() {
             )
         )
     }.flowOn(Dispatchers.Default)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AccountsUiState())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000, replayExpirationMillis = 0), AccountsUiState())
 }

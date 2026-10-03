@@ -12,6 +12,7 @@ import finance.shilling.shared.data.usecase.ComputeWindowUseCase
 import finance.shilling.shared.db.ShillingDatabase
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.datetime.LocalDate
@@ -22,6 +23,50 @@ import kotlin.test.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PlanProjectionTest {
+    @Test
+    fun inactiveSavedScreensReleaseRowsAndReloadWithTheirSelectionsAndActions() = fixture {
+        val date = today()
+        schedules.upsert(Schedule("bill", "Bill", 10.0, ScheduleType.EXPENSE, "a",
+            startDate = date, freq = Frequency.WEEKLY))
+        postings.recordAdHoc("Lunch", 12.0, ScheduleType.EXPENSE, "a", null, date)
+        val plan = onMain { own(PlanOverviewViewModel(ComputeWindowUseCase(accounts, categories, schedules, postings),
+            OccurrenceActions(postings, schedules))).also { it.setPeriod(PlanPeriod.MONTH) } }
+        val activity = onMain { own(ActivityViewModel(postings)).also { it.setRange(3); it.setQuery("Lunch") } }
+        val list = onMain { own(SchedulesViewModel(schedules, accounts, categories)).also { it.setFilter(ScheduleType.EXPENSE) } }
+        val scope = CoroutineScope(currentCoroutineContext())
+        val collectors = listOf(plan.state, activity.state, list.state).map { state -> scope.launch { state.collect {} } }
+        val key = withTimeout(10_000) { plan.state.first { it.days.isNotEmpty() } }
+            .days.flatMap { it.rows }.first { it.title == "Bill" }.key
+        withTimeout(10_000) { activity.state.first { it.sections.isNotEmpty() } }
+        withTimeout(10_000) { list.state.first { it.groups.isNotEmpty() } }
+        collectors.forEach { it.cancelAndJoin() }
+        // Returning during the grace interval still gets the populated snapshot.
+        assertTrue(activity.state.value.sections.isNotEmpty())
+        withTimeout(10_000) {
+            while (plan.state.value.days.isNotEmpty() || activity.state.value.sections.isNotEmpty() || list.state.value.groups.isNotEmpty()) {
+                delay(50) // Reading value does not resubscribe and restart the grace interval.
+            }
+        }
+        assertTrue(plan.state.value.days.isEmpty())
+        assertTrue(activity.state.value.sections.isEmpty())
+        assertTrue(list.state.value.groups.isEmpty())
+        assertNull(onMain { plan.changeAmountPrompt(key) }, "The action index must release its domain rows too")
+
+        accounts.upsert(Account("a", "Renamed checking", 150.0))
+        postings.recordAdHoc("Lunch refund", 2.0, ScheduleType.INCOME, "a", null, date)
+        val restored = withTimeout(10_000) { activity.state.first { it.sections.sumOf { s -> s.rows.size } == 2 } }
+        assertEquals(3, restored.selectedRange.months)
+        assertEquals("Lunch", restored.query)
+        assertTrue(restored.sections.flatMap { it.rows }.all { it.supporting.contains("Renamed checking") })
+        val restoredList = withTimeout(10_000) { list.state.first { it.groups.isNotEmpty() } }
+        assertEquals(ScheduleType.EXPENSE, restoredList.filter)
+        assertTrue(restoredList.groups.single().rows.single().supporting.contains("Renamed checking"))
+        val restoredPlan = withTimeout(10_000) { plan.state.first { it.days.isNotEmpty() } }
+        assertEquals(PlanPeriod.MONTH, restoredPlan.period)
+        assertNotNull(onMain { plan.changeAmountPrompt(key) })
+        assertNotNull(onMain { plan.markPosted(key) }, "Actions must work after the screen rebuilds its index")
+    }
+
     @Test
     fun groupingExpansionAndActionsStayConsistentAcrossBackgroundSnapshots() = fixture {
         val start = LocalDate(2026, 9, 2)

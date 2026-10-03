@@ -11,6 +11,7 @@ function createIndexedDB() {
   let saved = null;
   let writes = 0;
   let writesStarted = 0;
+  const reads = [];
   const idb = {
     createObjectStore() {},
     transaction(_store, mode) {
@@ -19,7 +20,16 @@ function createIndexedDB() {
         objectStore() {
           return {
             get() {
-              const request = { result: saved };
+              // Each IndexedDB read returns its own structured clone too.
+              const data = saved && new Uint8Array(saved);
+              if (data) {
+                const mode = reads.length % 3;
+                const supported = mode === 0 && typeof data.buffer.transfer === 'function';
+                if (mode === 1) data.buffer.transfer = undefined;
+                if (mode === 2) data.buffer.transfer = () => { throw new Error('cleanup unavailable'); };
+                reads.push({ data, supported });
+              }
+              const request = { result: data };
               queueMicrotask(() => request.onsuccess());
               return request;
             },
@@ -46,6 +56,7 @@ function createIndexedDB() {
     get writes() { return writes; },
     get writesStarted() { return writesStarted; },
     get saved() { return saved; },
+    reads,
     open() {
       const request = { result: idb };
       queueMicrotask(() => {
@@ -91,11 +102,11 @@ async function main() {
     }
   };
   vm.runInNewContext(workerSource, context, { filename: 'sqldelight.worker.js' });
-  function send(action, sql) {
+  function send(action, sql, workerContext = context) {
     const id = ++nextId;
     return new Promise(resolve => {
       pending.set(id, resolve);
-      context.self.onmessage({ data: { id, action, sql } });
+      workerContext.self.onmessage({ data: { id, action, sql } });
     }).then(message => {
       if (message.error) throw message.error;
       return message.results;
@@ -146,6 +157,22 @@ async function main() {
   await send('exec', 'PRAGMA user_version = 3;');
   await sleep(150);
   assert.equal(indexedDB.writes, initialWrites + 5, 'schema version changes must persist');
+  for (let reopen = 0; reopen < 3; reopen++) {
+    const next = { ...context, self: {} };
+    vm.runInNewContext(workerSource, next, { filename: 'sqldelight.worker.js' });
+    const expected = [[1], [3], [4], [5], ...Array.from({ length: reopen }, (_, i) => [6 + i])];
+    assert.deepEqual((await send('exec', 'SELECT id FROM items ORDER BY id;', next)).values, expected,
+      'reopening must preserve data after supported, absent or throwing snapshot cleanup');
+    assert.deepEqual((await send('exec', 'PRAGMA user_version;', next)).values, [[3]]);
+    const read = indexedDB.reads[reopen];
+    assert.equal(read.data.byteLength === 0, read.supported, 'startup readback releases its owned copy');
+    await send('begin_transaction', undefined, next);
+    await send('exec', `INSERT INTO items (id) VALUES (${6 + reopen});`, next);
+    await send('end_transaction', undefined, next);
+  }
+  const afterReloads = new SQL.Database(indexedDB.saved);
+  assert.deepEqual(afterReloads.exec('SELECT id FROM items ORDER BY id;')[0].values, [[1], [3], [4], [5], [6], [7], [8]]);
+  afterReloads.close();
   if (typeof ArrayBuffer.prototype.transfer === 'function') assert.ok(exports.some(entry => entry.supported));
   assert.ok(exports.some(entry => !entry.supported));
   for (const { data, supported } of exports) {
