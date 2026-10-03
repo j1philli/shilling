@@ -36,6 +36,11 @@ SELECT * FROM postings
 WHERE date >= ? AND date < ? AND space_id = :space_id
 ORDER BY date ASC;
 
+selectImportCandidates:
+SELECT date, amount, title FROM postings
+WHERE space_id = :space_id AND account_id = :accountId
+  AND date >= :startDay AND date < :endDay;
+
 selectWithDetails:
 SELECT p.id, p.schedule_id, p.type, p.account_id, p.date, p.amount, p.pair_id, p.title, p.category_id,
        s.title AS schedule_title,

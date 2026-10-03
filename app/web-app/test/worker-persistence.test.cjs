@@ -25,9 +25,12 @@ function createIndexedDB() {
             },
             put(data) {
               assert.equal(mode, 'readwrite');
+              // IndexedDB snapshots its argument instead of retaining the caller's
+              // mutable buffer. Keep this faithful when the worker detaches it.
+              const copy = new Uint8Array(data);
               writesStarted++;
               setTimeout(() => {
-                saved = data;
+                saved = copy;
                 writes++;
                 tx.oncomplete();
               }, 25);
@@ -58,11 +61,24 @@ async function main() {
   const indexedDB = createIndexedDB();
   const pending = new Map();
   let nextId = 0;
+  const exports = [];
   const context = {
     importScripts() {},
-    initSqlJs: () => initSqlJs({
-      locateFile: file => path.join(path.dirname(require.resolve('sql.js')), file)
-    }),
+    initSqlJs: async () => {
+      const SQL = await initSqlJs({ locateFile: file => path.join(path.dirname(require.resolve('sql.js')), file) });
+      return { ...SQL, Database: class extends SQL.Database {
+        export() {
+          const data = super.export();
+          // Cover supported, older-engine and cleanup-failure behavior without globals.
+          const mode = exports.length % 3;
+          const supported = mode === 0 && typeof data.buffer.transfer === 'function';
+          if (mode === 1) data.buffer.transfer = undefined;
+          if (mode === 2) data.buffer.transfer = () => { throw new Error('cleanup unavailable'); };
+          exports.push({ data, supported });
+          return data;
+        }
+      } };
+    },
     indexedDB,
     setTimeout,
     clearTimeout,
@@ -130,6 +146,11 @@ async function main() {
   await send('exec', 'PRAGMA user_version = 3;');
   await sleep(150);
   assert.equal(indexedDB.writes, initialWrites + 5, 'schema version changes must persist');
+  if (typeof ArrayBuffer.prototype.transfer === 'function') assert.ok(exports.some(entry => entry.supported));
+  assert.ok(exports.some(entry => !entry.supported));
+  for (const { data, supported } of exports) {
+    assert.equal(data.byteLength === 0, supported, 'completed exports detach where supported; older engines still persist');
+  }
   console.log('web worker persistence checks passed');
 }
 

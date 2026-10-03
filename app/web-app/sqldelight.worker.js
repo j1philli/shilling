@@ -96,7 +96,15 @@ function persistDatabase() {
     const data = db.export();
     // sql.js export resets connection pragmas. Keep scoped constraints active.
     db.run(`PRAGMA foreign_keys = ${foreignKeys ? "ON" : "OFF"};`);
-    await saveToIndexedDB(idb, data);
+    try {
+      await saveToIndexedDB(idb, data);
+    } finally {
+      // export() owns a standalone copy, separate from SQL.js's Wasm heap.
+      // IndexedDB has consumed its structured clone; don't retain this full-DB
+      // backing buffer until the worker's next garbage collection. Older
+      // engines simply collect it normally. Cleanup must never fail a commit.
+      try { data.buffer.transfer?.(0); } catch (_) {}
+    }
   })().catch(err => {
     dirty = true;
     throw err;

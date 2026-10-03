@@ -25,7 +25,9 @@ class IncomingChangeRouter(
     private val fileRetryIntervalMs: Long = 30_000L,
     private val delayFn: suspend (Long) -> Unit = { delay(it) },
     private val deviceId: String = "",
-    private val idGenerator: IdGenerator? = null
+    private val idGenerator: IdGenerator? = null,
+    /** Actual open P2P channels, not signaling-server presence. */
+    private val hasConnectedPeers: () -> Boolean = { true }
 ) {
     private val processedIds = mutableSetOf<String>()
     private val pendingMutex = Mutex()
@@ -116,6 +118,9 @@ class IncomingChangeRouter(
     }
 
     private suspend fun scanAndRequestMissingFiles() {
+        // A peer-connected event scans immediately. While offline, per-receipt
+        // presence queries and queued FileRequests cannot make any progress.
+        if (!hasConnectedPeers()) return
         try {
             val missing = storeFacade.findReceiptsMissingFiles { receiptId ->
                 fileStore?.hasFile(receiptId) == true
@@ -131,6 +136,7 @@ class IncomingChangeRouter(
     }
 
     private suspend fun retryPendingFileRequests() {
+        if (!hasConnectedPeers()) return
         val snapshot = pendingMutex.withLock { pendingFileReceipts.toMap() }
         if (snapshot.isEmpty()) return
         val toRemove = mutableListOf<String>()

@@ -189,7 +189,8 @@ class P2pPerformanceActivity : Activity() {
                 }
                 IncomingChangeRouter(
                     SyncStoreFacade(db), notifier, timedManager, FileTransferManager(files), files,
-                    startupScanDelayMs = 0, fileRetryIntervalMs = 2_000, deviceId = "z-pixel"
+                    startupScanDelayMs = 0, fileRetryIntervalMs = 2_000, deviceId = "z-pixel",
+                    hasConnectedPeers = { status.connectedPeerIds.value.isNotEmpty() }
                 ).start(scope)
                 manager.start(scope)
                 signaling.connect(scope)

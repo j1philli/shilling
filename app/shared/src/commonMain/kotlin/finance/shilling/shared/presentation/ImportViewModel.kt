@@ -133,10 +133,10 @@ class ImportViewModel(
             if (valid.isEmpty() || target == null) return@mapLatest emptySet()
             val start = valid.minOf { it.parsedDate!! }
             val end = valid.maxOf { it.parsedDate!! }.plus(1, DateTimeUnit.DAY)
-            val existing = postingRepository.getBetween(start, end).filter { it.accountId == target }
+            val existingByDay = postingRepository.getImportCandidates(target, start, end).groupBy { it.epochDay }
             valid.filter { row ->
-                existing.any { p ->
-                    p.date == row.parsedDate && abs(p.amount - abs(row.parsedAmount!!)) < 0.005 &&
+                existingByDay[row.parsedDate!!.toEpochDays()].orEmpty().any { p ->
+                    abs(p.amount - abs(row.parsedAmount!!)) < 0.005 &&
                         p.title?.equals(row.parsedDescription, ignoreCase = true) == true
                 }
             }.map { it.rowIndex }.toSet()
@@ -161,6 +161,7 @@ class ImportViewModel(
         val invalid = rows.count { !it.isValid }
         val accountName = accounts.firstOrNull { it.id == accountId }?.name ?: "this account"
         val categoryById = categories.associateBy { it.id }
+        val referenceDate = today()
         ImportUiState(
             stage = stage,
             fileLabel = i.fileName?.let { "$it · ${rows.size} ${if (rows.size == 1) "row" else "rows"}" },
@@ -200,8 +201,8 @@ class ImportViewModel(
                             if (row.parsedAmount == null) add("amount")
                             if (row.parsedDescription == null) add("description")
                         }.joinToString(prefix = "Can't read ", separator = ", ")
-                        row.rowIndex in dupes -> "${formatDate(row.parsedDate!!)} · Already imported"
-                        else -> formatDate(row.parsedDate!!)
+                        row.rowIndex in dupes -> "${formatDate(row.parsedDate!!, referenceDate)} · Already imported"
+                        else -> formatDate(row.parsedDate!!, referenceDate)
                     },
                     valid = row.isValid,
                     included = isIncluded(row),
@@ -261,22 +262,25 @@ class ImportViewModel(
         val current = state.value
         val target = current.accountId ?: return@withContext null
         val i = input.value
-        val selected = current.rows.filter { it.included }.map { it.rowIndex }.toSet()
+        val selected = current.rows.asSequence().filter { it.included }.map { it.rowIndex }.toSet()
         val content = i.content ?: return@withContext null
-        val toImport = CsvImporter.parseAll(content, CsvColumnMapping(i.dateCol, i.descCol, i.amountCol, i.dateFormat), i.hasHeader)
+        val groups = CsvImporter.parseRows(content, CsvColumnMapping(i.dateCol, i.descCol, i.amountCol, i.dateFormat), i.hasHeader)
             .filter { it.isValid && it.rowIndex in selected }
-        if (toImport.isEmpty()) return@withContext null
-        toImport.groupBy { i.categoryFor(it.rowIndex) }.forEach { (categoryId, group) ->
+            .groupBy({ i.categoryFor(it.rowIndex) }, { Triple(it.parsedDescription!!, it.parsedAmount!!, it.parsedDate!!) })
+        if (groups.isEmpty()) return@withContext null
+        var imported = 0
+        groups.forEach { (categoryId, group) ->
             postingRepository.bulkImport(
-                items = group.map { Triple(it.parsedDescription!!, it.parsedAmount!!, it.parsedDate!!) },
+                items = group,
                 accountId = target,
                 categoryId = categoryId
             )
+            imported += group.size
         }
         val accountName = current.accounts.firstOrNull { it.id == target }?.label ?: "this account"
         input.value = Input(accountId = target)
         analytics.captureAsync(ProductEvent.CSV_IMPORT_COMPLETED)
-        "Imported ${toImport.size} transactions into $accountName"
+        "Imported $imported transactions into $accountName"
     }
 }
 

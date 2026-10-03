@@ -11,7 +11,7 @@ cp "$fixture_package/import-map-loader.js" "$fixture_dist/"
 cp node_modules/@js-joda/core/dist/js-joda.esm.js "$fixture_dist/"
 cp node_modules/sql.js/dist/sql-wasm.js node_modules/sql.js/dist/sql-wasm.wasm "$fixture_dist/"
 workload="${SHILLING_MEMORY_WORKLOAD:-all}"
-case "$workload" in all|csv) ;; *) echo 'SHILLING_MEMORY_WORKLOAD must be all or csv' >&2; exit 2;; esac
+case "$workload" in all|csv|idle) ;; *) echo 'SHILLING_MEMORY_WORKLOAD must be all, csv or idle' >&2; exit 2;; esac
 sed -e 's@./web-app.mjs@./perf-web.mjs@' \
     -e "s@</head>@<meta name=\"shilling-memory-workload\" content=\"$workload\"></head>@" \
     app/web-app/index.html > "$fixture_dist/index.html"

@@ -101,7 +101,8 @@ private object PerformancePeer {
                 }
                 IncomingChangeRouter(
                     SyncStoreFacade(db), notifier, timed, FileTransferManager(files), files,
-                    startupScanDelayMs = 0, fileRetryIntervalMs = 2_000, deviceId = "z-iphone", delayFn = iosDelay
+                    startupScanDelayMs = 0, fileRetryIntervalMs = 2_000, deviceId = "z-iphone", delayFn = iosDelay,
+                    hasConnectedPeers = { status.connectedPeerIds.value.isNotEmpty() }
                 ).start(scope)
                 manager.start(scope)
                 signal.connect(scope)

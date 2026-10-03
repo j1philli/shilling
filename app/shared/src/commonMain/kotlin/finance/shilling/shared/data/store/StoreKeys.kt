@@ -58,6 +58,9 @@ fun ScheduleExceptionKey.toBookkeepingKey(): Pair<String, String> = when (this) 
 
 // --- Posting ---
 
+data class ImportCandidateKey(val accountId: String, val start: LocalDate, val end: LocalDate)
+data class ImportCandidate(val epochDay: Long, val amount: Double, val title: String?)
+
 /** Local read-only projections; entity writes still use PostingKey. */
 sealed class PostingDetailsKey {
     data class ById(val id: String) : PostingDetailsKey()

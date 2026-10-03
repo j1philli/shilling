@@ -39,9 +39,11 @@ class ImportViewModelTest {
             val postings = PostingRepository(object : IdGenerator { override fun newId() = UUID.randomUUID().toString() },
                 changes, createPostingStore(db), accounts, categories, schedules)
             accountRepo.upsert(Account("a", "Checking", 100.0))
+            accountRepo.upsert(Account("b", "Savings", 100.0))
             categoryRepo.upsert(Category("food", "Food"))
             val day = LocalDate(2026, 9, 29)
             postings.recordAdHoc("Already here", 12.34, ScheduleType.EXPENSE, "a", null, day)
+            postings.recordAdHoc("Lunch", 9.50, ScheduleType.EXPENSE, "b", null, day)
             val model = withContext(main) {
                 ImportViewModel(accountRepo, categoryRepo, postings, analytics).also { owner.put("import", it) }
             }
@@ -49,7 +51,7 @@ class ImportViewModelTest {
                 withTimeout(10_000) { model.state.first(predicate) }
             awaitState { it.accountId == "a" }
             withContext(main) {
-                model.loadFile("synthetic.csv", "date,description,amount\n2026-09-29,Already here,-12.34\n2026-09-29,Lunch,-9.50\n2026-09-29,Refund,5.00\ninvalid,Bad row,nope".encodeToByteArray())
+                model.loadFile("synthetic.csv", "date,description,amount\n2026-09-29,ALREADY HERE,-12.344\n2026-09-29,Lunch,-9.50\n2026-09-29,Refund,5.00\ninvalid,Bad row,nope".encodeToByteArray())
             }
             val reviewed = awaitState { it.rows.size == 4 && it.reviewSummary.contains("1 already imported") }
             assertEquals(listOf(false, true, true, false), reviewed.rows.map { it.included })
@@ -59,7 +61,7 @@ class ImportViewModelTest {
             }
             awaitState { it.defaultCategoryId == "food" && !it.rows[2].included && it.rows[1].categoryId == "food" }
             assertEquals("Imported 1 transactions into Checking", withContext(main) { model.import() })
-            val saved = postings.getBetween(day, LocalDate(2026, 9, 30))
+            val saved = postings.getBetween(day, LocalDate(2026, 9, 30)).filter { it.accountId == "a" }
             assertEquals(setOf("Already here", "Lunch"), saved.map { it.title }.toSet())
             assertEquals("food", saved.single { it.title == "Lunch" }.categoryId)
             assertEquals(9.5, saved.single { it.title == "Lunch" }.amount)
