@@ -45,6 +45,10 @@ sed -e "s/<meta name=\"shilling-dev-tools\" content=\"false\">/<meta name=\"shil
 echo "Copying Wasm package artifacts to $DIST/..."
 cp "$PKG_DIR/web-app.mjs" "$DIST/"
 cp "$PKG_DIR/web-app.wasm" "$DIST/"
+if [ "$SHILLING_WASM_VARIANT" = Release ]; then
+    # Keep function names for stack traces; full debugger names remain in PKG_DIR.
+    node scripts/trim-wasm-debug-names.cjs "$DIST/web-app.wasm"
+fi
 cp "$PKG_DIR/web-app.import-object.mjs" "$DIST/"
 cp "$PKG_DIR/web-app.js-builtins.mjs" "$DIST/"
 cp "$PKG_DIR/skiko.mjs" "$DIST/"

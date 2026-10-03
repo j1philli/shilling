@@ -126,26 +126,32 @@ class ImportViewModel(
         .flowOn(Dispatchers.Default)
         .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), replay = 1)
 
-    // Rows matching an existing transaction in the target account (same date, amount, description).
-    private val duplicates = combine(rows, input.map { it.accountId }.distinctUntilChanged()) { r, a -> r to a }
+    private data class Review(val rows: List<CsvPreviewRow>, val duplicates: Set<Int>)
+
+    // Publish rows with their duplicate decisions together. Publishing parsed rows
+    // first builds the entire UI twice and briefly offers duplicates for import.
+    private val review = combine(rows, input.map { it.accountId }.distinctUntilChanged()) { r, a -> r to a }
         .mapLatest { (rows, target) ->
             val valid = rows.filter { it.isValid }
-            if (valid.isEmpty() || target == null) return@mapLatest emptySet()
+            if (valid.isEmpty() || target == null) return@mapLatest Review(rows, emptySet())
             val start = valid.minOf { it.parsedDate!! }
             val end = valid.maxOf { it.parsedDate!! }.plus(1, DateTimeUnit.DAY)
             val existingByDay = postingRepository.getImportCandidates(target, start, end).groupBy { it.epochDay }
-            valid.filter { row ->
+            val duplicates = valid.filter { row ->
                 existingByDay[row.parsedDate!!.toEpochDays()].orEmpty().any { p ->
                     abs(p.amount - abs(row.parsedAmount!!)) < 0.005 &&
                         p.title?.equals(row.parsedDescription, ignoreCase = true) == true
                 }
             }.map { it.rowIndex }.toSet()
+            Review(rows, duplicates)
         }
 
     private val accounts = accountRepository.watchAll()
     private val categories = categoryRepository.watchAll()
 
-    val state: StateFlow<ImportUiState> = combine(input, rows, duplicates, accounts, categories) { i, rows, dupes, accounts, categories ->
+    val state: StateFlow<ImportUiState> = combine(input, review, accounts, categories) { i, review, accounts, categories ->
+        val rows = review.rows
+        val dupes = review.duplicates
         val accountId = i.accountId?.takeIf { id -> accounts.any { it.id == id } } ?: accounts.firstOrNull()?.id
         // Repair the current value only if it hasn't changed since this snapshot.
         if (accountId != i.accountId) {

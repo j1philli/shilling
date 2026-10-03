@@ -6,6 +6,9 @@ fixture_dist=perf-web-dist
 fixture_package=build/tasks/_perf-web_buildWasmJsAppWasmJsRelease
 mkdir -p "$fixture_dist"
 cp "$fixture_package"/*.mjs "$fixture_package"/*.wasm "$fixture_dist/"
+if [ "${SHILLING_MEMORY_TRIM_NAMES:-true}" = true ]; then
+    node scripts/trim-wasm-debug-names.cjs "$fixture_dist/perf-web.wasm"
+fi
 cp -R "$fixture_package/composeResources" "$fixture_dist/"
 cp "$fixture_package/import-map-loader.js" "$fixture_dist/"
 cp node_modules/@js-joda/core/dist/js-joda.esm.js "$fixture_dist/"
@@ -18,6 +21,10 @@ sed -e 's@./web-app.mjs@./perf-web.mjs@' \
 if [ "${SHILLING_MEMORY_SQL_PROFILE:-false}" = true ]; then
     cp app/perf-web/sql-profile.js "$fixture_dist/"
     sed -i '' 's@</head>@<script src="./sql-profile.js"></script></head>@' "$fixture_dist/index.html"
+fi
+if [ "${SHILLING_MEMORY_RUNTIME_PROFILE:-false}" = true ]; then
+    cp app/perf-web/runtime-profile.js "$fixture_dist/"
+    sed -i '' 's@</head>@<script src="./runtime-profile.js"></script></head>@' "$fixture_dist/index.html"
 fi
 sed 's/const DB_NAME = "shilling"/const DB_NAME = "shilling-memory-fixture-v1"/' app/web-app/sqldelight.worker.js > "$fixture_dist/sqldelight.worker.js"
 if [ "${SHILLING_MEMORY_SQL_PROFILE:-false}" = true ]; then
