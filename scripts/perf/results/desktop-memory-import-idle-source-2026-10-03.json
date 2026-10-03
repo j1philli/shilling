@@ -1,0 +1,23 @@
+{
+  "baseCommit": "1a865d188b97903b30392e1e2c51b19eae48ee9f",
+  "algorithm": "sha256",
+  "files": {
+    "app/perf-android/src/P2pPerformanceActivity.kt": "8ef228dac9cca02e1c91d40a2397512d1c56165f2485ce77391118f4c82328f7",
+    "app/perf-ios/src/P2pPerformance.kt": "3ca98beff1bfbbf331861f238ef0aa95761be5c4f2371c6d784ab9048c96f0fb",
+    "app/perf-web/src/wasmJsMain/kotlin/finance/shilling/perf/Main.kt": "ccffc26f12fb56a44ef2a5e27a6409941e771f05e113fc70d9ee8dcf41646c44",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/data/CsvImporter.kt": "a41d90bf5c4a4e2049c4adb3ace594c2eeb1894b499ecf8db2bd4e37ce098e23",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/data/store/PostingRepository.kt": "cd5850cc854ebefc05351b176d276d7ad048c83750d2e42463540dce2a0aa202",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/data/store/ShillingStores.kt": "d5acc8adc3e76b3f24fe84e4566dd8fbbba45c309d9afe293b47b7b6ef51c6db",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/data/store/StoreKeys.kt": "03f7ef21d2a8323b32998143a28132f37d20fb9a251c1269d8d82948f8bc7e9c",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/data/sync/IncomingChangeRouter.kt": "63a0283a48933bf33eeddbcfe25344c5fe2b0ebee03de6bd88aa55510acbee4e",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/presentation/ImportViewModel.kt": "f16b51d7071aad25b5e7d5985a86591c99ed0d468c1c04d99047484bbb4748f4",
+    "app/shared/src/commonMain/sqldelight/finance/shilling/shared/db/Posting.sq": "36d9537b44890d03cc8d947bfe8661ee22a1a87a17f714f794da38ee52a45e1b",
+    "app/shared/src@nonJvm/finance/shilling/shared/session/AppSession.kt": "1f3bf947bacbe81d62fae1416e8294cc839daeee518e4d262c2a02653fd137e9",
+    "app/shared/test@jvm/finance/shilling/shared/data/store/FinanceSpaceIsolationTest.kt": "0aaa6e849f2626680ee65aa37574723d6dc6a4917f8b853f5cbb023796c21159",
+    "app/shared/test@jvm/finance/shilling/shared/data/sync/IncomingChangeRouterTest.kt": "fb84b49ebc0facd9cb65d9375ef53a8837ca9d1e9eba9e63d4264877c9cedfb8",
+    "app/shared/test@jvm/finance/shilling/shared/presentation/ImportViewModelTest.kt": "9c7646816ed59dba5b0b980ebfd274e37c27d958e273dfd1a79a3f9e4de6fc64",
+    "app/web-app/sqldelight.worker.js": "36a075b0ec88e6a23414225d97a8dd1b9e3762307b8e163af0fd576de8601cf0",
+    "app/web-app/test/worker-persistence.test.cjs": "cd0239408753842388d79c641af5f8f5913a8f8f2e7d5e855323c45c32f39bf5",
+    "scripts/perf/build_desktop_memory.sh": "b3126d7aad750f986cbf0e1502fa0cd7c116765b19030c433b02b46affeb0013"
+  }
+}

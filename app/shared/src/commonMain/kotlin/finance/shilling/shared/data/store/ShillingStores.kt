@@ -53,12 +53,17 @@ class ScheduleExceptionStore(delegate: MutableStore<ScheduleExceptionKey, List<S
 @OptIn(ExperimentalStoreApi::class)
 class PostingStore(
     delegate: MutableStore<PostingKey, List<Posting>>,
-    private val detailsStore: Store<PostingDetailsKey, List<PostingWithDetails>>
+    private val detailsStore: Store<PostingDetailsKey, List<PostingWithDetails>>,
+    private val importCandidates: Store<ImportCandidateKey, List<ImportCandidate>>
 ) : MutableStore<PostingKey, List<Posting>> by delegate {
     internal fun watchDetails(key: PostingDetailsKey): Flow<List<PostingWithDetails>> =
         detailsStore.stream(StoreReadRequest.localOnly(key))
             .mapNotNull { (it as? StoreReadResponse.Data)?.value }
             .distinctUntilChanged()
+
+    internal fun watchImportCandidates(key: ImportCandidateKey): Flow<List<ImportCandidate>> =
+        importCandidates.stream(StoreReadRequest.localOnly(key))
+            .mapNotNull { (it as? StoreReadResponse.Data)?.value }
 }
 
 @OptIn(ExperimentalStoreApi::class)
@@ -424,7 +429,20 @@ fun createPostingStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
             writer = { _, _ -> error("Posting projections are read-only") }
         )
     ).disableCache().build()
-    return PostingStore(store, detailsStore)
+    val importCandidates = StoreBuilder.from<ImportCandidateKey, List<ImportCandidate>, List<ImportCandidate>>(
+        fetcher = Fetcher.of { _: ImportCandidateKey -> error("Import candidates are local-only") },
+        sourceOfTruth = SourceOfTruth.of(
+            reader = { key ->
+                db.postingQueries.selectImportCandidates(
+                    space_id = spaceId, accountId = key.accountId,
+                    startDay = key.start.toEpochDays(), endDay = key.end.toEpochDays(),
+                    mapper = ::ImportCandidate
+                ).asFlow().map { it.awaitAsList() }
+            },
+            writer = { _, _ -> error("Import candidates are read-only") }
+        )
+    ).disableCache().build()
+    return PostingStore(store, detailsStore, importCandidates)
 }
 
 @OptIn(ExperimentalStoreApi::class)

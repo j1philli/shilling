@@ -57,7 +57,11 @@ class IncomingChangeRouterTest {
             }
         }
 
-        override suspend fun hasFile(receiptId: String): Boolean = receiptId in files
+        val presenceChecks = java.util.concurrent.atomic.AtomicInteger()
+        override suspend fun hasFile(receiptId: String): Boolean {
+            presenceChecks.incrementAndGet()
+            return receiptId in files
+        }
 
         override suspend fun delete(receiptId: String) {
             files.remove(receiptId)
@@ -116,6 +120,8 @@ class IncomingChangeRouterTest {
             _incomingFileMessages.emit(peerId to message)
         }
 
+        suspend fun emitConnected(peerId: String) { _peerConnected.emit(peerId) }
+
         fun fileRequestCount(receiptId: String): Int = synchronized(sentFileBroadcasts) {
             sentFileBroadcasts.count { it is FileTransferMessage.FileRequest && it.receiptId == receiptId }
         }
@@ -147,6 +153,61 @@ class IncomingChangeRouterTest {
             waitUntil { peer.directedFiles().any { it is FileTransferMessage.FileComplete } }
         } finally {
             scope.cancel()
+            driver.close()
+        }
+    }
+
+    @Test
+    fun disconnectedReceiptRetriesStayIdleAndReconnectRechecksLocalChanges() = runBlockingTest {
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        ShillingDatabase.Schema.create(driver).await()
+        val db = ShillingDatabase(driver)
+        for (id in listOf("missing", "completed")) {
+            db.receiptQueries.upsert(id, null, id, id, 1L, null, null, null, "__local__").await()
+        }
+        val files = InMemoryFileStore()
+        val peer = FakePeerSyncManager()
+        val status = PeerConnectionStatus()
+        val ticks = kotlinx.coroutines.channels.Channel<Unit>(kotlinx.coroutines.channels.Channel.UNLIMITED)
+        val waits = java.util.concurrent.atomic.AtomicInteger()
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        try {
+            IncomingChangeRouter(
+                SyncStoreFacade(db), ChangeNotifier(), peer, FileTransferManager(files), files,
+                startupScanDelayMs = 0, fileRetryIntervalMs = 100,
+                delayFn = { ms -> if (ms > 0) { waits.incrementAndGet(); ticks.receive() } },
+                hasConnectedPeers = { status.connectedPeerIds.value.isNotEmpty() }
+            ).start(scope)
+            waitUntil { waits.get() == 1 }
+            repeat(3) { index ->
+                ticks.send(Unit)
+                waitUntil { waits.get() == index + 2 }
+            }
+            assertEquals(0, files.presenceChecks.get(), "Offline startup and retry ticks must not scan files")
+            assertEquals(0, peer.fileRequestCount("missing"))
+
+            status.setConnected(setOf("peer"))
+            peer.emitConnected("peer")
+            waitUntil { peer.fileRequestCount("missing") == 1 && peer.fileRequestCount("completed") == 1 }
+            status.setConnected(emptySet())
+            val checksBefore = files.presenceChecks.get()
+            ticks.send(Unit)
+            waitUntil { waits.get() == 5 }
+            assertEquals(checksBefore, files.presenceChecks.get(), "Pending requests must also stay idle after disconnect")
+
+            // Both ways a pending request can become obsolete while disconnected.
+            db.receiptQueries.deleteById("missing", "__local__")
+            files.store("completed", "completed", byteArrayOf(1))
+            status.setConnected(setOf("peer"))
+            peer.emitConnected("peer")
+            waitUntil { files.presenceChecks.get() >= checksBefore + 3 }
+            ticks.send(Unit)
+            waitUntil { waits.get() == 6 }
+            assertEquals(1, peer.fileRequestCount("missing"))
+            assertEquals(1, peer.fileRequestCount("completed"))
+        } finally {
+            scope.cancel()
+            ticks.close()
             driver.close()
         }
     }

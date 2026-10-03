@@ -659,7 +659,8 @@ class AppSession(
             graphs.current.files,
             delayFn = webRtcPlatform.delayFn,
             deviceId = syncConfig.deviceId,
-            idGenerator = idGenerator
+            idGenerator = idGenerator,
+            hasConnectedPeers = { peerConnectionStatus.connectedPeerIds.value.isNotEmpty() }
         )
         return SyncRuntime(signalingClient, webRtcManager, incomingChangeRouter)
     }

@@ -109,6 +109,10 @@ class PostingRepository(
     suspend fun getBetween(start: LocalDate, end: LocalDate): List<Posting> =
         store.readLocalSourceOfTruth(PostingKey.Between(start, end))
 
+    /** Only the selected account's duplicate-check fields cross the Store5 boundary. */
+    suspend fun getImportCandidates(accountId: String, start: LocalDate, end: LocalDate): List<ImportCandidate> =
+        store.watchImportCandidates(ImportCandidateKey(accountId, start, end)).first()
+
     suspend fun loadRecentPostings(limit: Int = 50): List<PostingWithDetails> {
         val postings = store.readLocalSourceOfTruth(PostingKey.Recent(limit.toLong()))
         val accounts = accountStore.readLocalSourceOfTruth(AccountKey.All)

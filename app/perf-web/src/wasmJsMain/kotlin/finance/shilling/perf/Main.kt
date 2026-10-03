@@ -132,7 +132,16 @@ private fun Workloads(controller: NavHostController, koin: Koin) {
         }
         try {
             delay(20000) // allow the profiler to attach before navigation starts
-            val csvOnly = document.querySelector("meta[name=shilling-memory-workload]")?.getAttribute("content") == "csv"
+            val workload = document.querySelector("meta[name=shilling-memory-workload]")?.getAttribute("content")
+            if (workload == "idle") {
+                screen("home_cold", "/home")
+                delay(60000)
+                mark("READY final_idle")
+                delay(10000)
+                mark("COMPLETE")
+                return@LaunchedEffect
+            }
+            val csvOnly = workload == "csv"
             if (csvOnly) screen("home_before_csv", "/home")
             repeat(if (csvOnly) 0 else 2) { pass ->
                 screen("home_$pass", "/home")

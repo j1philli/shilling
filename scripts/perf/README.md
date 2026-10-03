@@ -590,6 +590,11 @@ byte totals are cumulative copying work, not resident memory. Omit both variable
 for the full screen benchmark. Run only one instance of the benchmark bundle;
 multiple instances share its database and phase log and invalidate a comparison.
 
+`SHILLING_MEMORY_WORKLOAD=idle` opens Home and waits without navigating or
+importing. Restore a completed import fixture before using it to compare cold
+idle against memory retained after the import. See the
+[import/idle follow-up](../../docs/desktop-import-idle-memory-2026-10-03.md).
+
 `bash scripts/perf/build_desktop_memory.sh` builds the separate **Shilling Memory
 Perf** bundle (`finance.shilling.perf.memory`) and the `perf-web` entry point.
 Start the loopback `desktop_control_fixture.cjs`, then launch that bundle. Its
