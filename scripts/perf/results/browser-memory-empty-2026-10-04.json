@@ -1,0 +1,215 @@
+{
+  "label": "chrome-empty-r1",
+  "browserVersion": "154.0.8037.95",
+  "mode": "empty",
+  "metric": "macOS proc_pid_rusage physical footprint MiB (validated against vmmap); process snapshots sequential",
+  "notes": "Whole-browser headline excludes the separate CDP tracing service. It includes browser UI, spare renderer and shared browser services, so it is not incremental per-tab memory. No forced garbage collection.",
+  "configuration": {
+    "viewport": {
+      "width": 1200,
+      "height": 900
+    },
+    "deviceScaleFactor": 1,
+    "headless": false,
+    "page": {
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "dpr": 1,
+      "width": 1200,
+      "height": 900,
+      "tauri": "undefined",
+      "crossOriginIsolated": true,
+      "visibility": "visible",
+      "canvas": null
+    }
+  },
+  "phases": [
+    {
+      "name": "blank_browser_15s",
+      "snapshotStartedMs": 15003,
+      "partial": false,
+      "elapsedMs": 15053,
+      "processes": [
+        {
+          "pid": 69861,
+          "type": "browser",
+          "footprintMiB": 65.51725006103516,
+          "lifetimePeakFootprintMiB": 68.53287506103516
+        },
+        {
+          "pid": 69871,
+          "type": "renderer",
+          "footprintMiB": 24.92315673828125,
+          "lifetimePeakFootprintMiB": 25.50128173828125
+        },
+        {
+          "pid": 69872,
+          "type": "renderer",
+          "footprintMiB": 27.81385040283203,
+          "lifetimePeakFootprintMiB": 27.93885040283203
+        },
+        {
+          "pid": 69869,
+          "type": "renderer",
+          "footprintMiB": 61.173362731933594,
+          "lifetimePeakFootprintMiB": 61.251487731933594
+        },
+        {
+          "pid": 69865,
+          "type": "GPU",
+          "footprintMiB": 74.84498596191406,
+          "lifetimePeakFootprintMiB": 287.50123596191406
+        },
+        {
+          "pid": 69866,
+          "type": "network.mojom.NetworkService",
+          "footprintMiB": 21.75102996826172,
+          "lifetimePeakFootprintMiB": 24.01665496826172
+        },
+        {
+          "pid": 69867,
+          "type": "storage.mojom.StorageService",
+          "footprintMiB": 19.079132080078125,
+          "lifetimePeakFootprintMiB": 19.110382080078125
+        }
+      ],
+      "totalFootprintMiB": 295.10276794433594,
+      "browserFootprintExcludingProfilerMiB": 295.10276794433594,
+      "rendererFootprintMiB": 113.91036987304688,
+      "mainJsHeapBytes": 617956
+    },
+    {
+      "name": "READY production_home",
+      "snapshotStartedMs": 45706,
+      "partial": false,
+      "appRendererFootprintMiB": 175.95504760742188,
+      "elapsedMs": 45772,
+      "processes": [
+        {
+          "pid": 69861,
+          "type": "browser",
+          "footprintMiB": 68.79850006103516,
+          "lifetimePeakFootprintMiB": 70.28287506103516
+        },
+        {
+          "pid": 69871,
+          "type": "renderer",
+          "footprintMiB": 175.95504760742188,
+          "lifetimePeakFootprintMiB": 217.86129760742188
+        },
+        {
+          "pid": 69897,
+          "type": "renderer",
+          "footprintMiB": 25.016929626464844,
+          "lifetimePeakFootprintMiB": 25.563804626464844
+        },
+        {
+          "pid": 69869,
+          "type": "renderer",
+          "footprintMiB": 52.079612731933594,
+          "lifetimePeakFootprintMiB": 61.829612731933594
+        },
+        {
+          "pid": 69865,
+          "type": "GPU",
+          "footprintMiB": 106.54811096191406,
+          "lifetimePeakFootprintMiB": 287.50123596191406
+        },
+        {
+          "pid": 69866,
+          "type": "network.mojom.NetworkService",
+          "footprintMiB": 23.54790496826172,
+          "lifetimePeakFootprintMiB": 27.07915496826172
+        },
+        {
+          "pid": 69867,
+          "type": "storage.mojom.StorageService",
+          "footprintMiB": 19.251007080078125,
+          "lifetimePeakFootprintMiB": 19.251007080078125
+        },
+        {
+          "pid": 69898,
+          "type": "tracing.mojom.TracingService",
+          "footprintMiB": 31.501075744628906,
+          "lifetimePeakFootprintMiB": 35.2510986328125
+        }
+      ],
+      "totalFootprintMiB": 502.6981887817383,
+      "browserFootprintExcludingProfilerMiB": 471.1971130371094,
+      "rendererFootprintMiB": 253.0515899658203,
+      "mainJsHeapBytes": 14721072
+    },
+    {
+      "name": "READY production_idle",
+      "snapshotStartedMs": 105774,
+      "partial": false,
+      "appRendererFootprintMiB": 175.65819549560547,
+      "elapsedMs": 105847,
+      "processes": [
+        {
+          "pid": 69861,
+          "type": "browser",
+          "footprintMiB": 65.53287506103516,
+          "lifetimePeakFootprintMiB": 70.28287506103516
+        },
+        {
+          "pid": 69871,
+          "type": "renderer",
+          "footprintMiB": 175.65819549560547,
+          "lifetimePeakFootprintMiB": 217.86129760742188
+        },
+        {
+          "pid": 69897,
+          "type": "renderer",
+          "footprintMiB": 25.016929626464844,
+          "lifetimePeakFootprintMiB": 25.563804626464844
+        },
+        {
+          "pid": 69869,
+          "type": "renderer",
+          "footprintMiB": 51.001487731933594,
+          "lifetimePeakFootprintMiB": 61.829612731933594
+        },
+        {
+          "pid": 69865,
+          "type": "GPU",
+          "footprintMiB": 104.70436096191406,
+          "lifetimePeakFootprintMiB": 287.50123596191406
+        },
+        {
+          "pid": 69866,
+          "type": "network.mojom.NetworkService",
+          "footprintMiB": 23.01665496826172,
+          "lifetimePeakFootprintMiB": 27.07915496826172
+        },
+        {
+          "pid": 69867,
+          "type": "storage.mojom.StorageService",
+          "footprintMiB": 19.126007080078125,
+          "lifetimePeakFootprintMiB": 19.251007080078125
+        },
+        {
+          "pid": 69898,
+          "type": "tracing.mojom.TracingService",
+          "footprintMiB": 30.782325744628906,
+          "lifetimePeakFootprintMiB": 35.2510986328125
+        }
+      ],
+      "totalFootprintMiB": 494.8388366699219,
+      "browserFootprintExcludingProfilerMiB": 464.05651092529297,
+      "rendererFootprintMiB": 251.6766128540039,
+      "mainJsHeapBytes": 14704856
+    }
+  ],
+  "complete": true,
+  "errors": [],
+  "appRendererPid": 69871,
+  "workerUrls": [
+    "http://127.0.0.1:18193/production/sqldelight.worker.js"
+  ],
+  "integrity": {
+    "integrity": "ok",
+    "postings": 0,
+    "imported": 0,
+    "versions": 0
+  }
+}
