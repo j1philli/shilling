@@ -6,7 +6,9 @@ fixture_dist=perf-web-dist
 fixture_package=build/tasks/_perf-web_buildWasmJsAppWasmJsRelease
 mkdir -p "$fixture_dist"
 cp "$fixture_package"/*.mjs "$fixture_package"/*.wasm "$fixture_dist/"
-if [ "${SHILLING_MEMORY_TRIM_NAMES:-true}" = true ]; then
+if [ "${SHILLING_MEMORY_OPTIMIZE_WASM:-true}" = true ]; then
+    node scripts/optimize-wasm.cjs "$fixture_dist/perf-web.wasm"
+elif [ "${SHILLING_MEMORY_TRIM_NAMES:-true}" = true ]; then
     node scripts/trim-wasm-debug-names.cjs "$fixture_dist/perf-web.wasm"
 fi
 cp -R "$fixture_package/composeResources" "$fixture_dist/"
@@ -40,6 +42,22 @@ p.write_text(s.replace(marker, marker + '''
     self.shillingPersistenceProfile.count++;
     self.shillingPersistenceProfile.bytes += data.byteLength;
     postMessage({shillingPersistenceProfile: self.shillingPersistenceProfile});'''))
+PY
+fi
+if [ "${SHILLING_MEMORY_ALLOCATION_PROFILE:-false}" = true ]; then
+    cp app/perf-web/allocation-profile.js app/perf-web/allocation-worker-profile.js "$fixture_dist/"
+    sed -i '' 's@</head>@<script src="./allocation-profile.js"></script></head>@' "$fixture_dist/index.html"
+    python3 - "$fixture_dist/sqldelight.worker.js" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1])
+p.write_text('importScripts("allocation-worker-profile.js");\n' + p.read_text() + '''
+self.installShillingAllocationProfile(read => {
+    requests = requests.then(() => sqlModuleReady).then(() => read(db)).catch(error => {
+        postMessage({shillingAllocationProfile: {error: String(error)}});
+    });
+});
+''')
 PY
 fi
 cargo tauri build --bundles app --config '{"productName":"Shilling Memory Perf","identifier":"finance.shilling.perf.memory","build":{"beforeBuildCommand":"","frontendDist":"../perf-web-dist"}}'

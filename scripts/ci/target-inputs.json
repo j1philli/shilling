@@ -14,7 +14,7 @@
     {"paths": ["app/shared/src@android/*", "app/shared/src/androidMain/*", "app/shared-ui/src@android/*", "app/shared-ui/src/androidMain/*", "app/shared-ui/src@nativeBilling/*"], "targets": ["android"]},
     {"paths": ["app/shared/src@iosSimulatorArm64/*", "app/shared-ui/src@ios*/*"], "targets": []},
     {"paths": ["app/shared/src@ios*/*", "app/shared/src/iosMain/*", "app/shared/src@apple/*", "app/shared/src@native/*"], "targets": ["ios"]},
-    {"paths": ["app/shared/src@wasmJs/*", "app/shared/src/wasmJsMain/*", "app/shared-ui/src@wasmJs/*", "app/web-app/*", "build-web.sh", "package.json", "package-lock.json"], "targets": ["webBundle"]},
+    {"paths": ["app/shared/src@wasmJs/*", "app/shared/src/wasmJsMain/*", "app/shared-ui/src@wasmJs/*", "app/web-app/*", "build-web.sh", "scripts/optimize-wasm.cjs", "scripts/trim-wasm-debug-names.cjs", "package.json", "package-lock.json"], "targets": ["webBundle"]},
     {"paths": ["app/shared-ui/*"], "targets": ["compose"]},
     {"paths": ["app/shared/src@jvm/*", "app/shared/src/jvmMain/*"], "targets": []},
     {"paths": ["app/shared/*"], "targets": ["clients"]},

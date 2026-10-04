@@ -46,8 +46,9 @@ echo "Copying Wasm package artifacts to $DIST/..."
 cp "$PKG_DIR/web-app.mjs" "$DIST/"
 cp "$PKG_DIR/web-app.wasm" "$DIST/"
 if [ "$SHILLING_WASM_VARIANT" = Release ]; then
-    # Keep function names for stack traces; full debugger names remain in PKG_DIR.
-    node scripts/trim-wasm-debug-names.cjs "$DIST/web-app.wasm"
+    # Optimize the Kotlin app's code/GC types and retain stack-trace names.
+    # The unmodified compiler package remains in PKG_DIR for debugging.
+    node scripts/optimize-wasm.cjs "$DIST/web-app.wasm"
 fi
 cp "$PKG_DIR/web-app.import-object.mjs" "$DIST/"
 cp "$PKG_DIR/web-app.js-builtins.mjs" "$DIST/"

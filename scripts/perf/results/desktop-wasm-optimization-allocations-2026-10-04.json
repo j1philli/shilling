@@ -1,0 +1,947 @@
+{
+  "control-1": [
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY home_before_csv",
+      "skia": {
+        "GetFontCacheUsed": "52207",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "38"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY home_before_csv",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY home_before_csv",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 2289,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN csv_load_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY csv_review_10000",
+      "skia": {
+        "GetFontCacheUsed": "53567",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "39"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY csv_review_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY csv_review_10000",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 2289,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN csv_import_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY csv_imported_10000",
+      "skia": {
+        "GetFontCacheUsed": "68387",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "39"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY csv_imported_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY csv_imported_10000",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4217,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN home_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY home_after_import",
+      "skia": {
+        "GetFontCacheUsed": "72371",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "39"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY home_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY home_after_import",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4217,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN activity_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY activity_after_import",
+      "skia": {
+        "GetFontCacheUsed": "82791",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "42"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY activity_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY activity_after_import",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4217,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN home_settle",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY home_settle",
+      "skia": {
+        "GetFontCacheUsed": "82791",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "42"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY home_settle",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY home_settle",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4217,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY final_idle",
+      "skia": {
+        "GetFontCacheUsed": "82791",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "42"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY final_idle",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY final_idle",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4217,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "COMPLETE",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    }
+  ],
+  "control-2": [
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY home_before_csv",
+      "skia": {
+        "GetFontCacheUsed": "52207",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "38"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY home_before_csv",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY home_before_csv",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 2289,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN csv_load_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY csv_review_10000",
+      "skia": {
+        "GetFontCacheUsed": "53567",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "39"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY csv_review_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY csv_review_10000",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 2289,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN csv_import_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY csv_imported_10000",
+      "skia": {
+        "GetFontCacheUsed": "68387",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "39"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY csv_imported_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY csv_imported_10000",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4216,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN home_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY home_after_import",
+      "skia": {
+        "GetFontCacheUsed": "72371",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "39"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY home_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY home_after_import",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4216,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN activity_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY activity_after_import",
+      "skia": {
+        "GetFontCacheUsed": "82791",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "42"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY activity_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY activity_after_import",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4216,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN home_settle",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY home_settle",
+      "skia": {
+        "GetFontCacheUsed": "82791",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "42"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY home_settle",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY home_settle",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4216,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY final_idle",
+      "skia": {
+        "GetFontCacheUsed": "82791",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "42"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY final_idle",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY final_idle",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4216,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "COMPLETE",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    }
+  ],
+  "optimized-2": [
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY home_before_csv",
+      "skia": {
+        "GetFontCacheUsed": "52207",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "38"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY home_before_csv",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY home_before_csv",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 2300,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN csv_load_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY csv_review_10000",
+      "skia": {
+        "GetFontCacheUsed": "53567",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "39"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY csv_review_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY csv_review_10000",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 2300,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN csv_import_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY csv_imported_10000",
+      "skia": {
+        "GetFontCacheUsed": "68387",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "39"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY csv_imported_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY csv_imported_10000",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4230,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN home_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY home_after_import",
+      "skia": {
+        "GetFontCacheUsed": "72371",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "39"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY home_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY home_after_import",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4230,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN activity_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY activity_after_import",
+      "skia": {
+        "GetFontCacheUsed": "82791",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "42"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY activity_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY activity_after_import",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4230,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "BEGIN home_settle",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY home_settle",
+      "skia": {
+        "GetFontCacheUsed": "82791",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "42"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY home_settle",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY home_settle",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4230,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "ALLOCATION_MAIN",
+      "phase": "READY final_idle",
+      "skia": {
+        "GetFontCacheUsed": "82791",
+        "GetFontCacheLimit": "2097152",
+        "GetResourceCacheTotalBytesUsed": "0",
+        "GetResourceCacheTotalByteLimit": "33554432",
+        "GetFontCacheCountUsed": "42"
+      },
+      "dpr": 1,
+      "viewport": [
+        1200,
+        900
+      ],
+      "canvas": [],
+      "visibility": "visible"
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "READY final_idle",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "probe": "ALLOCATION_SQL",
+      "phase": "READY final_idle",
+      "linearBytes": [
+        22151168
+      ],
+      "pageCount": 4230,
+      "pageSize": 4096,
+      "cacheSize": -2000
+    },
+    {
+      "probe": "RUNTIME_PROFILE",
+      "phase": "COMPLETE",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    }
+  ]
+}

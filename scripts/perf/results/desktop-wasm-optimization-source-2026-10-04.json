@@ -1,0 +1,72 @@
+{
+  "sourceCommit": "5c56a5010f536a4b51fa9ac2ef609a61ead5bc6f",
+  "optimizer": {
+    "package": "binaryen",
+    "version": "132.0.0",
+    "args": [
+      "--enable-gc",
+      "--enable-reference-types",
+      "--enable-exception-handling",
+      "--enable-bulk-memory",
+      "--enable-sign-ext",
+      "--enable-nontrapping-float-to-int",
+      "--enable-multivalue",
+      "--closed-world",
+      "-Oz",
+      "--gufa",
+      "-Oz",
+      "-g"
+    ]
+  },
+  "files": {
+    "diagnostic-dist/perf-web.wasm": {
+      "bytes": 15625004,
+      "sha256": "b565663b242c8b9c6de4dc22a078f0d90f2dc7118cae52524615d0a8a19ca770"
+    },
+    "candidate-dist/perf-web.wasm": {
+      "bytes": 9390251,
+      "sha256": "57243ceca2b128fe5efe430515b24acd3f232a050aee8ef42bc00e53babddfc2"
+    },
+    "diagnostic-dist/skiko.wasm": {
+      "bytes": 8640316,
+      "sha256": "089052ba37e2a6e8345117bf6fe0f5730cfc8de1eb4c2bbc8921cf8e457ae3cb"
+    },
+    "diagnostic-dist/sql-wasm.wasm": {
+      "bytes": 658410,
+      "sha256": "38c14f6e379210bc942bdc4ebca44e7bfdb4318ecc1c72ca666a28fdce96670a"
+    },
+    "diagnostic-dist/allocation-profile.js": {
+      "bytes": 1247,
+      "sha256": "7858a1ff8922e4e54dff6f9e5797854a7e117440bd8ee1b98f6f3cebc46bd2ef"
+    },
+    "diagnostic-dist/sqldelight.worker.js": {
+      "bytes": 7746,
+      "sha256": "ba336982878217c105f85e11de8a851f04c19e5ca5774233c3c6c78ef833d61c"
+    }
+  },
+  "measurement": {
+    "host": "Mac15,6",
+    "memoryGiB": 36,
+    "macOS": "27.0 (26A428)",
+    "viewport": [
+      1200,
+      900
+    ],
+    "devicePixelRatio": 1,
+    "syntheticStartingPostings": 10000,
+    "importedPostings": 10000,
+    "metric": "vmmap physical footprint MiB; sequential host/WebContent/GPU/network snapshots",
+    "forcedGC": false
+  },
+  "fixtureCompilerInputVerified": true,
+  "coldStartingSnapshot": "PR46 retained-completed-webkit, same 20,000-posting snapshot in both cold runs",
+  "productionArtifact": {
+    "bytes": 9386289,
+    "sha256": "79a215e287a2274b2ea51e7df6753e2a6fbea05ac4e9a4bce3380442ea2701e9",
+    "previousTrimmedBytes": 15622459
+  },
+  "fullFixtureProbes": {
+    "allocation-profile.js": "24bc50c62d25dbd11c9a37b2be3878f515d51464e7cc0a9582da51949f8bd71a",
+    "allocation-worker-profile.js": "17ac9d3878353f61c66a8d737dba926be0850a5123d442399f9157a17f0854c0"
+  }
+}
