@@ -1,0 +1,201 @@
+{
+  "browserVersion": "154.0.8037.95",
+  "url": "https://demo.actualbudget.org",
+  "viewport": {
+    "width": 1200,
+    "height": 900
+  },
+  "deviceScaleFactor": 1,
+  "metric": "macOS proc_pid_rusage physical footprint MiB; tracing service excluded from headline totals",
+  "phases": [
+    {
+      "name": "blank_browser_15s",
+      "elapsedMs": 15084,
+      "totalFootprintMiB": 298.64996337890625,
+      "browserFootprintExcludingProfilerMiB": 298.64996337890625,
+      "processes": [
+        {
+          "pid": 88607,
+          "type": "browser",
+          "footprintMiB": 68.1737060546875,
+          "lifetimePeakFootprintMiB": 68.8768081665039
+        },
+        {
+          "pid": 88619,
+          "type": "renderer",
+          "footprintMiB": 24.907485961914062,
+          "lifetimePeakFootprintMiB": 25.485610961914062
+        },
+        {
+          "pid": 88620,
+          "type": "renderer",
+          "footprintMiB": 27.845054626464844,
+          "lifetimePeakFootprintMiB": 27.907554626464844
+        },
+        {
+          "pid": 88617,
+          "type": "renderer",
+          "footprintMiB": 61.048431396484375,
+          "lifetimePeakFootprintMiB": 61.126556396484375
+        },
+        {
+          "pid": 88613,
+          "type": "GPU",
+          "footprintMiB": 75.87628173828125,
+          "lifetimePeakFootprintMiB": 287.01690673828125
+        },
+        {
+          "pid": 88614,
+          "type": "network.mojom.NetworkService",
+          "footprintMiB": 21.5948486328125,
+          "lifetimePeakFootprintMiB": 23.891746520996094
+        },
+        {
+          "pid": 88615,
+          "type": "storage.mojom.StorageService",
+          "footprintMiB": 19.20415496826172,
+          "lifetimePeakFootprintMiB": 19.23540496826172
+        }
+      ]
+    },
+    {
+      "name": "cold_budget_ready_plus30",
+      "elapsedMs": 121374,
+      "totalFootprintMiB": 518.5118103027344,
+      "browserFootprintExcludingProfilerMiB": 518.5118103027344,
+      "processes": [
+        {
+          "pid": 88607,
+          "type": "browser",
+          "footprintMiB": 80.5643539428711,
+          "lifetimePeakFootprintMiB": 86.1737289428711
+        },
+        {
+          "pid": 90280,
+          "type": "renderer",
+          "footprintMiB": 24.954383850097656,
+          "lifetimePeakFootprintMiB": 25.532508850097656
+        },
+        {
+          "pid": 90279,
+          "type": "renderer",
+          "footprintMiB": 29.532691955566406,
+          "lifetimePeakFootprintMiB": 30.110816955566406
+        },
+        {
+          "pid": 88619,
+          "type": "renderer",
+          "footprintMiB": 203.3147430419922,
+          "lifetimePeakFootprintMiB": 244.127197265625
+        },
+        {
+          "pid": 88617,
+          "type": "renderer",
+          "footprintMiB": 51.814056396484375,
+          "lifetimePeakFootprintMiB": 61.610931396484375
+        },
+        {
+          "pid": 88613,
+          "type": "GPU",
+          "footprintMiB": 86.01692962646484,
+          "lifetimePeakFootprintMiB": 288.68880462646484
+        },
+        {
+          "pid": 88614,
+          "type": "network.mojom.NetworkService",
+          "footprintMiB": 23.141746520996094,
+          "lifetimePeakFootprintMiB": 23.891746520996094
+        },
+        {
+          "pid": 88615,
+          "type": "storage.mojom.StorageService",
+          "footprintMiB": 19.17290496826172,
+          "lifetimePeakFootprintMiB": 19.26665496826172
+        }
+      ]
+    },
+    {
+      "name": "cold_budget_ready_plus90",
+      "elapsedMs": 181490,
+      "totalFootprintMiB": 518.4961853027344,
+      "browserFootprintExcludingProfilerMiB": 518.4961853027344,
+      "processes": [
+        {
+          "pid": 88607,
+          "type": "browser",
+          "footprintMiB": 80.5018539428711,
+          "lifetimePeakFootprintMiB": 86.1737289428711
+        },
+        {
+          "pid": 90280,
+          "type": "renderer",
+          "footprintMiB": 24.954383850097656,
+          "lifetimePeakFootprintMiB": 25.532508850097656
+        },
+        {
+          "pid": 90279,
+          "type": "renderer",
+          "footprintMiB": 29.548316955566406,
+          "lifetimePeakFootprintMiB": 30.110816955566406
+        },
+        {
+          "pid": 88619,
+          "type": "renderer",
+          "footprintMiB": 203.3147430419922,
+          "lifetimePeakFootprintMiB": 244.127197265625
+        },
+        {
+          "pid": 88617,
+          "type": "renderer",
+          "footprintMiB": 51.829681396484375,
+          "lifetimePeakFootprintMiB": 61.610931396484375
+        },
+        {
+          "pid": 88613,
+          "type": "GPU",
+          "footprintMiB": 86.03255462646484,
+          "lifetimePeakFootprintMiB": 288.68880462646484
+        },
+        {
+          "pid": 88614,
+          "type": "network.mojom.NetworkService",
+          "footprintMiB": 23.141746520996094,
+          "lifetimePeakFootprintMiB": 23.891746520996094
+        },
+        {
+          "pid": 88615,
+          "type": "storage.mojom.StorageService",
+          "footprintMiB": 19.17290496826172,
+          "lifetimePeakFootprintMiB": 19.26665496826172
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "version": "26.10.0",
+  "complete": true,
+  "integrity": {
+    "integrity": "ok",
+    "databaseBytes": 9912320,
+    "databaseSha256": "b9521576126d80a651a77fa325cd75fad900874427e296c6af0612b8837bb144",
+    "counts": {
+      "transactions": 20464,
+      "accounts": 8,
+      "categories": 16,
+      "schedules": 4
+    },
+    "imported": 20000
+  },
+  "configuration": {
+    "viewport": {
+      "width": 1200,
+      "height": 900
+    },
+    "deviceScaleFactor": 1,
+    "headless": false,
+    "chromiumSandbox": true,
+    "server": "none",
+    "freshProcessAfterImport": true
+  },
+  "notes": "Cold reopen of local demo plus 20,000 synthetic imported records. Full Budget grid and 20000 uncategorized badge verified. Samples taken 30 and 90 seconds after confirmed Budget readiness; final approximately 181 seconds after process measurement started. Whole-browser footprint includes all owned renderer/worker/browser processes. App renderer not individually attributed. No tracing service, forced GC, or remote sync server. One observation, different workload/schema from Shilling."
+}

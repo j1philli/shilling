@@ -1,0 +1,16 @@
+{
+  "pid": 2219,
+  "kernelBefore": {
+    "footprintMiB": 226.59583282470703,
+    "lifetimePeakFootprintMiB": 253.48645782470703
+  },
+  "vmmapFootprintLines": [
+    "Physical footprint:         226.6M",
+    "Physical footprint (peak):  253.5M"
+  ],
+  "kernelAfter": {
+    "footprintMiB": 226.59583282470703,
+    "lifetimePeakFootprintMiB": 253.48645782470703
+  },
+  "vmmapMallocWarning": "Can't examine target process's malloc zone PartitionAlloc_0x11384d4a8, so memory analysis will be incomplete or incorrect.\nReason: failed to resolve canonical path for /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/154.0.8037.95/Google Chrome Framework in dyld shared cache."
+}

@@ -1,0 +1,87 @@
+{
+  "sourceCommit": "dedeb1936fc6c534caed274711784a66392c9c55",
+  "sourceStatus": "clean at measurement start; application unchanged throughout research",
+  "machine": {
+    "model": "Mac15,6",
+    "memoryBytes": 38654705664,
+    "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0\nBuildVersion:\t\t26A428"
+  },
+  "files": {
+    "fixture/perf-web.wasm": {
+      "bytes": 15625004,
+      "sha256": "b565663b242c8b9c6de4dc22a078f0d90f2dc7118cae52524615d0a8a19ca770"
+    },
+    "fixture/perf-web.mjs": {
+      "bytes": 3165,
+      "sha256": "54ba5234ba5da29a6243f6242cc9f51791e966edbc68551e30038980c6e2362f"
+    },
+    "fixture/sqldelight.worker.js": {
+      "bytes": 6965,
+      "sha256": "6e34ab93219b3cef4d26dd02dd5d53ea4ebb6f55885eaafde9407b90a9533950"
+    },
+    "fixture/index.html": {
+      "bytes": 4720,
+      "sha256": "8c6130569af9977a27285cacd51ad53068c854533843ce717a6ab7dfc6cf0e4a"
+    },
+    "production/web-app.wasm": {
+      "bytes": 15622459,
+      "sha256": "0ffe5ae6bdefe54249f3a580239df0c6238ee76129e29b1e0a83d3cef7513e0e"
+    },
+    "production/web-app.mjs": {
+      "bytes": 3161,
+      "sha256": "e7486530b5325b50751034802048f1af7e75b095b65d2b45bfc12e8adabfbfe1"
+    },
+    "production/sqldelight.worker.js": {
+      "bytes": 6947,
+      "sha256": "be6691806991a74a498662ea3f8ea1f3765a2147298493c157db7bf4054b831f"
+    },
+    "production/index.html": {
+      "bytes": 4623,
+      "sha256": "6fad0ade9ffc318f5fd84c1efaf915182497acc5c3f1f97264a7ef352a666d92"
+    },
+    "seed.sqlite": {
+      "bytes": 6328320,
+      "sha256": "60c73ee8c86a62f0a234c7d7448b09d973cd31768b9d8eb15936336d190f4bec"
+    },
+    "completed.sqlite": {
+      "bytes": 17272832,
+      "sha256": "12aa5a66b95469c589ce5dc8bc5ebfcfe9e6d9932796df00f235deac216bad77"
+    }
+  },
+  "safariControl": {
+    "status": "not measured",
+    "reason": "Safari WebDriver requires Allow Remote Automation, disabled on this machine. Bare WKWebView stayed hidden and never rendered the Compose workload; attempts excluded."
+  },
+  "measurementErrorsExcluded": [
+    "Asset-server setup 404",
+    "Bare WKWebView unrendered attempts",
+    "Initial DPR 1 vmmap run aborted before useful workload samples"
+  ],
+  "actualBudget": {
+    "version": "26.10.0",
+    "url": "https://demo.actualbudget.org/",
+    "setup": "Try the demo in fresh local Chrome profile; no server/account",
+    "import": "20,000 synthetic CSV rows into demo Bank of America account; merge with existing transactions disabled",
+    "uiVerification": "20000 uncategorized transactions; account balance fell by 315000.00 (20000 \u00d7 15.75)",
+    "rendererAttribution": "Not assigned: this app uses multiple renderer processes. Report complete isolated-browser footprint.",
+    "warmStressCaveat": "The Budget pane stayed blank after import in the warm process. That 45-second snapshot is excluded from settled-idle comparisons; the cold restart rendered the full Budget pane and preserved the 20,000 uncategorized badge.",
+    "integrity": {
+      "integrity": "ok",
+      "databaseBytes": 9912320,
+      "databaseSha256": "b9521576126d80a651a77fa325cd75fad900874427e296c6af0612b8837bb144",
+      "counts": {
+        "transactions": 20464,
+        "accounts": 8,
+        "categories": 16,
+        "schedules": 4
+      },
+      "imported": 20000
+    },
+    "syntheticCsvSha256": "6579fc7fa92ba4b319131d712675c94cd3712a844bdf87f38501a441653791b7",
+    "coldTotalFootprintMiB": 518.4961853027344
+  },
+  "probeSources": {
+    "scripts/perf/process_footprint.py": "f67dc81d6b7c246b6d37e0aa319087c0e34b3d8cf1009997ad6aee375838fb7b",
+    "scripts/perf/profile_web_memory.cjs": "27877b2242626612c9e72b365af206e9a6c3cffe1b97fedd5c3168de0a64e440"
+  }
+}
