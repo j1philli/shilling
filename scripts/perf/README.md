@@ -602,11 +602,20 @@ Kotlin Wasm GC objects, SQL worker memory and rendering allocations, so it is
 not a substitute for native physical-footprint measurements. Leave the probe
 disabled for normal builds; compare runs with the same probe setting.
 
-Release web/desktop packages trim local/type/global/field debug names from the
-Kotlin Wasm artifact, retaining module/function names for stack traces. Full
-debugger names remain in the unmodified compiler package under `build/tasks`;
-Debug builds are unchanged. The memory fixture applies the same trimming by
-default. Use `SHILLING_MEMORY_TRIM_NAMES=false` only for a diagnostic control.
+`SHILLING_MEMORY_ALLOCATION_PROFILE=true` adds SQLite-worker linear capacity,
+database page count/size and page-cache configuration, plus Skia CPU font and
+resource-cache counters. GPU allocations and Kotlin Wasm GC objects are outside
+these counters. The optional worker probe queues its read-only diagnostics with
+the normal worker requests; it never exports or retains a database snapshot.
+
+Release web/desktop packages optimize the Kotlin Wasm application with the
+lockfile-pinned Binaryen build dependency (`npm ci`). The size-focused pass keeps
+floating-point and trap semantics and retains function names for stack traces.
+It then trims local/type/global/field debug names. The unmodified compiler
+package remains under `build/tasks`; Debug builds are unchanged. This adds an
+optimization step to release build time. The memory fixture uses the same path.
+Set `SHILLING_MEMORY_OPTIMIZE_WASM=false` for the previous trimmed control; also
+set `SHILLING_MEMORY_TRIM_NAMES=false` for the original untrimmed diagnostic.
 The [retained-state follow-up](../../docs/desktop-retained-state-memory-2026-10-03.md)
 records the fresh control, rejected experiments, final full run and cold-idle checks.
 

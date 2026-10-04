@@ -1,0 +1,95 @@
+{
+  "control-1": {
+    "integrity": "ok",
+    "postings": 20000,
+    "importedRows": 10000,
+    "importedUniqueIds": 10000,
+    "importedVersionRecords": 10000,
+    "snapshotBytes": 17272832
+  },
+  "optimized-1": {
+    "integrity": "ok",
+    "postings": 20000,
+    "importedRows": 10000,
+    "importedUniqueIds": 10000,
+    "importedVersionRecords": 10000,
+    "snapshotBytes": 17408000
+  },
+  "control-2": {
+    "integrity": "ok",
+    "postings": 20000,
+    "importedRows": 10000,
+    "importedUniqueIds": 10000,
+    "importedVersionRecords": 10000,
+    "snapshotBytes": 17268736
+  },
+  "optimized-2": {
+    "integrity": "ok",
+    "postings": 20000,
+    "importedRows": 10000,
+    "importedUniqueIds": 10000,
+    "importedVersionRecords": 10000,
+    "snapshotBytes": 17326080
+  },
+  "cold-control": {
+    "integrity": "ok",
+    "postings": 20000,
+    "importedRows": 10000,
+    "importedUniqueIds": 10000,
+    "importedVersionRecords": 10000,
+    "snapshotBytes": 17272832
+  },
+  "financialEquivalence1": {
+    "equalColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "equalRows": 20000,
+    "financialValuesSha256": "5b7643c878c3fd312d8f6d66fce1b68fb04c0e8895aa54a262bec2c85737778f",
+    "importedRowsWithExpectedAmount": 10000
+  },
+  "financialEquivalence2": {
+    "equalColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "equalRows": 20000,
+    "financialValuesSha256": "5b7643c878c3fd312d8f6d66fce1b68fb04c0e8895aa54a262bec2c85737778f",
+    "importedRowsWithExpectedAmount": 10000
+  },
+  "cold-optimized": {
+    "integrity": "ok",
+    "postings": 20000,
+    "importedRows": 10000,
+    "importedUniqueIds": 10000,
+    "importedVersionRecords": 10000,
+    "snapshotBytes": 17272832
+  },
+  "financialEquivalenceCold": {
+    "equalColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "equalRows": 20000,
+    "financialValuesSha256": "0518286b70da3c361e78dc73d4665649dab9bbca58c1692f5f3e87f64882b966",
+    "importedRowsWithExpectedAmount": 10000
+  }
+}

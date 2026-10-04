@@ -56,7 +56,7 @@ def main():
         processes["gpu"] = args.gpu_pid
     if args.network_pid:
         processes["network"] = args.network_pid
-    result = {"processIds": processes, "rssSamples": [], "phases": [], "complete": False}
+    result = {"processIds": processes, "rssSamples": [], "phases": [], "diagnostics": [], "complete": False}
     stop = threading.Event()
 
     def sample():
@@ -92,6 +92,15 @@ def main():
                         log.seek(0)
                         continue
                     time.sleep(0.2)
+                    continue
+                diagnostic = re.search(r"(?:^|\] )SHILLING_(RUNTIME_PROFILE|ALLOCATION_MAIN|ALLOCATION_SQL) (\{.*\})$", line)
+                if diagnostic:
+                    try:
+                        result["diagnostics"].append({"probe": diagnostic.group(1),
+                            "seconds": round(time.monotonic() - started, 3),
+                            "values": json.loads(diagnostic.group(2))})
+                    except json.JSONDecodeError:
+                        result["diagnostics"].append({"probe": diagnostic.group(1), "error": "Malformed diagnostic JSON"})
                     continue
                 marker = re.search(r"(?:^|\] )SHILLING_MEMORY (.+)$", line)
                 if not marker:
