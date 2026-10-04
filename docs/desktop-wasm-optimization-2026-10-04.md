@@ -141,13 +141,54 @@ JSON output so Tauri log rotation cannot erase earlier phase counters.
 - Architecture guard, JavaScript/shell syntax, Python compilation and diff checks
   pass. No production Shilling database was used or modified.
 
-The broader two-pass navigation/editor stress run could not complete: the Mac
-screen locked before its first rendered checkpoint. That attempt is excluded
-from the memory results. The completed optimized workloads cover Home, CSV
-review/import, Activity, idle and reopening; they do not substitute for that
-broader navigation check. There is also no new standalone-browser RAM
-measurement in this pass, although the production web build uses the same
-optimization pipeline.
+There is no new standalone-browser RAM measurement in this pass, although the
+production web build uses the same optimization pipeline.
+
+## Full navigation verification after unlocking
+
+The unlocked retry completed **all 28 expected checkpoints**: two passes through
+Home, weekly/monthly Plan, Schedules, Categories, Accounts, Activity, Receipts
+and Settings; transaction, schedule, category and account editors; CSV review
+and import of 10,000 rows; Home/Activity/Home; and the final 45-second idle wait.
+Editors were opened without saving changes. The initial attempt blocked by the
+locked screen remains excluded.
+
+This run used the same optimized Kotlin Wasm artifact and restored 10,000-posting
+seed, with the committed allocation probes. All 28 READY checkpoints recorded
+main-thread, worker and runtime diagnostics without errors; all reported a
+visible 1200 × 900 viewport at DPR 1. Native visual inspection verified Home,
+Receipts, Plan Categories, the schedule editor, CSV review, and Home after
+completion. The final Home screen displayed the newly imported transactions.
+
+| Full-workload checkpoint | Total physical footprint (MiB) |
+| --- | ---: |
+| Initial Home | 367.3 |
+| Account editor, after both navigation passes | 400.6 |
+| CSV review | 581.4 |
+| Import complete | 626.9 |
+| Final idle | 564.0 |
+
+At final idle, the total comprised host **31.1**, WebContent **503.3**, GPU
+**20.9**, and Networking **8.7 MiB**. WebContent's process-lifetime peak was
+**749.1 MiB**; that is not the whole application's simultaneous peak. This is
+one optimized-only coverage run, with no matched full-workload control. Its
+broader navigation history is different from the CSV-only comparisons above,
+so it does not supply another percentage reduction. It also shows that the
+earlier 415–528 MiB observations are not a ceiling for a longer session.
+
+Main/worker linear capacities remained unchanged at 17.94/21.13 MiB. The Skia
+CPU font cache peaked at 140,430 bytes (0.134 MiB), with the CPU resource cache
+still reporting zero. No forced collection, release build, or optimizer pass
+ran during the measurement.
+
+The saved database passed integrity checking and retained **20,000 postings**,
+including **10,000 unique imported IDs and matching change-log records**.
+All financial columns matched the earlier CSV control across all 20,000 rows,
+excluding generated record/space IDs; all imported rows had the expected
+expense amount of 15.75. The isolated sandbox was restored afterward.
+
+Evidence: [full navigation profile](../scripts/perf/results/desktop-wasm-optimization-full-navigation-2026-10-04.json)
+and [checkpoint, probe, and database verification](../scripts/perf/results/desktop-wasm-optimization-full-verification-2026-10-04.json).
 
 Supporting artifacts:
 [allocation counters](../scripts/perf/results/desktop-wasm-optimization-allocations-2026-10-04.json),
