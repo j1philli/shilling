@@ -93,7 +93,7 @@ def main():
                         continue
                     time.sleep(0.2)
                     continue
-                diagnostic = re.search(r"(?:^|\] )SHILLING_(RUNTIME_PROFILE|ALLOCATION_MAIN|ALLOCATION_SQL) (\{.*\})$", line)
+                diagnostic = re.search(r"(?:^|\] )SHILLING_(RUNTIME_PROFILE|ALLOCATION_MAIN|ALLOCATION_SQL|IMPORT_REVIEW) (\{.*\})$", line)
                 if diagnostic:
                     try:
                         result["diagnostics"].append({"probe": diagnostic.group(1),

@@ -1,0 +1,246 @@
+{
+  "control-1": {
+    "complete": true,
+    "allReadyDiagnosticsRecorded": true,
+    "allReadyCheckpointsVisible": true,
+    "loadMs": 135.0,
+    "checkbox": {
+      "count": 30,
+      "medianMs": 25.5,
+      "p95Ms": 33.0,
+      "maxMs": 44.0
+    },
+    "category": {
+      "count": 30,
+      "medianMs": 29.0,
+      "p95Ms": 39.0,
+      "maxMs": 40.0
+    },
+    "phases": [
+      {
+        "name": "home_before_csv",
+        "totalFootprintMiB": 415.357,
+        "webContentFootprintMiB": 336.7
+      },
+      {
+        "name": "csv_review_10000",
+        "totalFootprintMiB": 525.357,
+        "webContentFootprintMiB": 455.8
+      },
+      {
+        "name": "csv_row_edits_60",
+        "totalFootprintMiB": 565.257,
+        "webContentFootprintMiB": 498.6
+      },
+      {
+        "name": "csv_imported_10000",
+        "totalFootprintMiB": 628.626,
+        "webContentFootprintMiB": 559.6
+      },
+      {
+        "name": "home_after_import",
+        "totalFootprintMiB": 575.848,
+        "webContentFootprintMiB": 520.6
+      },
+      {
+        "name": "activity_after_import",
+        "totalFootprintMiB": 587.963,
+        "webContentFootprintMiB": 530.8
+      },
+      {
+        "name": "home_settle",
+        "totalFootprintMiB": 590.117,
+        "webContentFootprintMiB": 533.1
+      },
+      {
+        "name": "final_idle",
+        "totalFootprintMiB": 589.532,
+        "webContentFootprintMiB": 532.5
+      }
+    ],
+    "webContentLifetimePeakFootprintMiB": 658.8
+  },
+  "candidate-1": {
+    "complete": true,
+    "allReadyDiagnosticsRecorded": true,
+    "allReadyCheckpointsVisible": true,
+    "loadMs": 110.0,
+    "checkbox": {
+      "count": 30,
+      "medianMs": 5.5,
+      "p95Ms": 8.0,
+      "maxMs": 11.0
+    },
+    "category": {
+      "count": 30,
+      "medianMs": 5.0,
+      "p95Ms": 8.0,
+      "maxMs": 9.0
+    },
+    "phases": [
+      {
+        "name": "home_before_csv",
+        "totalFootprintMiB": 357.348,
+        "webContentFootprintMiB": 271.9
+      },
+      {
+        "name": "csv_review_10000",
+        "totalFootprintMiB": 449.648,
+        "webContentFootprintMiB": 360.7
+      },
+      {
+        "name": "csv_row_edits_60",
+        "totalFootprintMiB": 546.179,
+        "webContentFootprintMiB": 367.3
+      },
+      {
+        "name": "csv_imported_10000",
+        "totalFootprintMiB": 589.548,
+        "webContentFootprintMiB": 448.6
+      },
+      {
+        "name": "home_after_import",
+        "totalFootprintMiB": 512.938,
+        "webContentFootprintMiB": 426.8
+      },
+      {
+        "name": "activity_after_import",
+        "totalFootprintMiB": 520.97,
+        "webContentFootprintMiB": 432.8
+      },
+      {
+        "name": "home_settle",
+        "totalFootprintMiB": 523.738,
+        "webContentFootprintMiB": 435.8
+      },
+      {
+        "name": "final_idle",
+        "totalFootprintMiB": 522.87,
+        "webContentFootprintMiB": 434.9
+      }
+    ],
+    "webContentLifetimePeakFootprintMiB": 528.2
+  },
+  "control-2": {
+    "complete": true,
+    "allReadyDiagnosticsRecorded": true,
+    "allReadyCheckpointsVisible": true,
+    "loadMs": 118.0,
+    "checkbox": {
+      "count": 30,
+      "medianMs": 23.0,
+      "p95Ms": 29.0,
+      "maxMs": 40.0
+    },
+    "category": {
+      "count": 30,
+      "medianMs": 24.0,
+      "p95Ms": 31.0,
+      "maxMs": 34.0
+    },
+    "phases": [
+      {
+        "name": "home_before_csv",
+        "totalFootprintMiB": 358.497,
+        "webContentFootprintMiB": 273.0
+      },
+      {
+        "name": "csv_review_10000",
+        "totalFootprintMiB": 488.666,
+        "webContentFootprintMiB": 400.0
+      },
+      {
+        "name": "csv_row_edits_60",
+        "totalFootprintMiB": 637.55,
+        "webContentFootprintMiB": 551.6
+      },
+      {
+        "name": "csv_imported_10000",
+        "totalFootprintMiB": 600.713,
+        "webContentFootprintMiB": 444.0
+      },
+      {
+        "name": "home_after_import",
+        "totalFootprintMiB": 504.635,
+        "webContentFootprintMiB": 418.7
+      },
+      {
+        "name": "activity_after_import",
+        "totalFootprintMiB": 502.651,
+        "webContentFootprintMiB": 429.2
+      },
+      {
+        "name": "home_settle",
+        "totalFootprintMiB": 505.367,
+        "webContentFootprintMiB": 432.0
+      },
+      {
+        "name": "final_idle",
+        "totalFootprintMiB": 504.651,
+        "webContentFootprintMiB": 431.3
+      }
+    ],
+    "webContentLifetimePeakFootprintMiB": 679.5
+  },
+  "candidate-2": {
+    "complete": true,
+    "allReadyDiagnosticsRecorded": true,
+    "allReadyCheckpointsVisible": true,
+    "loadMs": 112.0,
+    "checkbox": {
+      "count": 30,
+      "medianMs": 5.0,
+      "p95Ms": 9.0,
+      "maxMs": 11.0
+    },
+    "category": {
+      "count": 30,
+      "medianMs": 6.0,
+      "p95Ms": 10.0,
+      "maxMs": 10.0
+    },
+    "phases": [
+      {
+        "name": "home_before_csv",
+        "totalFootprintMiB": 376.556,
+        "webContentFootprintMiB": 290.0
+      },
+      {
+        "name": "csv_review_10000",
+        "totalFootprintMiB": 540.425,
+        "webContentFootprintMiB": 356.7
+      },
+      {
+        "name": "csv_row_edits_60",
+        "totalFootprintMiB": 470.541,
+        "webContentFootprintMiB": 383.1
+      },
+      {
+        "name": "csv_imported_10000",
+        "totalFootprintMiB": 540.895,
+        "webContentFootprintMiB": 452.5
+      },
+      {
+        "name": "home_after_import",
+        "totalFootprintMiB": 513.317,
+        "webContentFootprintMiB": 435.5
+      },
+      {
+        "name": "activity_after_import",
+        "totalFootprintMiB": 524.532,
+        "webContentFootprintMiB": 444.9
+      },
+      {
+        "name": "home_settle",
+        "totalFootprintMiB": 527.085,
+        "webContentFootprintMiB": 447.4
+      },
+      {
+        "name": "final_idle",
+        "totalFootprintMiB": 525.401,
+        "webContentFootprintMiB": 445.9
+      }
+    ],
+    "webContentLifetimePeakFootprintMiB": 553.5
+  }
+}
