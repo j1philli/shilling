@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import finance.shilling.shared.data.CsvColumnMapping
 import finance.shilling.shared.data.CsvImporter
-import finance.shilling.shared.data.CsvPreviewRow
 import finance.shilling.shared.data.DateFormat
 import finance.shilling.shared.data.ScheduleType
 import finance.shilling.shared.data.store.AccountRepository
@@ -122,11 +121,13 @@ class ImportViewModel(
     private val rows = input
         .map { i -> Triple(i.content, CsvColumnMapping(i.dateCol, i.descCol, i.amountCol, i.dateFormat), i.hasHeader) }
         .distinctUntilChanged()
-        .map { (content, mapping, hasHeader) -> content?.let { CsvImporter.parseAll(it, mapping, hasHeader) }.orEmpty() }
+        .map { (content, mapping, hasHeader) ->
+            content?.let { CsvImporter.parseRows(it, mapping, hasHeader).map(ImportReviewRow::from).toList() }.orEmpty()
+        }
         .flowOn(Dispatchers.Default)
         .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), replay = 1)
 
-    private data class Review(val rows: List<CsvPreviewRow>, val duplicates: Set<Int>)
+    private data class Review(val rows: List<ImportReviewRow>, val duplicates: Set<Int>)
 
     // Publish rows with their duplicate decisions together. Publishing parsed rows
     // first builds the entire UI twice and briefly offers duplicates for import.
@@ -148,6 +149,7 @@ class ImportViewModel(
 
     private val accounts = accountRepository.watchAll()
     private val categories = categoryRepository.watchAll()
+    private val reviewRows = ImportReviewRows()
 
     val state: StateFlow<ImportUiState> = combine(input, review, accounts, categories) { i, review, accounts, categories ->
         val rows = review.rows
@@ -162,7 +164,7 @@ class ImportViewModel(
             i.headers.isEmpty() -> ImportStage.UNREADABLE
             else -> ImportStage.READY
         }
-        fun isIncluded(row: CsvPreviewRow) = row.isValid && (i.included[row.rowIndex] ?: (row.rowIndex !in dupes))
+        fun isIncluded(row: ImportReviewRow) = row.isValid && (i.included[row.rowIndex] ?: (row.rowIndex !in dupes))
         val included = rows.count(::isIncluded)
         val invalid = rows.count { !it.isValid }
         val accountName = accounts.firstOrNull { it.id == accountId }?.name ?: "this account"
@@ -193,32 +195,7 @@ class ImportViewModel(
                 if (dupes.isNotEmpty()) add("${dupes.size} already imported")
                 if (invalid > 0) add("$invalid unreadable")
             }.joinToString(" · "),
-            rows = rows.map { row ->
-                val categoryId = i.categoryFor(row.rowIndex)
-                val category = categoryId?.let(categoryById::get)
-                val amount = row.parsedAmount
-                val type = if (amount != null && amount > 0) ScheduleType.INCOME else ScheduleType.EXPENSE
-                ImportRowUi(
-                    rowIndex = row.rowIndex,
-                    title = row.parsedDescription?.ifBlank { null } ?: row.raw.joinToString(", "),
-                    supporting = when {
-                        !row.isValid -> buildList {
-                            if (row.parsedDate == null) add("date")
-                            if (row.parsedAmount == null) add("amount")
-                            if (row.parsedDescription == null) add("description")
-                        }.joinToString(prefix = "Can't read ", separator = ", ")
-                        row.rowIndex in dupes -> "${formatDate(row.parsedDate!!, referenceDate)} · Already imported"
-                        else -> formatDate(row.parsedDate!!, referenceDate)
-                    },
-                    valid = row.isValid,
-                    included = isIncluded(row),
-                    categoryId = category?.id,
-                    categoryLabel = category?.name ?: "Uncategorized",
-                    categoryColor = category?.color,
-                    amount = amount?.let { formatSigned(type, abs(it)) },
-                    type = type
-                )
-            },
+            rows = reviewRows.project(rows, dupes, categoryById, i::categoryFor, ::isIncluded, referenceDate),
             importLabel = "Import $included ${if (included == 1) "transaction" else "transactions"}",
             importEnabled = included > 0 && accountId != null,
             confirm = ConfirmCopy(

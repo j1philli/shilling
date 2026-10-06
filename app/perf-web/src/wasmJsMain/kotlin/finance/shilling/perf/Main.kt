@@ -29,6 +29,7 @@ import org.koin.core.Koin
 import org.koin.dsl.module
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Clock
+import kotlin.time.TimeSource
 import kotlin.uuid.Uuid
 
 private const val SERVER = "http://127.0.0.1:18091"
@@ -141,7 +142,7 @@ private fun Workloads(controller: NavHostController, koin: Koin) {
                 mark("COMPLETE")
                 return@LaunchedEffect
             }
-            val csvOnly = workload == "csv"
+            val csvOnly = workload == "csv" || workload == "csv-review"
             if (csvOnly) screen("home_before_csv", "/home")
             repeat(if (csvOnly) 0 else 2) { pass ->
                 screen("home_$pass", "/home")
@@ -161,10 +162,35 @@ private fun Workloads(controller: NavHostController, koin: Koin) {
             mark("BEGIN csv_load_10000")
             AppPaths.navigate(controller, "/import")
             val model = withTimeout(10000) { snapshotFlow { importModel }.first { it != null }!! }
+            val loadStarted = TimeSource.Monotonic.markNow()
             model.loadFile("synthetic-memory-10000.csv", csvBytes())
             withTimeout(60000) { model.state.first { it.rows.size == 10000 && it.importEnabled } }
+            val loadMs = loadStarted.elapsedNow().inWholeMicroseconds / 1000.0
             mark("READY csv_review_10000")
             delay(15000)
+            if (workload == "csv-review") {
+                mark("BEGIN csv_row_edits_60")
+                val toggleMs = mutableListOf<Double>()
+                val categoryMs = mutableListOf<Double>()
+                suspend fun edit(times: MutableList<Double>, action: () -> Unit, ready: (ImportUiState) -> Boolean) {
+                    val started = TimeSource.Monotonic.markNow()
+                    action()
+                    withTimeout(10000) { model.state.first(ready) }
+                    times += started.elapsedNow().inWholeMicroseconds / 1000.0
+                    delay(50)
+                }
+                repeat(5) {
+                    for (index in listOf(0, 5000, 9999)) {
+                        edit(toggleMs, { model.setIncluded(index, false) }) { !it.rows[index].included }
+                        edit(toggleMs, { model.setIncluded(index, true) }) { it.rows[index].included }
+                        edit(categoryMs, { model.setRowCategory(index, "mem-category-1") }) { it.rows[index].categoryId == "mem-category-1" }
+                        edit(categoryMs, { model.setRowCategory(index, null) }) { it.rows[index].categoryId == null }
+                    }
+                }
+                println("SHILLING_IMPORT_REVIEW {\"loadMs\":$loadMs,\"toggleMs\":[${toggleMs.joinToString()}],\"categoryMs\":[${categoryMs.joinToString()}]}")
+                mark("READY csv_row_edits_60")
+                delay(15000)
+            }
             mark("BEGIN csv_import_10000")
             check(model.import() != null)
             mark("READY csv_imported_10000")

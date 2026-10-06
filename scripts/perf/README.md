@@ -590,6 +590,19 @@ byte totals are cumulative copying work, not resident memory. Omit both variable
 for the full screen benchmark. Run only one instance of the benchmark bundle;
 multiple instances share its database and phase log and invalidate a comparison.
 
+`SHILLING_MEMORY_WORKLOAD=csv-review` adds 60 single-row edits before the import:
+five rounds of checkbox off/on and category assign/clear at rows 0, 5,000 and
+9,999. It records `SHILLING_IMPORT_REVIEW` diagnostics for initial review loading
+(including synthetic CSV byte generation) and each edit, plus a footprint
+checkpoint after the edits. Timings end when the
+expected ViewModel state is published; they do not measure native input or frame
+presentation latency. The 50 ms pacing between edits is excluded from timings.
+All selections/categories are restored before importing, so saved financial
+values can be compared with an ordinary CSV run. The desktop profiler retains
+these timings in its `diagnostics` array.
+See the [October 6 comparison](../../docs/desktop-csv-review-memory-2026-10-06.md)
+for matched control/candidate runs and their limitations.
+
 `SHILLING_MEMORY_WORKLOAD=idle` opens Home and waits without navigating or
 importing. Restore a completed import fixture before using it to compare cold
 idle against memory retained after the import. See the
