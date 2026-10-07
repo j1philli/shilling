@@ -1,0 +1,202 @@
+{
+  "baseCommit": "c17f732969d3e3d8e0646a5dd63a8573fd930acc",
+  "candidateProductionSourceSha256": {
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/presentation/ImportViewModel.kt": "3fb0bb09492fbfae8df26ef9dc5db487d808e50e72f3979bfa1b2f8fdf0911cd",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/presentation/ImportReviewRows.kt": "e7527c81e0dbcf41d74904072b2eedf69a21b3d9f43a945d797fbfdb4d27a305"
+  },
+  "controlProductionSourceSha256": {
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/presentation/ImportViewModel.kt": "9e6e4e1142f791f1670fcee3ecb64985854ef1e457e781661452d80f9f9492e8",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/presentation/ImportReviewRows.kt": "aa82e83aca222a4df7012b0351cb4930d63da208f5b3dc41d475013dc1be0b1d"
+  },
+  "fixtureSourceSha256": "83fb0927e101c0b7352c60d274b904c1e586469f3229d9ced376f90cda202b56",
+  "hardware": {
+    "model": "Mac15,6",
+    "ramGiB": 36,
+    "macOS": "27.0.1",
+    "build": "26A434"
+  },
+  "workload": "csv-session",
+  "forcedGc": false,
+  "nativeMeasurements": "complete: four runs, 20 READY checkpoints each, all visible and all screen-lock samples unlocked",
+  "controlArtifacts": {
+    "perf-web.import-object.mjs": {
+      "bytes": 76184,
+      "sha256": "7b84a5b41b40d623d1b067e2b3fcf16092abe5f2a31fd4820bbe0a49f3df4106"
+    },
+    "index.html": {
+      "bytes": 4815,
+      "sha256": "db5621dae93a7e89edcc2cc0bc44952826a026d0615dde42a6f8daf3d3529131"
+    },
+    "allocation-profile.js": {
+      "bytes": 1769,
+      "sha256": "24bc50c62d25dbd11c9a37b2be3878f515d51464e7cc0a9582da51949f8bd71a"
+    },
+    "import-map-loader.js": {
+      "bytes": 288,
+      "sha256": "a66d5d181914ed2118a3704d176857005c086521102b39d4fef499e48b4707eb"
+    },
+    "perf-web.mjs": {
+      "bytes": 3165,
+      "sha256": "54ba5234ba5da29a6243f6242cc9f51791e966edbc68551e30038980c6e2362f"
+    },
+    "js-joda.esm.js": {
+      "bytes": 396916,
+      "sha256": "da8bc3071911f307525044765bf36ef53d1e77d1b241125cfb434127eb8dfd6d"
+    },
+    "perf-web.js-builtins.mjs": {
+      "bytes": 2095,
+      "sha256": "a370c66f8031ae3a8d5718123a7fb1aeed4f43caca681181ef69b512321d5b94"
+    },
+    "skiko.mjs": {
+      "bytes": 503913,
+      "sha256": "93d422c209952d9134432c426ce002555aff94ba5a812cee5984c782833108d9"
+    },
+    "sql-wasm.js": {
+      "bytes": 46535,
+      "sha256": "f1c84000dbc856c9d87f4f3aabc4d3654bd436165db4be3da13751db3a9c20d7"
+    },
+    "skiko.wasm": {
+      "bytes": 8640316,
+      "sha256": "089052ba37e2a6e8345117bf6fe0f5730cfc8de1eb4c2bbc8921cf8e457ae3cb"
+    },
+    "runtime-profile.js": {
+      "bytes": 2087,
+      "sha256": "6a262897410b357da0bd168533a2df0ecc00261b223ca0359b03e7f2129c163e"
+    },
+    "sqldelight.worker.js": {
+      "bytes": 7485,
+      "sha256": "8fab2ce8da66ec09c2caed300516580a298eeebfa5afa9f5ad30f3179aa32b1f"
+    },
+    "perf-web.wasm": {
+      "bytes": 9405103,
+      "sha256": "b1cb78d0dcb0ff1ad6f9d992a33e14db2d160ebddcb356b7aa4914152f6a3687"
+    },
+    "sql-profile.js": {
+      "bytes": 2284,
+      "sha256": "84f8a5f393ab6007eb3ea9315ed12bf18345122eaccef478030729b1ad62c171"
+    },
+    "allocation-worker-profile.js": {
+      "bytes": 1522,
+      "sha256": "17ac9d3878353f61c66a8d737dba926be0850a5123d442399f9157a17f0854c0"
+    },
+    "sql-wasm.wasm": {
+      "bytes": 658410,
+      "sha256": "38c14f6e379210bc942bdc4ebca44e7bfdb4318ecc1c72ca666a28fdce96670a"
+    },
+    "composeResources/shared_ui.generated.resources/drawable/app_logo.png": {
+      "bytes": 124014,
+      "sha256": "986ec5463e24fdc84bf6d2e75d076b8dac4635de3ba24527fdd15a0d69b42e87"
+    }
+  },
+  "candidateArtifacts": {
+    "perf-web.import-object.mjs": {
+      "bytes": 76184,
+      "sha256": "7b84a5b41b40d623d1b067e2b3fcf16092abe5f2a31fd4820bbe0a49f3df4106"
+    },
+    "index.html": {
+      "bytes": 4815,
+      "sha256": "db5621dae93a7e89edcc2cc0bc44952826a026d0615dde42a6f8daf3d3529131"
+    },
+    "allocation-profile.js": {
+      "bytes": 1769,
+      "sha256": "24bc50c62d25dbd11c9a37b2be3878f515d51464e7cc0a9582da51949f8bd71a"
+    },
+    "import-map-loader.js": {
+      "bytes": 288,
+      "sha256": "a66d5d181914ed2118a3704d176857005c086521102b39d4fef499e48b4707eb"
+    },
+    "perf-web.mjs": {
+      "bytes": 3165,
+      "sha256": "54ba5234ba5da29a6243f6242cc9f51791e966edbc68551e30038980c6e2362f"
+    },
+    "js-joda.esm.js": {
+      "bytes": 396916,
+      "sha256": "da8bc3071911f307525044765bf36ef53d1e77d1b241125cfb434127eb8dfd6d"
+    },
+    "perf-web.js-builtins.mjs": {
+      "bytes": 2095,
+      "sha256": "a370c66f8031ae3a8d5718123a7fb1aeed4f43caca681181ef69b512321d5b94"
+    },
+    "skiko.mjs": {
+      "bytes": 503913,
+      "sha256": "93d422c209952d9134432c426ce002555aff94ba5a812cee5984c782833108d9"
+    },
+    "sql-wasm.js": {
+      "bytes": 46535,
+      "sha256": "f1c84000dbc856c9d87f4f3aabc4d3654bd436165db4be3da13751db3a9c20d7"
+    },
+    "skiko.wasm": {
+      "bytes": 8640316,
+      "sha256": "089052ba37e2a6e8345117bf6fe0f5730cfc8de1eb4c2bbc8921cf8e457ae3cb"
+    },
+    "runtime-profile.js": {
+      "bytes": 2087,
+      "sha256": "6a262897410b357da0bd168533a2df0ecc00261b223ca0359b03e7f2129c163e"
+    },
+    "sqldelight.worker.js": {
+      "bytes": 7485,
+      "sha256": "8fab2ce8da66ec09c2caed300516580a298eeebfa5afa9f5ad30f3179aa32b1f"
+    },
+    "perf-web.wasm": {
+      "bytes": 9405360,
+      "sha256": "6b3f50a9b763205315168097bb39ffaff6f5e61055b6773f499777925d6c8fcc"
+    },
+    "sql-profile.js": {
+      "bytes": 2284,
+      "sha256": "84f8a5f393ab6007eb3ea9315ed12bf18345122eaccef478030729b1ad62c171"
+    },
+    "allocation-worker-profile.js": {
+      "bytes": 1522,
+      "sha256": "17ac9d3878353f61c66a8d737dba926be0850a5123d442399f9157a17f0854c0"
+    },
+    "sql-wasm.wasm": {
+      "bytes": 658410,
+      "sha256": "38c14f6e379210bc942bdc4ebca44e7bfdb4318ecc1c72ca666a28fdce96670a"
+    },
+    "composeResources/shared_ui.generated.resources/drawable/app_logo.png": {
+      "bytes": 124014,
+      "sha256": "986ec5463e24fdc84bf6d2e75d076b8dac4635de3ba24527fdd15a0d69b42e87"
+    }
+  },
+  "appearance": "system dark during the evening runs",
+  "viewport": [
+    1200,
+    900
+  ],
+  "dpr": 1,
+  "manualInspection": "Read-only native Home accessibility/screenshot inspection in the first control and candidate runs; no manual workload edits.",
+  "measurementDateLocal": "2026-10-06",
+  "timezone": "America/Edmonton",
+  "runOrder": [
+    "control-1",
+    "candidate-1",
+    "control-2",
+    "candidate-2"
+  ],
+  "seed": {
+    "postings": 10000,
+    "schedules": 1000,
+    "accounts": 20,
+    "categories": 40,
+    "receiptMetadata": 250
+  },
+  "cyclesPerRun": 4,
+  "cancelledReviewsPerRun": 3,
+  "importedRowsPerRun": 10000,
+  "idleCheckpointMinutes": [
+    1,
+    2,
+    3
+  ],
+  "memorySemantics": "vmmap physical footprint MiB. Phase totals sum sequential snapshots of the host, WebContent, GPU and Networking processes. Renderer peak is WebContent-only lifetime physical footprint, never a sum of process peaks.",
+  "lifetimeSemantics": "Hidden row count reads state.value without a subscription. Scope cancellation is counted without retaining models and does not prove garbage collection. The per-cycle helper returns before closed/idle checkpoints.",
+  "screenLockCheckIntervalSeconds": 5,
+  "compilationDuringRuns": false,
+  "screenLockSamples": 325,
+  "candidateAdditionalSourceSha256": {
+    "scripts/perf/build_desktop_memory.sh": "b55d890dfb8508a8e38532a0205fe823119c9092dccaefc368b30297d7e10c57",
+    "scripts/perf/profile_desktop_memory.py": "9963cb5f3706ac60ef65641f27e69e2414aafa71b542162bf07b434af9e6b7e7",
+    "app/shared/test@jvm/finance/shilling/shared/presentation/ImportViewModelTest.kt": "5d4c8d0b80f9336b2a96f3d7b5dad7bd5dd0c9a7d5c5f74bf7c3a4b1aa286cee"
+  },
+  "cleanup": "Original benchmark WebKit sandbox restored and its 18 files verified; owned app processes, loopback server and display-idle assertions stopped."
+}

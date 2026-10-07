@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ComposeViewport
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.lifecycle.viewModelScope
 import app.cash.sqldelight.driver.worker.WebWorkerDriver
 import com.russhwolf.settings.Settings
 import co.touchlab.kermit.Logger
@@ -134,6 +135,28 @@ private fun Workloads(controller: NavHostController, koin: Koin) {
         try {
             delay(20000) // allow the profiler to attach before navigation starts
             val workload = document.querySelector("meta[name=shilling-memory-workload]")?.getAttribute("content")
+            if (workload == "csv-session") {
+                screen("session_home", "/home")
+                val lifetime = ReviewLifetime()
+                repeat(4) { index ->
+                    // A separate suspend frame drops this cycle's strong model reference
+                    // before the next cycle and the final idle measurements.
+                    reviewSessionCycle(controller, { importModel }, lifetime, index + 1, import = index == 3)
+                    delay(6000)
+                    lifetime.report("settled_${index + 1}")
+                    mark("READY session_closed_${index + 1}")
+                    delay(6000)
+                }
+                repeat(3) { minute ->
+                    delay(60000)
+                    lifetime.report("idle_${minute + 1}")
+                    mark("READY session_idle_${minute + 1}")
+                }
+                check(lifetime.opened == 4 && lifetime.closed == 4)
+                delay(10000)
+                mark("COMPLETE")
+                return@LaunchedEffect
+            }
             if (workload == "idle") {
                 screen("home_cold", "/home")
                 delay(60000)
@@ -206,6 +229,64 @@ private fun Workloads(controller: NavHostController, koin: Koin) {
         } catch (cancelled: CancellationException) { throw cancelled }
         catch (failure: Throwable) { mark("ERROR $failure") }
     }
+}
+
+/** Counts scope cancellation, not garbage collection; never stores a view model. */
+private class ReviewLifetime {
+    var opened = 0
+    var closed = 0
+    fun report(event: String, retainedRows: Int? = null) {
+        println("SHILLING_REVIEW_LIFETIME {\"event\":\"$event\",\"opened\":$opened,\"closed\":$closed,\"retainedRows\":$retainedRows}")
+    }
+}
+
+private suspend fun reviewSessionCycle(
+    controller: NavHostController,
+    currentModel: () -> ImportViewModel?,
+    lifetime: ReviewLifetime,
+    cycle: Int,
+    import: Boolean
+) {
+    mark("BEGIN session_cycle_$cycle")
+    AppPaths.navigate(controller, "/activity")
+    delay(1000)
+    AppPaths.navigate(controller, "/import")
+    val model = withTimeout(10000) { snapshotFlow { currentModel() }.first { it != null }!! }
+    check(model.state.value.rows.isEmpty()) { "A new import must not restore a cancelled file" }
+    val job = checkNotNull(model.viewModelScope.coroutineContext[Job])
+    lifetime.opened++
+    // Capture counters and the cycle number only, not the model or its state.
+    job.invokeOnCompletion { lifetime.closed++; lifetime.report("closed_$cycle") }
+    model.loadFile("synthetic-session-$cycle.csv", csvBytes())
+    withTimeout(60000) { model.state.first { it.rows.size == 10000 && it.importEnabled } }
+    model.setIncluded(0, false)
+    model.setRowCategory(5000, "mem-category-1")
+    withTimeout(10000) { model.state.first { !it.rows[0].included && it.rows[5000].categoryId == "mem-category-1" } }
+    mark("READY session_review_$cycle")
+    delay(6000)
+
+    // Exercise the real tab-save path with an unfinished review. Reading state.value
+    // does not subscribe or keep its upstream active while the screen is hidden.
+    AppPaths.navigate(controller, "/home")
+    delay(12000)
+    check(!job.isCancelled) { "Tab switching must preserve the unfinished import" }
+    lifetime.report("hidden_$cycle", model.state.value.rows.size)
+    mark("READY session_hidden_$cycle")
+    delay(6000)
+    AppPaths.navigate(controller, "/activity")
+    withTimeout(10000) { snapshotFlow { currentModel() }.first { it === model } }
+    withTimeout(60000) { model.state.first {
+        it.rows.size == 10000 && !it.rows[0].included && it.rows[5000].categoryId == "mem-category-1"
+    } }
+    model.setIncluded(0, true)
+    model.setRowCategory(5000, null)
+    withTimeout(10000) { model.state.first { it.rows[0].included && it.rows[5000].categoryId == null } }
+    mark("READY session_restored_$cycle")
+    delay(6000)
+    if (import) check(model.import() != null)
+    check(controller.popBackStack())
+    withTimeout(10000) { while (!job.isCancelled) delay(20) }
+    AppPaths.navigate(controller, "/home")
 }
 
 private fun csvBytes(): ByteArray = buildString {

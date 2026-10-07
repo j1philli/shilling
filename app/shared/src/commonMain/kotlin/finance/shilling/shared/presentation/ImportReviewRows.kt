@@ -32,6 +32,14 @@ internal class ImportReviewRows {
     private var year: Int? = null
     private var currency: String? = null
 
+    fun clear() {
+        source = null
+        projected = emptyList()
+        duplicates = emptySet()
+        year = null
+        currency = null
+    }
+
     fun project(
         rows: List<ImportReviewRow>,
         duplicateRows: Set<Int>,
