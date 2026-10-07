@@ -64,7 +64,7 @@ class PerformanceActivity : Activity() {
     private suspend fun runWorkloads() {
         Logger.setMinSeverity(Severity.Error)
         val schema = object : SqlSchema<QueryResult.Value<Unit>> {
-            override val version = 1L
+            override val version = ShillingDatabase.Schema.version
             override fun create(driver: SqlDriver) = QueryResult.Value(Unit)
             override fun migrate(driver: SqlDriver, oldVersion: Long, newVersion: Long, vararg callbacks: AfterVersion) = QueryResult.Value(Unit)
         }
@@ -86,6 +86,16 @@ class PerformanceActivity : Activity() {
             val categoryRepo = CategoryRepository(notifier, categories, sync)
             val scheduleRepo = ScheduleRepository(notifier, schedules, exceptions, sync)
             val postingRepo = PostingRepository(ids, notifier, postings, accounts, categories, schedules, sync)
+            val preferences = com.russhwolf.settings.SharedPreferencesSettings(
+                getSharedPreferences("import-regression", MODE_PRIVATE))
+            preferences.putBoolean("posthog_consent", false)
+            val client = createSyncHttpClient()
+            try {
+                checkMobileImport(accountRepo, categoryRepo, postingRepo,
+                    finance.shilling.shared.data.analytics.ProductAnalytics(preferences, ids, client)) { check ->
+                    emit(JSONObject().put("importCheck", check).put("passed", true))
+                }
+            } finally { client.close() }
             accountRepo.upsert(Account("synthetic-account", "Synthetic account", 10_000.0))
             categoryRepo.upsert(Category("synthetic-category", "Synthetic category"))
             val start = LocalDate(2026, 1, 1)

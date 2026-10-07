@@ -15,8 +15,13 @@ final class ActivityModel: ObservableObject {
     func observe() async {
         do {
             for try await value in asyncSequence(for: screen.stateFlow) {
-                // StateFlow replays its current object when a tab becomes visible again.
-                if state !== value { state = value }
+                // The shared replay cache expires while this tab is hidden. Its
+                // initial placeholder is not a loaded empty result: publishing
+                // it here clears the native list and discards its scroll position.
+                guard !value.sections.isEmpty || value.empty != nil else { continue }
+                // Reloads also create equal immutable snapshots. Avoid rebuilding
+                // every visible row when the underlying data has not changed.
+                if state != value { state = value }
             }
         } catch {}
     }

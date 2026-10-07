@@ -52,7 +52,7 @@ class UiPerformanceActivity : ComponentActivity() {
                 val reseed = intent.getBooleanExtra("reseed", false)
                 val definitions = withContext(Dispatchers.IO) {
                     val schema = object : SqlSchema<QueryResult.Value<Unit>> {
-                        override val version = 1L
+                        override val version = ShillingDatabase.Schema.version
                         override fun create(driver: SqlDriver) = QueryResult.Value(Unit)
                         override fun migrate(driver: SqlDriver, oldVersion: Long, newVersion: Long, vararg callbacks: AfterVersion) = QueryResult.Value(Unit)
                     }
@@ -97,6 +97,9 @@ class UiPerformanceActivity : ComponentActivity() {
                         single { HomeViewModel(accountRepo, categoryRepo, postingRepo, receiptRepo, scheduleRepo, get(), get()) }
                         single { ActivityViewModel(postingRepo) }
                         single { PlanOverviewViewModel(get(), OccurrenceActions(postingRepo, scheduleRepo)) }
+                        factory { SchedulesViewModel(scheduleRepo, accountRepo, categoryRepo) }
+                        factory { CategoriesViewModel(categoryRepo) }
+                        factory { AccountsViewModel(accountRepo) }
                         single { PlanRequests() }
                     }
                 }

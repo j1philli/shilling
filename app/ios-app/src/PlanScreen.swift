@@ -24,15 +24,29 @@ final class PlanModel: ObservableObject {
     func observe(_ section: PlanSection) async {
         // Cancelling the section task releases its Kotlin subscription, allowing
         // WhileSubscribed to stop queries and projections for hidden sections.
+        // On resume, ignore the expired cache's initial placeholder until the
+        // loaded result arrives. Loaded empty lists carry their empty-state copy.
         switch section {
         case .schedules:
-            await collect(screen.schedulesStateFlow) { if self.schedules !== $0 { self.schedules = $0 } }
+            await collect(screen.schedulesStateFlow) {
+                guard !$0.groups.isEmpty || $0.empty != nil else { return }
+                if self.schedules != $0 { self.schedules = $0 }
+            }
         case .categories:
-            await collect(screen.categoriesStateFlow) { if self.categories !== $0 { self.categories = $0 } }
+            await collect(screen.categoriesStateFlow) {
+                guard !$0.rows.isEmpty || $0.empty != nil else { return }
+                if self.categories != $0 { self.categories = $0 }
+            }
         case .accounts:
-            await collect(screen.accountsStateFlow) { if self.accounts !== $0 { self.accounts = $0 } }
+            await collect(screen.accountsStateFlow) {
+                guard !$0.rows.isEmpty || $0.empty != nil else { return }
+                if self.accounts != $0 { self.accounts = $0 }
+            }
         default:
-            await collect(screen.overviewStateFlow) { if self.overview !== $0 { self.overview = $0 } }
+            await collect(screen.overviewStateFlow) {
+                guard !$0.rangeLabel.isEmpty else { return }
+                if self.overview != $0 { self.overview = $0 }
+            }
         }
     }
 

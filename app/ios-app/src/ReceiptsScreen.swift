@@ -15,8 +15,10 @@ final class ReceiptsModel: ObservableObject {
     func observe() async {
         do {
             for try await value in asyncSequence(for: screen.stateFlow) {
-                // StateFlow replays its current object when a tab becomes visible again.
-                if state !== value { state = value }
+                // Keep the displayed snapshot through cache-expiry reloads.
+                // A genuine empty result carries empty-state copy and still applies.
+                guard !value.rows.isEmpty || value.empty != nil else { continue }
+                if state != value { state = value }
             }
         } catch {}
     }
