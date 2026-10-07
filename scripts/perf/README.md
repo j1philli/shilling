@@ -603,6 +603,21 @@ these timings in its `diagnostics` array.
 See the [October 6 comparison](../../docs/desktop-csv-review-memory-2026-10-06.md)
 for matched control/candidate runs and their limitations.
 
+`SHILLING_MEMORY_WORKLOAD=csv-session` exercises four 10,000-row reviews. Each
+cycle edits a checkbox/category, switches to Home for 18 seconds, restores the
+saved Activity/import stack, verifies the edits, restores all selected rows,
+and closes the import. The first three cancel; the fourth imports all rows.
+Three one-minute idle checkpoints follow. `SHILLING_REVIEW_LIFETIME` reports
+hidden `state.value.rows.size` without subscribing, plus counts of opened and
+cancelled view-model scopes. Scope cancellation is not proof of garbage
+collection. The fixture keeps the current cycle's model only until that cycle
+returns, and stores no models in its counters. This separates saved-screen
+retention from cancellation and from process memory that remains after both.
+Use the same restored seed and no overlapping builds for matched comparisons;
+the full run takes roughly seven minutes with the window visible and Mac unlocked.
+See the [saved-review retention report](../../docs/desktop-import-session-retention-2026-10-06.md)
+for the matched runs and the modest final-footprint result.
+
 `SHILLING_MEMORY_WORKLOAD=idle` opens Home and waits without navigating or
 importing. Restore a completed import fixture before using it to compare cold
 idle against memory retained after the import. See the

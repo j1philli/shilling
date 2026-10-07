@@ -74,6 +74,18 @@ class ImportViewModelTest {
                 model.setIncluded(2, false)
             }
             awaitState { it.defaultCategoryId == "food" && !it.rows[2].included && it.rows[1].categoryId == "food" }
+            // A saved navigation entry keeps the ViewModel alive without collectors.
+            // Read value directly: subscribing here would prevent idle expiry.
+            assertEquals(4, model.state.value.rows.size, "Quick returns keep the populated review during the grace interval")
+            withTimeout(7_000) { while (model.state.value.rows.isNotEmpty()) delay(20) }
+            assertEquals(ImportUiState(), model.state.value)
+            categoryRepo.upsert(Category("food", "Groceries", "#123456"))
+            val restored = awaitState { it.rows.size == 4 && it.rows[1].categoryLabel == "Groceries" }
+            assertEquals("synthetic.csv · 4 rows", restored.fileLabel)
+            assertEquals(listOf(false, true, false, false), restored.rows.map { it.included })
+            assertEquals("food", restored.defaultCategoryId)
+            assertEquals("#123456", restored.rows[1].categoryColor)
+            assertTrue(restored.rows[0].supporting.endsWith("Already imported"))
             assertEquals("Imported 1 transactions into Checking", withContext(main) { model.import() })
             val saved = postings.getBetween(day, LocalDate(2026, 9, 30)).filter { it.accountId == "a" }
             assertEquals(setOf("Already here", "Lunch"), saved.map { it.title }.toSet())

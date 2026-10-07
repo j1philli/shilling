@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.DateTimeUnit
@@ -125,7 +126,9 @@ class ImportViewModel(
             content?.let { CsvImporter.parseRows(it, mapping, hasHeader).map(ImportReviewRow::from).toList() }.orEmpty()
         }
         .flowOn(Dispatchers.Default)
-        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), replay = 1)
+        // The public state below owns the five-second grace interval. Once it
+        // stops, drop parsed rows too instead of retaining a second full review.
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(replayExpirationMillis = 0), replay = 1)
 
     private data class Review(val rows: List<ImportReviewRow>, val duplicates: Set<Int>)
 
@@ -205,8 +208,9 @@ class ImportViewModel(
                 destructive = false
             )
         )
-    }.flowOn(Dispatchers.Default)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ImportUiState())
+    }.onCompletion { reviewRows.clear() }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000, replayExpirationMillis = 0), ImportUiState())
 
     /** Loads a CSV file and guesses its column roles and date format. */
     suspend fun loadFile(fileName: String, bytes: ByteArray) = withContext(Dispatchers.Default) {

@@ -1,0 +1,546 @@
+{
+  "control-1": {
+    "complete": true,
+    "all20ReadyCheckpointsVisible": true,
+    "allDiagnosticStreamsComplete": true,
+    "hiddenReviewRowCounts": [
+      10000,
+      10000,
+      10000,
+      10000
+    ],
+    "viewModelsOpened": 4,
+    "viewModelScopesCancelled": 4,
+    "phases": [
+      {
+        "name": "session_home",
+        "seconds": 30.35,
+        "totalFootprintMiB": 360.419,
+        "webContentFootprintMiB": 274.7
+      },
+      {
+        "name": "session_review_1",
+        "seconds": 40.569,
+        "totalFootprintMiB": 447.719,
+        "webContentFootprintMiB": 359.8
+      },
+      {
+        "name": "session_hidden_1",
+        "seconds": 58.401,
+        "totalFootprintMiB": 415.525,
+        "webContentFootprintMiB": 327.7
+      },
+      {
+        "name": "session_restored_1",
+        "seconds": 64.501,
+        "totalFootprintMiB": 529.525,
+        "webContentFootprintMiB": 344.9
+      },
+      {
+        "name": "session_closed_1",
+        "seconds": 76.936,
+        "totalFootprintMiB": 423.572,
+        "webContentFootprintMiB": 335.3
+      },
+      {
+        "name": "session_review_2",
+        "seconds": 84.06,
+        "totalFootprintMiB": 529.356,
+        "webContentFootprintMiB": 342.2
+      },
+      {
+        "name": "session_hidden_2",
+        "seconds": 101.993,
+        "totalFootprintMiB": 401.688,
+        "webContentFootprintMiB": 313.0
+      },
+      {
+        "name": "session_restored_2",
+        "seconds": 108.269,
+        "totalFootprintMiB": 412.372,
+        "webContentFootprintMiB": 320.9
+      },
+      {
+        "name": "session_closed_2",
+        "seconds": 120.523,
+        "totalFootprintMiB": 393.909,
+        "webContentFootprintMiB": 305.3
+      },
+      {
+        "name": "session_review_3",
+        "seconds": 127.639,
+        "totalFootprintMiB": 511.194,
+        "webContentFootprintMiB": 325.8
+      },
+      {
+        "name": "session_hidden_3",
+        "seconds": 145.648,
+        "totalFootprintMiB": 395.772,
+        "webContentFootprintMiB": 307.0
+      },
+      {
+        "name": "session_restored_3",
+        "seconds": 151.725,
+        "totalFootprintMiB": 501.472,
+        "webContentFootprintMiB": 316.1
+      },
+      {
+        "name": "session_closed_3",
+        "seconds": 164.131,
+        "totalFootprintMiB": 378.472,
+        "webContentFootprintMiB": 307.2
+      },
+      {
+        "name": "session_review_4",
+        "seconds": 171.264,
+        "totalFootprintMiB": 486.856,
+        "webContentFootprintMiB": 319.0
+      },
+      {
+        "name": "session_hidden_4",
+        "seconds": 189.404,
+        "totalFootprintMiB": 377.325,
+        "webContentFootprintMiB": 306.1
+      },
+      {
+        "name": "session_restored_4",
+        "seconds": 195.323,
+        "totalFootprintMiB": 485.856,
+        "webContentFootprintMiB": 320.0
+      },
+      {
+        "name": "session_closed_4",
+        "seconds": 210.623,
+        "totalFootprintMiB": 489.988,
+        "webContentFootprintMiB": 418.6
+      },
+      {
+        "name": "session_idle_1",
+        "seconds": 276.719,
+        "totalFootprintMiB": 489.373,
+        "webContentFootprintMiB": 418.0
+      },
+      {
+        "name": "session_idle_2",
+        "seconds": 336.525,
+        "totalFootprintMiB": 474.973,
+        "webContentFootprintMiB": 418.0
+      },
+      {
+        "name": "session_idle_3",
+        "seconds": 396.537,
+        "totalFootprintMiB": 475.073,
+        "webContentFootprintMiB": 418.1
+      }
+    ],
+    "webContentLifetimePeakFootprintMiB": 616.5
+  },
+  "candidate-1": {
+    "complete": true,
+    "all20ReadyCheckpointsVisible": true,
+    "allDiagnosticStreamsComplete": true,
+    "hiddenReviewRowCounts": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "viewModelsOpened": 4,
+    "viewModelScopesCancelled": 4,
+    "phases": [
+      {
+        "name": "session_home",
+        "seconds": 29.987,
+        "totalFootprintMiB": 361.673,
+        "webContentFootprintMiB": 274.3
+      },
+      {
+        "name": "session_review_1",
+        "seconds": 40.169,
+        "totalFootprintMiB": 478.573,
+        "webContentFootprintMiB": 386.2
+      },
+      {
+        "name": "session_hidden_1",
+        "seconds": 58.12,
+        "totalFootprintMiB": 428.995,
+        "webContentFootprintMiB": 339.4
+      },
+      {
+        "name": "session_restored_1",
+        "seconds": 64.236,
+        "totalFootprintMiB": 533.895,
+        "webContentFootprintMiB": 349.7
+      },
+      {
+        "name": "session_closed_1",
+        "seconds": 76.744,
+        "totalFootprintMiB": 434.61,
+        "webContentFootprintMiB": 344.9
+      },
+      {
+        "name": "session_review_2",
+        "seconds": 83.85,
+        "totalFootprintMiB": 405.726,
+        "webContentFootprintMiB": 313.2
+      },
+      {
+        "name": "session_hidden_2",
+        "seconds": 101.864,
+        "totalFootprintMiB": 387.626,
+        "webContentFootprintMiB": 297.8
+      },
+      {
+        "name": "session_restored_2",
+        "seconds": 107.881,
+        "totalFootprintMiB": 496.026,
+        "webContentFootprintMiB": 309.7
+      },
+      {
+        "name": "session_closed_2",
+        "seconds": 120.244,
+        "totalFootprintMiB": 389.11,
+        "webContentFootprintMiB": 299.2
+      },
+      {
+        "name": "session_review_3",
+        "seconds": 127.476,
+        "totalFootprintMiB": 414.095,
+        "webContentFootprintMiB": 321.5
+      },
+      {
+        "name": "session_hidden_3",
+        "seconds": 145.487,
+        "totalFootprintMiB": 403.495,
+        "webContentFootprintMiB": 313.6
+      },
+      {
+        "name": "session_restored_3",
+        "seconds": 151.402,
+        "totalFootprintMiB": 513.795,
+        "webContentFootprintMiB": 327.2
+      },
+      {
+        "name": "session_closed_3",
+        "seconds": 163.862,
+        "totalFootprintMiB": 398.995,
+        "webContentFootprintMiB": 308.9
+      },
+      {
+        "name": "session_review_4",
+        "seconds": 170.988,
+        "totalFootprintMiB": 403.679,
+        "webContentFootprintMiB": 310.9
+      },
+      {
+        "name": "session_hidden_4",
+        "seconds": 188.98,
+        "totalFootprintMiB": 393.548,
+        "webContentFootprintMiB": 303.6
+      },
+      {
+        "name": "session_restored_4",
+        "seconds": 195.099,
+        "totalFootprintMiB": 403.879,
+        "webContentFootprintMiB": 311.1
+      },
+      {
+        "name": "session_closed_4",
+        "seconds": 210.191,
+        "totalFootprintMiB": 495.563,
+        "webContentFootprintMiB": 405.5
+      },
+      {
+        "name": "session_idle_1",
+        "seconds": 276.283,
+        "totalFootprintMiB": 472.079,
+        "webContentFootprintMiB": 402.0
+      },
+      {
+        "name": "session_idle_2",
+        "seconds": 336.222,
+        "totalFootprintMiB": 472.079,
+        "webContentFootprintMiB": 402.0
+      },
+      {
+        "name": "session_idle_3",
+        "seconds": 396.234,
+        "totalFootprintMiB": 472.079,
+        "webContentFootprintMiB": 402.0
+      }
+    ],
+    "webContentLifetimePeakFootprintMiB": 522.8
+  },
+  "control-2": {
+    "complete": true,
+    "all20ReadyCheckpointsVisible": true,
+    "allDiagnosticStreamsComplete": true,
+    "hiddenReviewRowCounts": [
+      10000,
+      10000,
+      10000,
+      10000
+    ],
+    "viewModelsOpened": 4,
+    "viewModelScopesCancelled": 4,
+    "phases": [
+      {
+        "name": "session_home",
+        "seconds": 30.44,
+        "totalFootprintMiB": 358.953,
+        "webContentFootprintMiB": 272.7
+      },
+      {
+        "name": "session_review_1",
+        "seconds": 40.46,
+        "totalFootprintMiB": 591.253,
+        "webContentFootprintMiB": 401.6
+      },
+      {
+        "name": "session_hidden_1",
+        "seconds": 58.508,
+        "totalFootprintMiB": 441.459,
+        "webContentFootprintMiB": 352.6
+      },
+      {
+        "name": "session_restored_1",
+        "seconds": 64.581,
+        "totalFootprintMiB": 551.259,
+        "webContentFootprintMiB": 365.7
+      },
+      {
+        "name": "session_closed_1",
+        "seconds": 77.031,
+        "totalFootprintMiB": 448.775,
+        "webContentFootprintMiB": 359.7
+      },
+      {
+        "name": "session_review_2",
+        "seconds": 84.133,
+        "totalFootprintMiB": 447.659,
+        "webContentFootprintMiB": 365.7
+      },
+      {
+        "name": "session_hidden_2",
+        "seconds": 102.058,
+        "totalFootprintMiB": 409.281,
+        "webContentFootprintMiB": 330.0
+      },
+      {
+        "name": "session_restored_2",
+        "seconds": 108.141,
+        "totalFootprintMiB": 514.812,
+        "webContentFootprintMiB": 338.9
+      },
+      {
+        "name": "session_closed_2",
+        "seconds": 120.567,
+        "totalFootprintMiB": 391.897,
+        "webContentFootprintMiB": 312.6
+      },
+      {
+        "name": "session_review_3",
+        "seconds": 127.683,
+        "totalFootprintMiB": 493.681,
+        "webContentFootprintMiB": 319.9
+      },
+      {
+        "name": "session_hidden_3",
+        "seconds": 145.603,
+        "totalFootprintMiB": 390.381,
+        "webContentFootprintMiB": 311.1
+      },
+      {
+        "name": "session_restored_3",
+        "seconds": 151.868,
+        "totalFootprintMiB": 389.481,
+        "webContentFootprintMiB": 319.0
+      },
+      {
+        "name": "session_closed_3",
+        "seconds": 164.117,
+        "totalFootprintMiB": 380.197,
+        "webContentFootprintMiB": 312.4
+      },
+      {
+        "name": "session_review_4",
+        "seconds": 171.201,
+        "totalFootprintMiB": 497.481,
+        "webContentFootprintMiB": 331.0
+      },
+      {
+        "name": "session_hidden_4",
+        "seconds": 189.162,
+        "totalFootprintMiB": 380.581,
+        "webContentFootprintMiB": 312.6
+      },
+      {
+        "name": "session_restored_4",
+        "seconds": 195.289,
+        "totalFootprintMiB": 490.881,
+        "webContentFootprintMiB": 326.3
+      },
+      {
+        "name": "session_closed_4",
+        "seconds": 210.403,
+        "totalFootprintMiB": 500.798,
+        "webContentFootprintMiB": 432.7
+      },
+      {
+        "name": "session_idle_1",
+        "seconds": 276.502,
+        "totalFootprintMiB": 483.682,
+        "webContentFootprintMiB": 427.2
+      },
+      {
+        "name": "session_idle_2",
+        "seconds": 337.353,
+        "totalFootprintMiB": 483.682,
+        "webContentFootprintMiB": 427.2
+      },
+      {
+        "name": "session_idle_3",
+        "seconds": 398.366,
+        "totalFootprintMiB": 483.782,
+        "webContentFootprintMiB": 427.3
+      }
+    ],
+    "webContentLifetimePeakFootprintMiB": 529.9
+  },
+  "candidate-2": {
+    "complete": true,
+    "all20ReadyCheckpointsVisible": true,
+    "allDiagnosticStreamsComplete": true,
+    "hiddenReviewRowCounts": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "viewModelsOpened": 4,
+    "viewModelScopesCancelled": 4,
+    "phases": [
+      {
+        "name": "session_home",
+        "seconds": 30.297,
+        "totalFootprintMiB": 424.526,
+        "webContentFootprintMiB": 338.9
+      },
+      {
+        "name": "session_review_1",
+        "seconds": 40.472,
+        "totalFootprintMiB": 536.526,
+        "webContentFootprintMiB": 445.8
+      },
+      {
+        "name": "session_hidden_1",
+        "seconds": 58.406,
+        "totalFootprintMiB": 448.817,
+        "webContentFootprintMiB": 360.9
+      },
+      {
+        "name": "session_restored_1",
+        "seconds": 64.485,
+        "totalFootprintMiB": 559.317,
+        "webContentFootprintMiB": 377.0
+      },
+      {
+        "name": "session_closed_1",
+        "seconds": 77.008,
+        "totalFootprintMiB": 458.463,
+        "webContentFootprintMiB": 370.5
+      },
+      {
+        "name": "session_review_2",
+        "seconds": 84.1,
+        "totalFootprintMiB": 469.801,
+        "webContentFootprintMiB": 379.2
+      },
+      {
+        "name": "session_hidden_2",
+        "seconds": 102.017,
+        "totalFootprintMiB": 455.001,
+        "webContentFootprintMiB": 367.3
+      },
+      {
+        "name": "session_restored_2",
+        "seconds": 108.12,
+        "totalFootprintMiB": 561.101,
+        "webContentFootprintMiB": 378.8
+      },
+      {
+        "name": "session_closed_2",
+        "seconds": 120.62,
+        "totalFootprintMiB": 408.285,
+        "webContentFootprintMiB": 320.5
+      },
+      {
+        "name": "session_review_3",
+        "seconds": 127.583,
+        "totalFootprintMiB": 519.37,
+        "webContentFootprintMiB": 332.8
+      },
+      {
+        "name": "session_hidden_3",
+        "seconds": 145.759,
+        "totalFootprintMiB": 405.57,
+        "webContentFootprintMiB": 317.5
+      },
+      {
+        "name": "session_restored_3",
+        "seconds": 151.718,
+        "totalFootprintMiB": 512.37,
+        "webContentFootprintMiB": 327.6
+      },
+      {
+        "name": "session_closed_3",
+        "seconds": 164.104,
+        "totalFootprintMiB": 399.885,
+        "webContentFootprintMiB": 311.6
+      },
+      {
+        "name": "session_review_4",
+        "seconds": 171.13,
+        "totalFootprintMiB": 513.27,
+        "webContentFootprintMiB": 326.1
+      },
+      {
+        "name": "session_hidden_4",
+        "seconds": 189.187,
+        "totalFootprintMiB": 399.638,
+        "webContentFootprintMiB": 311.3
+      },
+      {
+        "name": "session_restored_4",
+        "seconds": 195.272,
+        "totalFootprintMiB": 510.47,
+        "webContentFootprintMiB": 325.5
+      },
+      {
+        "name": "session_closed_4",
+        "seconds": 210.305,
+        "totalFootprintMiB": 503.285,
+        "webContentFootprintMiB": 414.9
+      },
+      {
+        "name": "session_idle_1",
+        "seconds": 276.468,
+        "totalFootprintMiB": 498.701,
+        "webContentFootprintMiB": 410.4
+      },
+      {
+        "name": "session_idle_2",
+        "seconds": 336.335,
+        "totalFootprintMiB": 482.001,
+        "webContentFootprintMiB": 410.5
+      },
+      {
+        "name": "session_idle_3",
+        "seconds": 396.459,
+        "totalFootprintMiB": 467.401,
+        "webContentFootprintMiB": 410.5
+      }
+    ],
+    "webContentLifetimePeakFootprintMiB": 533.8
+  }
+}
