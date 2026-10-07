@@ -22,23 +22,46 @@ def mib(value):
     return float(match[1]) * {"": 1 / 1048576, "K": 1 / 1024, "M": 1, "G": 1024, "T": 1048576}[match[2]]
 
 
-def snapshot(pid):
+def snapshot(pid, raw_path=None):
     try:
         result = subprocess.run(["vmmap", "-summary", str(pid)], capture_output=True, text=True, timeout=30)
     except subprocess.TimeoutExpired:
         return {"error": "vmmap exceeded 30 seconds"}
     if result.returncode:
         return {"error": result.stderr.strip()}
+    if raw_path:
+        raw_path.parent.mkdir(parents=True, exist_ok=True)
+        raw_path.write_text(result.stdout)
     values = {}
     for label, key in [("Physical footprint", "footprintMiB"), ("Physical footprint (peak)", "lifetimePeakFootprintMiB")]:
         match = re.search(re.escape(label) + r":\s*([\d.]+[KMGT]?)", result.stdout)
         if match:
             values[key] = mib(match[1])
-    for label in ["JS VM Reservations", "WebKit Malloc", "owned unmapped (graphics)"]:
+    for label in ["JS JIT Generated Code", "JS VM Reservations", "WebKit Malloc", "owned unmapped (graphics)"]:
         match = re.search(r"^" + re.escape(label) + r"\s+([\d.]+[KMGT]?)\s+([\d.]+[KMGT]?)\s+([\d.]+[KMGT]?)\s+([\d.]+[KMGT]?)", result.stdout, re.M)
         if match:
             values[label] = dict(zip(["virtualMiB", "residentMiB", "dirtyMiB", "swappedMiB"], map(mib, match.groups())))
     return values
+
+
+def footprint_categories(pid, raw_path):
+    """Footprint separates reclaimable allocator pages from charged dirty pages."""
+    raw_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        result = subprocess.run(["footprint", "-p", str(pid), "-j", str(raw_path)],
+                                capture_output=True, text=True, timeout=30)
+        raw_path.with_suffix(".txt").write_text(result.stdout + result.stderr)
+        if result.returncode:
+            return {"error": result.stderr.strip() or f"footprint exited {result.returncode}"}
+        data = json.loads(raw_path.read_text())
+        if data["unit"] != "byte" or data["bytes per unit"] != 1:
+            return {"error": "Unexpected footprint units"}
+        process = next(p for p in data["processes"] if p["pid"] == pid)
+        return {"footprintMiB": process["footprint"] / 1048576, "categories": {
+            name: {key + "MiB": values[key] / 1048576 for key in ("dirty", "swapped", "clean", "reclaimable")}
+            for name, values in process["categories"].items()}}
+    except (subprocess.TimeoutExpired, OSError, ValueError, KeyError, StopIteration) as error:
+        return {"error": str(error)}
 
 
 def main():
@@ -49,6 +72,8 @@ def main():
     parser.add_argument("--network-pid", type=int)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--phase-log", type=Path, help="Follow SHILLING_MEMORY markers from the isolated fixture's Tauri log")
+    parser.add_argument("--vmmap-dir", type=Path, help="Preserve full vmmap summaries for allocation-region analysis")
+    parser.add_argument("--footprint-dir", type=Path, help="Capture WebContent dirty/reclaimable categories (additional sequential diagnostic)")
     args = parser.parse_args()
     started = time.monotonic()
     processes = {"host": args.host_pid, "webContent": args.web_pid}
@@ -93,7 +118,7 @@ def main():
                         continue
                     time.sleep(0.2)
                     continue
-                diagnostic = re.search(r"(?:^|\] )SHILLING_(RUNTIME_PROFILE|ALLOCATION_MAIN|ALLOCATION_SQL|IMPORT_REVIEW|REVIEW_LIFETIME) (\{.*\})$", line)
+                diagnostic = re.search(r"(?:^|\] )SHILLING_(RUNTIME_PROFILE|SQL_PROFILE|ALLOCATION_MAIN|ALLOCATION_SQL|IMPORT_REVIEW|REVIEW_LIFETIME|BOOTSTRAP) (\{.*\})$", line)
                 if diagnostic:
                     try:
                         result["diagnostics"].append({"probe": diagnostic.group(1),
@@ -122,7 +147,13 @@ def main():
                 break
             if not phase:
                 continue
-            record = {"name": phase, "seconds": round(time.monotonic() - started, 3), **{name: snapshot(pid) for name, pid in processes.items()}}
+            phase_file = re.sub(r"[^A-Za-z0-9_-]", "_", phase)
+            record = {"name": phase, "seconds": round(time.monotonic() - started, 3), **{
+                name: snapshot(pid, args.vmmap_dir / f"{len(result['phases']):03d}-{phase_file}-{name}.txt" if args.vmmap_dir else None)
+                for name, pid in processes.items()}}
+            if args.footprint_dir:
+                record["webContentCategories"] = footprint_categories(args.web_pid,
+                    args.footprint_dir / f"{len(result['phases']):03d}-{phase_file}.json")
             result["phases"].append(record)
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(json.dumps(result, indent=2) + "\n")

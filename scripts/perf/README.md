@@ -623,6 +623,20 @@ importing. Restore a completed import fixture before using it to compare cold
 idle against memory retained after the import. See the
 [import/idle follow-up](../../docs/desktop-import-idle-memory-2026-10-03.md).
 
+`SHILLING_MEMORY_WORKLOAD=bootstrap` pauses at four startup stages: an empty
+HTML page, the compiled Kotlin module, loaded JS imports/Skia, and the
+instantiated Kotlin module (including its Wasm start section). It then calls
+the normal entry point and runs the cold-Home idle workload. The Wasm binaries
+and generated import object are unchanged. This deliberately changes startup
+ordering and collection opportunities; stage differences are diagnostic, not
+an additive model of normal startup or a production memory saving. It uses the
+same isolated benchmark database and needs the existing synthetic seed.
+Leave `SHILLING_MEMORY_ALLOCATION_PROFILE=false` for this workload because that
+probe eagerly loads Skia and would invalidate the early stages. Runtime and SQL
+probes are compatible. `SHILLING_BOOTSTRAP` records viewport/visibility metadata.
+See the [WebContent allocation investigation](../../docs/desktop-webcontent-allocation-2026-10-06.md)
+for the staged results, native categories and inspection limitations.
+
 `SHILLING_MEMORY_RUNTIME_PROFILE=true` enables fixture-only phase counters for
 main-thread date formatter construction and Wasm linear-memory capacity. The
 probe keeps only weak references to memory objects. Linear capacity excludes
@@ -681,3 +695,13 @@ to finish. RSS may fall because macOS swaps or compresses memory; it is not a
 substitute for footprint or an allocation-retention trace. Large virtual Wasm
 reservations are not committed RAM. Other apps sharing the Mac can affect RSS,
 collection and swapping, so use footprint and repeat runs before claiming gains.
+
+For renderer allocation research, add `--vmmap-dir /tmp/shilling-vmmap` to retain
+all native summaries and `--footprint-dir /tmp/shilling-footprint` to capture
+WebContent's dirty/reclaimable categories as raw JSON/text and in the profile.
+These add sequential diagnostic snapshots. `footprint` separates reclaimable
+pages from charged dirty memory; do not add its reclaimable column to physical
+footprint or treat `vmmap`'s virtual reservations as RAM. Native allocator
+categories do not identify individual Kotlin objects. Instruments/heap
+inspections can affect execution and should be recorded separately from clean
+comparison runs.

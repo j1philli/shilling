@@ -1,0 +1,12 @@
+{
+  "originalSandboxFileCount": 18,
+  "restoredHashesMatch": true,
+  "lastOwnedProcessIds": {
+    "host": 44657,
+    "web": 44667,
+    "gpu": 44666,
+    "network": 44668,
+    "server": 44586
+  },
+  "ownedProcessesStopped": true
+}
