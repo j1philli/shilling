@@ -2,9 +2,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 workload="${SHILLING_MEMORY_WORKLOAD:-all}"
-case "$workload" in all|csv|csv-review|csv-session|idle|bootstrap) ;; *) echo 'SHILLING_MEMORY_WORKLOAD must be all, csv, csv-review, csv-session, idle or bootstrap' >&2; exit 2;; esac
-if [ "$workload" = bootstrap ] && [ "${SHILLING_MEMORY_ALLOCATION_PROFILE:-false}" = true ]; then
-    echo 'bootstrap requires SHILLING_MEMORY_ALLOCATION_PROFILE=false: that probe eagerly loads Skia' >&2
+case "$workload" in all|csv|csv-review|csv-session|idle|bootstrap|startup|startup-compose-first) ;; *) echo 'SHILLING_MEMORY_WORKLOAD must be all, csv, csv-review, csv-session, idle, bootstrap, startup or startup-compose-first' >&2; exit 2;; esac
+if [[ "$workload" = bootstrap || "$workload" = startup* ]] && [ "${SHILLING_MEMORY_ALLOCATION_PROFILE:-false}" = true ]; then
+    echo 'staged startup requires SHILLING_MEMORY_ALLOCATION_PROFILE=false: that probe eagerly loads Skia' >&2
     exit 2
 fi
 ./kotlin task :perf-web:buildWasmJsAppWasmJsRelease
@@ -24,7 +24,7 @@ cp node_modules/sql.js/dist/sql-wasm.js node_modules/sql.js/dist/sql-wasm.wasm "
 sed -e 's@./web-app.mjs@./perf-web.mjs@' \
     -e "s@</head>@<meta name=\"shilling-memory-workload\" content=\"$workload\"></head>@" \
     app/web-app/index.html > "$fixture_dist/index.html"
-if [ "$workload" = bootstrap ]; then
+if [[ "$workload" = bootstrap || "$workload" = startup* ]]; then
     cp app/perf-web/bootstrap-profile.mjs "$fixture_dist/"
     sed -i '' -e 's@./perf-web.mjs@./bootstrap-profile.mjs@' \
         -e 's@name="shilling-memory-workload" content="bootstrap"@name="shilling-memory-workload" content="idle"@' "$fixture_dist/index.html"

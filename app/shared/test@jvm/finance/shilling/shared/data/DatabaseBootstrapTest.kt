@@ -4,6 +4,7 @@ import app.cash.sqldelight.async.coroutines.awaitAsOne
 import app.cash.sqldelight.async.coroutines.await
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.db.SqlPreparedStatement
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import finance.shilling.shared.db.ShillingDatabase
 import kotlinx.coroutines.runBlocking
@@ -44,9 +45,19 @@ class DatabaseBootstrapTest {
         val db = ShillingDatabase(driver)
         db.accountQueries.upsert("acct-1", "Checking", 123.45, space_id = "__local__").await()
 
-        ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
+        val writes = mutableListOf<String>()
+        val recording = object : SqlDriver by driver {
+            override fun execute(identifier: Int?, sql: String, parameters: Int,
+                binders: (SqlPreparedStatement.() -> Unit)?): QueryResult<Long> {
+                writes += sql
+                return driver.execute(identifier, sql, parameters, binders)
+            }
+        }
+        ensureLocalSchemaReady(recording, logTag = "DatabaseBootstrapTest")
 
         assertEquals(1L, rowCount(driver, "accounts"))
+        assertEquals(listOf("PRAGMA foreign_keys = ON;"), writes,
+            "An up-to-date database must not issue DDL that makes the web worker persist a snapshot")
     }
 
     @Test

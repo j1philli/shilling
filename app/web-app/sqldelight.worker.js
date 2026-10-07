@@ -52,12 +52,17 @@ let dirty = false;
 let saving = null;
 let persistenceFailure = null;
 
-function isReadOnlySql(sql) {
+function needsPersistence(sql) {
   const statement = sql.replace(/^\s*(?:(?:--[^\n]*\n)|(?:\/\*[\s\S]*?\*\/))*/, "").trim();
   const semicolon = statement.indexOf(";");
-  if (semicolon !== -1 && statement.slice(semicolon + 1).trim()) return false;
-  return /^(SELECT|EXPLAIN)\b/i.test(statement) ||
-    (/^PRAGMA\b/i.test(statement) && !statement.includes("="));
+  if (semicolon !== -1 && statement.slice(semicolon + 1).trim()) return true;
+  // Bootstrap and migrations set enforcement on this connection. This pragma
+  // changes no database bytes; exporting for it adds a full-DB startup copy.
+  // Keep the exemption narrow: user_version and other writes still persist.
+  if (/^PRAGMA\s+foreign_keys\s*=\s*(?:ON|OFF|0|1)\s*;?\s*$/i.test(statement)) return false;
+  return !(/^(SELECT|EXPLAIN)\b/i.test(statement) ||
+    // Parentheses can assign a persistent pragma too: user_version(4).
+    (/^PRAGMA\b/i.test(statement) && !/[=(]/.test(statement)));
 }
 
 // sql.js returns BLOB columns as fresh Uint8Arrays. Transfer their backing
@@ -168,7 +173,7 @@ async function onModuleReady() {
       const sql = data.sql;
 
       const results = db.exec(sql, data.params)[0] ?? { values: [] };
-      if (!isReadOnlySql(sql)) {
+      if (needsPersistence(sql)) {
         if (inTransaction) transactionDirty = true;
         else scheduleSave();
       }

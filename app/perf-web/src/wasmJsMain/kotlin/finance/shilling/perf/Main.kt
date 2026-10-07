@@ -25,6 +25,7 @@ import io.ktor.client.webrtc.WebRtcClient
 import kotlinx.browser.document
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.collect
 import kotlinx.datetime.*
 import org.koin.core.Koin
 import org.koin.dsl.module
@@ -43,29 +44,18 @@ private fun mark(name: String) {
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     Logger.setMinSeverity(Severity.Info) // Match the production release entry point.
+    val workload = document.querySelector("meta[name=shilling-memory-workload]")?.getAttribute("content")
+    if (workload == "startup" || workload == "startup-compose-first") {
+        profileStartup(composeFirst = workload == "startup-compose-first")
+        return
+    }
     var status by mutableStateOf("Preparing synthetic database…")
     var ready by mutableStateOf(false)
     lateinit var koin: Koin
     MainScope().launch {
         runCatching {
-            val driver = WebWorkerDriver(createDatabaseWorker("sqldelight.worker.js"))
-            ensureLocalSchemaReady(driver)
-            val db = ShillingDatabase(driver)
-            val settings = Settings()
-            completeFirstLaunchOnboarding(settings, DeploymentSelection.SELF_HOSTED, SERVER)
-            koin = initKoin(module {
-                single { db }; single { settings }
-                single<IdGenerator> { object : IdGenerator { override fun newId() = Uuid.random().toString() } }
-                single { ProductAnalyticsEnvironment(developmentBuild = true) }
-                single { AppSessionConfig(selfHostedOnly = true, defaultSelfHostedServerUrl = SERVER) }
-                single<ReceiptFileStoreFactory> { ReceiptFileStoreFactory { id, _ ->
-                    Store5ReceiptFileStore(SqlReceiptFileStorage(db, id), { _, _, _ -> })
-                } }
-                single { createSyncHttpClient() }
-                single { WebRtcPlatform(createClient = { ice -> WebRtcClient(JsWebRtc) {
-                    defaultConnectionConfig = { iceServers = ice() }
-                } }) }
-            }, sessionModule)
+            val (settings, graph) = createFixture()
+            koin = graph
             if (!settings.getBoolean("memory_fixture_seeded_v1", false)) {
                 mark("seed_begin")
                 seed(koin)
@@ -86,6 +76,90 @@ fun main() {
             navRailWidth = 98.dp,
             navControllerHook = { controller -> Workloads(controller, koin) }
         ))
+    }
+}
+
+/** Ordinary fixture setup; the optional pauses belong only to the startup diagnostic. */
+private suspend fun createFixture(checkpoint: suspend (String) -> Unit = {}): Pair<Settings, Koin> {
+    val driver = WebWorkerDriver(createDatabaseWorker("sqldelight.worker.js"))
+    ensureLocalSchemaReady(driver)
+    val db = ShillingDatabase(driver)
+    checkpoint("startup_database")
+    val settings = Settings()
+    completeFirstLaunchOnboarding(settings, DeploymentSelection.SELF_HOSTED, SERVER)
+    val koin = initKoin(module {
+        single { db }; single { settings }
+        single<IdGenerator> { object : IdGenerator { override fun newId() = Uuid.random().toString() } }
+        single { ProductAnalyticsEnvironment(developmentBuild = true) }
+        single { AppSessionConfig(selfHostedOnly = true, defaultSelfHostedServerUrl = SERVER) }
+        single<ReceiptFileStoreFactory> { ReceiptFileStoreFactory { id, _ ->
+            Store5ReceiptFileStore(SqlReceiptFileStorage(db, id), { _, _, _ -> })
+        } }
+        single { createSyncHttpClient() }
+        single { WebRtcPlatform(createClient = { ice -> WebRtcClient(JsWebRtc) {
+            defaultConnectionConfig = { iceServers = ice() }
+        } }) }
+    }, sessionModule)
+    checkpoint("startup_koin")
+    return settings to koin
+}
+
+/**
+ * Fixture-only ablation: one Home model is collected before its first render and
+ * reused by HomeView. No navigation graph or second Home model is created here.
+ * Reversing Compose/database order reveals shared startup and collection effects.
+ */
+@OptIn(ExperimentalComposeUiApi::class)
+private fun profileStartup(composeFirst: Boolean) {
+    var renderedHome by mutableStateOf<HomeViewModel?>(null)
+    fun compose() = ComposeViewport(document.body!!) {
+        ShillingTheme {
+            val model = renderedHome
+            if (model == null) Text("Shilling startup allocation diagnostic")
+            else HomeView(onDestination = {}, viewModel = model)
+        }
+    }
+    MainScope().launch {
+        suspend fun checkpoint(phase: String) {
+            delay(15000)
+            mark("READY $phase")
+            delay(15000)
+        }
+        try {
+            checkpoint("startup_entry")
+            if (composeFirst) {
+                compose()
+                checkpoint("startup_compose")
+            }
+            val (settings, koin) = createFixture(::checkpoint)
+            check(settings.getBoolean("memory_fixture_seeded_v1", false)) {
+                "The startup diagnostic requires the ordinary fixture's seeded database"
+            }
+            koin.get<AppSession>().start()
+            withTimeout(60000) { koin.get<AppSession>().phase.first { it is SessionPhase.Ready } }
+            checkpoint("startup_session")
+            if (!composeFirst) {
+                compose()
+                checkpoint("startup_compose")
+            }
+            val model = koin.get<HomeViewModel>()
+            // Keep exactly this model subscribed across calculation and rendering.
+            val subscription = launch { model.state.collect() }
+            withTimeout(60000) { model.state.first {
+                it.accountCount == 20 && it.categoryCount == 40 && it.scheduleCount == 1000 &&
+                    it.receiptCount == 250 && it.recent.size == 3 && it.budget.lines.size == 1000 &&
+                    it.upcoming.isNotEmpty()
+            } }
+            checkpoint("startup_home_projection")
+            renderedHome = model
+            checkpoint("startup_home_rendered")
+            // Hand the subscription to the visible screen; do not collect a duplicate graph.
+            subscription.cancelAndJoin()
+            delay(60000)
+            checkpoint("startup_idle")
+            mark("COMPLETE")
+        } catch (cancelled: CancellationException) { throw cancelled }
+        catch (failure: Throwable) { mark("ERROR ${failure.stackTraceToString()}") }
     }
 }
 

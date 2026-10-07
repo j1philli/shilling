@@ -100,6 +100,11 @@ Returned-row and snapshot-byte counts are cumulative work, not resident memory.
 This rules out continued SQL polling in this workload; it does not isolate the
 remaining allocation into database, Compose and runtime ownership.
 
+The [startup follow-up](desktop-startup-memory-2026-10-06.md) subsequently found
+that this seed includes a first-session claim of its local finance space. These
+startup counts include that migration; use an initialized seed to measure an
+ordinary reopen. The matched comparisons above still use the same seed on both sides.
+
 The control Kotlin module is 9,405,360 bytes with 26,490 defined functions,
 19,504 globals and 2,884 recursion groups. Recursion-group count is not individual
 GC-type count. Compiling that artifact increases footprint substantially before

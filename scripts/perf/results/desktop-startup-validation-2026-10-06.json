@@ -1,0 +1,435 @@
+{
+  "runs": {
+    "db-first-initial": {
+      "readyCheckpoints": 12,
+      "unlockedSamples": 88,
+      "visibleCheckpoints": 12,
+      "complete": true,
+      "seedSource": "seeded-webkit"
+    },
+    "compose-first-initial": {
+      "readyCheckpoints": 12,
+      "unlockedSamples": 88,
+      "visibleCheckpoints": 12,
+      "complete": true,
+      "seedSource": "seeded-webkit"
+    },
+    "db-first-initialized": {
+      "readyCheckpoints": 12,
+      "unlockedSamples": 88,
+      "visibleCheckpoints": 12,
+      "complete": true,
+      "seedSource": "startup-1-webkit"
+    },
+    "app-initialized": {
+      "readyCheckpoints": 6,
+      "unlockedSamples": 49,
+      "visibleCheckpoints": 6,
+      "complete": true,
+      "seedSource": "startup-1-webkit"
+    },
+    "schema-startup": {
+      "readyCheckpoints": 12,
+      "unlockedSamples": 88,
+      "visibleCheckpoints": 12,
+      "complete": true,
+      "seedSource": "startup-1-webkit"
+    },
+    "schema-session": {
+      "readyCheckpoints": 20,
+      "unlockedSamples": 81,
+      "visibleCheckpoints": 20,
+      "complete": true,
+      "seedSource": "startup-1-webkit"
+    },
+    "cte-startup": {
+      "readyCheckpoints": 12,
+      "unlockedSamples": 88,
+      "visibleCheckpoints": 12,
+      "complete": true,
+      "seedSource": "startup-1-webkit"
+    },
+    "cte-session": {
+      "readyCheckpoints": 20,
+      "unlockedSamples": 81,
+      "visibleCheckpoints": 20,
+      "complete": true,
+      "seedSource": "startup-1-webkit"
+    },
+    "cte-guarded-session": {
+      "readyCheckpoints": 20,
+      "unlockedSamples": 80,
+      "visibleCheckpoints": 20,
+      "complete": true,
+      "seedSource": "startup-1-webkit"
+    }
+  },
+  "data": {
+    "db-first-initial": {
+      "integrity": "ok",
+      "postings": 10000,
+      "importedRows": 0,
+      "importedUniqueIds": 0,
+      "importedVersionRecords": 0,
+      "snapshotBytes": 9314304,
+      "entityCounts": {
+        "accounts": 20,
+        "categories": 40,
+        "schedules": 1000,
+        "receipts": 250
+      },
+      "foreignKeyViolations": [],
+      "localSpaceRows": 0,
+      "financialColumns": [
+        "schedule_id",
+        "type",
+        "account_id",
+        "date",
+        "amount",
+        "pair_id",
+        "title",
+        "category_id"
+      ],
+      "financialValuesSha256": "0a4445a44a9bb7995335b576caca8bac7575953fe7add8f95daf3f232d839007",
+      "importedRowsWithExpectedValues": 0
+    },
+    "compose-first-initial": {
+      "integrity": "ok",
+      "postings": 10000,
+      "importedRows": 0,
+      "importedUniqueIds": 0,
+      "importedVersionRecords": 0,
+      "snapshotBytes": 9314304,
+      "entityCounts": {
+        "accounts": 20,
+        "categories": 40,
+        "schedules": 1000,
+        "receipts": 250
+      },
+      "foreignKeyViolations": [],
+      "localSpaceRows": 0,
+      "financialColumns": [
+        "schedule_id",
+        "type",
+        "account_id",
+        "date",
+        "amount",
+        "pair_id",
+        "title",
+        "category_id"
+      ],
+      "financialValuesSha256": "0a4445a44a9bb7995335b576caca8bac7575953fe7add8f95daf3f232d839007",
+      "importedRowsWithExpectedValues": 0
+    },
+    "db-first-initialized": {
+      "integrity": "ok",
+      "postings": 10000,
+      "importedRows": 0,
+      "importedUniqueIds": 0,
+      "importedVersionRecords": 0,
+      "snapshotBytes": 9314304,
+      "entityCounts": {
+        "accounts": 20,
+        "categories": 40,
+        "schedules": 1000,
+        "receipts": 250
+      },
+      "foreignKeyViolations": [],
+      "localSpaceRows": 0,
+      "financialColumns": [
+        "schedule_id",
+        "type",
+        "account_id",
+        "date",
+        "amount",
+        "pair_id",
+        "title",
+        "category_id"
+      ],
+      "financialValuesSha256": "0a4445a44a9bb7995335b576caca8bac7575953fe7add8f95daf3f232d839007",
+      "importedRowsWithExpectedValues": 0
+    },
+    "app-initialized": {
+      "integrity": "ok",
+      "postings": 10000,
+      "importedRows": 0,
+      "importedUniqueIds": 0,
+      "importedVersionRecords": 0,
+      "snapshotBytes": 9314304,
+      "entityCounts": {
+        "accounts": 20,
+        "categories": 40,
+        "schedules": 1000,
+        "receipts": 250
+      },
+      "foreignKeyViolations": [],
+      "localSpaceRows": 0,
+      "financialColumns": [
+        "schedule_id",
+        "type",
+        "account_id",
+        "date",
+        "amount",
+        "pair_id",
+        "title",
+        "category_id"
+      ],
+      "financialValuesSha256": "0a4445a44a9bb7995335b576caca8bac7575953fe7add8f95daf3f232d839007",
+      "importedRowsWithExpectedValues": 0
+    },
+    "schema-startup": {
+      "integrity": "ok",
+      "postings": 10000,
+      "importedRows": 0,
+      "importedUniqueIds": 0,
+      "importedVersionRecords": 0,
+      "snapshotBytes": 9314304,
+      "entityCounts": {
+        "accounts": 20,
+        "categories": 40,
+        "schedules": 1000,
+        "receipts": 250
+      },
+      "foreignKeyViolations": [],
+      "localSpaceRows": 0,
+      "financialColumns": [
+        "schedule_id",
+        "type",
+        "account_id",
+        "date",
+        "amount",
+        "pair_id",
+        "title",
+        "category_id"
+      ],
+      "financialValuesSha256": "0a4445a44a9bb7995335b576caca8bac7575953fe7add8f95daf3f232d839007",
+      "importedRowsWithExpectedValues": 0
+    },
+    "schema-session": {
+      "integrity": "ok",
+      "postings": 20000,
+      "importedRows": 10000,
+      "importedUniqueIds": 10000,
+      "importedVersionRecords": 10000,
+      "snapshotBytes": 17264640,
+      "entityCounts": {
+        "accounts": 20,
+        "categories": 40,
+        "schedules": 1000,
+        "receipts": 250
+      },
+      "foreignKeyViolations": [],
+      "localSpaceRows": 0,
+      "financialColumns": [
+        "schedule_id",
+        "type",
+        "account_id",
+        "date",
+        "amount",
+        "pair_id",
+        "title",
+        "category_id"
+      ],
+      "financialValuesSha256": "3236e5e70f0494d3ad1a8dc30d04f83cc1b2a326d64e7212e4f6789c2bb5f424",
+      "importedRowsWithExpectedValues": 10000
+    },
+    "cte-startup": {
+      "integrity": "ok",
+      "postings": 10000,
+      "importedRows": 0,
+      "importedUniqueIds": 0,
+      "importedVersionRecords": 0,
+      "snapshotBytes": 9314304,
+      "entityCounts": {
+        "accounts": 20,
+        "categories": 40,
+        "schedules": 1000,
+        "receipts": 250
+      },
+      "foreignKeyViolations": [],
+      "localSpaceRows": 0,
+      "financialColumns": [
+        "schedule_id",
+        "type",
+        "account_id",
+        "date",
+        "amount",
+        "pair_id",
+        "title",
+        "category_id"
+      ],
+      "financialValuesSha256": "0a4445a44a9bb7995335b576caca8bac7575953fe7add8f95daf3f232d839007",
+      "importedRowsWithExpectedValues": 0
+    },
+    "cte-session": {
+      "integrity": "ok",
+      "postings": 20000,
+      "importedRows": 10000,
+      "importedUniqueIds": 10000,
+      "importedVersionRecords": 10000,
+      "snapshotBytes": 17260544,
+      "entityCounts": {
+        "accounts": 20,
+        "categories": 40,
+        "schedules": 1000,
+        "receipts": 250
+      },
+      "foreignKeyViolations": [],
+      "localSpaceRows": 0,
+      "financialColumns": [
+        "schedule_id",
+        "type",
+        "account_id",
+        "date",
+        "amount",
+        "pair_id",
+        "title",
+        "category_id"
+      ],
+      "financialValuesSha256": "3236e5e70f0494d3ad1a8dc30d04f83cc1b2a326d64e7212e4f6789c2bb5f424",
+      "importedRowsWithExpectedValues": 10000
+    },
+    "cte-guarded-session": {
+      "integrity": "ok",
+      "postings": 20000,
+      "importedRows": 10000,
+      "importedUniqueIds": 10000,
+      "importedVersionRecords": 10000,
+      "snapshotBytes": 17252352,
+      "entityCounts": {
+        "accounts": 20,
+        "categories": 40,
+        "schedules": 1000,
+        "receipts": 250
+      },
+      "foreignKeyViolations": [],
+      "localSpaceRows": 0,
+      "financialColumns": [
+        "schedule_id",
+        "type",
+        "account_id",
+        "date",
+        "amount",
+        "pair_id",
+        "title",
+        "category_id"
+      ],
+      "financialValuesSha256": "3236e5e70f0494d3ad1a8dc30d04f83cc1b2a326d64e7212e4f6789c2bb5f424",
+      "importedRowsWithExpectedValues": 10000
+    }
+  },
+  "cleanup": {
+    "fixtureProcessesStopped": true,
+    "ownedServerStopped": true,
+    "controlPortClosed": true,
+    "originalSandboxRestored": true,
+    "restoredFileCount": 18,
+    "restoredSha256": {
+      "WebsiteData/Default/salt": "13ec3ca876c3c1f62a72c999311eac62603e272dc4a7e82a2a0900dea2e9375f",
+      "WebsiteData/ResourceLoadStatistics/pcm.db-shm": "50c88f091ef614bdf34cb476fed51203909262c10697a6e46dc8f8f1e865c7d5",
+      "WebsiteData/ResourceLoadStatistics/pcm.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "WebsiteData/ResourceLoadStatistics/observations.db-wal": "a2f5e88238fb18cbc3263d815989cdfe8c86d09180d9090c9533d4864d2edcdf",
+      "WebsiteData/ResourceLoadStatistics/pcm.db": "8fa8229159659ba0313772f5fc887100a507d8c28a8cb11a1e23980062d50ee9",
+      "WebsiteData/ResourceLoadStatistics/observations.db-shm": "a44de93675cabdf8bcffd2beaa642fe37b9df306997d93a57b235267ed9e053b",
+      "WebsiteData/ResourceLoadStatistics/observations.db": "63dabc64939121b9cc1d22ff47b274f05e5217a48f62897ff680d7eab2d390c9",
+      "WebsiteData/EnhancedSecurity/EnhancedSecuritySites.db": "aa618bf662481cb2e19a95f373f496700d3b5524235950b9bf58fd9cbcc7663d",
+      "WebsiteData/EnhancedSecurity/EnhancedSecuritySites.db-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "WebsiteData/EnhancedSecurity/EnhancedSecuritySites.db-shm": "55d0af4ac06c609ab11c3b11af895886080cd227d60c4c71729a21f676aa3882",
+      "WebsiteData/Default/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/origin": "6cfb2ed92f8d214273755c6245f76e9123ff919440ce8fc474293522ecd7772d",
+      "WebsiteData/Default/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/LocalStorage/localstorage.sqlite3-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "WebsiteData/Default/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/LocalStorage/localstorage.sqlite3-shm": "0c8fe610e4dfd91b23185f4e1a86783d9f33dbd77c8cf4d4853904789d3fa9bb",
+      "WebsiteData/Default/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/LocalStorage/localstorage.sqlite3": "450c4317f48533a456cc978c1f8ecbaf6ca03ce14c54da75a2b6cee098c23d76",
+      "WebsiteData/Default/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/IndexedDB/12B72692A7E28E945CDD735468D846BBC4DA5D37AD7111CC6513E7791C1DF243/IndexedDB.sqlite3-wal": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "WebsiteData/Default/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/IndexedDB/12B72692A7E28E945CDD735468D846BBC4DA5D37AD7111CC6513E7791C1DF243/IndexedDB.sqlite3": "2f53ce43b8789a124fcd00ed020558766c23fa3b9a713ed85f8eff8a362dbf39",
+      "WebsiteData/Default/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/N3Tn6UiMwzIpv-3YPFRUTRRi6_UKzVmnHYNY-WU56aU/IndexedDB/12B72692A7E28E945CDD735468D846BBC4DA5D37AD7111CC6513E7791C1DF243/IndexedDB.sqlite3-shm": "cf2d9201ed642ed6a370ba6073a92c708722010b1776c43c3c4cc6771cc5a21e",
+      "WebsiteData/MediaKeys/v1/salt": "cb81855e943d30ca20a2111262b76e27a292e3fb61aaa555a677e7c275066e7d"
+    }
+  },
+  "tests": {
+    "jvm": [
+      {
+        "module": "shared",
+        "report": "build/reports/shared/jvm/TEST-junit-jupiter.xml",
+        "tests": 0,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "shared",
+        "report": "build/reports/shared/jvm/TEST-junit-platform-suite.xml",
+        "tests": 0,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "shared",
+        "report": "build/reports/shared/jvm/TEST-junit-vintage.xml",
+        "tests": 157,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "server",
+        "report": "build/reports/server/jvm/TEST-junit-jupiter.xml",
+        "tests": 33,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "server",
+        "report": "build/reports/server/jvm/TEST-junit-platform-suite.xml",
+        "tests": 0,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "module": "server",
+        "report": "build/reports/server/jvm/TEST-junit-vintage.xml",
+        "tests": 0,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "web": {
+      "tests": 13,
+      "passed": 13,
+      "failed": 0,
+      "workerSourceSha256": "49cc52c135ae427f98825182645b7f2dfa7fd6970cebddd46a4b5d5d15700884",
+      "testSourceSha256": "c158692fe1997ea3f815c853f01c4c4cf69a307033b131e8895027e9164c5019",
+      "logSha256": "06cc3e4d56e84322ef9dc1e07efe3e9f5ac7ad84f96856b2657e1abc21e5bb25"
+    },
+    "architectureGuard": "passed"
+  },
+  "optionGuards": [
+    {
+      "workload": "invalid",
+      "allocationProfile": "false",
+      "exit": 2,
+      "message": "SHILLING_MEMORY_WORKLOAD must be all, csv, csv-review, csv-session, idle, bootstrap, startup or startup-compose-first"
+    },
+    {
+      "workload": "bootstrap",
+      "allocationProfile": "true",
+      "exit": 2,
+      "message": "staged startup requires SHILLING_MEMORY_ALLOCATION_PROFILE=false: that probe eagerly loads Skia"
+    },
+    {
+      "workload": "startup",
+      "allocationProfile": "true",
+      "exit": 2,
+      "message": "staged startup requires SHILLING_MEMORY_ALLOCATION_PROFILE=false: that probe eagerly loads Skia"
+    },
+    {
+      "workload": "startup-compose-first",
+      "allocationProfile": "true",
+      "exit": 2,
+      "message": "staged startup requires SHILLING_MEMORY_ALLOCATION_PROFILE=false: that probe eagerly loads Skia"
+    }
+  ]
+}

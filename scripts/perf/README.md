@@ -618,9 +618,9 @@ the full run takes roughly seven minutes with the window visible and Mac unlocke
 See the [saved-review retention report](../../docs/desktop-import-session-retention-2026-10-06.md)
 for the matched runs and the modest final-footprint result.
 
-`SHILLING_MEMORY_WORKLOAD=idle` opens Home and waits without navigating or
-importing. Restore a completed import fixture before using it to compare cold
-idle against memory retained after the import. See the
+`SHILLING_MEMORY_WORKLOAD=idle` opens Home, reselects the Home tab once, then
+waits without further navigation or importing. Restore a completed import fixture
+before using it to compare cold idle against memory retained after the import. See the
 [import/idle follow-up](../../docs/desktop-import-idle-memory-2026-10-03.md).
 
 `SHILLING_MEMORY_WORKLOAD=bootstrap` pauses at four startup stages: an empty
@@ -637,8 +637,31 @@ probes are compatible. `SHILLING_BOOTSTRAP` records viewport/visibility metadata
 See the [WebContent allocation investigation](../../docs/desktop-webcontent-allocation-2026-10-06.md)
 for the staged results, native categories and inspection limitations.
 
+`SHILLING_MEMORY_WORKLOAD=startup` extends the same staged loader with pauses
+after Kotlin entry, database/schema initialization, Koin setup, session readiness,
+minimal Compose text, Home data projection, Home rendering, and one minute idle.
+`startup-compose-first` moves the minimal Compose step before the database step.
+Both require the existing 10,000-posting / 1,000-schedule seed and disable the
+eager allocation probe, just like `bootstrap`. The Home model is collected before
+rendering and reused by the real `HomeView`; its expected fixture counts must
+arrive before the projection checkpoint. These two modes omit the navigation
+scaffold and do not run imports. Their totals are diagnostic, not normal-app
+memory benchmarks. Compare the same binary using `bootstrap` for the full app.
+See the [startup and persistence follow-up](../../docs/desktop-startup-memory-2026-10-06.md)
+for the stage breakdown, the schema-snapshot fix, and the rejected CTE experiment.
+
+Record whether the restored seed has completed its first session. The initial
+`seed_complete_restart` database still belongs to `__local__`; the first session
+claims it into the active space and rewrites its scoped keys. To profile ordinary
+startup, complete one `idle`/`bootstrap` run, stop the fixture, and save that
+initialized benchmark sandbox as the seed for every compared run. Never copy a
+live database. Keep the original seed separately for migration measurements.
+Matched earlier runs remain comparisons of the same workload, but their startup
+figures include this one-time migration and should be labelled accordingly.
+
 `SHILLING_MEMORY_RUNTIME_PROFILE=true` enables fixture-only phase counters for
-main-thread date formatter construction and Wasm linear-memory capacity. The
+main-thread date formatter construction and Wasm linear-memory capacity, plus
+viewport, pixel ratio and document visibility at each phase. The
 probe keeps only weak references to memory objects. Linear capacity excludes
 Kotlin Wasm GC objects, SQL worker memory and rendering allocations, so it is
 not a substitute for native physical-footprint measurements. Leave the probe

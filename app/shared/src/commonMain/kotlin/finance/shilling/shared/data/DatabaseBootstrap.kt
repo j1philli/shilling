@@ -114,7 +114,17 @@ suspend fun ensureLocalSchemaReady(
 }
 
 private suspend fun installProjectionIndexes(driver: SqlDriver) {
-    driver.execute(null, "CREATE INDEX IF NOT EXISTS idx_change_log_entity_latest ON change_log(" +
-        "household_id, entity_type, entity_id, timestamp DESC, change_id DESC);", 0).await()
-    driver.execute(null, "CREATE INDEX IF NOT EXISTS postings_pair_idx ON postings(space_id, pair_id);", 0).await()
+    installIndexIfMissing(driver, "idx_change_log_entity_latest", "CREATE INDEX IF NOT EXISTS idx_change_log_entity_latest ON change_log(" +
+        "household_id, entity_type, entity_id, timestamp DESC, change_id DESC);")
+    installIndexIfMissing(driver, "postings_pair_idx", "CREATE INDEX IF NOT EXISTS postings_pair_idx ON postings(space_id, pair_id);")
+}
+
+private suspend fun installIndexIfMissing(driver: SqlDriver, name: String, sql: String) {
+    // Avoid a no-op DDL request: the web worker conservatively persists writes,
+    // so even CREATE INDEX IF NOT EXISTS would copy the whole SQLite database.
+    val exists = driver.executeQuery(
+        null, "SELECT COUNT(*) FROM sqlite_master WHERE type = 'index' AND name = ?;",
+        { cursor -> cursor.next(); QueryResult.Value((cursor.getLong(0) ?: 0L) > 0L) }, 1
+    ) { bindString(0, name) }.await()
+    if (!exists) driver.execute(null, sql, 0).await()
 }

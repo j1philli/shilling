@@ -43,6 +43,8 @@
         if (typeof args[0] === 'string' && args[0].startsWith('SHILLING_MEMORY ')) {
             console.info('SHILLING_RUNTIME_PROFILE ' + JSON.stringify({
                 phase: args[0].slice('SHILLING_MEMORY '.length),
+                visibility: document.visibilityState,
+                dpr: devicePixelRatio, viewport: [innerWidth, innerHeight],
                 dateFormats,
                 // Linear capacity is not process footprint, and excludes Wasm GC objects.
                 linearMemoryBytes: memories.map(ref => ref.deref()?.buffer.byteLength ?? null)
