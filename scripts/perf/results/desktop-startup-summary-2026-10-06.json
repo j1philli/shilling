@@ -1,0 +1,2324 @@
+{
+  "db-first-initial": {
+    "complete": true,
+    "seedSource": "seeded-webkit",
+    "rows": [
+      {
+        "phase": "bootstrap_empty",
+        "webMiB": 16.4,
+        "wholeMiB": 64.33,
+        "mallocMiB": 6.94,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.16,
+        "jitMiB": 0.28,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_kotlin_compiled",
+        "webMiB": 87.0,
+        "wholeMiB": 150.53,
+        "mallocMiB": 77.33,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.14,
+        "jitMiB": 0.44,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_imports_skia",
+        "webMiB": 108.0,
+        "wholeMiB": 160.63,
+        "mallocMiB": 97.62,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.48,
+        "jitMiB": 0.69,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_kotlin_instantiated",
+        "webMiB": 129.9,
+        "wholeMiB": 182.53,
+        "mallocMiB": 118.38,
+        "graphicsMiB": 6.66,
+        "wasmCommittedMiB": 1.59,
+        "jitMiB": 0.89,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_entry",
+        "webMiB": 130.2,
+        "wholeMiB": 182.83,
+        "mallocMiB": 118.41,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 1.59,
+        "jitMiB": 0.91,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_database",
+        "webMiB": 143.9,
+        "wholeMiB": 196.82,
+        "mallocMiB": 123.73,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 7.72,
+        "jitMiB": 3.17,
+        "sql": {
+          "calls": 15,
+          "rows": 12,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 6311936
+          }
+        }
+      },
+      {
+        "phase": "startup_koin",
+        "webMiB": 144.4,
+        "wholeMiB": 194.07,
+        "mallocMiB": 124.11,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 7.72,
+        "jitMiB": 3.19,
+        "sql": {
+          "calls": 15,
+          "rows": 12,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 6311936
+          }
+        }
+      },
+      {
+        "phase": "startup_session",
+        "webMiB": 175.0,
+        "wholeMiB": 225.54,
+        "mallocMiB": 144.17,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 15.55,
+        "jitMiB": 4.05,
+        "sql": {
+          "calls": 29,
+          "rows": 13,
+          "commits": 1,
+          "snapshots": {
+            "count": 2,
+            "bytes": 15626240
+          }
+        }
+      },
+      {
+        "phase": "startup_compose",
+        "webMiB": 195.6,
+        "wholeMiB": 249.55,
+        "mallocMiB": 146.05,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 15.55,
+        "jitMiB": 7.17,
+        "sql": {
+          "calls": 29,
+          "rows": 13,
+          "commits": 1,
+          "snapshots": {
+            "count": 2,
+            "bytes": 15626240
+          }
+        }
+      },
+      {
+        "phase": "startup_home_projection",
+        "webMiB": 224.6,
+        "wholeMiB": 278.5,
+        "mallocMiB": 172.02,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 15.55,
+        "jitMiB": 8.34,
+        "sql": {
+          "calls": 61,
+          "rows": 3180,
+          "commits": 1,
+          "snapshots": {
+            "count": 3,
+            "bytes": 24940544
+          }
+        }
+      },
+      {
+        "phase": "startup_home_rendered",
+        "webMiB": 244.3,
+        "wholeMiB": 299.0,
+        "mallocMiB": 179.97,
+        "graphicsMiB": 25.45,
+        "wasmCommittedMiB": 15.55,
+        "jitMiB": 11.81,
+        "sql": {
+          "calls": 61,
+          "rows": 3180,
+          "commits": 1,
+          "snapshots": {
+            "count": 3,
+            "bytes": 24940544
+          }
+        }
+      },
+      {
+        "phase": "startup_idle",
+        "webMiB": 231.5,
+        "wholeMiB": 287.0,
+        "mallocMiB": 166.67,
+        "graphicsMiB": 25.45,
+        "wasmCommittedMiB": 15.5,
+        "jitMiB": 11.66,
+        "sql": {
+          "calls": 61,
+          "rows": 3180,
+          "commits": 1,
+          "snapshots": {
+            "count": 3,
+            "bytes": 24940544
+          }
+        }
+      }
+    ]
+  },
+  "compose-first-initial": {
+    "complete": true,
+    "seedSource": "seeded-webkit",
+    "rows": [
+      {
+        "phase": "bootstrap_empty",
+        "webMiB": 16.5,
+        "wholeMiB": 65.09,
+        "mallocMiB": 6.94,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.16,
+        "jitMiB": 0.31,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_kotlin_compiled",
+        "webMiB": 86.1,
+        "wholeMiB": 150.09,
+        "mallocMiB": 76.39,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.14,
+        "jitMiB": 0.47,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_imports_skia",
+        "webMiB": 107.4,
+        "wholeMiB": 172.71,
+        "mallocMiB": 96.91,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.47,
+        "jitMiB": 0.66,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_kotlin_instantiated",
+        "webMiB": 121.4,
+        "wholeMiB": 186.69,
+        "mallocMiB": 109.8,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 1.62,
+        "jitMiB": 0.8,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_entry",
+        "webMiB": 121.6,
+        "wholeMiB": 186.79,
+        "mallocMiB": 109.78,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 1.62,
+        "jitMiB": 0.84,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_compose",
+        "webMiB": 145.6,
+        "wholeMiB": 214.19,
+        "mallocMiB": 113.94,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 1.61,
+        "jitMiB": 5.25,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_database",
+        "webMiB": 165.1,
+        "wholeMiB": 226.53,
+        "mallocMiB": 126.44,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 7.73,
+        "jitMiB": 6.03,
+        "sql": {
+          "calls": 15,
+          "rows": 12,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 6311936
+          }
+        }
+      },
+      {
+        "phase": "startup_koin",
+        "webMiB": 166.0,
+        "wholeMiB": 227.51,
+        "mallocMiB": 127.14,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 7.77,
+        "jitMiB": 6.05,
+        "sql": {
+          "calls": 15,
+          "rows": 12,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 6311936
+          }
+        }
+      },
+      {
+        "phase": "startup_session",
+        "webMiB": 201.4,
+        "wholeMiB": 263.59,
+        "mallocMiB": 151.41,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 16.25,
+        "jitMiB": 7.27,
+        "sql": {
+          "calls": 29,
+          "rows": 13,
+          "commits": 1,
+          "snapshots": {
+            "count": 2,
+            "bytes": 15626240
+          }
+        }
+      },
+      {
+        "phase": "startup_home_projection",
+        "webMiB": 213.5,
+        "wholeMiB": 275.78,
+        "mallocMiB": 160.41,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 16.25,
+        "jitMiB": 8.56,
+        "sql": {
+          "calls": 61,
+          "rows": 3180,
+          "commits": 1,
+          "snapshots": {
+            "count": 3,
+            "bytes": 24940544
+          }
+        }
+      },
+      {
+        "phase": "startup_home_rendered",
+        "webMiB": 228.7,
+        "wholeMiB": 291.78,
+        "mallocMiB": 164.08,
+        "graphicsMiB": 25.45,
+        "wasmCommittedMiB": 16.25,
+        "jitMiB": 11.58,
+        "sql": {
+          "calls": 61,
+          "rows": 3180,
+          "commits": 1,
+          "snapshots": {
+            "count": 3,
+            "bytes": 24940544
+          }
+        }
+      },
+      {
+        "phase": "startup_idle",
+        "webMiB": 228.7,
+        "wholeMiB": 291.78,
+        "mallocMiB": 164.09,
+        "graphicsMiB": 25.45,
+        "wasmCommittedMiB": 16.25,
+        "jitMiB": 11.59,
+        "sql": {
+          "calls": 61,
+          "rows": 3180,
+          "commits": 1,
+          "snapshots": {
+            "count": 3,
+            "bytes": 24940544
+          }
+        }
+      }
+    ]
+  },
+  "db-first-initialized": {
+    "complete": true,
+    "seedSource": "startup-1-webkit",
+    "rows": [
+      {
+        "phase": "bootstrap_empty",
+        "webMiB": 16.6,
+        "wholeMiB": 64.98,
+        "mallocMiB": 7.03,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.16,
+        "jitMiB": 0.31,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_kotlin_compiled",
+        "webMiB": 86.3,
+        "wholeMiB": 150.18,
+        "mallocMiB": 76.5,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.14,
+        "jitMiB": 0.47,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_imports_skia",
+        "webMiB": 106.8,
+        "wholeMiB": 180.88,
+        "mallocMiB": 96.47,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.45,
+        "jitMiB": 0.66,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_kotlin_instantiated",
+        "webMiB": 129.2,
+        "wholeMiB": 203.28,
+        "mallocMiB": 117.48,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 1.59,
+        "jitMiB": 0.83,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_entry",
+        "webMiB": 129.4,
+        "wholeMiB": 203.48,
+        "mallocMiB": 117.58,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 1.59,
+        "jitMiB": 0.88,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_database",
+        "webMiB": 155.0,
+        "wholeMiB": 225.65,
+        "mallocMiB": 131.73,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 10.58,
+        "jitMiB": 3.23,
+        "sql": {
+          "calls": 15,
+          "rows": 12,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 9314304
+          }
+        }
+      },
+      {
+        "phase": "startup_koin",
+        "webMiB": 155.4,
+        "wholeMiB": 225.95,
+        "mallocMiB": 132.12,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 10.58,
+        "jitMiB": 3.25,
+        "sql": {
+          "calls": 15,
+          "rows": 12,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 9314304
+          }
+        }
+      },
+      {
+        "phase": "startup_session",
+        "webMiB": 157.4,
+        "wholeMiB": 228.67,
+        "mallocMiB": 133.56,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 10.64,
+        "jitMiB": 3.66,
+        "sql": {
+          "calls": 15,
+          "rows": 12,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 9314304
+          }
+        }
+      },
+      {
+        "phase": "startup_compose",
+        "webMiB": 180.9,
+        "wholeMiB": 255.32,
+        "mallocMiB": 138.34,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 10.59,
+        "jitMiB": 6.83,
+        "sql": {
+          "calls": 15,
+          "rows": 12,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 9314304
+          }
+        }
+      },
+      {
+        "phase": "startup_home_projection",
+        "webMiB": 221.2,
+        "wholeMiB": 295.74,
+        "mallocMiB": 175.45,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 10.59,
+        "jitMiB": 8.3,
+        "sql": {
+          "calls": 47,
+          "rows": 3179,
+          "commits": 0,
+          "snapshots": {
+            "count": 2,
+            "bytes": 18628608
+          }
+        }
+      },
+      {
+        "phase": "startup_home_rendered",
+        "webMiB": 240.9,
+        "wholeMiB": 316.52,
+        "mallocMiB": 183.45,
+        "graphicsMiB": 25.45,
+        "wasmCommittedMiB": 10.59,
+        "jitMiB": 11.73,
+        "sql": {
+          "calls": 47,
+          "rows": 3179,
+          "commits": 0,
+          "snapshots": {
+            "count": 2,
+            "bytes": 18628608
+          }
+        }
+      },
+      {
+        "phase": "startup_idle",
+        "webMiB": 229.1,
+        "wholeMiB": 304.62,
+        "mallocMiB": 171.34,
+        "graphicsMiB": 25.45,
+        "wasmCommittedMiB": 10.59,
+        "jitMiB": 11.73,
+        "sql": {
+          "calls": 47,
+          "rows": 3179,
+          "commits": 0,
+          "snapshots": {
+            "count": 2,
+            "bytes": 18628608
+          }
+        }
+      }
+    ]
+  },
+  "app-initialized": {
+    "complete": true,
+    "seedSource": "startup-1-webkit",
+    "rows": [
+      {
+        "phase": "bootstrap_empty",
+        "webMiB": 16.6,
+        "wholeMiB": 64.64,
+        "mallocMiB": 7.06,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.16,
+        "jitMiB": 0.31,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_kotlin_compiled",
+        "webMiB": 86.3,
+        "wholeMiB": 148.44,
+        "mallocMiB": 76.55,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.14,
+        "jitMiB": 0.47,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_imports_skia",
+        "webMiB": 107.0,
+        "wholeMiB": 179.34,
+        "mallocMiB": 96.66,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.45,
+        "jitMiB": 0.66,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_kotlin_instantiated",
+        "webMiB": 122.0,
+        "wholeMiB": 194.34,
+        "mallocMiB": 110.34,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 1.59,
+        "jitMiB": 0.78,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "home_cold",
+        "webMiB": 239.0,
+        "wholeMiB": 309.1,
+        "mallocMiB": 180.3,
+        "graphicsMiB": 25.47,
+        "wasmCommittedMiB": 10.59,
+        "jitMiB": 14.08,
+        "sql": {
+          "calls": 47,
+          "rows": 3179,
+          "commits": 0,
+          "snapshots": {
+            "count": 2,
+            "bytes": 18628608
+          }
+        }
+      },
+      {
+        "phase": "final_idle",
+        "webMiB": 238.9,
+        "wholeMiB": 309.0,
+        "mallocMiB": 180.42,
+        "graphicsMiB": 25.47,
+        "wasmCommittedMiB": 10.59,
+        "jitMiB": 14.08,
+        "sql": {
+          "calls": 47,
+          "rows": 3179,
+          "commits": 0,
+          "snapshots": {
+            "count": 2,
+            "bytes": 18628608
+          }
+        }
+      }
+    ]
+  },
+  "schema-startup": {
+    "complete": true,
+    "seedSource": "startup-1-webkit",
+    "rows": [
+      {
+        "phase": "bootstrap_empty",
+        "webMiB": 16.3,
+        "wholeMiB": 64.52,
+        "mallocMiB": 6.88,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.16,
+        "jitMiB": 0.31,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_kotlin_compiled",
+        "webMiB": 86.1,
+        "wholeMiB": 149.65,
+        "mallocMiB": 76.44,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.14,
+        "jitMiB": 0.47,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_imports_skia",
+        "webMiB": 108.2,
+        "wholeMiB": 173.04,
+        "mallocMiB": 97.7,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.47,
+        "jitMiB": 0.73,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_kotlin_instantiated",
+        "webMiB": 130.1,
+        "wholeMiB": 194.94,
+        "mallocMiB": 118.38,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 1.62,
+        "jitMiB": 0.91,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_entry",
+        "webMiB": 130.3,
+        "wholeMiB": 195.14,
+        "mallocMiB": 118.42,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 1.62,
+        "jitMiB": 0.95,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_database",
+        "webMiB": 155.3,
+        "wholeMiB": 211.08,
+        "mallocMiB": 132.09,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 10.61,
+        "jitMiB": 3.27,
+        "sql": {
+          "calls": 15,
+          "rows": 14,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_koin",
+        "webMiB": 155.7,
+        "wholeMiB": 211.42,
+        "mallocMiB": 132.45,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 10.61,
+        "jitMiB": 3.28,
+        "sql": {
+          "calls": 15,
+          "rows": 14,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_session",
+        "webMiB": 157.8,
+        "wholeMiB": 214.25,
+        "mallocMiB": 134.02,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 3.7,
+        "sql": {
+          "calls": 15,
+          "rows": 14,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_compose",
+        "webMiB": 181.3,
+        "wholeMiB": 241.0,
+        "mallocMiB": 138.81,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 10.62,
+        "jitMiB": 6.84,
+        "sql": {
+          "calls": 15,
+          "rows": 14,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_home_projection",
+        "webMiB": 220.4,
+        "wholeMiB": 280.42,
+        "mallocMiB": 174.81,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 10.62,
+        "jitMiB": 8.25,
+        "sql": {
+          "calls": 47,
+          "rows": 3181,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 9314304
+          }
+        }
+      },
+      {
+        "phase": "startup_home_rendered",
+        "webMiB": 240.1,
+        "wholeMiB": 301.14,
+        "mallocMiB": 182.73,
+        "graphicsMiB": 25.45,
+        "wasmCommittedMiB": 10.62,
+        "jitMiB": 11.73,
+        "sql": {
+          "calls": 47,
+          "rows": 3181,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 9314304
+          }
+        }
+      },
+      {
+        "phase": "startup_idle",
+        "webMiB": 228.4,
+        "wholeMiB": 289.44,
+        "mallocMiB": 170.58,
+        "graphicsMiB": 25.45,
+        "wasmCommittedMiB": 10.62,
+        "jitMiB": 11.75,
+        "sql": {
+          "calls": 47,
+          "rows": 3181,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 9314304
+          }
+        }
+      }
+    ]
+  },
+  "schema-session": {
+    "complete": true,
+    "seedSource": "startup-1-webkit",
+    "rows": [
+      {
+        "phase": "session_home",
+        "webMiB": 259.4,
+        "wholeMiB": 344.92,
+        "mallocMiB": 196.53,
+        "graphicsMiB": 29.66,
+        "wasmCommittedMiB": 10.69,
+        "jitMiB": 13.88,
+        "sql": {
+          "calls": 47,
+          "rows": 3181,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 9314304
+          }
+        }
+      },
+      {
+        "phase": "session_review_1",
+        "webMiB": 438.7,
+        "wholeMiB": 629.32,
+        "mallocMiB": 349.62,
+        "graphicsMiB": 35.84,
+        "wasmCommittedMiB": 10.7,
+        "jitMiB": 20.42,
+        "sql": {
+          "calls": 59,
+          "rows": 8021,
+          "commits": 0,
+          "snapshots": {
+            "count": 1,
+            "bytes": 9314304
+          }
+        }
+      },
+      {
+        "phase": "session_hidden_1",
+        "webMiB": 436.8,
+        "wholeMiB": 524.72,
+        "mallocMiB": 360.73,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.7,
+        "jitMiB": 20.91,
+        "sql": {
+          "calls": 92,
+          "rows": 11688,
+          "commits": 0,
+          "snapshots": {
+            "count": 2,
+            "bytes": 18628608
+          }
+        }
+      },
+      {
+        "phase": "session_restored_1",
+        "webMiB": 450.7,
+        "wholeMiB": 541.52,
+        "mallocMiB": 363.94,
+        "graphicsMiB": 31.33,
+        "wasmCommittedMiB": 10.7,
+        "jitMiB": 22.3,
+        "sql": {
+          "calls": 97,
+          "rows": 12248,
+          "commits": 0,
+          "snapshots": {
+            "count": 2,
+            "bytes": 18628608
+          }
+        }
+      },
+      {
+        "phase": "session_closed_1",
+        "webMiB": 467.9,
+        "wholeMiB": 544.51,
+        "mallocMiB": 385.61,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.7,
+        "jitMiB": 23.27,
+        "sql": {
+          "calls": 137,
+          "rows": 20195,
+          "commits": 0,
+          "snapshots": {
+            "count": 3,
+            "bytes": 27942912
+          }
+        }
+      },
+      {
+        "phase": "session_review_2",
+        "webMiB": 489.4,
+        "wholeMiB": 568.69,
+        "mallocMiB": 398.14,
+        "graphicsMiB": 31.33,
+        "wasmCommittedMiB": 10.7,
+        "jitMiB": 23.66,
+        "sql": {
+          "calls": 149,
+          "rows": 25035,
+          "commits": 0,
+          "snapshots": {
+            "count": 3,
+            "bytes": 27942912
+          }
+        }
+      },
+      {
+        "phase": "session_hidden_2",
+        "webMiB": 287.4,
+        "wholeMiB": 363.89,
+        "mallocMiB": 204.02,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 23.16,
+        "sql": {
+          "calls": 182,
+          "rows": 28702,
+          "commits": 0,
+          "snapshots": {
+            "count": 4,
+            "bytes": 37257216
+          }
+        }
+      },
+      {
+        "phase": "session_restored_2",
+        "webMiB": 299.8,
+        "wholeMiB": 378.89,
+        "mallocMiB": 204.14,
+        "graphicsMiB": 35.52,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 23.16,
+        "sql": {
+          "calls": 187,
+          "rows": 29262,
+          "commits": 0,
+          "snapshots": {
+            "count": 4,
+            "bytes": 37257216
+          }
+        }
+      },
+      {
+        "phase": "session_closed_2",
+        "webMiB": 283.6,
+        "wholeMiB": 360.08,
+        "mallocMiB": 198.39,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 23.16,
+        "sql": {
+          "calls": 227,
+          "rows": 37209,
+          "commits": 0,
+          "snapshots": {
+            "count": 5,
+            "bytes": 46571520
+          }
+        }
+      },
+      {
+        "phase": "session_review_3",
+        "webMiB": 293.8,
+        "wholeMiB": 373.06,
+        "mallocMiB": 198.64,
+        "graphicsMiB": 31.33,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 23.16,
+        "sql": {
+          "calls": 239,
+          "rows": 42049,
+          "commits": 0,
+          "snapshots": {
+            "count": 5,
+            "bytes": 46571520
+          }
+        }
+      },
+      {
+        "phase": "session_hidden_3",
+        "webMiB": 283.4,
+        "wholeMiB": 350.36,
+        "mallocMiB": 196.06,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 23.16,
+        "sql": {
+          "calls": 272,
+          "rows": 45716,
+          "commits": 0,
+          "snapshots": {
+            "count": 6,
+            "bytes": 55885824
+          }
+        }
+      },
+      {
+        "phase": "session_restored_3",
+        "webMiB": 290.4,
+        "wholeMiB": 451.86,
+        "mallocMiB": 196.17,
+        "graphicsMiB": 33.94,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 23.16,
+        "sql": {
+          "calls": 277,
+          "rows": 46276,
+          "commits": 0,
+          "snapshots": {
+            "count": 6,
+            "bytes": 55885824
+          }
+        }
+      },
+      {
+        "phase": "session_closed_3",
+        "webMiB": 285.3,
+        "wholeMiB": 352.34,
+        "mallocMiB": 196.12,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 23.16,
+        "sql": {
+          "calls": 317,
+          "rows": 54223,
+          "commits": 0,
+          "snapshots": {
+            "count": 7,
+            "bytes": 65200128
+          }
+        }
+      },
+      {
+        "phase": "session_review_4",
+        "webMiB": 294.7,
+        "wholeMiB": 364.86,
+        "mallocMiB": 197.42,
+        "graphicsMiB": 31.33,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 23.22,
+        "sql": {
+          "calls": 329,
+          "rows": 59063,
+          "commits": 0,
+          "snapshots": {
+            "count": 7,
+            "bytes": 65200128
+          }
+        }
+      },
+      {
+        "phase": "session_hidden_4",
+        "webMiB": 287.3,
+        "wholeMiB": 354.46,
+        "mallocMiB": 197.2,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 23.08,
+        "sql": {
+          "calls": 362,
+          "rows": 62730,
+          "commits": 0,
+          "snapshots": {
+            "count": 8,
+            "bytes": 74514432
+          }
+        }
+      },
+      {
+        "phase": "session_restored_4",
+        "webMiB": 300.0,
+        "wholeMiB": 463.86,
+        "mallocMiB": 197.27,
+        "graphicsMiB": 37.67,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 23.08,
+        "sql": {
+          "calls": 367,
+          "rows": 63290,
+          "commits": 0,
+          "snapshots": {
+            "count": 8,
+            "bytes": 74514432
+          }
+        }
+      },
+      {
+        "phase": "session_closed_4",
+        "webMiB": 422.7,
+        "wholeMiB": 489.93,
+        "mallocMiB": 319.56,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 20.73,
+        "jitMiB": 23.55,
+        "sql": {
+          "calls": 30457,
+          "rows": 74688,
+          "commits": 20,
+          "snapshots": {
+            "count": 30,
+            "bytes": 377610240
+          }
+        }
+      },
+      {
+        "phase": "session_idle_1",
+        "webMiB": 422.1,
+        "wholeMiB": 478.34,
+        "mallocMiB": 319.55,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 20.73,
+        "jitMiB": 23.55,
+        "sql": {
+          "calls": 30457,
+          "rows": 74688,
+          "commits": 20,
+          "snapshots": {
+            "count": 30,
+            "bytes": 377610240
+          }
+        }
+      },
+      {
+        "phase": "session_idle_2",
+        "webMiB": 422.2,
+        "wholeMiB": 478.54,
+        "mallocMiB": 319.55,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 20.73,
+        "jitMiB": 23.56,
+        "sql": {
+          "calls": 30457,
+          "rows": 74688,
+          "commits": 20,
+          "snapshots": {
+            "count": 30,
+            "bytes": 377610240
+          }
+        }
+      },
+      {
+        "phase": "session_idle_3",
+        "webMiB": 422.1,
+        "wholeMiB": 478.44,
+        "mallocMiB": 319.56,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 20.73,
+        "jitMiB": 23.56,
+        "sql": {
+          "calls": 30457,
+          "rows": 74688,
+          "commits": 20,
+          "snapshots": {
+            "count": 30,
+            "bytes": 377610240
+          }
+        }
+      }
+    ]
+  },
+  "cte-startup": {
+    "complete": true,
+    "seedSource": "startup-1-webkit",
+    "rows": [
+      {
+        "phase": "bootstrap_empty",
+        "webMiB": 16.6,
+        "wholeMiB": 64.89,
+        "mallocMiB": 7.08,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.16,
+        "jitMiB": 0.31,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_kotlin_compiled",
+        "webMiB": 86.6,
+        "wholeMiB": 150.31,
+        "mallocMiB": 76.8,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.14,
+        "jitMiB": 0.47,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_imports_skia",
+        "webMiB": 107.5,
+        "wholeMiB": 172.61,
+        "mallocMiB": 96.97,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 0.47,
+        "jitMiB": 0.66,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "bootstrap_kotlin_instantiated",
+        "webMiB": 128.0,
+        "wholeMiB": 193.21,
+        "mallocMiB": 116.28,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 1.62,
+        "jitMiB": 0.81,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_entry",
+        "webMiB": 128.1,
+        "wholeMiB": 193.21,
+        "mallocMiB": 116.27,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 1.62,
+        "jitMiB": 0.86,
+        "sql": {
+          "calls": 0,
+          "rows": 0,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_database",
+        "webMiB": 154.2,
+        "wholeMiB": 207.04,
+        "mallocMiB": 130.91,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 10.59,
+        "jitMiB": 3.17,
+        "sql": {
+          "calls": 15,
+          "rows": 14,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_koin",
+        "webMiB": 154.5,
+        "wholeMiB": 207.24,
+        "mallocMiB": 131.22,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 10.59,
+        "jitMiB": 3.19,
+        "sql": {
+          "calls": 15,
+          "rows": 14,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_session",
+        "webMiB": 156.7,
+        "wholeMiB": 210.21,
+        "mallocMiB": 132.78,
+        "graphicsMiB": 4.27,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 3.7,
+        "sql": {
+          "calls": 15,
+          "rows": 14,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_compose",
+        "webMiB": 179.8,
+        "wholeMiB": 236.74,
+        "mallocMiB": 137.17,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 10.59,
+        "jitMiB": 6.81,
+        "sql": {
+          "calls": 15,
+          "rows": 14,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_home_projection",
+        "webMiB": 211.3,
+        "wholeMiB": 268.34,
+        "mallocMiB": 165.64,
+        "graphicsMiB": 18.39,
+        "wasmCommittedMiB": 10.59,
+        "jitMiB": 8.12,
+        "sql": {
+          "calls": 47,
+          "rows": 3181,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_home_rendered",
+        "webMiB": 228.2,
+        "wholeMiB": 285.94,
+        "mallocMiB": 170.75,
+        "graphicsMiB": 25.45,
+        "wasmCommittedMiB": 10.59,
+        "jitMiB": 11.7,
+        "sql": {
+          "calls": 47,
+          "rows": 3181,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "startup_idle",
+        "webMiB": 228.4,
+        "wholeMiB": 286.13,
+        "mallocMiB": 170.77,
+        "graphicsMiB": 25.45,
+        "wasmCommittedMiB": 10.59,
+        "jitMiB": 11.72,
+        "sql": {
+          "calls": 47,
+          "rows": 3181,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      }
+    ]
+  },
+  "cte-session": {
+    "complete": true,
+    "seedSource": "startup-1-webkit",
+    "rows": [
+      {
+        "phase": "session_home",
+        "webMiB": 252.9,
+        "wholeMiB": 338.03,
+        "mallocMiB": 194.14,
+        "graphicsMiB": 25.47,
+        "wasmCommittedMiB": 10.64,
+        "jitMiB": 13.95,
+        "sql": {
+          "calls": 47,
+          "rows": 3181,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_review_1",
+        "webMiB": 431.0,
+        "wholeMiB": 521.03,
+        "mallocMiB": 343.41,
+        "graphicsMiB": 35.52,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 20.41,
+        "sql": {
+          "calls": 59,
+          "rows": 8021,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_hidden_1",
+        "webMiB": 428.3,
+        "wholeMiB": 515.43,
+        "mallocMiB": 352.64,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 20.94,
+        "sql": {
+          "calls": 92,
+          "rows": 11688,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_restored_1",
+        "webMiB": 446.1,
+        "wholeMiB": 536.13,
+        "mallocMiB": 355.77,
+        "graphicsMiB": 35.52,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 22.28,
+        "sql": {
+          "calls": 97,
+          "rows": 12248,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_closed_1",
+        "webMiB": 454.4,
+        "wholeMiB": 541.73,
+        "mallocMiB": 372.72,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 23.19,
+        "sql": {
+          "calls": 137,
+          "rows": 20195,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_review_2",
+        "webMiB": 477.6,
+        "wholeMiB": 567.63,
+        "mallocMiB": 382.47,
+        "graphicsMiB": 35.52,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 23.59,
+        "sql": {
+          "calls": 149,
+          "rows": 25035,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_hidden_2",
+        "webMiB": 346.7,
+        "wholeMiB": 434.03,
+        "mallocMiB": 258.94,
+        "graphicsMiB": 36.12,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 23.8,
+        "sql": {
+          "calls": 182,
+          "rows": 28702,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_restored_2",
+        "webMiB": 354.8,
+        "wholeMiB": 538.63,
+        "mallocMiB": 259.38,
+        "graphicsMiB": 38.12,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 23.97,
+        "sql": {
+          "calls": 187,
+          "rows": 29262,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_closed_2",
+        "webMiB": 349.4,
+        "wholeMiB": 436.73,
+        "mallocMiB": 259.81,
+        "graphicsMiB": 36.12,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 24.28,
+        "sql": {
+          "calls": 227,
+          "rows": 37209,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_review_3",
+        "webMiB": 379.9,
+        "wholeMiB": 563.83,
+        "mallocMiB": 284.23,
+        "graphicsMiB": 32.81,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 24.81,
+        "sql": {
+          "calls": 239,
+          "rows": 42049,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_hidden_3",
+        "webMiB": 351.2,
+        "wholeMiB": 438.63,
+        "mallocMiB": 263.52,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 24.89,
+        "sql": {
+          "calls": 272,
+          "rows": 45716,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_restored_3",
+        "webMiB": 365.6,
+        "wholeMiB": 549.83,
+        "mallocMiB": 263.03,
+        "graphicsMiB": 37.67,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 24.95,
+        "sql": {
+          "calls": 277,
+          "rows": 46276,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_closed_3",
+        "webMiB": 343.3,
+        "wholeMiB": 430.93,
+        "mallocMiB": 253.59,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 25.11,
+        "sql": {
+          "calls": 317,
+          "rows": 54223,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_review_4",
+        "webMiB": 384.3,
+        "wholeMiB": 474.63,
+        "mallocMiB": 286.19,
+        "graphicsMiB": 31.33,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 25.28,
+        "sql": {
+          "calls": 329,
+          "rows": 59063,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_hidden_4",
+        "webMiB": 371.1,
+        "wholeMiB": 458.73,
+        "mallocMiB": 280.64,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 25.36,
+        "sql": {
+          "calls": 362,
+          "rows": 62730,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_restored_4",
+        "webMiB": 385.0,
+        "wholeMiB": 569.58,
+        "mallocMiB": 281.7,
+        "graphicsMiB": 37.67,
+        "wasmCommittedMiB": 10.66,
+        "jitMiB": 25.42,
+        "sql": {
+          "calls": 367,
+          "rows": 63290,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_closed_4",
+        "webMiB": 444.7,
+        "wholeMiB": 515.11,
+        "mallocMiB": 341.41,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 20.7,
+        "jitMiB": 24.75,
+        "sql": {
+          "calls": 30457,
+          "rows": 74688,
+          "commits": 20,
+          "snapshots": {
+            "count": 21,
+            "bytes": 286187520
+          }
+        }
+      },
+      {
+        "phase": "session_idle_1",
+        "webMiB": 444.0,
+        "wholeMiB": 514.31,
+        "mallocMiB": 341.3,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 20.7,
+        "jitMiB": 24.75,
+        "sql": {
+          "calls": 30457,
+          "rows": 74688,
+          "commits": 20,
+          "snapshots": {
+            "count": 21,
+            "bytes": 286187520
+          }
+        }
+      },
+      {
+        "phase": "session_idle_2",
+        "webMiB": 444.0,
+        "wholeMiB": 514.39,
+        "mallocMiB": 341.28,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 20.7,
+        "jitMiB": 24.75,
+        "sql": {
+          "calls": 30457,
+          "rows": 74688,
+          "commits": 20,
+          "snapshots": {
+            "count": 21,
+            "bytes": 286187520
+          }
+        }
+      },
+      {
+        "phase": "session_idle_3",
+        "webMiB": 444.0,
+        "wholeMiB": 514.39,
+        "mallocMiB": 341.3,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 20.7,
+        "jitMiB": 24.75,
+        "sql": {
+          "calls": 30457,
+          "rows": 74688,
+          "commits": 20,
+          "snapshots": {
+            "count": 21,
+            "bytes": 286187520
+          }
+        }
+      }
+    ]
+  },
+  "cte-guarded-session": {
+    "complete": true,
+    "seedSource": "startup-1-webkit",
+    "rows": [
+      {
+        "phase": "session_home",
+        "webMiB": 259.1,
+        "wholeMiB": 344.18,
+        "mallocMiB": 196.23,
+        "graphicsMiB": 29.66,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 13.89,
+        "sql": {
+          "calls": 47,
+          "rows": 3181,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_review_1",
+        "webMiB": 441.7,
+        "wholeMiB": 531.83,
+        "mallocMiB": 352.77,
+        "graphicsMiB": 35.52,
+        "wasmCommittedMiB": 10.69,
+        "jitMiB": 20.42,
+        "sql": {
+          "calls": 59,
+          "rows": 8021,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_hidden_1",
+        "webMiB": 438.3,
+        "wholeMiB": 525.77,
+        "mallocMiB": 361.95,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.69,
+        "jitMiB": 20.91,
+        "sql": {
+          "calls": 92,
+          "rows": 11688,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_restored_1",
+        "webMiB": 458.2,
+        "wholeMiB": 642.47,
+        "mallocMiB": 364.95,
+        "graphicsMiB": 37.67,
+        "wasmCommittedMiB": 10.69,
+        "jitMiB": 22.3,
+        "sql": {
+          "calls": 97,
+          "rows": 12248,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_closed_1",
+        "webMiB": 465.3,
+        "wholeMiB": 553.07,
+        "mallocMiB": 382.25,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.69,
+        "jitMiB": 23.2,
+        "sql": {
+          "calls": 137,
+          "rows": 20195,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_review_2",
+        "webMiB": 483.9,
+        "wholeMiB": 574.37,
+        "mallocMiB": 391.91,
+        "graphicsMiB": 31.33,
+        "wasmCommittedMiB": 10.69,
+        "jitMiB": 23.58,
+        "sql": {
+          "calls": 149,
+          "rows": 25035,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_hidden_2",
+        "webMiB": 488.7,
+        "wholeMiB": 576.27,
+        "mallocMiB": 283.81,
+        "graphicsMiB": 36.12,
+        "wasmCommittedMiB": 10.69,
+        "jitMiB": 23.78,
+        "sql": {
+          "calls": 182,
+          "rows": 28702,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_restored_2",
+        "webMiB": 383.7,
+        "wholeMiB": 568.07,
+        "mallocMiB": 284.42,
+        "graphicsMiB": 37.67,
+        "wasmCommittedMiB": 10.69,
+        "jitMiB": 23.98,
+        "sql": {
+          "calls": 187,
+          "rows": 29262,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_closed_2",
+        "webMiB": 370.5,
+        "wholeMiB": 458.27,
+        "mallocMiB": 278.91,
+        "graphicsMiB": 36.12,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 24.3,
+        "sql": {
+          "calls": 227,
+          "rows": 37209,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_review_3",
+        "webMiB": 406.5,
+        "wholeMiB": 592.97,
+        "mallocMiB": 302.97,
+        "graphicsMiB": 35.84,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 24.81,
+        "sql": {
+          "calls": 239,
+          "rows": 42049,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_hidden_3",
+        "webMiB": 378.1,
+        "wholeMiB": 466.07,
+        "mallocMiB": 287.67,
+        "graphicsMiB": 31.94,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 24.91,
+        "sql": {
+          "calls": 272,
+          "rows": 45716,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_restored_3",
+        "webMiB": 389.8,
+        "wholeMiB": 480.47,
+        "mallocMiB": 287.95,
+        "graphicsMiB": 35.52,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 24.95,
+        "sql": {
+          "calls": 277,
+          "rows": 46276,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_closed_3",
+        "webMiB": 370.8,
+        "wholeMiB": 458.77,
+        "mallocMiB": 274.36,
+        "graphicsMiB": 36.12,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 25.12,
+        "sql": {
+          "calls": 317,
+          "rows": 54223,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_review_4",
+        "webMiB": 409.1,
+        "wholeMiB": 499.77,
+        "mallocMiB": 304.16,
+        "graphicsMiB": 35.52,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 25.3,
+        "sql": {
+          "calls": 329,
+          "rows": 59063,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_hidden_4",
+        "webMiB": 390.5,
+        "wholeMiB": 478.47,
+        "mallocMiB": 293.28,
+        "graphicsMiB": 36.12,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 25.41,
+        "sql": {
+          "calls": 362,
+          "rows": 62730,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_restored_4",
+        "webMiB": 397.8,
+        "wholeMiB": 580.27,
+        "mallocMiB": 294.0,
+        "graphicsMiB": 38.12,
+        "wasmCommittedMiB": 10.67,
+        "jitMiB": 25.47,
+        "sql": {
+          "calls": 367,
+          "rows": 63290,
+          "commits": 0,
+          "snapshots": {
+            "count": 0,
+            "bytes": 0
+          }
+        }
+      },
+      {
+        "phase": "session_closed_4",
+        "webMiB": 447.4,
+        "wholeMiB": 535.43,
+        "mallocMiB": 337.89,
+        "graphicsMiB": 36.12,
+        "wasmCommittedMiB": 20.77,
+        "jitMiB": 24.64,
+        "sql": {
+          "calls": 30457,
+          "rows": 74688,
+          "commits": 20,
+          "snapshots": {
+            "count": 21,
+            "bytes": 285986816
+          }
+        }
+      },
+      {
+        "phase": "session_idle_1",
+        "webMiB": 446.7,
+        "wholeMiB": 534.64,
+        "mallocMiB": 337.91,
+        "graphicsMiB": 36.12,
+        "wasmCommittedMiB": 20.77,
+        "jitMiB": 24.64,
+        "sql": {
+          "calls": 30457,
+          "rows": 74688,
+          "commits": 20,
+          "snapshots": {
+            "count": 21,
+            "bytes": 285986816
+          }
+        }
+      },
+      {
+        "phase": "session_idle_2",
+        "webMiB": 446.8,
+        "wholeMiB": 534.84,
+        "mallocMiB": 337.91,
+        "graphicsMiB": 36.12,
+        "wasmCommittedMiB": 20.77,
+        "jitMiB": 24.64,
+        "sql": {
+          "calls": 30457,
+          "rows": 74688,
+          "commits": 20,
+          "snapshots": {
+            "count": 21,
+            "bytes": 285986816
+          }
+        }
+      },
+      {
+        "phase": "session_idle_3",
+        "webMiB": 446.7,
+        "wholeMiB": 534.74,
+        "mallocMiB": 337.92,
+        "graphicsMiB": 36.12,
+        "wasmCommittedMiB": 20.77,
+        "jitMiB": 24.64,
+        "sql": {
+          "calls": 30457,
+          "rows": 74688,
+          "commits": 20,
+          "snapshots": {
+            "count": 21,
+            "bytes": 285986816
+          }
+        }
+      }
+    ]
+  }
+}
