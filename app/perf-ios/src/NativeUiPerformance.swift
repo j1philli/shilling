@@ -56,7 +56,21 @@ final class NativeUiPerformanceController: UIViewController {
                 if screen == "plan-transitions" { try await runPlanTransitions(); continue }
                 if screen == "hosted-settings" { try await runHostedSettings(); continue }
                 if screen == "tabs" { try await runTabs(); continue }
+                if screen == "tab-resume" { try await runTabResume(); continue }
+                if screen == "loaded-empty" {
+                    try await checkLoadedEmptyStates()
+                    await pause(6)
+                    emit(["event": "empty-states-closed", "database": querySnapshot()])
+                    continue
+                }
                 if screen == "receipt-previews" { try await runReceiptPreviews(); continue }
+                if screen == "import-regression" {
+                    let checks = try await asyncFunction(for: NativeUiFixture.shared.checkImportRegression())
+                    mount(AnyView(Text("Import regression passed")))
+                    await pause(6)
+                    emit(["event": "import-checked", "checks": checks, "database": querySnapshot()])
+                    continue
+                }
                 begin(screen, "load")
                 switch screen {
                 case "activity": mount(AnyView(ActivityScreen()))
@@ -583,6 +597,82 @@ final class NativeUiPerformanceController: UIViewController {
         for i in 0..<10 { _ = try await asyncFunction(for: NativeUiFixture.shared.changePosting(index: Int32(i))) }
         await pause(1)
         end("tabs", "after-close-updates")
+    }
+
+    private func runTabResume() async throws {
+        var tabs: ShillingTabBarController? = ShillingTabBarController()
+        mountController(tabs!)
+        for (key, minimum, maximum) in [("ACTIVITY", 7000, 7600), ("PLAN", 1000, 1010), ("RECEIPTS", 250, 252)] {
+            guard let tab = tabs?.tabs.first(where: { $0.identifier == key }),
+                  let settings = tabs?.tabs.first(where: { $0.identifier == "SETTINGS" }) else {
+                throw FixtureError("Missing tab")
+            }
+            tabs?.selectedTab = tab
+            let list = try await waitForList(minimum: minimum, maximum: maximum)
+            await pause(0.5)
+            list.setContentOffset(CGPoint(x: 0, y: 1200), animated: false)
+            await pause(0.5)
+            let previousOffset = list.contentOffset.y
+            let previousItems = itemCount(list)
+            tabs?.selectedTab = settings
+            await pause(7) // Expires the shared StateFlow replay cache.
+            begin("tab-resume", key)
+            tabs?.selectedTab = tab
+            let resumed = try await waitForList(minimum: minimum, maximum: maximum)
+            await pause(1)
+            end("tab-resume", key, extra: ["beforeOffsetY": previousOffset,
+                "afterOffsetY": resumed.contentOffset.y, "beforeItems": previousItems,
+                "afterItems": itemCount(resumed)])
+            screenshot("resume-\(key.lowercased())")
+        }
+        weak var released = tabs
+        mount(AnyView(Text("Resume check closed")))
+        tabs = nil
+        await pause(6)
+        emit(["event": "resume-closed", "controllerReleased": released == nil, "database": querySnapshot()])
+    }
+
+    private func checkLoadedEmptyStates() async throws {
+        let activity = ActivityModel()
+        let receipts = ReceiptsModel()
+        let plan = PlanModel()
+        var tasks = [Task { await activity.observe() }, Task { await receipts.observe() },
+                     Task { await plan.observe(.schedules) }]
+        defer { tasks.forEach { $0.cancel() } }
+        func wait(_ condition: () -> Bool) async throws {
+            let deadline = CACurrentMediaTime() + 30
+            while !condition() {
+                guard CACurrentMediaTime() < deadline else { throw FixtureError("Loaded empty state did not update") }
+                await pause(0.02)
+            }
+        }
+        try await wait { !activity.state.sections.isEmpty && receipts.state.rows.count == 250 && !plan.schedules.groups.isEmpty }
+        activity.screen.setQuery(text: "no synthetic transactions match this query")
+        plan.screen.setScheduleFilter(type: .income)
+        try await wait { activity.state.empty != nil && activity.state.sections.isEmpty &&
+            plan.schedules.empty != nil && plan.schedules.groups.isEmpty }
+        _ = try await asyncFunction(for: NativeUiFixture.shared.setReceiptsHidden(hidden: true))
+        do {
+            try await wait { receipts.state.empty != nil && receipts.state.rows.isEmpty }
+            emit(["event": "empty-states-checked", "activity": true, "schedules": true, "receipts": true])
+            _ = try await asyncFunction(for: NativeUiFixture.shared.setReceiptsHidden(hidden: false))
+        } catch {
+            _ = try? await asyncFunction(for: NativeUiFixture.shared.setReceiptsHidden(hidden: false))
+            throw error
+        }
+        activity.screen.setQuery(text: "")
+        plan.screen.setScheduleFilter(type: nil)
+        try await wait { !activity.state.sections.isEmpty && receipts.state.rows.count == 250 && !plan.schedules.groups.isEmpty }
+        emit(["event": "empty-states-restored"])
+        tasks[0].cancel()
+        await tasks[0].value
+        await pause(6)
+        _ = try await asyncFunction(for: NativeUiFixture.shared.changePosting(index: 777))
+        tasks[0] = Task { await activity.observe() }
+        try await wait { activity.state.sections.flatMap(\.rows).contains { $0.title == "Synthetic update 777" } }
+        _ = try await asyncFunction(for: NativeUiFixture.shared.changePosting(index: 9))
+        try await wait { activity.state.sections.flatMap(\.rows).contains { $0.title == "Synthetic update 9" } }
+        emit(["event": "hidden-update-checked"])
     }
 
     private func runReceiptPreviews() async throws {

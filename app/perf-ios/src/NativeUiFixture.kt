@@ -17,6 +17,7 @@ import finance.shilling.shared.db.ShillingDatabase
 import finance.shilling.shared.presentation.today
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.datetime.*
 import org.koin.dsl.module
 import org.koin.mp.KoinPlatform
@@ -28,6 +29,7 @@ internal fun isDebugBuild(): Boolean = false
 /** Synthetic Store5 graph in the perf sandbox; hosted mode adds local control-plane metadata. */
 object NativeUiFixture {
     private lateinit var metrics: UiQueryDriver
+    private var heldReceipts: List<Receipt>? = null
 
     @NativeCoroutines
     suspend fun seed(): Unit = withContext(Dispatchers.Default) {
@@ -115,6 +117,31 @@ object NativeUiFixture {
 
     fun resetQueries() = metrics.reset()
     fun queryMetrics(): String = metrics.snapshot()
+
+    @NativeCoroutines
+    suspend fun checkImportRegression(): String {
+        val graph = KoinPlatform.getKoin()
+        val checks = mutableListOf<String>()
+        finance.shilling.perf.checkMobileImport(graph.get(), graph.get(), graph.get(), graph.get()) { checks += it }
+        return checks.joinToString(",")
+    }
+
+    /** Exercise a loaded empty result without touching the fixture's receipt files. */
+    @NativeCoroutines
+    suspend fun setReceiptsHidden(hidden: Boolean): Unit = withContext(Dispatchers.Default) {
+        val graph = KoinPlatform.getKoin()
+        if (hidden) {
+            check(heldReceipts == null)
+            heldReceipts = graph.get<ReceiptRepository>().watchAll().first().map { it.receipt }
+            graph.get<ReceiptRepository>().clearAll()
+        } else {
+            val receipts = heldReceipts ?: return@withContext
+            graph.get<ReceiptStore>().write(
+                StoreWriteRequest.of<ReceiptKey, List<Receipt>, Unit>(ReceiptKey.All, receipts))
+            graph.get<ChangeNotifier>().notifyChanged()
+            heldReceipts = null
+        }
+    }
 
     @NativeCoroutines
     suspend fun installReceipt(path: String, receiptId: String, name: String): Unit = withContext(Dispatchers.IO) {

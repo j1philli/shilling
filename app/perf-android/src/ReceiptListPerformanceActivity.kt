@@ -51,7 +51,7 @@ class ReceiptListPerformanceActivity : Activity() {
     private suspend fun runWorkload() = coroutineScope {
         Logger.setMinSeverity(Severity.Error)
         val schema = object : SqlSchema<QueryResult.Value<Unit>> {
-            override val version = 1L
+            override val version = ShillingDatabase.Schema.version
             override fun create(driver: SqlDriver) = QueryResult.Value(Unit)
             override fun migrate(driver: SqlDriver, oldVersion: Long, newVersion: Long, vararg callbacks: AfterVersion) = QueryResult.Value(Unit)
         }

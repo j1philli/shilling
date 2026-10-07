@@ -17,30 +17,42 @@ import time
 import uuid
 
 
+def validate_closed_updates(records):
+    measured = [r for r in records if r["event"] == "measurement" and r["phase"] == "after-close-updates"]
+    # Each of the ten production record() calls checks the existing posting's
+    # linked-transfer identity through Store5 (one posting + one bookkeeping read).
+    # These are write validation, not leaked UI subscriptions. Reject extra reads.
+    if len(measured) != 1:
+        raise RuntimeError("Missing closed-screen mutation check")
+    database = measured[0]["database"]
+    if (database["activeListeners"] or database["mainThreadQueries"] or database["queries"] != 20
+            or database["tables"] != {"postings": 10, "bookkeeping": 10}):
+        raise RuntimeError("Closed screens caused reads beyond the ten writes' Store5 validation")
+
+
 def validate_editor_lifetimes(records):
     closed = [r for r in records if r["event"] == "editor-closed"]
     if len(closed) != 12 or any(not r["controllerReleased"] or r["database"]["activeListeners"] for r in closed):
         raise RuntimeError("Editor controllers or database listeners remained after closing")
     measured = [r for r in records if r["event"] == "measurement"]
     rebuilds = [r for r in measured if r["phase"].startswith("rebuild-")]
-    after_close = [r for r in measured if r["phase"] == "after-close-updates"]
-    if len(rebuilds) != 12 or len(after_close) != 1 or any(r["database"]["queries"] for r in rebuilds + after_close):
-        raise RuntimeError("Editor parent rebuilds or closed editors caused extra database reads")
+    if len(rebuilds) != 12 or any(r["database"]["queries"] for r in rebuilds):
+        raise RuntimeError("Editor parent rebuilds caused extra database reads")
+    validate_closed_updates(records)
 
 
 def validate_editor_navigation(records):
     closed = [r for r in records if r["event"] == "navigation-closed"]
     if len(closed) != 8 or any(r["database"]["activeListeners"] for r in closed):
         raise RuntimeError("Navigation left editor database listeners active")
-    after_close = [r for r in records if r["event"] == "measurement" and r["phase"] == "after-close-updates"]
-    if len(after_close) != 1 or after_close[0]["database"]["queries"]:
-        raise RuntimeError("Closed navigation editors caused database reads")
+    validate_closed_updates(records)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", required=True)
-    parser.add_argument("--screen", choices=["activity", "receipts", "plan", "plan-transitions", "hosted-settings", "home", "editors", "editor-navigation", "editor-choices", "editor-save", "tabs", "receipt-previews"], required=True)
+    parser.add_argument("--screen", choices=["activity", "receipts", "plan", "plan-transitions", "hosted-settings", "home", "editors", "editor-navigation", "editor-choices", "editor-save", "tabs", "tab-resume", "loaded-empty", "receipt-previews", "import-regression"], required=True)
+    parser.add_argument("--allow-scroll-reset", action="store_true", help="Record a known-bad tab-resume baseline without requiring scroll-position preservation")
     parser.add_argument("--hosted-server", help="Local synthetic control-plane fixture URL, required for hosted-settings")
     parser.add_argument("--runs", type=int, default=3, choices=range(1, 6))
     parser.add_argument("--label", required=True)
@@ -118,6 +130,11 @@ def main():
                     checked = [r for r in records if r["run"] == run and r["event"] == "editor-save-checked"]
                     if len(checked) != 4 or any(not r["restored"] or r["saveDelayMs"] >= 120 for r in checked):
                         raise RuntimeError("Rapid editor save/restore checks did not complete")
+                if args.screen == "import-regression":
+                    checked = [r for r in records if r["run"] == run and r["event"] == "import-checked"]
+                    expected = "large-review-edits,hidden-review-resumed,account-duplicates-refreshed,replacement-import-verified"
+                    if len(checked) != 1 or checked[0]["checks"] != expected or checked[0]["database"]["activeListeners"]:
+                        raise RuntimeError("Import regression checks did not complete or left listeners active")
                 if args.screen == "hosted-settings":
                     measured = [r for r in records if r["run"] == run and r["event"] == "measurement"]
                     if ([r["phase"] for r in measured] != ["visible", "hidden", "reopened"]
@@ -142,9 +159,26 @@ def main():
                     closed = [r for r in tab_records if r["event"] == "tabs-closed"]
                     if len(closed) != 1 or not closed[0]["controllerReleased"] or closed[0]["database"]["activeListeners"]:
                         raise RuntimeError("Tab container or database listeners remained after closing")
-                    updates = [r for r in tab_records if r["event"] == "measurement" and r["phase"] == "after-close-updates"]
-                    if len(updates) != 1 or updates[0]["database"]["queries"]:
-                        raise RuntimeError("Closed tabs caused database reads")
+                    validate_closed_updates(tab_records)
+                if args.screen == "tab-resume":
+                    current = [r for r in records if r["run"] == run]
+                    measured = [r for r in current if r["event"] == "measurement"]
+                    closed = [r for r in current if r["event"] == "resume-closed"]
+                    if (len(measured) != 3 or {r["phase"] for r in measured} != {"ACTIVITY", "PLAN", "RECEIPTS"}
+                            or len(closed) != 1 or not closed[0]["controllerReleased"] or closed[0]["database"]["activeListeners"]
+                            or any(r["beforeItems"] != r["afterItems"] or r["database"]["mainThreadQueries"] for r in measured)):
+                        raise RuntimeError("Tab resume lost rows, queried on Main, or retained listeners/controllers")
+                    if not args.allow_scroll_reset and any(abs(r["beforeOffsetY"] - r["afterOffsetY"]) > 2 for r in measured):
+                        raise RuntimeError("Tab resume lost its scroll position after cache expiry")
+                if args.screen == "loaded-empty":
+                    current = [r for r in records if r["run"] == run]
+                    closed = [r for r in current if r["event"] == "empty-states-closed"]
+                    if (len([r for r in current if r["event"] == "empty-states-checked"]) != 1
+                            or len([r for r in current if r["event"] == "empty-states-restored"]) != 1
+                            or len([r for r in current if r["event"] == "hidden-update-checked"]) != 1
+                            or len(closed) != 1 or closed[0]["database"]["activeListeners"]
+                            or closed[0]["database"]["mainThreadQueries"]):
+                        raise RuntimeError("Loaded empty results or restored data did not reach the native models")
                 if args.screen == "receipt-previews":
                     closed = [r for r in records if r["run"] == run and r["event"] == "preview-closed"]
                     if len(closed) != 6 or any(not r["controllerReleased"] for r in closed):
