@@ -20,6 +20,7 @@ final class NativeUiPerformanceController: UIViewController {
     private var displayLink: CADisplayLink?
     private var frameGaps: [Double] = []
     private var previousFrame: CFTimeInterval?
+    private var firstCallbackLatencyMs: Double?
     private var scrollView: UIScrollView?
     private var scrolling = false
     private let start = CACurrentMediaTime()
@@ -619,10 +620,12 @@ final class NativeUiPerformanceController: UIViewController {
             begin("tab-resume", key)
             tabs?.selectedTab = tab
             let resumed = try await waitForList(minimum: minimum, maximum: maximum)
+            // This checks populated cells in the hierarchy, not completed rendering.
+            let listReadyMs = (CACurrentMediaTime() - phaseStarted) * 1000
             await pause(1)
             end("tab-resume", key, extra: ["beforeOffsetY": previousOffset,
                 "afterOffsetY": resumed.contentOffset.y, "beforeItems": previousItems,
-                "afterItems": itemCount(resumed)])
+                "afterItems": itemCount(resumed), "listReadyMs": listReadyMs])
             screenshot("resume-\(key.lowercased())")
         }
         weak var released = tabs
@@ -828,6 +831,7 @@ final class NativeUiPerformanceController: UIViewController {
         NativeUiFixture.shared.resetQueries()
         frameGaps = []
         previousFrame = nil
+        firstCallbackLatencyMs = nil
         phaseCpu = cpuSeconds()
         phaseStarted = CACurrentMediaTime()
         interval = signposter.beginInterval("NativeUIWorkload", "\(screen, privacy: .public) / \(phase, privacy: .public)")
@@ -849,6 +853,9 @@ final class NativeUiPerformanceController: UIViewController {
             "maxCallbackGapMs": samples.last ?? 0,
             "p95CallbackGapMs": samples.isEmpty ? 0 : samples[Int(Double(samples.count - 1) * 0.95)],
             "residentMiB": residentMiB()]
+        // Callback-to-callback gaps omit the initial synchronous work. Keep its
+        // latency separate; neither metric establishes when pixels were rendered.
+        metrics["firstCallbackLatencyMs"] = firstCallbackLatencyMs.map { $0 as Any } ?? NSNull()
         if let data = NativeUiFixture.shared.queryMetrics().data(using: .utf8),
            let queries = try? JSONSerialization.jsonObject(with: data) { metrics["database"] = queries }
         metrics.merge(extra) { _, new in new }
@@ -856,6 +863,9 @@ final class NativeUiPerformanceController: UIViewController {
     }
 
     @objc private func frame(_ link: CADisplayLink) {
+        if firstCallbackLatencyMs == nil {
+            firstCallbackLatencyMs = (CACurrentMediaTime() - phaseStarted) * 1000
+        }
         if let previousFrame { frameGaps.append((link.timestamp - previousFrame) * 1000) }
         previousFrame = link.timestamp
         if scrolling, let scrollView {

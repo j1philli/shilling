@@ -5,7 +5,6 @@ Record Animation Hitches with Time Profiler and Points of Interest added. Export
 OSSignpostIntervals, time-profile and hitches-summary tables from the same trace.
 """
 import argparse
-import collections
 import json
 import xml.etree.ElementTree as ET
 
@@ -22,6 +21,32 @@ def table(path):
         return element
 
     return root, resolve
+
+
+def summarize_cpu(samples):
+    # Inclusive sample counts: stack categories overlap. A sample contributes
+    # once per category even when multiple matching frames occur in its stack.
+    categories = {
+        "menuConstruction": "Coordinator.makeMenu()",
+        "viewGraphUpdate": "ViewRendererHost.updateViewGraph<A>(body:)",
+        "collectionLayout": "-[UICollectionView layoutSubviews]",
+        "cellCreation": "-[UICollectionView _createPreparedCellForItemAtIndexPath:withLayoutAttributes:applyAttributes:isFocused:notify:]",
+        "cellSizing": "PlatformListViewBase<>.hostSizeThatFits(width:)",
+        "navigationLayout": "-[UINavigationController __viewWillLayoutSubviews]",
+        "toolbarUpdate": "ToolbarBridge.preferencesDidChange(_:context:)",
+        "hostingViewRelease": "_UIHostingView.__deallocating_deinit",
+        "hostingLayout": "_UIHostingView.layoutSubviews()",
+        "windowAttachment": "-[UIView(Internal) _didMoveFromWindow:toWindow:]",
+        "layerLayout": "CA::Layer::layout_if_needed(CA::Transaction*)",
+    }
+    main_stacks = [s[3] for s in samples if s[2]]
+    counts = {key: sum(frame in stack for stack in main_stacks) for key, frame in categories.items()}
+    counts["tabTransition"] = sum(
+        any("-[UITabBarController transitionFromViewController:" in frame for frame in stack)
+        for stack in main_stacks
+    )
+    return {"sampledCpuMs": sum(s[1] for s in samples), "mainThreadSamples": len(main_stacks),
+            "inclusiveMainThreadSamples": counts}
 
 
 def summarize(intervals_path, cpu_path, hitches_path):
@@ -54,26 +79,14 @@ def summarize(intervals_path, cpu_path, hitches_path):
     for start, end, name in intervals:
         selected = [s for s in samples if start <= s[0] < end]
         hits = [h for h in hitches if start <= h["startSeconds"] < end]
-        frames = collections.Counter()
-        for _, _, main, names in selected:
-            if main:
-                frames.update(names)
-        # Inclusive sample counts: these stack categories overlap.
-        categories = {
-            "menuConstruction": "Coordinator.makeMenu()",
-            "viewGraphUpdate": "ViewRendererHost.updateViewGraph<A>(body:)",
-            "collectionLayout": "-[UICollectionView layoutSubviews]",
-            "cellCreation": "-[UICollectionView _createPreparedCellForItemAtIndexPath:withLayoutAttributes:applyAttributes:isFocused:notify:]",
-            "cellSizing": "PlatformListViewBase<>.hostSizeThatFits(width:)",
-            "navigationLayout": "-[UINavigationController __viewWillLayoutSubviews]",
-            "toolbarUpdate": "ToolbarBridge.preferencesDidChange(_:context:)",
-            "hostingViewRelease": "_UIHostingView.__deallocating_deinit",
-        }
+        # Include the full hitch window even if it ends after the phase. CPU
+        # stacks locate overlapping work, not proof that a frame caused a hitch.
+        hits = [{**h, "cpuWindow": summarize_cpu([
+            s for s in samples if h["startSeconds"] <= s[0] < h["startSeconds"] + h["durationMs"] / 1000
+        ])} for h in hits]
         result.append({
             "phase": name, "startSeconds": start, "endSeconds": end,
-            "sampledCpuMs": sum(s[1] for s in selected),
-            "mainThreadSamples": sum(s[2] for s in selected),
-            "inclusiveMainThreadSamples": {key: frames[value] for key, value in categories.items()},
+            **summarize_cpu(selected),
             "hitches": len(hits), "maxHitchMs": max((h["durationMs"] for h in hits), default=0),
             "hitchSamples": hits,
         })
