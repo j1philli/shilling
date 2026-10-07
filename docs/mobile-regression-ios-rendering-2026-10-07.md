@@ -143,3 +143,7 @@ Validation includes 190 passing shared/server JVM tests, Release fixture builds,
 the architecture guard, Python syntax checks and diff checks.
 
 [Raw regression checks, repeated cohorts and aligned trace summaries](../scripts/perf/results/mobile-regression-ios-resume-2026-10-07.json).
+
+The [native tab rendering follow-up](ios-tab-rendering-followup-2026-10-07.md)
+reproduces the Receipt peak, tests two reverted prototypes, and adds timing for
+work before the first display callback plus per-hitch CPU attribution.
