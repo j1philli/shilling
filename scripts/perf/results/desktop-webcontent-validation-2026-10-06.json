@@ -1,0 +1,37 @@
+{
+  "regions-1": {
+    "readyCheckpoints": 20,
+    "unlockedSamples": 82,
+    "bootstrapVisibilitySamples": 0,
+    "complete": true,
+    "profileSha256": "7ab0035bb3165a43ceb874212127a26880abe62f898fef5478bc7081c6a3fd9b"
+  },
+  "bootstrap-1": {
+    "readyCheckpoints": 6,
+    "unlockedSamples": 50,
+    "bootstrapVisibilitySamples": 4,
+    "complete": true,
+    "profileSha256": "c3f1fdb5621b9ce3e84019966c5f37a0ece6104428acd9ba2594e223e148a8e9"
+  },
+  "bootstrap-2": {
+    "readyCheckpoints": 6,
+    "unlockedSamples": 50,
+    "bootstrapVisibilitySamples": 4,
+    "complete": true,
+    "profileSha256": "11d252d1633bcd3d1fbd48bc2e9eeaac0ddcbc2ae9dd8ac08e5cabbee7592ce3"
+  },
+  "bootstrap-3": {
+    "readyCheckpoints": 6,
+    "unlockedSamples": 50,
+    "bootstrapVisibilitySamples": 4,
+    "complete": true,
+    "profileSha256": "caa3bdea321e322dd4424690527f9a104f5f627661703be515b474b1e80a7800"
+  },
+  "bootstrap-type-1": {
+    "readyCheckpoints": 6,
+    "unlockedSamples": 50,
+    "bootstrapVisibilitySamples": 4,
+    "complete": true,
+    "profileSha256": "f802d81daca79e35352e769003ecd0254f694bc491fe1eaaed38f3cc102455ab"
+  }
+}

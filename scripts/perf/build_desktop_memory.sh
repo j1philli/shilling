@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/../.."
+workload="${SHILLING_MEMORY_WORKLOAD:-all}"
+case "$workload" in all|csv|csv-review|csv-session|idle|bootstrap) ;; *) echo 'SHILLING_MEMORY_WORKLOAD must be all, csv, csv-review, csv-session, idle or bootstrap' >&2; exit 2;; esac
+if [ "$workload" = bootstrap ] && [ "${SHILLING_MEMORY_ALLOCATION_PROFILE:-false}" = true ]; then
+    echo 'bootstrap requires SHILLING_MEMORY_ALLOCATION_PROFILE=false: that probe eagerly loads Skia' >&2
+    exit 2
+fi
 ./kotlin task :perf-web:buildWasmJsAppWasmJsRelease
 fixture_dist=perf-web-dist
 fixture_package=build/tasks/_perf-web_buildWasmJsAppWasmJsRelease
@@ -15,11 +21,14 @@ cp -R "$fixture_package/composeResources" "$fixture_dist/"
 cp "$fixture_package/import-map-loader.js" "$fixture_dist/"
 cp node_modules/@js-joda/core/dist/js-joda.esm.js "$fixture_dist/"
 cp node_modules/sql.js/dist/sql-wasm.js node_modules/sql.js/dist/sql-wasm.wasm "$fixture_dist/"
-workload="${SHILLING_MEMORY_WORKLOAD:-all}"
-case "$workload" in all|csv|csv-review|csv-session|idle) ;; *) echo 'SHILLING_MEMORY_WORKLOAD must be all, csv, csv-review, csv-session or idle' >&2; exit 2;; esac
 sed -e 's@./web-app.mjs@./perf-web.mjs@' \
     -e "s@</head>@<meta name=\"shilling-memory-workload\" content=\"$workload\"></head>@" \
     app/web-app/index.html > "$fixture_dist/index.html"
+if [ "$workload" = bootstrap ]; then
+    cp app/perf-web/bootstrap-profile.mjs "$fixture_dist/"
+    sed -i '' -e 's@./perf-web.mjs@./bootstrap-profile.mjs@' \
+        -e 's@name="shilling-memory-workload" content="bootstrap"@name="shilling-memory-workload" content="idle"@' "$fixture_dist/index.html"
+fi
 if [ "${SHILLING_MEMORY_SQL_PROFILE:-false}" = true ]; then
     cp app/perf-web/sql-profile.js "$fixture_dist/"
     sed -i '' 's@</head>@<script src="./sql-profile.js"></script></head>@' "$fixture_dist/index.html"
