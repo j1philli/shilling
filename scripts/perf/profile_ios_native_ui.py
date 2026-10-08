@@ -53,7 +53,7 @@ def validate_editor_navigation(records):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", required=True)
-    parser.add_argument("--screen", choices=["activity", "receipts", "plan", "plan-transitions", "hosted-settings", "home", "editors", "editor-navigation", "editor-choices", "editor-save", "tabs", "tab-resume", "tab-isolation", "receipt-table", "loaded-empty", "receipt-previews", "import-regression"], required=True)
+    parser.add_argument("--screen", choices=["activity", "receipts", "plan", "plan-transitions", "hosted-settings", "home", "editors", "editor-navigation", "editor-choices", "editor-save", "tabs", "tab-resume", "tab-isolation", "receipt-table", "activity-table", "loaded-empty", "receipt-previews", "import-regression"], required=True)
     parser.add_argument("--allow-scroll-reset", action="store_true", help="Record a known-bad tab-resume baseline without requiring scroll-position preservation")
     parser.add_argument("--hosted-server", help="Local synthetic control-plane fixture URL, required for hosted-settings")
     parser.add_argument("--runs", type=int, default=3, choices=range(1, 6))
@@ -174,7 +174,7 @@ def main():
                         raise RuntimeError("Not all five native tabs were exercised")
                     closed = [r for r in tab_records if r["event"] == "tabs-closed"]
                     if (len(closed) != 1 or not closed[0]["controllerReleased"] or closed[0]["database"]["activeListeners"]
-                            or closed[0].get("receiptListReleased") is False):
+                            or closed[0].get("receiptListReleased") is False or closed[0].get("activityListReleased") is False):
                         raise RuntimeError("Tab container or database listeners remained after closing")
                     validate_closed_updates(tab_records)
                 if args.screen == "tab-resume":
@@ -187,11 +187,11 @@ def main():
                         raise RuntimeError("Tab resume lost rows, queried on Main, or retained listeners/controllers")
                     if not args.allow_scroll_reset and any(abs(r["beforeOffsetY"] - r["afterOffsetY"]) > 2 for r in measured):
                         raise RuntimeError("Tab resume lost its scroll position after cache expiry")
-                if args.screen == "receipt-table":
-                    checked = [r for r in records if r["run"] == run and r["event"] == "receipt-table-checked"]
+                if args.screen in {"receipt-table", "activity-table"}:
+                    checked = [r for r in records if r["run"] == run and r["event"] == args.screen + "-checked"]
                     if (len(checked) != 1 or not checked[0]["controllerReleased"]
                             or checked[0]["database"]["activeListeners"] or checked[0]["database"]["mainThreadQueries"]):
-                        raise RuntimeError("Receipt table checks failed, queried on Main, or retained its controller/listeners")
+                        raise RuntimeError("Native table checks failed, queried on Main, or retained its controller/listeners")
                 if args.screen == "tab-isolation":
                     current = [r for r in records if r["run"] == run]
                     measured = [r for r in current if r["event"] == "measurement"]

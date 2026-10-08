@@ -60,6 +60,7 @@ final class NativeUiPerformanceController: UIViewController {
                 if screen == "tab-resume" { try await runTabResume(); continue }
                 if screen == "tab-isolation" { try await runTabIsolation(); continue }
                 if screen == "receipt-table" { try await runReceiptTable(); continue }
+                if screen == "activity-table" { try await runActivityTable(); continue }
                 if screen == "loaded-empty" {
                     try await checkLoadedEmptyStates()
                     await pause(6)
@@ -89,6 +90,7 @@ final class NativeUiPerformanceController: UIViewController {
                 end(screen, "load", extra: ["listItems": itemCount(list), "visibleCells": visibleCells(list).count])
                 await pause(1)
                 screenshot(screen)
+                if args.contains("--ui-loaded-only") { continue }
 
                 begin(screen, "scroll")
                 scrollView = list
@@ -576,6 +578,7 @@ final class NativeUiPerformanceController: UIViewController {
     private func runTabs() async throws {
         var tabs: ShillingTabBarController? = ShillingTabBarController()
         weak var receiptList: UIScrollView?
+        weak var activityList: UIScrollView?
         mountController(tabs!)
         for cycle in 0..<6 {
             for key in ["HOME", "PLAN", "ACTIVITY", "RECEIPTS", "SETTINGS"] {
@@ -583,7 +586,7 @@ final class NativeUiPerformanceController: UIViewController {
                 guard let tab = tabs?.tabs.first(where: { $0.identifier == key }) else { throw FixtureError("Missing tab") }
                 tabs?.selectedTab = tab
                 if key == "PLAN" { _ = try await waitForList(minimum: 1000) }
-                if key == "ACTIVITY" { _ = try await waitForList(minimum: 7000) }
+                if key == "ACTIVITY" { activityList = try await waitForList(minimum: 7000) }
                 if key == "RECEIPTS" { receiptList = try await waitForList(minimum: 250) }
                 await pause(0.5)
                 end("tabs", "select-\(key)", extra: ["cycle": cycle])
@@ -596,7 +599,7 @@ final class NativeUiPerformanceController: UIViewController {
         tabs = nil
         await pause(6)
         emit(["event": "tabs-closed", "controllerReleased": released == nil,
-              "receiptListReleased": receiptList == nil,
+              "receiptListReleased": receiptList == nil, "activityListReleased": activityList == nil,
               "residentMiB": residentMiB(), "database": querySnapshot()])
         begin("tabs", "after-close-updates")
         for i in 0..<10 { _ = try await asyncFunction(for: NativeUiFixture.shared.changePosting(index: Int32(i))) }
@@ -763,6 +766,203 @@ final class NativeUiPerformanceController: UIViewController {
         _ = try await asyncFunction(for: NativeUiFixture.shared.changePosting(index: 9))
         try await wait { activity.state.sections.flatMap(\.rows).contains { $0.title == "Synthetic update 9" } }
         emit(["event": "hidden-update-checked"])
+    }
+
+    /// Exercise production search, date sections, row updates and navigation.
+    private func runActivityTable() async throws {
+        func wait(_ description: String, until condition: () -> Bool) async throws {
+            let deadline = CACurrentMediaTime() + 10
+            while !condition() {
+                guard CACurrentMediaTime() < deadline else { throw FixtureError(description) }
+                await pause(0.05)
+            }
+        }
+        func navigationController(_ controller: UIViewController) -> UINavigationController? {
+            if let navigation = controller as? UINavigationController { return navigation }
+            return controller.children.compactMap { navigationController($0) }.first
+        }
+        func navigationItems() -> [UIBarButtonItem] {
+            descendants(view).compactMap { $0 as? UINavigationBar }.flatMap { bar in
+                guard let item = bar.topItem else { return [UIBarButtonItem]() }
+                return (item.rightBarButtonItems ?? []) + item.trailingItemGroups.flatMap(\.barButtonItems)
+                    + (item.pinnedTrailingGroup?.barButtonItems ?? [])
+            }
+        }
+        func perform(_ item: UIBarButtonItem) throws {
+            if let action = item.primaryAction { UIControl().sendAction(action) }
+            else if let action = item.action,
+                    UIApplication.shared.sendAction(action, to: item.target, from: item, for: nil) { return }
+            else { throw FixtureError("Activity navigation action unavailable") }
+        }
+        mount(AnyView(ActivityScreen()))
+        guard let table = try await waitForList(minimum: 7502, maximum: 7503) as? UITableView else {
+            throw FixtureError("Activity table missing")
+        }
+        await pause(0.5)
+        emit(["event": "activity-viewport", "offset": table.contentOffset.y, "insets": String(describing: table.adjustedContentInset),
+              "frame": String(describing: table.frame), "navigation": descendants(view).filter { $0 is UINavigationBar || $0 is UISearchBar || ($0 as? UILabel)?.text == "Activity" }.map { v in
+                  ["type": String(describing: type(of: v)), "frame": String(describing: v.convert(v.bounds, to: view)), "alpha": v.alpha, "hidden": v.isHidden] as [String: Any]
+              }])
+        screenshot("activity-table-loaded")
+        for cell in table.visibleCells where cell.accessibilityIdentifier?.hasPrefix("transaction.") == true {
+            let labels = descendants(cell).compactMap { $0 as? UILabel }.filter { !($0.text ?? "").isEmpty }
+            guard labels.count == 3 else { throw FixtureError("Activity row labels missing") }
+            let frames = labels.map { $0.convert($0.bounds, to: cell) }
+            emit(["event": "activity-row-layout", "labels": labels.map { $0.text ?? "" },
+                  "frames": frames.map { String(describing: $0) }])
+            guard frames[0].maxX + 7 <= frames[2].minX, frames[1].maxX + 7 <= frames[2].minX else {
+                throw FixtureError("Activity title or supporting text overlaps its amount")
+            }
+        }
+        guard table.numberOfSections == 29,
+              table.dataSource?.tableView?(table, titleForHeaderInSection: 1) == "Today" else {
+            throw FixtureError("Activity date headers missing")
+        }
+        table.scrollToRow(at: IndexPath(row: 20, section: 1), at: .top, animated: false)
+        await pause(0.5)
+        guard let cell = table.visibleCells.first(where: {
+            $0.accessibilityIdentifier?.hasPrefix("transaction.") == true && $0.convert($0.bounds, to: view).minY >= table.adjustedContentInset.top
+        }), let identifier = cell.accessibilityIdentifier, let index = table.indexPath(for: cell) else {
+            throw FixtureError("No Activity row to edit")
+        }
+        let editor = TransactionEditorScreenModel(postingId: String(identifier.dropFirst("transaction.".count)))
+        try await wait("Transaction editor did not load") { editor.state.load == .ready }
+        let original = editor.state.fields
+        let beforeY = cell.convert(cell.bounds, to: view).minY
+        func search(_ text: String) throws {
+            guard let bar = descendants(view).compactMap({ $0 as? UISearchBar }).first else {
+                throw FixtureError("Activity search bar missing")
+            }
+            bar.text = text
+            bar.delegate?.searchBar?(bar, textDidChange: text)
+        }
+        do {
+            editor.setTitle(value: "Activity table edited")
+            editor.setAmountText(value: "8765.43")
+            _ = try await asyncFunction(for: editor.save())
+            try await wait("Activity visible row did not reconfigure") {
+                cell.accessibilityLabel?.contains("Activity table edited") == true && cell.accessibilityLabel?.contains("8,765.43") == true
+            }
+            let afterY = cell.convert(cell.bounds, to: view).minY
+            emit(["event": "activity-update", "sameCell": table.cellForRow(at: index) === cell,
+                  "beforeCellY": beforeY, "afterCellY": afterY, "rowHeight": cell.bounds.height])
+            guard table.cellForRow(at: index) === cell, abs(afterY - beforeY) <= 2 else {
+                throw FixtureError("Activity edit replaced its cell or moved the visible row")
+            }
+            table.delegate?.tableView?(table, didSelectRowAt: index)
+            try await wait("Activity opened the wrong transaction editor") {
+                self.descendants(self.view).compactMap { $0 as? UITextField }.contains { $0.text == "8765.43" }
+            }
+            await pause(0.5)
+            screenshot("activity-table-editor")
+            let field = descendants(view).compactMap { $0 as? UITextField }.first { $0.text == "8765.43" }!
+            field.text = "1234.56"
+            field.sendActions(for: .editingChanged)
+            await pause(0.2)
+            guard let save = navigationItems().first(where: { $0.title == "Save" || $0.primaryAction?.title == "Save" }), save.isEnabled else {
+                throw FixtureError("Transaction Save unavailable")
+            }
+            try perform(save)
+            try await wait("Transaction save did not return to Activity") {
+                table.window != nil && navigationController(self)?.viewControllers.count == 1 && cell.accessibilityLabel?.contains("1,234.56") == true
+            }
+            guard abs(cell.convert(cell.bounds, to: view).minY - beforeY) <= 2 else {
+                throw FixtureError("Transaction save lost the visible Activity row")
+            }
+            table.setContentOffset(CGPoint(x: 0, y: -table.adjustedContentInset.top), animated: false)
+            await pause(0.5)
+            try search("Activity table edited")
+            _ = try await waitForList(minimum: 2, maximum: 3)
+            try await wait("Activity search showed wrong row") {
+                table.visibleCells.contains { $0.accessibilityIdentifier == identifier }
+            }
+            await pause(0.5)
+            screenshot("activity-table-search")
+            host?.traitOverrides.preferredContentSizeCategory = .accessibilityExtraExtraExtraLarge
+            await pause(0.7)
+            table.scrollToRow(at: IndexPath(row: 0, section: 1), at: .top, animated: false)
+            await pause(0.3)
+            guard let largeCell = table.visibleCells.first(where: { $0.accessibilityIdentifier == identifier }), largeCell.bounds.height > 120 else {
+                throw FixtureError("Activity did not resize for accessibility text")
+            }
+            let labels = descendants(largeCell).compactMap { $0 as? UILabel }.filter { !$0.isHidden && !($0.text ?? "").isEmpty }
+            screenshot("activity-table-accessibility")
+            emit(["event": "activity-accessibility", "rowHeight": largeCell.bounds.height, "labels": labels.map { label in
+                ["text": label.text ?? "", "lines": label.numberOfLines, "height": label.bounds.height,
+                 "width": label.bounds.width, "fittingHeight": label.sizeThatFits(CGSize(width: label.bounds.width, height: .greatestFiniteMagnitude)).height] as [String: Any]
+            }])
+            guard labels.count == 3 && labels.allSatisfy({ label in
+                label.numberOfLines == 0 && label.bounds.height + 1 >= label.sizeThatFits(CGSize(width: label.bounds.width, height: .greatestFiniteMagnitude)).height
+            }) else { throw FixtureError("Activity accessibility text clipped") }
+            host?.traitOverrides.preferredContentSizeCategory = .large
+            editor.setDate(epochDay: original.dateEpochDay - 45)
+            _ = try await asyncFunction(for: editor.save())
+            try await wait("Out-of-range transaction remained visible") {
+                !table.visibleCells.contains { $0.accessibilityIdentifier == identifier }
+            }
+            table.setContentOffset(CGPoint(x: 0, y: -table.adjustedContentInset.top), animated: false)
+            await pause(1)
+            screenshot("activity-table-empty-search")
+            for range in ["3M", "6M", "1Y"] {
+                try selectSegment(range)
+                try await wait("Activity range did not include older transaction") {
+                    table.visibleCells.contains { $0.accessibilityIdentifier == identifier }
+                }
+                guard table.dataSource?.tableView?(table, titleForHeaderInSection: 1) != "Today" else {
+                    throw FixtureError("Transaction did not move to its new date section")
+                }
+            }
+            host?.traitOverrides.userInterfaceStyle = .light
+            await pause(0.5)
+            screenshot("activity-table-light")
+            host?.traitOverrides.userInterfaceStyle = .dark
+            try selectSegment("1M")
+            try await wait("Activity range did not remove older transaction") {
+                !table.visibleCells.contains { $0.accessibilityIdentifier == identifier }
+            }
+            editor.setDate(epochDay: original.dateEpochDay)
+            editor.setTitle(value: original.title)
+            editor.setAmountText(value: original.amountText)
+            _ = try await asyncFunction(for: editor.save())
+            try search("")
+            _ = try await waitForList(minimum: 7502, maximum: 7503)
+        } catch {
+            host?.traitOverrides.preferredContentSizeCategory = .large
+            editor.setDate(epochDay: original.dateEpochDay)
+            editor.setTitle(value: original.title)
+            editor.setAmountText(value: original.amountText)
+            _ = try? await asyncFunction(for: editor.save())
+            editor.close()
+            throw error
+        }
+        editor.close()
+        guard let add = navigationItems().first(where: { $0.accessibilityLabel == "Add" || $0.primaryAction?.title == "Add" }),
+              navigationItems().contains(where: { $0.accessibilityLabel == "Import" || $0.primaryAction?.title == "Import" }) else {
+            throw FixtureError("Activity toolbar actions missing")
+        }
+        try perform(add)
+        try await wait("New transaction editor did not open") {
+            self.descendants(self.view).compactMap { $0 as? UITextField }.contains { $0.placeholder == "Description" }
+        }
+        navigationController(self)?.popViewController(animated: true)
+        await pause(0.7)
+        _ = try await waitForList(minimum: 7502, maximum: 7503)
+        guard let importItem = navigationItems().first(where: { $0.accessibilityLabel == "Import" || $0.primaryAction?.title == "Import" }) else {
+            throw FixtureError("Activity Import action did not return")
+        }
+        try perform(importItem)
+        try await wait("Activity did not navigate to Import") {
+            navigationController(self)?.viewControllers.count == 2 &&
+                self.descendants(self.view).compactMap { $0 as? UINavigationBar }.contains { $0.topItem?.title == "Import from CSV" }
+        }
+        screenshot("activity-table-import")
+        navigationController(self)?.popViewController(animated: true)
+        await pause(0.7)
+        weak var released = host
+        mount(AnyView(Text("Activity table checked")))
+        await pause(6)
+        emit(["event": "activity-table-checked", "checks": "sections,reconfigure,editor-save,scroll,search,ranges,accessibility,restore,add,import",
+              "controllerReleased": released == nil, "database": querySnapshot()])
     }
 
     /// Interaction and sizing coverage for the production native receipt list.

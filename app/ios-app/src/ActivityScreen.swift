@@ -47,50 +47,13 @@ struct ActivityScreen: View {
     var body: some View {
         let state = model.state
         NavigationStack(path: $path) {
-            List {
-                Section {
-                    Picker("Range", selection: Binding(
-                        get: { Int(state.selectedRange.months) },
-                        set: { model.screen.setRange(months: Int32($0)) }
-                    )) {
-                        ForEach(state.ranges, id: \.months) { range in
-                            Text(range.label).tag(Int(range.months))
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
-                }
-
-                if let empty = state.empty {
-                    Section {
-                        ContentUnavailableView {
-                            Label(empty.title, systemImage: empty.showActions ? "tray" : "magnifyingglass")
-                        } description: {
-                            Text(empty.message)
-                        } actions: {
-                            if empty.showActions {
-                                Button("Add transaction") { path.append(.transaction(nil)) }
-                                    .buttonStyle(.borderedProminent)
-                                Button("Import from CSV") { path.append(.importCSV) }
-                            }
-                        }
-                    }
-                    .listRowBackground(Color.clear)
-                } else {
-                    ForEach(state.sections, id: \.header) { section in
-                        Section(section.header) {
-                            ForEach(section.rows, id: \.id) { row in
-                                NavigationLink(value: Editor.transaction(row.id)) {
-                                    ActivityRow(row: row)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            .listStyle(.insetGrouped)
+            ActivityTable(state: state,
+                          selectRange: { model.screen.setRange(months: $0) },
+                          openTransaction: { path.append(.transaction($0)) },
+                          importCSV: { path.append(.importCSV) })
+            .ignoresSafeArea(.container, edges: .vertical)
             .navigationTitle("Activity")
+            .navigationBarTitleDisplayMode(.large)
             .searchable(text: $query, prompt: "Search transactions")
             .onChange(of: query) { _, text in model.screen.setQuery(text: text) }
             .navigationDestination(for: Editor.self) { editor in
@@ -118,31 +81,5 @@ struct ActivityScreen: View {
         }
         .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .task { await model.observe() }
-    }
-}
-
-private struct ActivityRow: View {
-    let row: ActivityRowUi
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Circle()
-                .fill(Color(hex: row.categoryColor) ?? Color(.tertiaryLabel))
-                .frame(width: 10, height: 10)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(row.title).lineLimit(1)
-                Text(row.supporting)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-            Spacer(minLength: 8)
-            Text(row.amount)
-                .foregroundStyle(row.type.amountColor)
-                .lineLimit(1)
-                .fixedSize()
-        }
-        .contentShape(Rectangle())
-        .accessibilityElement(children: .combine)
     }
 }
