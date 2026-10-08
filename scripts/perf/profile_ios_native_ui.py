@@ -16,6 +16,8 @@ import tempfile
 import time
 import uuid
 
+ISOLATION_PROBES = ["uikit", "text", "navigation", "list", "staticReceipts", "nativeTable", "production"]
+
 
 def validate_closed_updates(records):
     measured = [r for r in records if r["event"] == "measurement" and r["phase"] == "after-close-updates"]
@@ -51,7 +53,7 @@ def validate_editor_navigation(records):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", required=True)
-    parser.add_argument("--screen", choices=["activity", "receipts", "plan", "plan-transitions", "hosted-settings", "home", "editors", "editor-navigation", "editor-choices", "editor-save", "tabs", "tab-resume", "loaded-empty", "receipt-previews", "import-regression"], required=True)
+    parser.add_argument("--screen", choices=["activity", "receipts", "plan", "plan-transitions", "hosted-settings", "home", "editors", "editor-navigation", "editor-choices", "editor-save", "tabs", "tab-resume", "tab-isolation", "receipt-table", "loaded-empty", "receipt-previews", "import-regression"], required=True)
     parser.add_argument("--allow-scroll-reset", action="store_true", help="Record a known-bad tab-resume baseline without requiring scroll-position preservation")
     parser.add_argument("--hosted-server", help="Local synthetic control-plane fixture URL, required for hosted-settings")
     parser.add_argument("--runs", type=int, default=3, choices=range(1, 6))
@@ -59,11 +61,19 @@ def main():
     parser.add_argument("--output", type=pathlib.Path, required=True)
     parser.add_argument("--check-navigation", action="store_true", help="Also verify Plan section switching after measurement")
     parser.add_argument("--baseline-receipts", action="store_true", help="Reproduce the former synchronous picker and retained preview copies")
+    parser.add_argument("--isolation-uikit-outgoing", action="store_true", help="Use a plain UIKit outgoing screen for tab-isolation controls")
+    parser.add_argument("--isolation-screenshots", action="store_true", help="Capture tab-isolation screens outside the measured phases")
+    parser.add_argument("--isolation-probe", action="append", choices=ISOLATION_PROBES,
+                        help="Run only the specified tab-isolation probes, in argument order; repeat for multiple probes")
     args = parser.parse_args()
     if args.screen == "hosted-settings" and not args.hosted_server:
         parser.error("--hosted-server is required for hosted-settings")
     if args.baseline_receipts and args.screen != "receipt-previews":
         parser.error("--baseline-receipts requires --screen receipt-previews")
+    if (args.isolation_uikit_outgoing or args.isolation_screenshots or args.isolation_probe) and args.screen != "tab-isolation":
+        parser.error("--isolation-* options require --screen tab-isolation")
+    if args.isolation_probe and len(set(args.isolation_probe)) != len(args.isolation_probe):
+        parser.error("--isolation-probe values must be unique")
     records = []
     args.output.parent.mkdir(parents=True, exist_ok=True)
     for index in range(args.runs):
@@ -75,6 +85,12 @@ def main():
             command.append("--ui-check-navigation")
         if args.baseline_receipts:
             command.append("--ui-preview-baseline")
+        if args.isolation_uikit_outgoing:
+            command.append("--ui-isolation-uikit-outgoing")
+        if args.isolation_screenshots:
+            command.append("--ui-isolation-screenshots")
+        for probe in args.isolation_probe or []:
+            command.extend(["--ui-isolation-probe", probe])
         if args.hosted_server:
             command.extend(["--ui-hosted-server", args.hosted_server])
         with tempfile.TemporaryFile(mode="w+") as raw:
@@ -157,7 +173,8 @@ def main():
                     if len(cycles) != 6 or any(r["tabCount"] != 5 for r in cycles):
                         raise RuntimeError("Not all five native tabs were exercised")
                     closed = [r for r in tab_records if r["event"] == "tabs-closed"]
-                    if len(closed) != 1 or not closed[0]["controllerReleased"] or closed[0]["database"]["activeListeners"]:
+                    if (len(closed) != 1 or not closed[0]["controllerReleased"] or closed[0]["database"]["activeListeners"]
+                            or closed[0].get("receiptListReleased") is False):
                         raise RuntimeError("Tab container or database listeners remained after closing")
                     validate_closed_updates(tab_records)
                 if args.screen == "tab-resume":
@@ -170,6 +187,25 @@ def main():
                         raise RuntimeError("Tab resume lost rows, queried on Main, or retained listeners/controllers")
                     if not args.allow_scroll_reset and any(abs(r["beforeOffsetY"] - r["afterOffsetY"]) > 2 for r in measured):
                         raise RuntimeError("Tab resume lost its scroll position after cache expiry")
+                if args.screen == "receipt-table":
+                    checked = [r for r in records if r["run"] == run and r["event"] == "receipt-table-checked"]
+                    if (len(checked) != 1 or not checked[0]["controllerReleased"]
+                            or checked[0]["database"]["activeListeners"] or checked[0]["database"]["mainThreadQueries"]):
+                        raise RuntimeError("Receipt table checks failed, queried on Main, or retained its controller/listeners")
+                if args.screen == "tab-isolation":
+                    current = [r for r in records if r["run"] == run]
+                    measured = [r for r in current if r["event"] == "measurement"]
+                    closed = [r for r in current if r["event"] == "isolation-closed"]
+                    probes = set(args.isolation_probe or ISOLATION_PROBES)
+                    if (len(measured) != len(probes) or {r["phase"] for r in measured} != probes
+                            or len(closed) != len(probes) or {r["probe"] for r in closed} != probes
+                            or any(not r["controllerReleased"] or not r["hostReleased"] or
+                                   r["database"]["activeListeners"] for r in closed)
+                            or any(r["database"]["mainThreadQueries"] or
+                                   abs(r["beforeOffsetY"] - r["afterOffsetY"]) > 2 for r in measured)
+                            or any(r["listItems"] != 251 or r["listReadyMs"] is None for r in measured
+                                   if r["phase"] in {"list", "staticReceipts", "nativeTable", "production"})):
+                        raise RuntimeError("Tab isolation lost rows/scroll state, queried on Main, or retained controllers/listeners")
                 if args.screen == "loaded-empty":
                     current = [r for r in records if r["run"] == run]
                     closed = [r for r in current if r["event"] == "empty-states-closed"]

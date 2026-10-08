@@ -58,6 +58,8 @@ final class NativeUiPerformanceController: UIViewController {
                 if screen == "hosted-settings" { try await runHostedSettings(); continue }
                 if screen == "tabs" { try await runTabs(); continue }
                 if screen == "tab-resume" { try await runTabResume(); continue }
+                if screen == "tab-isolation" { try await runTabIsolation(); continue }
+                if screen == "receipt-table" { try await runReceiptTable(); continue }
                 if screen == "loaded-empty" {
                     try await checkLoadedEmptyStates()
                     await pause(6)
@@ -84,7 +86,7 @@ final class NativeUiPerformanceController: UIViewController {
                 let initialPlanItems = screen == "plan" ? itemCount(list) : 0
                 // Allow the populated collection to reach a display callback before ending load.
                 await pause(0.05)
-                end(screen, "load", extra: ["listItems": itemCount(list), "visibleCells": list.visibleCells.count])
+                end(screen, "load", extra: ["listItems": itemCount(list), "visibleCells": visibleCells(list).count])
                 await pause(1)
                 screenshot(screen)
 
@@ -573,6 +575,7 @@ final class NativeUiPerformanceController: UIViewController {
 
     private func runTabs() async throws {
         var tabs: ShillingTabBarController? = ShillingTabBarController()
+        weak var receiptList: UIScrollView?
         mountController(tabs!)
         for cycle in 0..<6 {
             for key in ["HOME", "PLAN", "ACTIVITY", "RECEIPTS", "SETTINGS"] {
@@ -581,7 +584,7 @@ final class NativeUiPerformanceController: UIViewController {
                 tabs?.selectedTab = tab
                 if key == "PLAN" { _ = try await waitForList(minimum: 1000) }
                 if key == "ACTIVITY" { _ = try await waitForList(minimum: 7000) }
-                if key == "RECEIPTS" { _ = try await waitForList(minimum: 250) }
+                if key == "RECEIPTS" { receiptList = try await waitForList(minimum: 250) }
                 await pause(0.5)
                 end("tabs", "select-\(key)", extra: ["cycle": cycle])
             }
@@ -593,6 +596,7 @@ final class NativeUiPerformanceController: UIViewController {
         tabs = nil
         await pause(6)
         emit(["event": "tabs-closed", "controllerReleased": released == nil,
+              "receiptListReleased": receiptList == nil,
               "residentMiB": residentMiB(), "database": querySnapshot()])
         begin("tabs", "after-close-updates")
         for i in 0..<10 { _ = try await asyncFunction(for: NativeUiFixture.shared.changePosting(index: Int32(i))) }
@@ -633,6 +637,89 @@ final class NativeUiPerformanceController: UIViewController {
         tabs = nil
         await pause(6)
         emit(["event": "resume-closed", "controllerReleased": released == nil, "database": querySnapshot()])
+    }
+
+    private func runTabIsolation() async throws {
+        let arguments = ProcessInfo.processInfo.arguments
+        let plainOutgoing = arguments.contains("--ui-isolation-uikit-outgoing")
+        let requested = arguments.indices.compactMap { index -> String? in
+            arguments[index] == "--ui-isolation-probe" && index + 1 < arguments.count ? arguments[index + 1] : nil
+        }
+        let probes = requested.isEmpty ? NativeTabProbe.allCases : requested.compactMap(NativeTabProbe.init(rawValue:))
+        guard requested.isEmpty || probes.count == requested.count else { throw FixtureError("Unknown tab isolation probe") }
+        for probe in probes {
+            var controller: UIViewController? = probe.controller()
+            var tabs: UITabBarController? = UITabBarController()
+            // Keep the same outgoing screen and native transition in every probe.
+            var settings: UITab? = UITab(title: "Settings", image: nil, identifier: "settings") { _ in
+                plainOutgoing ? NativeTabProbe.uikit.controller() : UIHostingController(rootView: SettingsScreen())
+            }
+            var target: UITab? = UITab(title: "Receipts", image: nil, identifier: "receipts") { [weak controller] _ in
+                controller ?? UIViewController()
+            }
+            tabs!.setTabs([settings!, target!], animated: false)
+            mountController(tabs!)
+            if probe == .nativeTable && view.traitCollection.preferredContentSizeCategory != .large {
+                throw FixtureError("The fixed-height native table control requires the default Large text size")
+            }
+            tabs!.selectedTab = target!
+            var previousOffset = 0.0
+            if probe.hasList {
+                let list = try await waitForList(minimum: 250, maximum: 252)
+                await pause(0.5)
+                if arguments.contains("--ui-isolation-screenshots") {
+                    screenshot("isolation-\(probe.rawValue)-loaded")
+                }
+                list.setContentOffset(CGPoint(x: 0, y: 1200), animated: false)
+                await pause(0.5)
+                previousOffset = list.contentOffset.y
+            } else { await pause(1) }
+            tabs!.selectedTab = settings
+            await pause(7)
+            var observed = controller as? TabProbeHostingController
+            observed?.capture = true
+            begin("tab-isolation", probe.rawValue)
+            tabs!.selectedTab = target!
+            var readyMs: Double?
+            var afterOffset = 0.0
+            var items = 0
+            var cellHeights: [Double] = []
+            var viewport: [String: Double] = [:]
+            if probe.hasList {
+                _ = try await waitForList(minimum: 250, maximum: 252)
+                readyMs = (CACurrentMediaTime() - phaseStarted) * 1000
+            }
+            await pause(1)
+            if probe.hasList {
+                let list = try await waitForList(minimum: 250, maximum: 252)
+                afterOffset = list.contentOffset.y
+                items = itemCount(list)
+                cellHeights = visibleCells(list).map { Double($0.bounds.height) }.sorted()
+                let frame = list.convert(list.bounds, to: view.window)
+                viewport = ["x": frame.origin.x, "y": frame.origin.y, "width": frame.width, "height": frame.height,
+                            "insetTop": list.adjustedContentInset.top, "insetBottom": list.adjustedContentInset.bottom]
+            }
+            observed?.capture = false
+            end("tab-isolation", probe.rawValue, extra: ["listReadyMs": readyMs.map { $0 as Any } ?? NSNull(),
+                "beforeOffsetY": previousOffset, "afterOffsetY": afterOffset, "listItems": items,
+                "visibleCellHeights": cellHeights, "outgoing": plainOutgoing ? "uikit" : "settings",
+                "viewport": viewport, "lifecycle": observed?.events ?? []])
+            if ProcessInfo.processInfo.arguments.contains("--ui-isolation-screenshots") {
+                screenshot("isolation-\(probe.rawValue)")
+            }
+            weak var released = tabs
+            weak var releasedHost = controller
+            mount(AnyView(Text("Isolation probe closed")))
+            tabs = nil
+            settings = nil
+            target = nil
+            observed = nil
+            controller = nil
+            await pause(6)
+            emit(["event": "isolation-closed", "probe": probe.rawValue,
+                  "controllerReleased": released == nil, "hostReleased": releasedHost == nil,
+                  "database": querySnapshot()])
+        }
     }
 
     private func checkLoadedEmptyStates() async throws {
@@ -676,6 +763,160 @@ final class NativeUiPerformanceController: UIViewController {
         _ = try await asyncFunction(for: NativeUiFixture.shared.changePosting(index: 9))
         try await wait { activity.state.sections.flatMap(\.rows).contains { $0.title == "Synthetic update 9" } }
         emit(["event": "hidden-update-checked"])
+    }
+
+    /// Interaction and sizing coverage for the production native receipt list.
+    private func runReceiptTable() async throws {
+        func wait(_ description: String, until condition: () -> Bool) async throws {
+            let deadline = CACurrentMediaTime() + 10
+            while !condition() {
+                guard CACurrentMediaTime() < deadline else { throw FixtureError(description) }
+                await pause(0.05)
+            }
+        }
+        func navigationItems() -> [UIBarButtonItem] {
+            var items: [UIBarButtonItem] = []
+            for bar in descendants(view).compactMap({ $0 as? UINavigationBar }) {
+                guard let item = bar.topItem else { continue }
+                items += item.rightBarButtonItems ?? []
+                items += item.trailingItemGroups.flatMap(\.barButtonItems)
+                items += item.pinnedTrailingGroup?.barButtonItems ?? []
+            }
+            return items
+        }
+        func perform(_ item: UIBarButtonItem) throws {
+            if let action = item.primaryAction { UIControl().sendAction(action) }
+            else if let action = item.action,
+                    UIApplication.shared.sendAction(action, to: item.target, from: item, for: nil) { return }
+            else { throw FixtureError("Receipt navigation action unavailable") }
+        }
+        func navigationController(_ controller: UIViewController) -> UINavigationController? {
+            if let navigation = controller as? UINavigationController { return navigation }
+            return controller.children.compactMap { navigationController($0) }.first
+        }
+        mount(AnyView(ReceiptsScreen()))
+        guard let table = try await waitForList(minimum: 251, maximum: 252) as? UITableView else {
+            throw FixtureError("Receipt table missing")
+        }
+        await pause(0.5)
+        screenshot("receipt-table-loaded")
+        for (filter, supporting) in [("Attached", "Attached to"), ("Not attached", "Not attached")] {
+            try selectSegment(filter)
+            _ = try await waitForList(minimum: 126, maximum: 127)
+            try await wait("Receipt filter showed incorrect rows") {
+                let cells = table.visibleCells.filter { $0.accessibilityIdentifier?.hasPrefix("receipt.") == true }
+                return !cells.isEmpty && cells.allSatisfy { $0.accessibilityLabel?.contains(supporting) == true }
+            }
+        }
+        try selectSegment("All")
+        _ = try await waitForList(minimum: 251, maximum: 252)
+        table.scrollToRow(at: IndexPath(row: 20, section: 1), at: .top, animated: false)
+        await pause(0.5)
+        guard let cell = table.visibleCells.first(where: {
+            $0.accessibilityIdentifier?.hasPrefix("receipt.") == true && $0.convert($0.bounds, to: view).minY >= table.adjustedContentInset.top
+        }),
+              let identifier = cell.accessibilityIdentifier, let index = table.indexPath(for: cell) else {
+            throw FixtureError("No receipt row to edit")
+        }
+        let receiptId = String(identifier.dropFirst("receipt.".count))
+        let editor = ReceiptEditorScreenModel(receiptId: receiptId)
+        try await wait("Receipt editor model did not load") { editor.state.load == .ready }
+        let originalAmount = editor.state.fields.amountText
+        let beforeOffset = table.contentOffset.y
+        let beforeCellY = cell.convert(cell.bounds, to: view).minY
+        do {
+            editor.setAmountText(value: "8765.43")
+            _ = try await asyncFunction(for: editor.save())
+            try await wait("Receipt cell did not reconfigure") {
+                cell.accessibilityLabel?.contains("8,765.43") == true
+            }
+            emit(["event": "receipt-update", "beforeOffset": beforeOffset, "afterOffset": table.contentOffset.y,
+                  "beforeCellY": beforeCellY, "afterCellY": cell.convert(cell.bounds, to: view).minY,
+                  "sameCell": table.cellForRow(at: index) === cell, "rowHeight": cell.bounds.height])
+            guard abs(cell.convert(cell.bounds, to: view).minY - beforeCellY) <= 2,
+                  table.cellForRow(at: index) === cell else { throw FixtureError("Receipt update replaced the visible cell or moved the list") }
+            table.delegate?.tableView?(table, didSelectRowAt: index)
+            try await wait("Receipt row opened the wrong editor") {
+                self.descendants(self.view).compactMap { $0 as? UITextField }.contains { $0.text == "8765.43" }
+            }
+            await pause(0.5)
+            screenshot("receipt-table-editor")
+            guard let field = descendants(view).compactMap({ $0 as? UITextField }).first(where: { $0.text == "8765.43" }) else {
+                throw FixtureError("Missing receipt amount field")
+            }
+            field.text = ""
+            field.sendActions(for: .editingChanged)
+            await pause(0.2)
+            guard let save = navigationItems().first(where: { $0.title == "Save" || $0.primaryAction?.title == "Save" }), save.isEnabled else {
+                throw FixtureError("Missing receipt Save action")
+            }
+            try perform(save)
+            try await wait("Receipt editor did not return to list") { table.window != nil && navigationController(self)?.viewControllers.count == 1 }
+            try await wait("Receipt amount was not cleared") { cell.accessibilityLabel?.contains("8,765.43") == false }
+            guard abs(cell.convert(cell.bounds, to: view).minY - beforeCellY) <= 2 else { throw FixtureError("Editor save lost receipt scroll position") }
+            screenshot("receipt-table-updated")
+            editor.setAmountText(value: "8765.43")
+            _ = try await asyncFunction(for: editor.save())
+            try await wait("Receipt amount did not return") { cell.accessibilityLabel?.contains("8,765.43") == true }
+            host?.traitOverrides.preferredContentSizeCategory = .accessibilityExtraExtraExtraLarge
+            await pause(0.7)
+            table.scrollToRow(at: index, at: .top, animated: false)
+            await pause(0.3)
+            guard let largeCell = table.cellForRow(at: index), largeCell.bounds.height > 120 else {
+                throw FixtureError("Receipt rows did not resize for accessibility text")
+            }
+            let labels = descendants(largeCell).compactMap { $0 as? UILabel }.filter { !$0.isHidden && !($0.text ?? "").isEmpty }
+            screenshot("receipt-table-accessibility")
+            emit(["event": "receipt-accessibility", "rowHeight": largeCell.bounds.height, "labels": labels.map { label in
+                ["text": label.text ?? "", "lines": label.numberOfLines, "height": label.bounds.height,
+                 "width": label.bounds.width, "fittingHeight": label.sizeThatFits(CGSize(width: label.bounds.width, height: .greatestFiniteMagnitude)).height] as [String: Any]
+            }])
+            guard labels.allSatisfy({ label in
+                label.numberOfLines == 0 && label.bounds.height + 1 >= label.sizeThatFits(CGSize(width: label.bounds.width, height: .greatestFiniteMagnitude)).height
+            }) else { throw FixtureError("Accessibility receipt text clipped") }
+            host?.traitOverrides.preferredContentSizeCategory = .large
+            editor.setAmountText(value: originalAmount)
+            _ = try await asyncFunction(for: editor.save())
+        } catch {
+            host?.traitOverrides.preferredContentSizeCategory = .large
+            editor.setAmountText(value: originalAmount)
+            _ = try? await asyncFunction(for: editor.save())
+            editor.close()
+            throw error
+        }
+        editor.close()
+        table.setContentOffset(CGPoint(x: 0, y: -table.adjustedContentInset.top), animated: false)
+        await pause(0.5)
+        _ = try await asyncFunction(for: NativeUiFixture.shared.setReceiptsHidden(hidden: true))
+        do {
+            _ = try await waitForList(minimum: 2, maximum: 3)
+            await pause(1)
+            screenshot("receipt-table-empty")
+            try selectSegment("Attached")
+            await pause(1)
+            screenshot("receipt-table-empty-filter")
+            try selectSegment("All")
+            _ = try await asyncFunction(for: NativeUiFixture.shared.setReceiptsHidden(hidden: false))
+        } catch {
+            _ = try? await asyncFunction(for: NativeUiFixture.shared.setReceiptsHidden(hidden: false))
+            throw error
+        }
+        _ = try await waitForList(minimum: 251, maximum: 252)
+        guard let add = navigationItems().first(where: { $0.accessibilityLabel == "Add" || $0.title == "Add" || $0.primaryAction?.title == "Add" }) else {
+            throw FixtureError("Missing receipt Add action")
+        }
+        try perform(add)
+        try await wait("New receipt editor did not open") {
+            self.descendants(self.view).compactMap { $0 as? UITextField }.contains { $0.placeholder == "Name" }
+        }
+        navigationController(self)?.popViewController(animated: true)
+        await pause(0.7)
+        _ = try await waitForList(minimum: 251, maximum: 252)
+        weak var released = host
+        mount(AnyView(Text("Receipt table checked")))
+        await pause(6)
+        emit(["event": "receipt-table-checked", "checks": "filters,reconfigure,editor-save,scroll,accessibility,empty,restore,add",
+              "controllerReleased": released == nil, "database": querySnapshot()])
     }
 
     private func runReceiptPreviews() async throws {
@@ -807,20 +1048,32 @@ final class NativeUiPerformanceController: UIViewController {
         picker.sendActions(for: .valueChanged)
     }
 
-    private func waitForList(minimum: Int, maximum: Int = .max) async throws -> UICollectionView {
+    private func waitForList(minimum: Int, maximum: Int = .max) async throws -> UIScrollView {
         let deadline = CACurrentMediaTime() + 30
         while CACurrentMediaTime() < deadline {
-            if let list = descendants(view).compactMap({ $0 as? UICollectionView })
-                .first(where: { itemCount($0) >= minimum && itemCount($0) < maximum && !$0.visibleCells.isEmpty }) { return list }
+            if let list = descendants(view).compactMap({ $0 as? UIScrollView })
+                .first(where: { itemCount($0) >= minimum && itemCount($0) < maximum && !visibleCells($0).isEmpty }) { return list }
             await pause(0.05)
         }
-        let observed = descendants(view).compactMap { $0 as? UICollectionView }
-            .map { "items=\(itemCount($0)),visible=\($0.visibleCells.count)" }
+        let observed = descendants(view).compactMap { $0 as? UIScrollView }
+            .map { "items=\(itemCount($0)),visible=\(visibleCells($0).count)" }
         throw FixtureError("No populated native list rendered within 30 seconds (expected \(minimum)..<\(maximum), observed \(observed))")
     }
 
-    private func itemCount(_ list: UICollectionView) -> Int {
-        (0..<list.numberOfSections).reduce(0) { $0 + list.numberOfItems(inSection: $1) }
+    private func itemCount(_ list: UIScrollView) -> Int {
+        if let collection = list as? UICollectionView {
+            return (0..<collection.numberOfSections).reduce(0) { $0 + collection.numberOfItems(inSection: $1) }
+        }
+        if let table = list as? UITableView {
+            return (0..<table.numberOfSections).reduce(0) { $0 + table.numberOfRows(inSection: $1) }
+        }
+        return 0
+    }
+
+    private func visibleCells(_ list: UIScrollView) -> [UIView] {
+        if let collection = list as? UICollectionView { return collection.visibleCells }
+        if let table = list as? UITableView { return table.visibleCells }
+        return []
     }
 
     private func descendants(_ root: UIView) -> [UIView] {

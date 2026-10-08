@@ -45,67 +45,13 @@ struct ReceiptsScreen: View {
     var body: some View {
         let state = model.state
         NavigationStack(path: $path) {
-            List {
-                Section {
-                    Picker("Filter", selection: Binding(
-                        get: { state.filter },
-                        set: { model.screen.setFilter(filter: $0) }
-                    )) {
-                        ForEach(state.filters, id: \.self) { filter in
-                            Text(filter.label).tag(filter)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
-                } footer: {
-                    if let subtitle = state.subtitle {
-                        Text(subtitle)
-                    }
-                }
-
-                if let empty = state.empty {
-                    Section {
-                        ContentUnavailableView {
-                            Label(empty.title, systemImage: "doc.text")
-                        } description: {
-                            if let message = empty.message { Text(message) }
-                        } actions: {
-                            if empty.showAdd {
-                                Button("Add receipt") { path.append(.receipt(nil)) }
-                                    .buttonStyle(.borderedProminent)
-                            }
-                        }
-                    }
-                    .listRowBackground(Color.clear)
-                } else {
-                    Section {
-                        ForEach(state.rows, id: \.id) { row in
-                            NavigationLink(value: Editor.receipt(row.id)) {
-                                HStack(spacing: 12) {
-                                    Image(systemName: "doc.text")
-                                        .foregroundStyle(.secondary)
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(row.title).lineLimit(1)
-                                        Text(row.supporting)
-                                            .font(.footnote)
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(1)
-                                    }
-                                    Spacer(minLength: 8)
-                                    if let amount = row.amount {
-                                        Text(amount).lineLimit(1).fixedSize()
-                                    }
-                                }
-                                .contentShape(Rectangle())
-                                .accessibilityElement(children: .combine)
-                            }
-                        }
-                    }
-                }
-            }
-            .listStyle(.insetGrouped)
+            ReceiptTable(state: state,
+                selectFilter: { model.screen.setFilter(filter: $0) },
+                openReceipt: { path.append(.receipt($0)) })
+            // UITableView adjusts its own navigation/tab-bar insets.
+            .ignoresSafeArea(.container, edges: .vertical)
             .navigationTitle("Receipts")
+            .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: Editor.self) { editor in
                 switch editor {
                 case .receipt(let id):
