@@ -140,11 +140,12 @@ def main():
                     validate_editor_navigation([r for r in records if r["run"] == run])
                 if args.screen == "editor-choices":
                     checked = [r for r in records if r["run"] == run and r["event"] == "choices-checked"]
-                    if len(checked) != 2 or any(r.get("keyboardDoneChecks") != 2 or not r.get("directFocusSwitchChecked") or r["database"]["activeListeners"] for r in checked):
+                    if len(checked) != 2 or any(r.get("keyboardDoneChecks") != 2 or not r.get("directFocusSwitchChecked") or not r.get("accessibilityTextChecked") or r["database"]["activeListeners"] for r in checked):
                         raise RuntimeError("Editor choice/keyboard checks did not complete or left database listeners active")
                 if args.screen == "editor-save":
                     checked = [r for r in records if r["run"] == run and r["event"] == "editor-save-checked"]
-                    if len(checked) != 4 or any(not r["restored"] or r["saveDelayMs"] >= 120 for r in checked):
+                    if (len(checked) != 4 or any(not r["restored"] or r["saveDelayMs"] >= 120 for r in checked)
+                            or any(not r.get("amountAndDateChecked") for r in checked if r["editor"] in {"schedule", "transaction"})):
                         raise RuntimeError("Rapid editor save/restore checks did not complete")
                 if args.screen == "import-regression":
                     checked = [r for r in records if r["run"] == run and r["event"] == "import-checked"]
@@ -174,7 +175,7 @@ def main():
                         raise RuntimeError("Not all five native tabs were exercised")
                     closed = [r for r in tab_records if r["event"] == "tabs-closed"]
                     if (len(closed) != 1 or not closed[0]["controllerReleased"] or closed[0]["database"]["activeListeners"]
-                            or closed[0].get("receiptListReleased") is False or closed[0].get("activityListReleased") is False):
+                            or closed[0].get("receiptListReleased") is False or closed[0].get("activityListReleased") is False or closed[0].get("planListReleased") is False):
                         raise RuntimeError("Tab container or database listeners remained after closing")
                     validate_closed_updates(tab_records)
                 if args.screen == "tab-resume":
