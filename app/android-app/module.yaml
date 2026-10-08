@@ -44,7 +44,7 @@ settings:
   android:
     compileSdk: 37
     minSdk: 28
-    targetSdk: 35
+    targetSdk: 36
     namespace: finance.shilling.android
     applicationId: finance.shilling.android
     versionName: "0.1.1"

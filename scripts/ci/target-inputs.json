@@ -9,8 +9,8 @@
   "rules": [
     {"paths": ["docs/*", "plans/*", "scripts/perf/*", "app/perf-*", ".github/*", ".superset/*", ".mcp.json", "conductor.json", "AGENTS.md", "CLAUDE.md", "CONTRIBUTING.md", "README.md", "SECURITY.md", ".gitignore", ".gitkeep", ".envrc", "Brewfile", "justfile"], "targets": []},
     {"paths": ["app/shared/test@*", "app/shared/src/commonTest/*", "app/shared-ui/test@*", "core/test/*", "core/test@*", "server/test/*", "server/test@*", "scripts/ci/tests/*", "scripts/ci/fixtures/*", "scripts/ci/smoke/*", "scripts/ci/smoke-*", "scripts/ci/test-*", "scripts/ci/run-jvm-tests.sh", "scripts/ci/accept-successful-junit-reports.sh", "scripts/enforce-architecture.sh"], "targets": []},
-    {"paths": ["app/ios-app/*", "app/ios-platform/*", "setup-webrtc.sh", "scripts/ci/build-ios.sh", "scripts/ci/check-ios-archive.py", "scripts/ci/ios_provenance.py", "scripts/ci/apple_store.py", "scripts/ci/apple-python.sh", "scripts/ci/apple-requirements.txt"], "targets": ["ios"]},
-    {"paths": ["app/android-app/*", "scripts/ci/build-android.sh", "scripts/ci/ensure-android-sdk.sh"], "targets": ["android"]},
+    {"paths": ["app/ios-app/*", "app/ios-platform/*", "setup-webrtc.sh", "scripts/ci/build-ios.sh", "scripts/ci/check-ios-archive.py", "scripts/ci/ios_provenance.py", "scripts/ci/apple_store.py", "scripts/ci/apple-python.sh"], "targets": ["ios"]},
+    {"paths": ["app/android-app/*", "scripts/ci/build-android.sh", "scripts/ci/ensure-android-sdk.sh", "scripts/ci/android_provenance.py", "scripts/ci/sign_android.py", "scripts/ci/play_store.py", "scripts/ci/play-python.sh"], "targets": ["android"]},
     {"paths": ["app/shared/src@android/*", "app/shared/src/androidMain/*", "app/shared-ui/src@android/*", "app/shared-ui/src/androidMain/*", "app/shared-ui/src@nativeBilling/*"], "targets": ["android"]},
     {"paths": ["app/shared/src@iosSimulatorArm64/*", "app/shared-ui/src@ios*/*"], "targets": []},
     {"paths": ["app/shared/src@ios*/*", "app/shared/src/iosMain/*", "app/shared/src@apple/*", "app/shared/src@native/*"], "targets": ["ios"]},
