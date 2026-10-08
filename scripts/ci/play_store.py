@@ -139,6 +139,8 @@ def upload(api, candidate, directory, output):
         code = candidate['version_code']
         if any(int(v) > int(code) for v in versions(current)):
             raise ValueError('A newer Android internal beta exists; refusing to move the track backwards')
+        if code in versions(current, 'completed') and not existing:
+            raise ValueError('Active internal bundle is missing from Play; cannot verify its hash')
         if code not in versions(current, 'completed'):
             if not existing:
                 uploaded = api.request('POST', path + '/bundles?uploadType=media',

@@ -123,6 +123,13 @@ class PlayTests(unittest.TestCase):
         self.assertFalse(self.mutations())
         self.assertTrue(self.output.exists())
 
+    def test_internal_retry_requires_remote_hash_verification(self):
+        self.api.bundles = []
+        with self.assertRaisesRegex(ValueError, 'cannot verify its hash'):
+            play.upload(self.api, CANDIDATE, self.temp.name, self.output)
+        self.assertFalse(self.mutations())
+        self.assertFalse(self.output.exists())
+
     def test_internal_first_upload_validates_then_commits(self):
         self.api.bundles = []
         self.api.tracks['internal']['releases'] = []
