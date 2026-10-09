@@ -10,6 +10,7 @@ from pathlib import Path
 import re
 import subprocess
 import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -26,9 +27,12 @@ def run(*args, **kwargs):
     return subprocess.run(args, check=True, text=True, capture_output=True, **kwargs).stdout
 
 
-def request_json(url, headers=None):
-    with urllib.request.urlopen(urllib.request.Request(url, headers=headers or {}), timeout=60) as response:
-        return json.load(response)
+def request_json(url):
+    # curl handles Pages TLS consistently on both build agents. These snapshots
+    # are public; authenticated Cloudflare API calls stay in cloudflare().
+    return json.loads(run('curl', '--fail', '--silent', '--show-error', '--location',
+        '--retry', '3', '--retry-all-errors', '--max-time', '60', '--proto', '=https',
+        '--user-agent', 'Shilling-Release/1.0', url))
 
 
 def cloudflare(path, method='GET', body=None):
@@ -107,8 +111,11 @@ def deploy(state, commit):
         run('npx', '--yes', 'wrangler@4.80.0', 'pages', 'deploy', tmp,
             '--project-name=' + PROJECT, '--branch=main', '--commit-hash=' + commit,
             '--commit-dirty=false', env=env)
-    if state_from_host() != state:
-        raise RuntimeError('Pages did not publish the expected update state; rerun to reconcile')
+    for attempt in range(6):
+        if state_from_host() == state:
+            return
+        time.sleep(5)
+    raise RuntimeError('Pages did not publish the expected update state; rerun to reconcile')
 
 
 def verify_signature(path, signature):
@@ -230,7 +237,7 @@ def prepare_stable(targets, version, commit):
         # Fetch and verify published signature/package before any other target changes.
         with tempfile.TemporaryDirectory() as tmp:
             file = Path(tmp)/candidate['updater']
-            with urllib.request.urlopen(feed['url'], timeout=120) as response:
+            with urllib.request.urlopen(urllib.request.Request(feed['url'], headers={'User-Agent': 'Shilling-Release/1.0'}), timeout=120) as response:
                 import shutil
                 with file.open('wb') as output: shutil.copyfileobj(response, output)
             if sha256(file) != feed['sha256']:
