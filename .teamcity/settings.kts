@@ -14,6 +14,8 @@ project {
 
     // --- Phase 2: packages, runtime checks, and deployment ---
     buildType(AndroidBuild)
+    buildType(AndroidSign)
+    buildType(AndroidInternal)
     buildType(ServerBuild)
     buildType(WebDeploy)
     buildType(RuntimeSmoke)
@@ -39,7 +41,6 @@ project {
     // --- Parameters (secrets configured in TeamCity UI) ---
     params {
         password("env.GITHUB_TOKEN", "credentialsJSON:github-token", display = ParameterDisplay.HIDDEN)
-        password("env.PLAY_SERVICE_ACCOUNT_JSON", "credentialsJSON:play-service-account", display = ParameterDisplay.HIDDEN)
         param("env.CLOUDFLARE_PAGES_PROJECT", "shilling-app")
         param("env.CLOUDFLARE_PAGES_DOMAIN", "app.shilling.finance")
         param("env.AMPER_SHARED_CACHES_ROOT", "/opt/shilling-ci/amper-cache")
@@ -124,6 +125,7 @@ object AndroidBuild : BuildType({
     name = "Android Build"
     description = "Build an installable debug APK and unsigned release AAB on Linux"
     artifactRules = "mobile-artifacts/android/** => android.zip"
+    params { param("env.TEAMCITY_BUILD_ID", "%teamcity.build.id%") }
 
     vcs {
         root(DslContext.settingsRoot)
@@ -149,6 +151,70 @@ object AndroidBuild : BuildType({
     requirements {
         equals("teamcity.agent.jvm.os.name", "Linux")
     }
+})
+
+// Signing credentials are mapped only in this main-chain job, never compilation.
+object AndroidSign : BuildType({
+    name = "Android — Sign Bundle"
+    description = "Sign the exact main-chain AAB with the Play upload key"
+    artifactRules = "android-signed/** => android-signed.zip"
+    params {
+        param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
+        password("env.ANDROID_UPLOAD_KEY_BASE64", "%shilling.android.upload.key.base64%", display = ParameterDisplay.HIDDEN)
+        password("env.ANDROID_UPLOAD_KEY_PASSWORD", "%shilling.android.upload.key.password%", display = ParameterDisplay.HIDDEN)
+    }
+    vcs { root(DslContext.settingsRoot) }
+    dependencies {
+        snapshot(AndroidBuild) {
+            onDependencyFailure = FailureAction.FAIL_TO_START
+            onDependencyCancel = FailureAction.CANCEL
+            reuseBuilds = ReuseBuilds.SUCCESSFUL
+        }
+        artifacts(AndroidBuild) {
+            buildRule = sameChain()
+            artifactRules = "android.zip!** => android-input"
+            cleanDestination = true
+        }
+    }
+    steps { script {
+        name = "Validate and sign Android bundle"
+        scriptContent = "python3 scripts/ci/sign_android.py"
+    } }
+    requirements { equals("teamcity.agent.jvm.os.name", "Linux") }
+})
+
+object AndroidInternal : BuildType({
+    name = "Android — Play Internal"
+    description = "Upload the tested main bundle only when Android inputs changed"
+    artifactRules = "play-output/** => play-internal.zip"
+    params {
+        password("env.PLAY_SERVICE_ACCOUNT_JSON", "%shilling.play.service.account.json%", display = ParameterDisplay.HIDDEN)
+    }
+    vcs { root(DslContext.settingsRoot) }
+    features { sharedResources { writeLock("shilling-release") } }
+    triggers { finishBuildTrigger {
+        buildType = "${AllTargets.id}"
+        successfulOnly = true
+        branchFilter = "+:<default>\n+:main"
+    } }
+    dependencies {
+        snapshot(AllTargets) {
+            onDependencyFailure = FailureAction.FAIL_TO_START
+            onDependencyCancel = FailureAction.CANCEL
+            reuseBuilds = ReuseBuilds.SUCCESSFUL
+        }
+        artifacts(AndroidSign) {
+            buildRule = sameChain()
+            artifactRules = "android-signed.zip!** => release-input/clients/android"
+            cleanDestination = true
+        }
+    }
+    steps { script {
+        name = "Clear previous Play receipt"
+        scriptContent = "rm -f play-output/internal.json"
+    } }
+    BetaPublication.configure(this, "android", "play-internal", "bash scripts/ci/play-python.sh scripts/ci/play_store.py upload")
+    requirements { equals("teamcity.agent.jvm.os.name", "Linux") }
 })
 
 // =============================================================================
@@ -186,8 +252,8 @@ object IosBuild : BuildType({
     }
 })
 
-// Every beta track gets its own last-successful publication baseline. Future
-// Android/desktop tracks can wrap their publisher with this same helper.
+// Every beta track gets its own last-successful publication baseline.
+// All beta tracks wrap their publisher with this same helper.
 object BetaPublication {
     fun configure(build: BuildType, target: String, channel: String, command: String) = with(build) {
         maxRunningBuilds = 1
@@ -496,10 +562,11 @@ object ServerBuild : BuildType({
 open class ReleaseBuild(buildId: String, title: String, singleTarget: Boolean) : BuildType({
     id(buildId)
     name = title
-    description = "Promote a tested chain; iOS requires Apple approval before any target publishes"
+    description = "Promote a tested chain; Android must match Play internal and iOS must be Apple-approved"
     artifactRules = "release-output/** => release-output.zip"
     maxRunningBuilds = 1
     params {
+        password("env.PLAY_SERVICE_ACCOUNT_JSON", "%shilling.play.service.account.json%", display = ParameterDisplay.HIDDEN)
         // This non-environment password is exposed only to release/review jobs.
         password("env.ASC_API_PRIVATE_KEY", "%shilling.apple.api.private.key%", display = ParameterDisplay.HIDDEN)
         param("env.TEAMCITY_BUILD_ID", "%teamcity.build.id%")
@@ -534,7 +601,7 @@ open class ReleaseBuild(buildId: String, title: String, singleTarget: Boolean) :
             cleanDestination = true
         }
         for ((build, archive, target) in listOf(
-            Triple(AndroidBuild, "android.zip", "android"),
+            Triple(AndroidSign, "android-signed.zip", "android"),
             Triple(IosBuild, "ios.zip", "ios"),
             Triple(DesktopLinux, "desktop-linux.zip", "linux"),
             Triple(DesktopWindows, "desktop-windows.zip", "windows"),
@@ -601,6 +668,7 @@ object AllTargets : BuildType({
 
     dependencies {
         snapshot(LinuxTargets) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        snapshot(AndroidSign) { onDependencyFailure = FailureAction.FAIL_TO_START }
         snapshot(IosBuild) { onDependencyFailure = FailureAction.FAIL_TO_START }
         snapshot(DesktopMacOS) { onDependencyFailure = FailureAction.FAIL_TO_START }
     }
