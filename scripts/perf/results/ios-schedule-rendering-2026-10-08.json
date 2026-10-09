@@ -1,0 +1,3836 @@
+{
+  "date": "2026-10-08",
+  "baselineCommit": "77dbcd8c59894a43afb1e30577ac5eeca750e080",
+  "device": "iPhone SE (2nd generation), iOS 18.7.8",
+  "app": "finance.shilling.perf, Release, synthetic Store5 data",
+  "seed": {
+    "postings": 10000,
+    "schedules": 1000,
+    "receipts": 250,
+    "additionalFixedUpdateProbe": true
+  },
+  "method": [
+    "Three sequential fresh processes per cohort; two visits per editor/Plan transition.",
+    "Focus 400 ms; ten keystrokes at 50 ms intervals; 200 ms settling.",
+    "CPU includes all app threads. Display callback metrics are not rendering hitches.",
+    "Fresh app processes do not imply cold keyboard. No completed post-reboot comparison.",
+    "The Schedule performance candidate included a Group-only Plan control, not mounted in the editor fixture. That control was subsequently reverted.",
+    "Prototype initialized-editors cohort extended focus; only its opening phases are included. Its Animation Hitches trace used corrected fixed timing."
+  ],
+  "scheduleSourceSha256": "5cc23cebac0321c0628a73289a898d6a2e089d6453912a0509f9404cbd4781c2",
+  "editorCohorts": {
+    "baseline-editors": {
+      "processes": 3,
+      "sampleOrder": "process 1, 2, 3; milliseconds",
+      "thermalStates": [0],
+      "mainThreadQueries": 0,
+      "samples": [
+        {
+          "phase": "push-account",
+          "visit": 1,
+          "cpuMs": [125.435, 134.767, 134.698],
+          "maxCallbackGapMs": [33.335, 41.085, 45.655],
+          "firstCallbackLatencyMs": [55.286, 50.285, 50.697]
+        },
+        {
+          "phase": "push-settle-account",
+          "visit": 1,
+          "cpuMs": [97.852, 86.981, 87.9],
+          "maxCallbackGapMs": [16.667, 16.668, 16.668],
+          "firstCallbackLatencyMs": [15.036, 12.732, 16.845]
+        },
+        {
+          "phase": "focus-account",
+          "visit": 1,
+          "cpuMs": [174.33, 170.32, 250.105],
+          "maxCallbackGapMs": [16.668, 21.412, 16.668],
+          "firstCallbackLatencyMs": [97.106, 78.085, 75.531]
+        },
+        {
+          "phase": "typing-account",
+          "visit": 1,
+          "cpuMs": [247.381, 248.851, 303.285],
+          "maxCallbackGapMs": [36.537, 16.668, 36.728],
+          "firstCallbackLatencyMs": [26.91, 27.871, 23.762]
+        },
+        {
+          "phase": "pop-account",
+          "visit": 1,
+          "cpuMs": [207.428, 211.909, 209.356],
+          "maxCallbackGapMs": [50.245, 52.694, 59.919],
+          "firstCallbackLatencyMs": [13.623, 16.789, 13.099]
+        },
+        {
+          "phase": "push-category",
+          "visit": 1,
+          "cpuMs": [128.414, 129.43, 131.063],
+          "maxCallbackGapMs": [40.792, 38.784, 48.105],
+          "firstCallbackLatencyMs": [42.388, 42.834, 44.4]
+        },
+        {
+          "phase": "push-settle-category",
+          "visit": 1,
+          "cpuMs": [47.592, 51.259, 35.99],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [15.328, 3.558, 14.728]
+        },
+        {
+          "phase": "focus-category",
+          "visit": 1,
+          "cpuMs": [109.064, 108.116, 110.742],
+          "maxCallbackGapMs": [18.597, 18.381, 16.668],
+          "firstCallbackLatencyMs": [35.157, 35.971, 35.466]
+        },
+        {
+          "phase": "typing-category",
+          "visit": 1,
+          "cpuMs": [230.83, 235.487, 239.66],
+          "maxCallbackGapMs": [22.26, 26.225, 28.392],
+          "firstCallbackLatencyMs": [38.866, 36.75, 31.085]
+        },
+        {
+          "phase": "pop-category",
+          "visit": 1,
+          "cpuMs": [206.705, 204.765, 203.498],
+          "maxCallbackGapMs": [51.1, 46.974, 50.835],
+          "firstCallbackLatencyMs": [14.556, 13.224, 14.969]
+        },
+        {
+          "phase": "push-schedule",
+          "visit": 1,
+          "cpuMs": [204.21, 205.856, 211.022],
+          "maxCallbackGapMs": [113.116, 106.986, 107.088],
+          "firstCallbackLatencyMs": [44.548, 41.53, 47.142]
+        },
+        {
+          "phase": "push-settle-schedule",
+          "visit": 1,
+          "cpuMs": [46.939, 62.309, 63.371],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [0.591, 5.953, 13.923]
+        },
+        {
+          "phase": "focus-schedule",
+          "visit": 1,
+          "cpuMs": [204.867, 203.223, 125.767],
+          "maxCallbackGapMs": [28.984, 39.777, 38.276],
+          "firstCallbackLatencyMs": [28.926, 27.743, 29.08]
+        },
+        {
+          "phase": "typing-schedule",
+          "visit": 1,
+          "cpuMs": [314.052, 336.557, 254.872],
+          "maxCallbackGapMs": [41.401, 49.911, 34.736],
+          "firstCallbackLatencyMs": [17.857, 13.751, 17.487]
+        },
+        {
+          "phase": "pop-schedule",
+          "visit": 1,
+          "cpuMs": [230.086, 229.461, 229.519],
+          "maxCallbackGapMs": [65.032, 62.506, 60.646],
+          "firstCallbackLatencyMs": [8.774, 8.85, 14.806]
+        },
+        {
+          "phase": "push-transaction",
+          "visit": 1,
+          "cpuMs": [182.586, 179.385, 185.012],
+          "maxCallbackGapMs": [70.312, 71.652, 75.937],
+          "firstCallbackLatencyMs": [38.039, 38.863, 41.622]
+        },
+        {
+          "phase": "push-settle-transaction",
+          "visit": 1,
+          "cpuMs": [59.197, 58.998, 57.577],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [9.41, 7.962, 3.637]
+        },
+        {
+          "phase": "focus-transaction",
+          "visit": 1,
+          "cpuMs": [110.343, 105.955, 103.729],
+          "maxCallbackGapMs": [26.934, 16.668, 29.163],
+          "firstCallbackLatencyMs": [29.722, 29.619, 28.287]
+        },
+        {
+          "phase": "typing-transaction",
+          "visit": 1,
+          "cpuMs": [237.588, 244.52, 247.124],
+          "maxCallbackGapMs": [33.495, 16.668, 33.335],
+          "firstCallbackLatencyMs": [11.023, 11.176, 14.381]
+        },
+        {
+          "phase": "pop-transaction",
+          "visit": 1,
+          "cpuMs": [214.016, 210.188, 210.421],
+          "maxCallbackGapMs": [53.033, 55.112, 53.026],
+          "firstCallbackLatencyMs": [13.158, 8.795, 13.675]
+        },
+        {
+          "phase": "push-account",
+          "visit": 2,
+          "cpuMs": [114.119, 112.807, 114.317],
+          "maxCallbackGapMs": [37.903, 37.293, 35.706],
+          "firstCallbackLatencyMs": [40.601, 40.125, 41.374]
+        },
+        {
+          "phase": "push-settle-account",
+          "visit": 2,
+          "cpuMs": [35.365, 34.366, 34.396],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [15.167, 16.084, 10.535]
+        },
+        {
+          "phase": "focus-account",
+          "visit": 2,
+          "cpuMs": [135.831, 138.771, 145.211],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [58.118, 58.26, 66.764]
+        },
+        {
+          "phase": "typing-account",
+          "visit": 2,
+          "cpuMs": [232.478, 232.315, 227.637],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [27.741, 25.782, 24.934]
+        },
+        {
+          "phase": "pop-account",
+          "visit": 2,
+          "cpuMs": [211.532, 202.165, 204.911],
+          "maxCallbackGapMs": [53.488, 47.709, 55.991],
+          "firstCallbackLatencyMs": [14.8, 15.164, 12.081]
+        },
+        {
+          "phase": "push-category",
+          "visit": 2,
+          "cpuMs": [121.538, 120.268, 119.681],
+          "maxCallbackGapMs": [35.533, 37.566, 37.779],
+          "firstCallbackLatencyMs": [39.048, 40.837, 39.977]
+        },
+        {
+          "phase": "push-settle-category",
+          "visit": 2,
+          "cpuMs": [51.83, 45.559, 51.917],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [14.052, 7.15, 8.226]
+        },
+        {
+          "phase": "focus-category",
+          "visit": 2,
+          "cpuMs": [132.282, 124.902, 129.823],
+          "maxCallbackGapMs": [17.731, 19.483, 19.58],
+          "firstCallbackLatencyMs": [43.648, 42.614, 42.455]
+        },
+        {
+          "phase": "typing-category",
+          "visit": 2,
+          "cpuMs": [239.402, 236.637, 236.853],
+          "maxCallbackGapMs": [25.831, 41.765, 16.668],
+          "firstCallbackLatencyMs": [30.447, 29.274, 28.009]
+        },
+        {
+          "phase": "pop-category",
+          "visit": 2,
+          "cpuMs": [212.627, 201.095, 213.024],
+          "maxCallbackGapMs": [56.238, 51.758, 61.257],
+          "firstCallbackLatencyMs": [11.462, 10.17, 11.965]
+        },
+        {
+          "phase": "push-schedule",
+          "visit": 2,
+          "cpuMs": [176.751, 183.033, 178.628],
+          "maxCallbackGapMs": [92.508, 92.922, 92.357],
+          "firstCallbackLatencyMs": [33.263, 39.436, 31.953]
+        },
+        {
+          "phase": "push-settle-schedule",
+          "visit": 2,
+          "cpuMs": [65.239, 64.384, 63.831],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [3.628, 3.468, 3.977]
+        },
+        {
+          "phase": "focus-schedule",
+          "visit": 2,
+          "cpuMs": [151.45, 143.473, 148.439],
+          "maxCallbackGapMs": [43.127, 43.648, 42.765],
+          "firstCallbackLatencyMs": [56.542, 49.932, 62.802]
+        },
+        {
+          "phase": "typing-schedule",
+          "visit": 2,
+          "cpuMs": [264.4, 257.179, 256.214],
+          "maxCallbackGapMs": [48.425, 35.839, 46.877],
+          "firstCallbackLatencyMs": [16.73, 17.266, 16.712]
+        },
+        {
+          "phase": "pop-schedule",
+          "visit": 2,
+          "cpuMs": [221.616, 221.001, 219.697],
+          "maxCallbackGapMs": [60.329, 57.158, 58.714],
+          "firstCallbackLatencyMs": [11.989, 10.483, 8.087]
+        },
+        {
+          "phase": "push-transaction",
+          "visit": 2,
+          "cpuMs": [164.745, 164.264, 161.388],
+          "maxCallbackGapMs": [64.347, 63.069, 66.508],
+          "firstCallbackLatencyMs": [35.119, 35.671, 35.034]
+        },
+        {
+          "phase": "push-settle-transaction",
+          "visit": 2,
+          "cpuMs": [55.657, 58.778, 58.802],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [15.445, 0.611, 13.217]
+        },
+        {
+          "phase": "focus-transaction",
+          "visit": 2,
+          "cpuMs": [135.838, 130.527, 132.375],
+          "maxCallbackGapMs": [16.668, 20.657, 28.875],
+          "firstCallbackLatencyMs": [43.164, 52.811, 52.113]
+        },
+        {
+          "phase": "typing-transaction",
+          "visit": 2,
+          "cpuMs": [234.879, 246.922, 238.393],
+          "maxCallbackGapMs": [16.668, 42.589, 16.668],
+          "firstCallbackLatencyMs": [14.207, 11.18, 11.236]
+        },
+        {
+          "phase": "pop-transaction",
+          "visit": 2,
+          "cpuMs": [211.819, 208.453, 209.39],
+          "maxCallbackGapMs": [50.331, 52.308, 51.686],
+          "firstCallbackLatencyMs": [9.005, 12.68, 16.335]
+        },
+        {
+          "phase": "after-close-updates",
+          "visit": 1,
+          "cpuMs": [159.186, 153.612, 150.511],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [3.977, 15.275, 5.016]
+        }
+      ],
+      "navigationAndPostCloseValidationPassed": true
+    },
+    "native-editors": {
+      "processes": 3,
+      "sampleOrder": "process 1, 2, 3; milliseconds",
+      "thermalStates": [0],
+      "mainThreadQueries": 0,
+      "samples": [
+        {
+          "phase": "push-account",
+          "visit": 1,
+          "cpuMs": [208.59, 128.559, 133.161],
+          "maxCallbackGapMs": [77.189, 40.042, 35.623],
+          "firstCallbackLatencyMs": [96.954, 45.988, 48.481]
+        },
+        {
+          "phase": "push-settle-account",
+          "visit": 1,
+          "cpuMs": [66.63, 104.396, 79.574],
+          "maxCallbackGapMs": [16.667, 16.668, 16.667],
+          "firstCallbackLatencyMs": [1.95, 8.93, 14.654]
+        },
+        {
+          "phase": "focus-account",
+          "visit": 1,
+          "cpuMs": [199.322, 167.299, 169.236],
+          "maxCallbackGapMs": [40.989, 20.955, 20.027],
+          "firstCallbackLatencyMs": [200.558, 78.761, 78.662]
+        },
+        {
+          "phase": "typing-account",
+          "visit": 1,
+          "cpuMs": [225.521, 245.917, 244.775],
+          "maxCallbackGapMs": [27.138, 35.881, 35.692],
+          "firstCallbackLatencyMs": [32.537, 26.535, 26.048]
+        },
+        {
+          "phase": "pop-account",
+          "visit": 1,
+          "cpuMs": [208.766, 207.158, 208.561],
+          "maxCallbackGapMs": [63.588, 50.405, 56.285],
+          "firstCallbackLatencyMs": [14.574, 13.682, 12.327]
+        },
+        {
+          "phase": "push-category",
+          "visit": 1,
+          "cpuMs": [128.53, 129.16, 127.961],
+          "maxCallbackGapMs": [40.859, 48.213, 37.639],
+          "firstCallbackLatencyMs": [41.87, 42.304, 41.192]
+        },
+        {
+          "phase": "push-settle-category",
+          "visit": 1,
+          "cpuMs": [34.598, 54.8, 45.887],
+          "maxCallbackGapMs": [16.667, 16.668, 16.668],
+          "firstCallbackLatencyMs": [5.052, 14.61, 8.319]
+        },
+        {
+          "phase": "focus-category",
+          "visit": 1,
+          "cpuMs": [112.234, 104.965, 105.57],
+          "maxCallbackGapMs": [22.513, 17.573, 19.076],
+          "firstCallbackLatencyMs": [38.749, 35.905, 32.678]
+        },
+        {
+          "phase": "typing-category",
+          "visit": 1,
+          "cpuMs": [241.449, 229.648, 239.84],
+          "maxCallbackGapMs": [42.71, 22.866, 27.074],
+          "firstCallbackLatencyMs": [31.412, 38.259, 32.284]
+        },
+        {
+          "phase": "pop-category",
+          "visit": 1,
+          "cpuMs": [206.28, 212.159, 204.335],
+          "maxCallbackGapMs": [55.417, 49.635, 51.354],
+          "firstCallbackLatencyMs": [10.807, 14.748, 15.313]
+        },
+        {
+          "phase": "push-schedule",
+          "visit": 1,
+          "cpuMs": [200.65, 189.109, 189.687],
+          "maxCallbackGapMs": [114.421, 94.361, 94.627],
+          "firstCallbackLatencyMs": [36.64, 38.529, 36.674]
+        },
+        {
+          "phase": "push-settle-schedule",
+          "visit": 1,
+          "cpuMs": [59.424, 59.863, 58.997],
+          "maxCallbackGapMs": [16.667, 16.668, 16.668],
+          "firstCallbackLatencyMs": [15.453, 7.35, 15.426]
+        },
+        {
+          "phase": "focus-schedule",
+          "visit": 1,
+          "cpuMs": [106.928, 109.854, 112.557],
+          "maxCallbackGapMs": [18.712, 22.626, 16.668],
+          "firstCallbackLatencyMs": [33.2, 34.659, 33.834]
+        },
+        {
+          "phase": "typing-schedule",
+          "visit": 1,
+          "cpuMs": [269.349, 247.646, 254.945],
+          "maxCallbackGapMs": [39.833, 39.706, 40.171],
+          "firstCallbackLatencyMs": [14.762, 14.647, 15.204]
+        },
+        {
+          "phase": "pop-schedule",
+          "visit": 1,
+          "cpuMs": [229.373, 229.331, 223.953],
+          "maxCallbackGapMs": [63.531, 69.039, 58.888],
+          "firstCallbackLatencyMs": [12.663, 10.777, 10.215]
+        },
+        {
+          "phase": "push-transaction",
+          "visit": 1,
+          "cpuMs": [189.321, 166.702, 179.714],
+          "maxCallbackGapMs": [77.354, 67.688, 71.848],
+          "firstCallbackLatencyMs": [42.388, 36.901, 37.021]
+        },
+        {
+          "phase": "push-settle-transaction",
+          "visit": 1,
+          "cpuMs": [58.394, 54.892, 57.779],
+          "maxCallbackGapMs": [16.667, 16.668, 16.668],
+          "firstCallbackLatencyMs": [14.356, 11.878, 14.766]
+        },
+        {
+          "phase": "focus-transaction",
+          "visit": 1,
+          "cpuMs": [104.875, 98.428, 105.46],
+          "maxCallbackGapMs": [27.652, 17.277, 16.668],
+          "firstCallbackLatencyMs": [27.057, 30.198, 25.902]
+        },
+        {
+          "phase": "typing-transaction",
+          "visit": 1,
+          "cpuMs": [239.5, 242.652, 234.301],
+          "maxCallbackGapMs": [33.335, 34.789, 33.335],
+          "firstCallbackLatencyMs": [10.935, 13.616, 14.63]
+        },
+        {
+          "phase": "pop-transaction",
+          "visit": 1,
+          "cpuMs": [213.319, 210.319, 213.798],
+          "maxCallbackGapMs": [53.183, 51.127, 52.297],
+          "firstCallbackLatencyMs": [6.48, 15.216, 8.795]
+        },
+        {
+          "phase": "push-account",
+          "visit": 2,
+          "cpuMs": [114.956, 113.53, 114.084],
+          "maxCallbackGapMs": [24.191, 38.242, 38.326],
+          "firstCallbackLatencyMs": [39.467, 40.494, 41.127]
+        },
+        {
+          "phase": "push-settle-account",
+          "visit": 2,
+          "cpuMs": [44.715, 35.438, 33.511],
+          "maxCallbackGapMs": [16.667, 16.668, 16.668],
+          "firstCallbackLatencyMs": [2.441, 13.557, 1.443]
+        },
+        {
+          "phase": "focus-account",
+          "visit": 2,
+          "cpuMs": [131.628, 190.175, 145.843],
+          "maxCallbackGapMs": [16.667, 266.393, 28.05],
+          "firstCallbackLatencyMs": [48.498, 58.534, 64.709]
+        },
+        {
+          "phase": "typing-account",
+          "visit": 2,
+          "cpuMs": [232.971, 297.104, 225.258],
+          "maxCallbackGapMs": [16.667, 76.313, 16.668],
+          "firstCallbackLatencyMs": [26.235, 10.036, 28.39]
+        },
+        {
+          "phase": "pop-account",
+          "visit": 2,
+          "cpuMs": [202.617, 207.967, 201.478],
+          "maxCallbackGapMs": [49.62, 51.694, 57.69],
+          "firstCallbackLatencyMs": [13.1, 14.512, 11.604]
+        },
+        {
+          "phase": "push-category",
+          "visit": 2,
+          "cpuMs": [117.921, 124.022, 122.682],
+          "maxCallbackGapMs": [34.564, 39.782, 35.14],
+          "firstCallbackLatencyMs": [39.487, 41.727, 39.778]
+        },
+        {
+          "phase": "push-settle-category",
+          "visit": 2,
+          "cpuMs": [34.661, 44.697, 50.616],
+          "maxCallbackGapMs": [16.667, 16.668, 16.668],
+          "firstCallbackLatencyMs": [12.043, 0.697, 11.477]
+        },
+        {
+          "phase": "focus-category",
+          "visit": 2,
+          "cpuMs": [142.282, 137.311, 131.623],
+          "maxCallbackGapMs": [25.289, 17.35, 16.98],
+          "firstCallbackLatencyMs": [60.517, 48.581, 43.966]
+        },
+        {
+          "phase": "typing-category",
+          "visit": 2,
+          "cpuMs": [241.813, 234.882, 230.371],
+          "maxCallbackGapMs": [16.667, 21.856, 20.903],
+          "firstCallbackLatencyMs": [39.896, 39.193, 40.263]
+        },
+        {
+          "phase": "pop-category",
+          "visit": 2,
+          "cpuMs": [216.675, 207.173, 202.599],
+          "maxCallbackGapMs": [52.852, 48.358, 54.92],
+          "firstCallbackLatencyMs": [13.395, 12.373, 10.681]
+        },
+        {
+          "phase": "push-schedule",
+          "visit": 2,
+          "cpuMs": [164.904, 167.375, 168.123],
+          "maxCallbackGapMs": [93.008, 84.828, 88.983],
+          "firstCallbackLatencyMs": [33.754, 35.464, 35.393]
+        },
+        {
+          "phase": "push-settle-schedule",
+          "visit": 2,
+          "cpuMs": [60.617, 59.992, 63.858],
+          "maxCallbackGapMs": [16.667, 16.668, 16.668],
+          "firstCallbackLatencyMs": [3.348, 8.428, 3.752]
+        },
+        {
+          "phase": "focus-schedule",
+          "visit": 2,
+          "cpuMs": [133.112, 139.163, 142.452],
+          "maxCallbackGapMs": [29.056, 16.668, 28.033],
+          "firstCallbackLatencyMs": [61.953, 54.346, 63.498]
+        },
+        {
+          "phase": "typing-schedule",
+          "visit": 2,
+          "cpuMs": [246.381, 237.541, 239.438],
+          "maxCallbackGapMs": [43.439, 34.352, 35.758],
+          "firstCallbackLatencyMs": [13.833, 10.509, 14.34]
+        },
+        {
+          "phase": "pop-schedule",
+          "visit": 2,
+          "cpuMs": [213.383, 226.884, 223.176],
+          "maxCallbackGapMs": [60.563, 72.535, 60.204],
+          "firstCallbackLatencyMs": [11.002, 12.525, 14.97]
+        },
+        {
+          "phase": "push-transaction",
+          "visit": 2,
+          "cpuMs": [155.577, 163.668, 154.674],
+          "maxCallbackGapMs": [63.194, 71.105, 64.614],
+          "firstCallbackLatencyMs": [35.379, 33.55, 34.645]
+        },
+        {
+          "phase": "push-settle-transaction",
+          "visit": 2,
+          "cpuMs": [57.331, 58.778, 58.414],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [0.547, 12.373, 15.098]
+        },
+        {
+          "phase": "focus-transaction",
+          "visit": 2,
+          "cpuMs": [133.752, 128.486, 129.24],
+          "maxCallbackGapMs": [25.957, 27.448, 26.48],
+          "firstCallbackLatencyMs": [44.426, 45.807, 49.432]
+        },
+        {
+          "phase": "typing-transaction",
+          "visit": 2,
+          "cpuMs": [243.315, 238.615, 238.514],
+          "maxCallbackGapMs": [16.668, 38.373, 39.359],
+          "firstCallbackLatencyMs": [14.88, 14.008, 14.133]
+        },
+        {
+          "phase": "pop-transaction",
+          "visit": 2,
+          "cpuMs": [210.653, 213.812, 215.134],
+          "maxCallbackGapMs": [50.742, 51.686, 53.103],
+          "firstCallbackLatencyMs": [9.211, 16.313, 14.585]
+        },
+        {
+          "phase": "after-close-updates",
+          "visit": 1,
+          "cpuMs": [149.657, 146.131, 154.678],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [8.805, 2.152, 16.044]
+        }
+      ],
+      "navigationAndPostCloseValidationPassed": true
+    }
+  },
+  "scheduleIntermediateOpening": {
+    "menus-editors": {
+      "processes": 3,
+      "sampleOrder": "process 1, 2, 3; milliseconds",
+      "thermalStates": [0],
+      "mainThreadQueries": 0,
+      "samples": [
+        {
+          "phase": "push-schedule",
+          "visit": 1,
+          "cpuMs": [192.58, 194.699, 195.384],
+          "maxCallbackGapMs": [107.183, 95.225, 108.206],
+          "firstCallbackLatencyMs": [45.729, 45.226, 44.844]
+        },
+        {
+          "phase": "push-settle-schedule",
+          "visit": 1,
+          "cpuMs": [63.027, 64.891, 65.054],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [5.836, 9.806, 4.592]
+        },
+        {
+          "phase": "push-schedule",
+          "visit": 2,
+          "cpuMs": [172.912, 172.169, 168.072],
+          "maxCallbackGapMs": [85.588, 83.835, 92.831],
+          "firstCallbackLatencyMs": [33.043, 37.723, 36.3]
+        },
+        {
+          "phase": "push-settle-schedule",
+          "visit": 2,
+          "cpuMs": [62.54, 70.169, 63.196],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [10.591, 5.745, 0.647]
+        }
+      ]
+    },
+    "initialized-editors": {
+      "processes": 3,
+      "sampleOrder": "process 1, 2, 3; milliseconds",
+      "thermalStates": [0],
+      "mainThreadQueries": 0,
+      "samples": [
+        {
+          "phase": "push-schedule",
+          "visit": 1,
+          "cpuMs": [200.186, 191.125, 191.427],
+          "maxCallbackGapMs": [95.745, 95.658, 95.507],
+          "firstCallbackLatencyMs": [38.556, 35.208, 36.519]
+        },
+        {
+          "phase": "push-settle-schedule",
+          "visit": 1,
+          "cpuMs": [61.923, 63.077, 62.061],
+          "maxCallbackGapMs": [16.667, 16.668, 16.667],
+          "firstCallbackLatencyMs": [10.828, 9.556, 12.979]
+        },
+        {
+          "phase": "push-schedule",
+          "visit": 2,
+          "cpuMs": [166.928, 167.932, 168.908],
+          "maxCallbackGapMs": [90.844, 85.439, 86.752],
+          "firstCallbackLatencyMs": [31.65, 34.252, 30.929]
+        },
+        {
+          "phase": "push-settle-schedule",
+          "visit": 2,
+          "cpuMs": [62.733, 63.418, 62.829],
+          "maxCallbackGapMs": [16.668, 16.668, 16.668],
+          "firstCallbackLatencyMs": [7.818, 8.593, 9.569]
+        }
+      ]
+    }
+  },
+  "planCohortsAllDiscarded": {
+    "baseline-plan": {
+      "processes": 3,
+      "sampleOrder": "process 1, 2, 3; milliseconds",
+      "thermalStates": [0],
+      "mainThreadQueries": 0,
+      "samples": [
+        {
+          "phase": "Schedules",
+          "visit": 1,
+          "cpuMs": [160.899, 211.894, 198.4],
+          "maxCallbackGapMs": [59.516, 36.764, 72.712],
+          "firstCallbackLatencyMs": [18.927, 73.674, 12.905]
+        },
+        {
+          "phase": "Categories",
+          "visit": 1,
+          "cpuMs": [117.868, 118.722, 116.636],
+          "maxCallbackGapMs": [56.793, 58.892, 63.543],
+          "firstCallbackLatencyMs": [29.162, 11.7, 10.6]
+        },
+        {
+          "phase": "Accounts",
+          "visit": 1,
+          "cpuMs": [116.919, 125.807, 122.376],
+          "maxCallbackGapMs": [57.643, 53.85, 62.226],
+          "firstCallbackLatencyMs": [10.117, 11.971, 9.649]
+        },
+        {
+          "phase": "Overview",
+          "visit": 1,
+          "cpuMs": [94.336, 99.909, 96.072],
+          "maxCallbackGapMs": [16.668, 49.943, 43.491],
+          "firstCallbackLatencyMs": [82.483, 37.099, 38.44]
+        },
+        {
+          "phase": "By category",
+          "visit": 1,
+          "cpuMs": [109.942, 109.108, 121.909],
+          "maxCallbackGapMs": [58.304, 56.867, 62.352],
+          "firstCallbackLatencyMs": [13.959, 14.054, 14.027]
+        },
+        {
+          "phase": "By day",
+          "visit": 1,
+          "cpuMs": [92.028, 95.449, 88.603],
+          "maxCallbackGapMs": [35.326, 16.668, 16.667],
+          "firstCallbackLatencyMs": [13.437, 12.982, 12.501]
+        },
+        {
+          "phase": "Schedules",
+          "visit": 2,
+          "cpuMs": [102.294, 103.175, 99.165],
+          "maxCallbackGapMs": [51.661, 79.052, 79.663],
+          "firstCallbackLatencyMs": [32.433, 12.362, 11.944]
+        },
+        {
+          "phase": "Categories",
+          "visit": 2,
+          "cpuMs": [90.148, 87.62, 89.088],
+          "maxCallbackGapMs": [65.215, 66.797, 71.485],
+          "firstCallbackLatencyMs": [12.405, 11.758, 11.417]
+        },
+        {
+          "phase": "Accounts",
+          "visit": 2,
+          "cpuMs": [85.375, 86.076, 89.523],
+          "maxCallbackGapMs": [67.684, 39.457, 73.032],
+          "firstCallbackLatencyMs": [13.211, 32.966, 13.006]
+        },
+        {
+          "phase": "Overview",
+          "visit": 2,
+          "cpuMs": [82.407, 84.441, 84.572],
+          "maxCallbackGapMs": [62.761, 65.472, 61.878],
+          "firstCallbackLatencyMs": [8.308, 11.172, 11.48]
+        },
+        {
+          "phase": "By category",
+          "visit": 2,
+          "cpuMs": [91.941, 87.953, 90.925],
+          "maxCallbackGapMs": [39.483, 48.998, 38.566],
+          "firstCallbackLatencyMs": [9.622, 13.222, 11.907]
+        },
+        {
+          "phase": "By day",
+          "visit": 2,
+          "cpuMs": [88.335, 96.558, 100.089],
+          "maxCallbackGapMs": [16.667, 35.394, 16.668],
+          "firstCallbackLatencyMs": [8.572, 9.776, 12.051]
+        }
+      ]
+    },
+    "identity-plan": {
+      "processes": 3,
+      "sampleOrder": "process 1, 2, 3; milliseconds",
+      "thermalStates": [0],
+      "mainThreadQueries": 0,
+      "samples": [
+        {
+          "phase": "Schedules",
+          "visit": 1,
+          "cpuMs": [179.331, 208.252, 216.33],
+          "maxCallbackGapMs": [50.716, 86.521, 83.807],
+          "firstCallbackLatencyMs": [30.606, 12.956, 12.943]
+        },
+        {
+          "phase": "Categories",
+          "visit": 1,
+          "cpuMs": [128.473, 130.654, 126.058],
+          "maxCallbackGapMs": [52.736, 48.685, 51.858],
+          "firstCallbackLatencyMs": [9.444, 38.693, 63.914]
+        },
+        {
+          "phase": "Accounts",
+          "visit": 1,
+          "cpuMs": [125.136, 128.503, 129.057],
+          "maxCallbackGapMs": [44.768, 48.265, 57.631],
+          "firstCallbackLatencyMs": [38.055, 67.377, 9.519]
+        },
+        {
+          "phase": "Overview",
+          "visit": 1,
+          "cpuMs": [115.475, 116.628, 114.891],
+          "maxCallbackGapMs": [103.492, 100.6, 96.783],
+          "firstCallbackLatencyMs": [9.476, 9.609, 9.57]
+        },
+        {
+          "phase": "By category",
+          "visit": 1,
+          "cpuMs": [105.2, 104.641, 103.634],
+          "maxCallbackGapMs": [51.768, 55.772, 50.228],
+          "firstCallbackLatencyMs": [9.718, 13.137, 10.514]
+        },
+        {
+          "phase": "By day",
+          "visit": 1,
+          "cpuMs": [89.639, 86.004, 87.855],
+          "maxCallbackGapMs": [16.667, 16.667, 16.668],
+          "firstCallbackLatencyMs": [12.969, 9.828, 12.619]
+        },
+        {
+          "phase": "Schedules",
+          "visit": 2,
+          "cpuMs": [127.625, 128.635, 127.616],
+          "maxCallbackGapMs": [79.391, 16.667, 79.682],
+          "firstCallbackLatencyMs": [37.199, 118.021, 36.93]
+        },
+        {
+          "phase": "Categories",
+          "visit": 2,
+          "cpuMs": [117.823, 119.736, 121.839],
+          "maxCallbackGapMs": [98.86, 103.403, 71.586],
+          "firstCallbackLatencyMs": [9.548, 9.253, 38.872]
+        },
+        {
+          "phase": "Accounts",
+          "visit": 2,
+          "cpuMs": [116.444, 117.583, 118.735],
+          "maxCallbackGapMs": [24.446, 66.211, 67.454],
+          "firstCallbackLatencyMs": [107.929, 40.33, 41.255]
+        },
+        {
+          "phase": "Overview",
+          "visit": 2,
+          "cpuMs": [112.459, 114.66, 116.298],
+          "maxCallbackGapMs": [61.746, 101.892, 110.725],
+          "firstCallbackLatencyMs": [41.956, 8.8, 14.857]
+        },
+        {
+          "phase": "By category",
+          "visit": 2,
+          "cpuMs": [100.426, 104.561, 101.395],
+          "maxCallbackGapMs": [53.49, 57.867, 49.045],
+          "firstCallbackLatencyMs": [15.118, 12.171, 9.528]
+        },
+        {
+          "phase": "By day",
+          "visit": 2,
+          "cpuMs": [87.27, 89.337, 91.714],
+          "maxCallbackGapMs": [16.668, 34.185, 16.668],
+          "firstCallbackLatencyMs": [16.49, 9.128, 10.878]
+        }
+      ]
+    },
+    "transactions-plan": {
+      "processes": 3,
+      "sampleOrder": "process 1, 2, 3; milliseconds",
+      "thermalStates": [0],
+      "mainThreadQueries": 0,
+      "samples": [
+        {
+          "phase": "Schedules",
+          "visit": 1,
+          "cpuMs": [191.254, 215.394, 202.365],
+          "maxCallbackGapMs": [36.897, 75.838, 67.229],
+          "firstCallbackLatencyMs": [65.8, 16.035, 12.401]
+        },
+        {
+          "phase": "Categories",
+          "visit": 1,
+          "cpuMs": [119.643, 117.392, 117.827],
+          "maxCallbackGapMs": [69.431, 57.293, 58.023],
+          "firstCallbackLatencyMs": [11.482, 11.451, 11.573]
+        },
+        {
+          "phase": "Accounts",
+          "visit": 1,
+          "cpuMs": [123.714, 121.252, 124.032],
+          "maxCallbackGapMs": [62.867, 54.961, 54.509],
+          "firstCallbackLatencyMs": [39.907, 29.907, 10.842]
+        },
+        {
+          "phase": "Overview",
+          "visit": 1,
+          "cpuMs": [105.149, 102.224, 94.522],
+          "maxCallbackGapMs": [86.996, 85.281, 70.196],
+          "firstCallbackLatencyMs": [12.587, 12.825, 11.25]
+        },
+        {
+          "phase": "By category",
+          "visit": 1,
+          "cpuMs": [110.506, 108.497, 109.833],
+          "maxCallbackGapMs": [62.915, 62.227, 62.814],
+          "firstCallbackLatencyMs": [13.422, 13.495, 13.964]
+        },
+        {
+          "phase": "By day",
+          "visit": 1,
+          "cpuMs": [88.424, 89.093, 92.948],
+          "maxCallbackGapMs": [34.681, 16.667, 16.667],
+          "firstCallbackLatencyMs": [10.82, 12.335, 14.908]
+        },
+        {
+          "phase": "Schedules",
+          "visit": 2,
+          "cpuMs": [103.819, 98.995, 101.421],
+          "maxCallbackGapMs": [80.867, 16.668, 80.365],
+          "firstCallbackLatencyMs": [11.379, 84.482, 11.566]
+        },
+        {
+          "phase": "Categories",
+          "visit": 2,
+          "cpuMs": [90.659, 90.171, 88.993],
+          "maxCallbackGapMs": [24.342, 67.602, 43.365],
+          "firstCallbackLatencyMs": [75.514, 12.632, 35.505]
+        },
+        {
+          "phase": "Accounts",
+          "visit": 2,
+          "cpuMs": [85.291, 87.486, 85.791],
+          "maxCallbackGapMs": [66.828, 16.667, 27.075],
+          "firstCallbackLatencyMs": [11.653, 69.407, 73.125]
+        },
+        {
+          "phase": "Overview",
+          "visit": 2,
+          "cpuMs": [91.739, 80.963, 93.1],
+          "maxCallbackGapMs": [77.116, 59.675, 72.981],
+          "firstCallbackLatencyMs": [7.714, 9.582, 7.923]
+        },
+        {
+          "phase": "By category",
+          "visit": 2,
+          "cpuMs": [90.024, 84.945, 87.468],
+          "maxCallbackGapMs": [45.748, 40.417, 51.233],
+          "firstCallbackLatencyMs": [14.598, 13.687, 9.113]
+        },
+        {
+          "phase": "By day",
+          "visit": 2,
+          "cpuMs": [90.709, 88.31, 89.945],
+          "maxCallbackGapMs": [33.521, 16.667, 16.668],
+          "firstCallbackLatencyMs": [8.178, 11.485, 12.196]
+        }
+      ]
+    },
+    "segments-plan": {
+      "processes": 3,
+      "sampleOrder": "process 1, 2, 3; milliseconds",
+      "thermalStates": [0],
+      "mainThreadQueries": 0,
+      "samples": [
+        {
+          "phase": "Schedules",
+          "visit": 1,
+          "cpuMs": [166.192, 214.683, 216.737],
+          "maxCallbackGapMs": [38.14, 75.718, 79.988],
+          "firstCallbackLatencyMs": [62.74, 15.427, 16.303]
+        },
+        {
+          "phase": "Categories",
+          "visit": 1,
+          "cpuMs": [116.701, 114.881, 115.603],
+          "maxCallbackGapMs": [57.396, 58.05, 59.101],
+          "firstCallbackLatencyMs": [35.876, 10.253, 10.465]
+        },
+        {
+          "phase": "Accounts",
+          "visit": 1,
+          "cpuMs": [117.253, 120.459, 122.594],
+          "maxCallbackGapMs": [54.089, 56.456, 54.413],
+          "firstCallbackLatencyMs": [10.848, 10.732, 31.197]
+        },
+        {
+          "phase": "Overview",
+          "visit": 1,
+          "cpuMs": [83.127, 86.393, 96.119],
+          "maxCallbackGapMs": [63.161, 25.025, 46.692],
+          "firstCallbackLatencyMs": [11.398, 36.895, 35.931]
+        },
+        {
+          "phase": "By category",
+          "visit": 1,
+          "cpuMs": [103.678, 103.436, 102.55],
+          "maxCallbackGapMs": [64.693, 51.562, 60.968],
+          "firstCallbackLatencyMs": [11.303, 11.282, 11.796]
+        },
+        {
+          "phase": "By day",
+          "visit": 1,
+          "cpuMs": [84.798, 89.821, 86.928],
+          "maxCallbackGapMs": [16.668, 35.557, 16.668],
+          "firstCallbackLatencyMs": [11.465, 16.142, 15.674]
+        },
+        {
+          "phase": "Schedules",
+          "visit": 2,
+          "cpuMs": [103.499, 97.56, 98.935],
+          "maxCallbackGapMs": [52.025, 49.849, 51.293],
+          "firstCallbackLatencyMs": [33.468, 31.923, 31.681]
+        },
+        {
+          "phase": "Categories",
+          "visit": 2,
+          "cpuMs": [90.637, 87.345, 89.815],
+          "maxCallbackGapMs": [28.046, 61.296, 28.717],
+          "firstCallbackLatencyMs": [33.79, 12.471, 34.028]
+        },
+        {
+          "phase": "Accounts",
+          "visit": 2,
+          "cpuMs": [86.533, 85.869, 87.145],
+          "maxCallbackGapMs": [23.328, 65.311, 39.685],
+          "firstCallbackLatencyMs": [71.879, 11.676, 33.674]
+        },
+        {
+          "phase": "Overview",
+          "visit": 2,
+          "cpuMs": [80.78, 85.866, 81.413],
+          "maxCallbackGapMs": [25.893, 71.044, 64.018],
+          "firstCallbackLatencyMs": [37.039, 7.934, 11.987]
+        },
+        {
+          "phase": "By category",
+          "visit": 2,
+          "cpuMs": [89.122, 82.238, 87.384],
+          "maxCallbackGapMs": [52.167, 48.402, 40.613],
+          "firstCallbackLatencyMs": [11.719, 11.254, 11.998]
+        },
+        {
+          "phase": "By day",
+          "visit": 2,
+          "cpuMs": [85.249, 85.319, 87.522],
+          "maxCallbackGapMs": [16.667, 36.129, 16.668],
+          "firstCallbackLatencyMs": [11.937, 16.408, 10.932]
+        }
+      ]
+    },
+    "group-plan": {
+      "processes": 3,
+      "sampleOrder": "process 1, 2, 3; milliseconds",
+      "thermalStates": [0],
+      "mainThreadQueries": 0,
+      "samples": [
+        {
+          "phase": "Schedules",
+          "visit": 1,
+          "cpuMs": [156.218, 202.589, 203.266],
+          "maxCallbackGapMs": [38.374, 70.453, 47.489],
+          "firstCallbackLatencyMs": [69.479, 12.696, 33.082]
+        },
+        {
+          "phase": "Categories",
+          "visit": 1,
+          "cpuMs": [122.883, 117.963, 116.033],
+          "maxCallbackGapMs": [58.013, 63.709, 58.745],
+          "firstCallbackLatencyMs": [11.58, 11.117, 10.394]
+        },
+        {
+          "phase": "Accounts",
+          "visit": 1,
+          "cpuMs": [117.838, 120.414, 123.971],
+          "maxCallbackGapMs": [65.644, 65.309, 55.419],
+          "firstCallbackLatencyMs": [12.128, 38.348, 10.983]
+        },
+        {
+          "phase": "Overview",
+          "visit": 1,
+          "cpuMs": [99.762, 94.422, 100.461],
+          "maxCallbackGapMs": [76.563, 45.163, 84.658],
+          "firstCallbackLatencyMs": [12.221, 36.059, 12.21]
+        },
+        {
+          "phase": "By category",
+          "visit": 1,
+          "cpuMs": [106.692, 103.816, 104.255],
+          "maxCallbackGapMs": [59.225, 64.511, 54.031],
+          "firstCallbackLatencyMs": [16.566, 11.454, 11.165]
+        },
+        {
+          "phase": "By day",
+          "visit": 1,
+          "cpuMs": [91.961, 86.959, 87.566],
+          "maxCallbackGapMs": [16.667, 16.667, 36.311],
+          "firstCallbackLatencyMs": [12.023, 12.446, 13.892]
+        },
+        {
+          "phase": "Schedules",
+          "visit": 2,
+          "cpuMs": [103.99, 99.554, 99.468],
+          "maxCallbackGapMs": [76.64, 72.903, 76.39],
+          "firstCallbackLatencyMs": [11.837, 12.537, 11.688]
+        },
+        {
+          "phase": "Categories",
+          "visit": 2,
+          "cpuMs": [88.499, 89.631, 90.427],
+          "maxCallbackGapMs": [41.08, 28.56, 25.005],
+          "firstCallbackLatencyMs": [32.907, 33.349, 74.381]
+        },
+        {
+          "phase": "Accounts",
+          "visit": 2,
+          "cpuMs": [86.666, 85.58, 87.004],
+          "maxCallbackGapMs": [68.533, 69.891, 24.473],
+          "firstCallbackLatencyMs": [11.808, 11.41, 73.256]
+        },
+        {
+          "phase": "Overview",
+          "visit": 2,
+          "cpuMs": [83.918, 83.553, 91.715],
+          "maxCallbackGapMs": [63.704, 67.348, 66.325],
+          "firstCallbackLatencyMs": [11.441, 12.682, 12.513]
+        },
+        {
+          "phase": "By category",
+          "visit": 2,
+          "cpuMs": [86.732, 86.45, 87.034],
+          "maxCallbackGapMs": [45.584, 47.481, 44.709],
+          "firstCallbackLatencyMs": [11.837, 14.048, 15.372]
+        },
+        {
+          "phase": "By day",
+          "visit": 2,
+          "cpuMs": [91.18, 87.415, 88.842],
+          "maxCallbackGapMs": [16.667, 36.149, 16.667],
+          "firstCallbackLatencyMs": [12.401, 12.248, 12.923]
+        }
+      ]
+    },
+    "buttons-plan": {
+      "processes": 3,
+      "sampleOrder": "process 1, 2, 3; milliseconds",
+      "thermalStates": [0],
+      "mainThreadQueries": 0,
+      "samples": [
+        {
+          "phase": "Schedules",
+          "visit": 1,
+          "cpuMs": [172.461, 209.471, 214.901],
+          "maxCallbackGapMs": [94.058, 70.011, 73.04],
+          "firstCallbackLatencyMs": [14.67, 14.886, 16.456]
+        },
+        {
+          "phase": "Categories",
+          "visit": 1,
+          "cpuMs": [113.684, 114.07, 115.236],
+          "maxCallbackGapMs": [54.816, 53.459, 54.299],
+          "firstCallbackLatencyMs": [11.311, 11.463, 11.608]
+        },
+        {
+          "phase": "Accounts",
+          "visit": 1,
+          "cpuMs": [110.801, 116.265, 115.238],
+          "maxCallbackGapMs": [52.875, 50.926, 53.264],
+          "firstCallbackLatencyMs": [12.193, 28.48, 10.474]
+        },
+        {
+          "phase": "Overview",
+          "visit": 1,
+          "cpuMs": [94.859, 99.344, 98.943],
+          "maxCallbackGapMs": [67.846, 48.188, 83.338],
+          "firstCallbackLatencyMs": [14.11, 36.971, 12.184]
+        },
+        {
+          "phase": "By category",
+          "visit": 1,
+          "cpuMs": [105.152, 102.917, 103.807],
+          "maxCallbackGapMs": [56.52, 50.673, 57.365],
+          "firstCallbackLatencyMs": [15.901, 11.111, 14.777]
+        },
+        {
+          "phase": "By day",
+          "visit": 1,
+          "cpuMs": [94.775, 91.119, 85.227],
+          "maxCallbackGapMs": [16.667, 16.667, 33.473],
+          "firstCallbackLatencyMs": [14.682, 13.537, 10.707]
+        },
+        {
+          "phase": "Schedules",
+          "visit": 2,
+          "cpuMs": [104.579, 99.953, 98.777],
+          "maxCallbackGapMs": [49.984, 49.853, 49.967],
+          "firstCallbackLatencyMs": [34.76, 34.502, 34.217]
+        },
+        {
+          "phase": "Categories",
+          "visit": 2,
+          "cpuMs": [88.524, 85.835, 88.14],
+          "maxCallbackGapMs": [71.601, 66.796, 67.926],
+          "firstCallbackLatencyMs": [9.574, 8.116, 8.486]
+        },
+        {
+          "phase": "Accounts",
+          "visit": 2,
+          "cpuMs": [84.722, 86.518, 86.215],
+          "maxCallbackGapMs": [28.947, 16.667, 70.741],
+          "firstCallbackLatencyMs": [30.846, 69.628, 9.004]
+        },
+        {
+          "phase": "Overview",
+          "visit": 2,
+          "cpuMs": [81.734, 84.533, 83.55],
+          "maxCallbackGapMs": [66.483, 60.709, 60.056],
+          "firstCallbackLatencyMs": [11.148, 12.525, 11.605]
+        },
+        {
+          "phase": "By category",
+          "visit": 2,
+          "cpuMs": [86.402, 87.672, 87.786],
+          "maxCallbackGapMs": [43.646, 45.484, 37.755],
+          "firstCallbackLatencyMs": [16.86, 13.255, 11.92]
+        },
+        {
+          "phase": "By day",
+          "visit": 2,
+          "cpuMs": [89.674, 89.818, 90.651],
+          "maxCallbackGapMs": [16.667, 33.335, 16.667],
+          "firstCallbackLatencyMs": [12.004, 12.188, 12.48]
+        }
+      ]
+    }
+  },
+  "traces": {
+    "baselineSchedule": {
+      "note": "Hitches are assigned by interval start. Rendering contexts and inclusive CPU stacks can overlap; do not add their durations or counts into wall-time percentages. Push intervals end at field readiness, not animation completion. Launch/seed work outside the signposts is excluded.",
+      "phases": [
+        {
+          "sampledCpuMs": 213.0,
+          "mainThreadSamples": 196,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 8,
+            "viewGraphUpdate": 119,
+            "collectionLayout": 82,
+            "cellCreation": 67,
+            "cellSizing": 64,
+            "navigationLayout": 19,
+            "toolbarUpdate": 9,
+            "hostingViewRelease": 0,
+            "hostingLayout": 14,
+            "windowAttachment": 6,
+            "layerLayout": 122,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 116.7,
+          "phase": "push-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 57.0,
+          "mainThreadSamples": 55,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 9,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 1,
+            "hostingLayout": 4,
+            "windowAttachment": 3,
+            "layerLayout": 14,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "phase": "push-settle-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 196.0,
+          "mainThreadSamples": 113,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 4,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 4,
+            "hostingViewRelease": 1,
+            "hostingLayout": 17,
+            "windowAttachment": 2,
+            "layerLayout": 41,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 16.701,
+          "phase": "focus-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 318.0,
+          "mainThreadSamples": 214,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 41,
+            "collectionLayout": 1,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 15,
+            "windowAttachment": 3,
+            "layerLayout": 50,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "phase": "typing-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 224.0,
+          "mainThreadSamples": 209,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 16,
+            "collectionLayout": 9,
+            "cellCreation": 0,
+            "cellSizing": 2,
+            "navigationLayout": 32,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 27,
+            "hostingLayout": 22,
+            "windowAttachment": 26,
+            "layerLayout": 73,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.041,
+          "phase": "pop-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 182.0,
+          "mainThreadSamples": 176,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 6,
+            "viewGraphUpdate": 90,
+            "collectionLayout": 67,
+            "cellCreation": 55,
+            "cellSizing": 48,
+            "navigationLayout": 25,
+            "toolbarUpdate": 12,
+            "hostingViewRelease": 0,
+            "hostingLayout": 21,
+            "windowAttachment": 8,
+            "layerLayout": 119,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 83.416,
+          "phase": "push-schedule",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 64.0,
+          "mainThreadSamples": 63,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 12,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 1,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 1,
+            "hostingLayout": 5,
+            "windowAttachment": 4,
+            "layerLayout": 16,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 16.748,
+          "phase": "push-settle-schedule",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 147.0,
+          "mainThreadSamples": 144,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 7,
+            "collectionLayout": 1,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 5,
+            "hostingViewRelease": 2,
+            "hostingLayout": 25,
+            "windowAttachment": 2,
+            "layerLayout": 52,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 33.335,
+          "phase": "focus-schedule",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 260.0,
+          "mainThreadSamples": 250,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 52,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 17,
+            "windowAttachment": 0,
+            "layerLayout": 72,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "phase": "typing-schedule",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 215.0,
+          "mainThreadSamples": 205,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 15,
+            "collectionLayout": 9,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 31,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 26,
+            "hostingLayout": 22,
+            "windowAttachment": 23,
+            "layerLayout": 70,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.09,
+          "phase": "pop-schedule",
+          "visit": 2
+        }
+      ]
+    },
+    "nativeSchedule": {
+      "note": "Hitches are assigned by interval start. Rendering contexts and inclusive CPU stacks can overlap; do not add their durations or counts into wall-time percentages. Push intervals end at field readiness, not animation completion. Launch/seed work outside the signposts is excluded.",
+      "phases": [
+        {
+          "sampledCpuMs": 191.0,
+          "mainThreadSamples": 177,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 95,
+            "collectionLayout": 75,
+            "cellCreation": 62,
+            "cellSizing": 53,
+            "navigationLayout": 21,
+            "toolbarUpdate": 11,
+            "hostingViewRelease": 0,
+            "hostingLayout": 20,
+            "windowAttachment": 8,
+            "layerLayout": 123,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 100.012,
+          "phase": "push-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 58.0,
+          "mainThreadSamples": 57,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 8,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 1,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 1,
+            "hostingLayout": 3,
+            "windowAttachment": 3,
+            "layerLayout": 16,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 16.675,
+          "phase": "push-settle-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 98.0,
+          "mainThreadSamples": 93,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 2,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 1,
+            "hostingLayout": 0,
+            "windowAttachment": 3,
+            "layerLayout": 28,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "phase": "focus-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 249.0,
+          "mainThreadSamples": 235,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 27,
+            "collectionLayout": 1,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 35,
+            "windowAttachment": 1,
+            "layerLayout": 84,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "phase": "typing-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 236.0,
+          "mainThreadSamples": 216,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 16,
+            "collectionLayout": 7,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 33,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 24,
+            "hostingLayout": 20,
+            "windowAttachment": 23,
+            "layerLayout": 71,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.012,
+          "phase": "pop-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 155.0,
+          "mainThreadSamples": 153,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 78,
+            "collectionLayout": 64,
+            "cellCreation": 49,
+            "cellSizing": 43,
+            "navigationLayout": 21,
+            "toolbarUpdate": 12,
+            "hostingViewRelease": 0,
+            "hostingLayout": 18,
+            "windowAttachment": 9,
+            "layerLayout": 109,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 83.354,
+          "phase": "push-schedule",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 60.0,
+          "mainThreadSamples": 56,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 6,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 1,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 1,
+            "hostingLayout": 2,
+            "windowAttachment": 4,
+            "layerLayout": 15,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "phase": "push-settle-schedule",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 120.0,
+          "mainThreadSamples": 114,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 1,
+            "collectionLayout": 1,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 1,
+            "hostingLayout": 1,
+            "windowAttachment": 7,
+            "layerLayout": 28,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 16.69,
+          "phase": "focus-schedule",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 217.0,
+          "mainThreadSamples": 209,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 34,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 26,
+            "windowAttachment": 0,
+            "layerLayout": 66,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "phase": "typing-schedule",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 227.0,
+          "mainThreadSamples": 209,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 18,
+            "collectionLayout": 9,
+            "cellCreation": 0,
+            "cellSizing": 1,
+            "navigationLayout": 34,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 24,
+            "hostingLayout": 19,
+            "windowAttachment": 28,
+            "layerLayout": 73,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.024,
+          "phase": "pop-schedule",
+          "visit": 2
+        }
+      ]
+    },
+    "initializedSwiftUIFields": {
+      "note": "Hitches are assigned by interval start. Rendering contexts and inclusive CPU stacks can overlap; do not add their durations or counts into wall-time percentages. Push intervals end at field readiness, not animation completion. Launch/seed work outside the signposts is excluded.",
+      "phases": [
+        {
+          "sampledCpuMs": 208.0,
+          "mainThreadSamples": 186,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 102,
+            "collectionLayout": 83,
+            "cellCreation": 70,
+            "cellSizing": 60,
+            "navigationLayout": 20,
+            "toolbarUpdate": 9,
+            "hostingViewRelease": 0,
+            "hostingLayout": 22,
+            "windowAttachment": 7,
+            "layerLayout": 132,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 133.341,
+          "phase": "push-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 54.0,
+          "mainThreadSamples": 53,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 11,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 1,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 2,
+            "windowAttachment": 3,
+            "layerLayout": 14,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "phase": "push-settle-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 193.0,
+          "mainThreadSamples": 70,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 8,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 3,
+            "hostingViewRelease": 1,
+            "hostingLayout": 16,
+            "windowAttachment": 6,
+            "layerLayout": 23,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 216.675,
+          "phase": "focus-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 272.0,
+          "mainThreadSamples": 134,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 16,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 6,
+            "windowAttachment": 1,
+            "layerLayout": 27,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 116.673,
+          "phase": "typing-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 202.0,
+          "mainThreadSamples": 185,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 10,
+            "collectionLayout": 5,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 25,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 21,
+            "hostingLayout": 15,
+            "windowAttachment": 18,
+            "layerLayout": 60,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 33.333,
+          "phase": "pop-schedule",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 164.0,
+          "mainThreadSamples": 158,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 78,
+            "collectionLayout": 64,
+            "cellCreation": 50,
+            "cellSizing": 45,
+            "navigationLayout": 23,
+            "toolbarUpdate": 12,
+            "hostingViewRelease": 0,
+            "hostingLayout": 21,
+            "windowAttachment": 5,
+            "layerLayout": 112,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 83.341,
+          "phase": "push-schedule",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 66.0,
+          "mainThreadSamples": 63,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 8,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 1,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 3,
+            "windowAttachment": 4,
+            "layerLayout": 15,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "phase": "push-settle-schedule",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 129.0,
+          "mainThreadSamples": 122,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 8,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 5,
+            "hostingViewRelease": 2,
+            "hostingLayout": 19,
+            "windowAttachment": 2,
+            "layerLayout": 42,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 33.341,
+          "phase": "focus-schedule",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 232.0,
+          "mainThreadSamples": 226,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 52,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 11,
+            "windowAttachment": 1,
+            "layerLayout": 56,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "phase": "typing-schedule",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 210.0,
+          "mainThreadSamples": 198,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 17,
+            "collectionLayout": 4,
+            "cellCreation": 0,
+            "cellSizing": 1,
+            "navigationLayout": 31,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 25,
+            "hostingLayout": 18,
+            "windowAttachment": 24,
+            "layerLayout": 66,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.0,
+          "phase": "pop-schedule",
+          "visit": 2
+        }
+      ]
+    },
+    "freshBaselinePlan": {
+      "note": "Hitches are assigned by interval start. Rendering contexts and inclusive CPU stacks can overlap; do not add their durations or counts into wall-time percentages. Push intervals end at field readiness, not animation completion. Launch/seed work outside the signposts is excluded.",
+      "phases": [
+        {
+          "sampledCpuMs": 148.0,
+          "mainThreadSamples": 114,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 33,
+            "collectionLayout": 37,
+            "cellCreation": 29,
+            "cellSizing": 19,
+            "navigationLayout": 0,
+            "toolbarUpdate": 6,
+            "hostingViewRelease": 0,
+            "hostingLayout": 15,
+            "windowAttachment": 1,
+            "layerLayout": 64,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 49.998,
+          "phase": "Schedules",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 125.0,
+          "mainThreadSamples": 119,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 45,
+            "collectionLayout": 53,
+            "cellCreation": 40,
+            "cellSizing": 27,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 4,
+            "windowAttachment": 3,
+            "layerLayout": 63,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.001,
+          "phase": "Categories",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 120.0,
+          "mainThreadSamples": 114,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 49,
+            "collectionLayout": 50,
+            "cellCreation": 40,
+            "cellSizing": 30,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 8,
+            "windowAttachment": 1,
+            "layerLayout": 62,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 50.002,
+          "phase": "Accounts",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 100.0,
+          "mainThreadSamples": 91,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 38,
+            "collectionLayout": 29,
+            "cellCreation": 18,
+            "cellSizing": 16,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 1,
+            "hostingLayout": 5,
+            "windowAttachment": 1,
+            "layerLayout": 42,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 66.669,
+          "phase": "Overview",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 109.0,
+          "mainThreadSamples": 92,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 46,
+            "collectionLayout": 13,
+            "cellCreation": 9,
+            "cellSizing": 8,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 1,
+            "windowAttachment": 0,
+            "layerLayout": 20,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 16.671,
+          "phase": "By category",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 93.0,
+          "mainThreadSamples": 66,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 20,
+            "collectionLayout": 12,
+            "cellCreation": 6,
+            "cellSizing": 7,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 3,
+            "windowAttachment": 0,
+            "layerLayout": 21,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 16.669,
+          "phase": "By day",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 99.0,
+          "mainThreadSamples": 95,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 32,
+            "collectionLayout": 26,
+            "cellCreation": 17,
+            "cellSizing": 12,
+            "navigationLayout": 0,
+            "toolbarUpdate": 4,
+            "hostingViewRelease": 0,
+            "hostingLayout": 11,
+            "windowAttachment": 0,
+            "layerLayout": 47,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 66.671,
+          "phase": "Schedules",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 88.0,
+          "mainThreadSamples": 84,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 27,
+            "collectionLayout": 31,
+            "cellCreation": 19,
+            "cellSizing": 13,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 3,
+            "windowAttachment": 0,
+            "layerLayout": 38,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.005,
+          "phase": "Categories",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 93.0,
+          "mainThreadSamples": 87,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 32,
+            "collectionLayout": 29,
+            "cellCreation": 22,
+            "cellSizing": 17,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 3,
+            "windowAttachment": 0,
+            "layerLayout": 38,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.004,
+          "phase": "Accounts",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 84.0,
+          "mainThreadSamples": 82,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 30,
+            "collectionLayout": 22,
+            "cellCreation": 9,
+            "cellSizing": 10,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 1,
+            "hostingLayout": 5,
+            "windowAttachment": 0,
+            "layerLayout": 32,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.003,
+          "phase": "Overview",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 100.0,
+          "mainThreadSamples": 79,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 23,
+            "collectionLayout": 7,
+            "cellCreation": 1,
+            "cellSizing": 2,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 1,
+            "windowAttachment": 0,
+            "layerLayout": 13,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 16.669,
+          "phase": "By category",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 95.0,
+          "mainThreadSamples": 71,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 16,
+            "collectionLayout": 11,
+            "cellCreation": 5,
+            "cellSizing": 2,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 1,
+            "windowAttachment": 0,
+            "layerLayout": 17,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 16.667,
+          "phase": "By day",
+          "visit": 2
+        }
+      ]
+    },
+    "discardedGroupPlan": {
+      "note": "Hitches are assigned by interval start. Rendering contexts and inclusive CPU stacks can overlap; do not add their durations or counts into wall-time percentages. Push intervals end at field readiness, not animation completion. Launch/seed work outside the signposts is excluded.",
+      "phases": [
+        {
+          "sampledCpuMs": 179.0,
+          "mainThreadSamples": 139,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 51,
+            "collectionLayout": 43,
+            "cellCreation": 33,
+            "cellSizing": 26,
+            "navigationLayout": 0,
+            "toolbarUpdate": 9,
+            "hostingViewRelease": 0,
+            "hostingLayout": 20,
+            "windowAttachment": 2,
+            "layerLayout": 79,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 50.006,
+          "phase": "Schedules",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 119.0,
+          "mainThreadSamples": 115,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 46,
+            "collectionLayout": 53,
+            "cellCreation": 42,
+            "cellSizing": 31,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 5,
+            "windowAttachment": 2,
+            "layerLayout": 65,
+            "tabTransition": 0
+          },
+          "hitches": 3,
+          "maxHitchMs": 50.003,
+          "phase": "Categories",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 129.0,
+          "mainThreadSamples": 123,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 53,
+            "collectionLayout": 51,
+            "cellCreation": 39,
+            "cellSizing": 31,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 6,
+            "windowAttachment": 1,
+            "layerLayout": 63,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.0,
+          "phase": "Accounts",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 92.0,
+          "mainThreadSamples": 89,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 31,
+            "collectionLayout": 25,
+            "cellCreation": 12,
+            "cellSizing": 11,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 4,
+            "windowAttachment": 0,
+            "layerLayout": 33,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.006,
+          "phase": "Overview",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 111.0,
+          "mainThreadSamples": 96,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 50,
+            "collectionLayout": 14,
+            "cellCreation": 10,
+            "cellSizing": 10,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 3,
+            "windowAttachment": 0,
+            "layerLayout": 21,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 16.671,
+          "phase": "By category",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 101.0,
+          "mainThreadSamples": 70,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 22,
+            "collectionLayout": 15,
+            "cellCreation": 7,
+            "cellSizing": 7,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 2,
+            "windowAttachment": 0,
+            "layerLayout": 21,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 16.661,
+          "phase": "By day",
+          "visit": 1
+        },
+        {
+          "sampledCpuMs": 102.0,
+          "mainThreadSamples": 94,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 37,
+            "collectionLayout": 28,
+            "cellCreation": 18,
+            "cellSizing": 16,
+            "navigationLayout": 0,
+            "toolbarUpdate": 6,
+            "hostingViewRelease": 0,
+            "hostingLayout": 12,
+            "windowAttachment": 0,
+            "layerLayout": 50,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 66.666,
+          "phase": "Schedules",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 99.0,
+          "mainThreadSamples": 91,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 32,
+            "collectionLayout": 32,
+            "cellCreation": 23,
+            "cellSizing": 14,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 4,
+            "windowAttachment": 0,
+            "layerLayout": 40,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 66.67,
+          "phase": "Categories",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 88.0,
+          "mainThreadSamples": 82,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 33,
+            "collectionLayout": 29,
+            "cellCreation": 21,
+            "cellSizing": 19,
+            "navigationLayout": 0,
+            "toolbarUpdate": 1,
+            "hostingViewRelease": 0,
+            "hostingLayout": 7,
+            "windowAttachment": 0,
+            "layerLayout": 40,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.005,
+          "phase": "Accounts",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 87.0,
+          "mainThreadSamples": 82,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 32,
+            "collectionLayout": 25,
+            "cellCreation": 13,
+            "cellSizing": 12,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 1,
+            "hostingLayout": 5,
+            "windowAttachment": 0,
+            "layerLayout": 34,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 50.004,
+          "phase": "Overview",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 84.0,
+          "mainThreadSamples": 67,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 22,
+            "collectionLayout": 6,
+            "cellCreation": 2,
+            "cellSizing": 1,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 2,
+            "windowAttachment": 0,
+            "layerLayout": 12,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 16.666,
+          "phase": "By category",
+          "visit": 2
+        },
+        {
+          "sampledCpuMs": 91.0,
+          "mainThreadSamples": 62,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 21,
+            "collectionLayout": 13,
+            "cellCreation": 6,
+            "cellSizing": 8,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 3,
+            "windowAttachment": 0,
+            "layerLayout": 19,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 16.665,
+          "phase": "By day",
+          "visit": 2
+        }
+      ]
+    }
+  },
+  "keyboardEpisode": {
+    "variant": "initialized drafts and deferred menus, SwiftUI Name/Amount; discarded",
+    "focusMaxHitchMs": 216.675,
+    "inclusiveStickerInitializationSamples": 75,
+    "stickerSamplesIncludingDlopen": 75,
+    "stickerMainThreadSamples": 0,
+    "largestHitchCpuWindow": {
+      "sampledCpuMs": 77.0,
+      "mainThreadSamples": 13,
+      "inclusiveMainThreadSamples": {
+        "menuConstruction": 0,
+        "viewGraphUpdate": 1,
+        "collectionLayout": 0,
+        "cellCreation": 0,
+        "cellSizing": 0,
+        "navigationLayout": 0,
+        "toolbarUpdate": 0,
+        "hostingViewRelease": 0,
+        "hostingLayout": 0,
+        "windowAttachment": 0,
+        "layerLayout": 2,
+        "tabTransition": 0
+      }
+    },
+    "caution": "Overlapping stacks locate work; they do not prove exclusive causation or explain all wall time.",
+    "coldComparison": "Blocked: SE did not reconnect after reboot; no baseline/candidate pair."
+  },
+  "nativeKeyboardObservations": [
+    {
+      "editor": "account",
+      "cycle": 0,
+      "processRun": 1,
+      "firstKeyboardInProcess": true,
+      "becomeFirstResponderMs": 189.746,
+      "keyboardWillShowMs": 239.405,
+      "keyboardDidShowMs": 773.064
+    },
+    {
+      "editor": "category",
+      "cycle": 0,
+      "processRun": 1,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 31.794,
+      "keyboardWillShowMs": 59.347,
+      "keyboardDidShowMs": 564.056
+    },
+    {
+      "editor": "schedule",
+      "cycle": 0,
+      "processRun": 1,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 32.008,
+      "keyboardWillShowMs": 55.228,
+      "keyboardDidShowMs": 576.388
+    },
+    {
+      "editor": "transaction",
+      "cycle": 0,
+      "processRun": 1,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 25.373,
+      "keyboardWillShowMs": 48.724,
+      "keyboardDidShowMs": 561.567
+    },
+    {
+      "editor": "account",
+      "cycle": 1,
+      "processRun": 1,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 47.578,
+      "keyboardWillShowMs": 75.104,
+      "keyboardDidShowMs": 582.056
+    },
+    {
+      "editor": "category",
+      "cycle": 1,
+      "processRun": 1,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 55.304,
+      "keyboardWillShowMs": 87.855,
+      "keyboardDidShowMs": 601.153
+    },
+    {
+      "editor": "schedule",
+      "cycle": 1,
+      "processRun": 1,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 57.006,
+      "keyboardWillShowMs": 83.979,
+      "keyboardDidShowMs": 611.341
+    },
+    {
+      "editor": "transaction",
+      "cycle": 1,
+      "processRun": 1,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 43.444,
+      "keyboardWillShowMs": 71.405,
+      "keyboardDidShowMs": 596.18
+    },
+    {
+      "editor": "account",
+      "cycle": 0,
+      "processRun": 2,
+      "firstKeyboardInProcess": true,
+      "becomeFirstResponderMs": 68.571,
+      "keyboardWillShowMs": 102.176,
+      "keyboardDidShowMs": 623.255
+    },
+    {
+      "editor": "category",
+      "cycle": 0,
+      "processRun": 2,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 27.823,
+      "keyboardWillShowMs": 52.722,
+      "keyboardDidShowMs": 569.987
+    },
+    {
+      "editor": "schedule",
+      "cycle": 0,
+      "processRun": 2,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 32.93,
+      "keyboardWillShowMs": 56.634,
+      "keyboardDidShowMs": 594.144
+    },
+    {
+      "editor": "transaction",
+      "cycle": 0,
+      "processRun": 2,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 25.252,
+      "keyboardWillShowMs": 48.169,
+      "keyboardDidShowMs": 578.423
+    },
+    {
+      "editor": "account",
+      "cycle": 1,
+      "processRun": 2,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 54.959,
+      "keyboardWillShowMs": 82.58,
+      "keyboardDidShowMs": 595.69
+    },
+    {
+      "editor": "category",
+      "cycle": 1,
+      "processRun": 2,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 46.174,
+      "keyboardWillShowMs": 78.772,
+      "keyboardDidShowMs": 585.506
+    },
+    {
+      "editor": "schedule",
+      "cycle": 1,
+      "processRun": 2,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 53.614,
+      "keyboardWillShowMs": 80.222,
+      "keyboardDidShowMs": 593.018
+    },
+    {
+      "editor": "transaction",
+      "cycle": 1,
+      "processRun": 2,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 40.507,
+      "keyboardWillShowMs": 68.377,
+      "keyboardDidShowMs": 580.106
+    },
+    {
+      "editor": "account",
+      "cycle": 0,
+      "processRun": 3,
+      "firstKeyboardInProcess": true,
+      "becomeFirstResponderMs": 68.376,
+      "keyboardWillShowMs": 101.747,
+      "keyboardDidShowMs": 621.027
+    },
+    {
+      "editor": "category",
+      "cycle": 0,
+      "processRun": 3,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 27.609,
+      "keyboardWillShowMs": 52.796,
+      "keyboardDidShowMs": 582.229
+    },
+    {
+      "editor": "schedule",
+      "cycle": 0,
+      "processRun": 3,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 32.636,
+      "keyboardWillShowMs": 56.242,
+      "keyboardDidShowMs": 574.582
+    },
+    {
+      "editor": "transaction",
+      "cycle": 0,
+      "processRun": 3,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 24.294,
+      "keyboardWillShowMs": 47.86,
+      "keyboardDidShowMs": 565.396
+    },
+    {
+      "editor": "account",
+      "cycle": 1,
+      "processRun": 3,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 59.117,
+      "keyboardWillShowMs": 90.441,
+      "keyboardDidShowMs": 595.747
+    },
+    {
+      "editor": "category",
+      "cycle": 1,
+      "processRun": 3,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 43.349,
+      "keyboardWillShowMs": 71.512,
+      "keyboardDidShowMs": 580.605
+    },
+    {
+      "editor": "schedule",
+      "cycle": 1,
+      "processRun": 3,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 58.404,
+      "keyboardWillShowMs": 85.228,
+      "keyboardDidShowMs": 599.088
+    },
+    {
+      "editor": "transaction",
+      "cycle": 1,
+      "processRun": 3,
+      "firstKeyboardInProcess": false,
+      "becomeFirstResponderMs": 44.296,
+      "keyboardWillShowMs": 72.451,
+      "keyboardDidShowMs": 594.607
+    }
+  ],
+  "simulator": {
+    "version": "iOS 26.5",
+    "manualChecks": {
+      "platform": "iOS Simulator 26.5",
+      "app": "finance.shilling.perf",
+      "checks": [
+        "New Schedule starts with empty editable name and amount; Save is disabled until valid",
+        "Created AAA Rendering Probe with amount 1.23; Save dismissed to Plan and showed the new row",
+        "Reopened the new Schedule, changed day-of-month to 9, and dismissed its number pad with Done",
+        "Entered Synthetic notes check in the multiline Notes field and dismissed its text keyboard with Done",
+        "Confirmed Delete schedule; editor dismissed to Plan and the temporary record disappeared"
+      ],
+      "note": "Notes fill initially hit an automation focus/occlusion error; focusing the visible text area and typing completed normally."
+    },
+    "regressions": {
+      "choices": {
+        "completed": true,
+        "mainThreadQueries": 0,
+        "events": [
+          {
+            "accessibilityTextChecked": true,
+            "accountChoices": 10,
+            "categoryChoices": 41,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "directFocusSwitchChecked": true,
+            "editor": "schedule",
+            "event": "choices-checked",
+            "keyboardDoneChecks": 2,
+            "thermalState": 0,
+            "transferChoices": 9
+          },
+          {
+            "accessibilityTextChecked": true,
+            "accountChoices": 10,
+            "categoryChoices": 41,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "directFocusSwitchChecked": true,
+            "editor": "transaction",
+            "event": "choices-checked",
+            "keyboardDoneChecks": 2,
+            "thermalState": 0,
+            "transferChoices": 9
+          }
+        ]
+      },
+      "editor-save": {
+        "completed": true,
+        "mainThreadQueries": 0,
+        "events": [
+          {
+            "amountAndDateChecked": false,
+            "editor": "account",
+            "event": "editor-save-checked",
+            "restored": true,
+            "saveDelayMs": 51.596,
+            "thermalState": 0
+          },
+          {
+            "amountAndDateChecked": false,
+            "editor": "category",
+            "event": "editor-save-checked",
+            "restored": true,
+            "saveDelayMs": 49.308,
+            "thermalState": 0
+          },
+          {
+            "amountAndDateChecked": true,
+            "editor": "schedule",
+            "event": "editor-save-checked",
+            "restored": true,
+            "saveDelayMs": 47.26,
+            "thermalState": 0
+          },
+          {
+            "amountAndDateChecked": true,
+            "editor": "transaction",
+            "event": "editor-save-checked",
+            "restored": true,
+            "saveDelayMs": 50.138,
+            "thermalState": 0
+          }
+        ]
+      },
+      "schedule-recurrence": {
+        "completed": true,
+        "mainThreadQueries": 0,
+        "events": [
+          {
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 42,
+              "rows": {
+                "accounts": 30,
+                "bookkeeping": 0,
+                "categories": 120,
+                "other": 1,
+                "pragma_table_info": 1,
+                "schedules": 10,
+                "sqlite_master": 12
+              },
+              "tables": {
+                "accounts": 3,
+                "bookkeeping": 12,
+                "categories": 3,
+                "other": 1,
+                "pragma_table_info": 1,
+                "schedules": 10,
+                "sqlite_master": 12
+              }
+            },
+            "dayChoices": 7,
+            "event": "recurrence-checked",
+            "frequencyChoices": 8,
+            "savedAndRestored": true,
+            "thermalState": 0,
+            "weekChoices": 5
+          }
+        ]
+      },
+      "editors": {
+        "completed": true,
+        "mainThreadQueries": 0,
+        "events": [
+          {
+            "cpuMs": 224.885,
+            "cycle": 0,
+            "database": {
+              "activeListeners": 1,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "displayCallbacks": 50,
+            "elapsedMs": 855.013,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 21.394,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "parentUpdates": 20,
+            "phase": "rebuild-account",
+            "residentMiB": 311.844,
+            "screen": "editors",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "cycle": 0,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "account",
+            "event": "editor-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 100.646,
+            "cycle": 0,
+            "database": {
+              "activeListeners": 1,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "displayCallbacks": 49,
+            "elapsedMs": 853.181,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 25.52,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "parentUpdates": 20,
+            "phase": "rebuild-category",
+            "residentMiB": 315.906,
+            "screen": "editors",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "cycle": 0,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "category",
+            "event": "editor-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 110.561,
+            "cycle": 0,
+            "database": {
+              "activeListeners": 3,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "displayCallbacks": 49,
+            "elapsedMs": 849.029,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 20.906,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "parentUpdates": 20,
+            "phase": "rebuild-schedule",
+            "residentMiB": 326.859,
+            "screen": "editors",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "cycle": 0,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "schedule",
+            "event": "editor-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 103.011,
+            "cycle": 0,
+            "database": {
+              "activeListeners": 7,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "displayCallbacks": 50,
+            "elapsedMs": 853.229,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 2.211,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "parentUpdates": 20,
+            "phase": "rebuild-transaction",
+            "residentMiB": 335.344,
+            "screen": "editors",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "cycle": 0,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "transaction",
+            "event": "editor-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 76.196,
+            "cycle": 1,
+            "database": {
+              "activeListeners": 1,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "displayCallbacks": 49,
+            "elapsedMs": 850.805,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 32.238,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "parentUpdates": 20,
+            "phase": "rebuild-account",
+            "residentMiB": 335.328,
+            "screen": "editors",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "cycle": 1,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "account",
+            "event": "editor-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 109.32,
+            "cycle": 1,
+            "database": {
+              "activeListeners": 1,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "displayCallbacks": 48,
+            "elapsedMs": 847.463,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 32.211,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "parentUpdates": 20,
+            "phase": "rebuild-category",
+            "residentMiB": 335.203,
+            "screen": "editors",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "cycle": 1,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "category",
+            "event": "editor-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 120.266,
+            "cycle": 1,
+            "database": {
+              "activeListeners": 3,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "displayCallbacks": 49,
+            "elapsedMs": 841.59,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 24.677,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "parentUpdates": 20,
+            "phase": "rebuild-schedule",
+            "residentMiB": 335.906,
+            "screen": "editors",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "cycle": 1,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "schedule",
+            "event": "editor-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 108.659,
+            "cycle": 1,
+            "database": {
+              "activeListeners": 7,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "displayCallbacks": 49,
+            "elapsedMs": 851.16,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 25.703,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "parentUpdates": 20,
+            "phase": "rebuild-transaction",
+            "residentMiB": 336.203,
+            "screen": "editors",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "cycle": 1,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "transaction",
+            "event": "editor-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 106.562,
+            "cycle": 2,
+            "database": {
+              "activeListeners": 1,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "displayCallbacks": 49,
+            "elapsedMs": 848.779,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 31.156,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "parentUpdates": 20,
+            "phase": "rebuild-account",
+            "residentMiB": 336.578,
+            "screen": "editors",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "cycle": 2,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "account",
+            "event": "editor-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 88.743,
+            "cycle": 2,
+            "database": {
+              "activeListeners": 1,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "displayCallbacks": 49,
+            "elapsedMs": 847.292,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 1.319,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "parentUpdates": 20,
+            "phase": "rebuild-category",
+            "residentMiB": 335.891,
+            "screen": "editors",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "cycle": 2,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "category",
+            "event": "editor-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 118.676,
+            "cycle": 2,
+            "database": {
+              "activeListeners": 3,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "displayCallbacks": 49,
+            "elapsedMs": 851.75,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 27.533,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "parentUpdates": 20,
+            "phase": "rebuild-schedule",
+            "residentMiB": 336.328,
+            "screen": "editors",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "cycle": 2,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "schedule",
+            "event": "editor-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 113.281,
+            "cycle": 2,
+            "database": {
+              "activeListeners": 7,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "displayCallbacks": 48,
+            "elapsedMs": 842.024,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 29.777,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "parentUpdates": 20,
+            "phase": "rebuild-transaction",
+            "residentMiB": 336.547,
+            "screen": "editors",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "cycle": 2,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "transaction",
+            "event": "editor-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 93.161,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 20,
+              "rows": {
+                "bookkeeping": 0,
+                "postings": 10
+              },
+              "tables": {
+                "bookkeeping": 10,
+                "postings": 10
+              }
+            },
+            "displayCallbacks": 128,
+            "elapsedMs": 2149.375,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 15.549,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "phase": "after-close-updates",
+            "residentMiB": 336.484,
+            "screen": "editors",
+            "thermalState": 0
+          }
+        ]
+      },
+      "tabs": {
+        "completed": true,
+        "mainThreadQueries": 0,
+        "events": [
+          {
+            "cycle": 0,
+            "database": {
+              "activeListeners": 35,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "event": "tab-cycle",
+            "residentMiB": 395.625,
+            "tabCount": 5,
+            "thermalState": 0
+          },
+          {
+            "cycle": 1,
+            "database": {
+              "activeListeners": 35,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "event": "tab-cycle",
+            "residentMiB": 396.547,
+            "tabCount": 5,
+            "thermalState": 0
+          },
+          {
+            "cycle": 2,
+            "database": {
+              "activeListeners": 35,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "event": "tab-cycle",
+            "residentMiB": 396.547,
+            "tabCount": 5,
+            "thermalState": 0
+          },
+          {
+            "cycle": 3,
+            "database": {
+              "activeListeners": 35,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "event": "tab-cycle",
+            "residentMiB": 396.578,
+            "tabCount": 5,
+            "thermalState": 0
+          },
+          {
+            "cycle": 4,
+            "database": {
+              "activeListeners": 35,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "event": "tab-cycle",
+            "residentMiB": 396.297,
+            "tabCount": 5,
+            "thermalState": 0
+          },
+          {
+            "cycle": 5,
+            "database": {
+              "activeListeners": 35,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "event": "tab-cycle",
+            "residentMiB": 396.312,
+            "tabCount": 5,
+            "thermalState": 0
+          },
+          {
+            "activityListReleased": true,
+            "controllerReleased": true,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "event": "tabs-closed",
+            "planListReleased": true,
+            "receiptListReleased": true,
+            "residentMiB": 396.797,
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 52.553,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 20,
+              "rows": {
+                "bookkeeping": 0,
+                "postings": 10
+              },
+              "tables": {
+                "bookkeeping": 10,
+                "postings": 10
+              }
+            },
+            "displayCallbacks": 63,
+            "elapsedMs": 1071.359,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 5.597,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "phase": "after-close-updates",
+            "residentMiB": 398,
+            "screen": "tabs",
+            "thermalState": 0
+          }
+        ]
+      },
+      "tab-resume": {
+        "completed": true,
+        "mainThreadQueries": 0,
+        "events": [
+          {
+            "afterItems": 7502,
+            "afterOffsetY": 1312,
+            "beforeItems": 7502,
+            "beforeOffsetY": 1312,
+            "cpuMs": 206.281,
+            "database": {
+              "activeListeners": 4,
+              "mainThreadQueries": 0,
+              "queries": 8,
+              "rows": {
+                "accounts": 10,
+                "bookkeeping": 0,
+                "categories": 40,
+                "postings": 10001,
+                "schedules": 1000
+              },
+              "tables": {
+                "accounts": 1,
+                "bookkeeping": 4,
+                "categories": 1,
+                "postings": 1,
+                "schedules": 1
+              }
+            },
+            "displayCallbacks": 59,
+            "elapsedMs": 1089.448,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 82.161,
+            "gapsOver25ms": 1,
+            "listReadyMs": 69.968,
+            "maxCallbackGapMs": 25.916,
+            "p95CallbackGapMs": 16.667,
+            "phase": "ACTIVITY",
+            "residentMiB": 397.75,
+            "screen": "tab-resume",
+            "thermalState": 0
+          },
+          {
+            "afterItems": 1005,
+            "afterOffsetY": 1252,
+            "beforeItems": 1005,
+            "beforeOffsetY": 1252,
+            "cpuMs": 138.074,
+            "database": {
+              "activeListeners": 7,
+              "mainThreadQueries": 0,
+              "queries": 14,
+              "rows": {
+                "accounts": 10,
+                "bookkeeping": 0,
+                "categories": 40,
+                "postings": 0,
+                "schedule_exceptions": 0,
+                "schedules": 1000
+              },
+              "tables": {
+                "accounts": 1,
+                "bookkeeping": 7,
+                "categories": 1,
+                "postings": 1,
+                "schedule_exceptions": 3,
+                "schedules": 1
+              }
+            },
+            "displayCallbacks": 60,
+            "elapsedMs": 1124.388,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 64.407,
+            "gapsOver25ms": 2,
+            "listReadyMs": 57.875,
+            "maxCallbackGapMs": 50.39,
+            "p95CallbackGapMs": 16.667,
+            "phase": "PLAN",
+            "residentMiB": 425.719,
+            "screen": "tab-resume",
+            "thermalState": 0
+          },
+          {
+            "afterItems": 251,
+            "afterOffsetY": 1252,
+            "beforeItems": 251,
+            "beforeOffsetY": 1252,
+            "cpuMs": 124.571,
+            "database": {
+              "activeListeners": 3,
+              "mainThreadQueries": 0,
+              "queries": 1,
+              "rows": {
+                "receipts": 250
+              },
+              "tables": {
+                "receipts": 1
+              }
+            },
+            "displayCallbacks": 60,
+            "elapsedMs": 1107.899,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 74.395,
+            "gapsOver25ms": 2,
+            "listReadyMs": 59.019,
+            "maxCallbackGapMs": 41.062,
+            "p95CallbackGapMs": 16.667,
+            "phase": "RECEIPTS",
+            "residentMiB": 433.344,
+            "screen": "tab-resume",
+            "thermalState": 0
+          },
+          {
+            "controllerReleased": true,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 1,
+              "rows": {
+                "receipts": 250
+              },
+              "tables": {
+                "receipts": 1
+              }
+            },
+            "event": "resume-closed",
+            "thermalState": 0
+          }
+        ]
+      },
+      "plan-transitions": {
+        "completed": true,
+        "mainThreadQueries": 0,
+        "events": [
+          {
+            "event": "plan-controls-checked",
+            "filters": 4,
+            "periods": 2,
+            "thermalState": 0
+          },
+          {
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 28,
+              "rows": {
+                "accounts": 20,
+                "bookkeeping": 0,
+                "categories": 80,
+                "postings": 2865,
+                "schedule_exceptions": 0,
+                "schedules": 2000
+              },
+              "tables": {
+                "accounts": 2,
+                "bookkeeping": 14,
+                "categories": 2,
+                "postings": 2,
+                "schedule_exceptions": 6,
+                "schedules": 2
+              }
+            },
+            "event": "plan-closed",
+            "thermalState": 0
+          }
+        ]
+      },
+      "editor-navigation": {
+        "completed": true,
+        "mainThreadQueries": 0,
+        "events": [
+          {
+            "becomeFirstResponderMs": 129.594,
+            "cycle": 0,
+            "editor": "schedule",
+            "event": "keyboard-appearance",
+            "firstKeyboardInProcess": true,
+            "keyboardDidShowMs": 644.059,
+            "keyboardWillShowMs": 213.569,
+            "thermalState": 0
+          },
+          {
+            "cycle": 0,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "schedule",
+            "event": "navigation-closed",
+            "thermalState": 0
+          },
+          {
+            "becomeFirstResponderMs": 18.372,
+            "cycle": 0,
+            "editor": "account",
+            "event": "keyboard-appearance",
+            "firstKeyboardInProcess": false,
+            "keyboardDidShowMs": 455.91,
+            "keyboardWillShowMs": 65.525,
+            "thermalState": 0
+          },
+          {
+            "cycle": 0,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "account",
+            "event": "navigation-closed",
+            "thermalState": 0
+          },
+          {
+            "becomeFirstResponderMs": 13.547,
+            "cycle": 0,
+            "editor": "category",
+            "event": "keyboard-appearance",
+            "firstKeyboardInProcess": false,
+            "keyboardDidShowMs": 447.126,
+            "keyboardWillShowMs": 57.959,
+            "thermalState": 0
+          },
+          {
+            "cycle": 0,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "category",
+            "event": "navigation-closed",
+            "thermalState": 0
+          },
+          {
+            "becomeFirstResponderMs": 15.437,
+            "cycle": 0,
+            "editor": "transaction",
+            "event": "keyboard-appearance",
+            "firstKeyboardInProcess": false,
+            "keyboardDidShowMs": 457.529,
+            "keyboardWillShowMs": 58.648,
+            "thermalState": 0
+          },
+          {
+            "cycle": 0,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "transaction",
+            "event": "navigation-closed",
+            "thermalState": 0
+          },
+          {
+            "becomeFirstResponderMs": 14.217,
+            "cycle": 1,
+            "editor": "schedule",
+            "event": "keyboard-appearance",
+            "firstKeyboardInProcess": false,
+            "keyboardDidShowMs": 451.852,
+            "keyboardWillShowMs": 58.104,
+            "thermalState": 0
+          },
+          {
+            "cycle": 1,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "schedule",
+            "event": "navigation-closed",
+            "thermalState": 0
+          },
+          {
+            "becomeFirstResponderMs": 19.421,
+            "cycle": 1,
+            "editor": "account",
+            "event": "keyboard-appearance",
+            "firstKeyboardInProcess": false,
+            "keyboardDidShowMs": 464.878,
+            "keyboardWillShowMs": 72.386,
+            "thermalState": 0
+          },
+          {
+            "cycle": 1,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "account",
+            "event": "navigation-closed",
+            "thermalState": 0
+          },
+          {
+            "becomeFirstResponderMs": 19.975,
+            "cycle": 1,
+            "editor": "category",
+            "event": "keyboard-appearance",
+            "firstKeyboardInProcess": false,
+            "keyboardDidShowMs": 474.532,
+            "keyboardWillShowMs": 69.824,
+            "thermalState": 0
+          },
+          {
+            "cycle": 1,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "category",
+            "event": "navigation-closed",
+            "thermalState": 0
+          },
+          {
+            "becomeFirstResponderMs": 19.899,
+            "cycle": 1,
+            "editor": "transaction",
+            "event": "keyboard-appearance",
+            "firstKeyboardInProcess": false,
+            "keyboardDidShowMs": 468.445,
+            "keyboardWillShowMs": 67.214,
+            "thermalState": 0
+          },
+          {
+            "cycle": 1,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 0,
+              "rows": {},
+              "tables": {}
+            },
+            "editor": "transaction",
+            "event": "navigation-closed",
+            "thermalState": 0
+          },
+          {
+            "cpuMs": 112.346,
+            "database": {
+              "activeListeners": 0,
+              "mainThreadQueries": 0,
+              "queries": 20,
+              "rows": {
+                "bookkeeping": 0,
+                "postings": 10
+              },
+              "tables": {
+                "bookkeeping": 10,
+                "postings": 10
+              }
+            },
+            "displayCallbacks": 129,
+            "elapsedMs": 2175.14,
+            "event": "measurement",
+            "firstCallbackLatencyMs": 17.562,
+            "gapsOver25ms": 0,
+            "maxCallbackGapMs": 16.667,
+            "p95CallbackGapMs": 16.667,
+            "phase": "after-close-updates",
+            "residentMiB": 365.672,
+            "screen": "editor-navigation",
+            "thermalState": 0
+          }
+        ]
+      }
+    }
+  },
+  "remaining": [
+    "Schedule opening 83\u2013100 ms in the candidate trace.",
+    "Plan section transitions 50\u201367 ms in the fresh baseline trace.",
+    "Controlled cold-keyboard comparison and physical iOS 18 rerun of new recurrence/restore checks."
+  ]
+}
