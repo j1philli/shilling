@@ -1,0 +1,2709 @@
+{
+  "date": "2026-10-09",
+  "device": "iPhone SE (2nd generation), iOS 18.7.8",
+  "app": "finance.shilling.perf, Release, synthetic Store5 data",
+  "baselineProductionCommit": "77dbcd8c59894a43afb1e30577ac5eeca750e080",
+  "candidateProductionCommit": "2025415e8bd29973087b446f155660d4d094a41d",
+  "method": {
+    "postRebootRunsPerBuild": 1,
+    "userConfirmedNoKeyboardBeforeEachRun": true,
+    "order": "baseline then candidate",
+    "editorOrder": [
+      "schedule",
+      "account",
+      "category",
+      "transaction"
+    ],
+    "visitsPerEditor": 2,
+    "focusPauseMs": 400,
+    "keystrokes": 10,
+    "keyIntervalMs": 50,
+    "typingSettleMs": 200,
+    "limitations": [
+      "Reboot-to-launch durations were not matched; one run per build.",
+      "Keyboard notifications include animation and do not establish pixel presentation.",
+      "Focus-request timing includes the measurement setup before becomeFirstResponder.",
+      "App CPU includes all threads. Keyboard setup overlaps different workload phases.",
+      "Candidate post-reboot Instruments CPU stream is truncated; its apparent zero CPU/hitches are rejected. No causal cold-start improvement is established."
+    ]
+  },
+  "postReboot": {
+    "baseline": {
+      "completed": true,
+      "navigationAndPostCloseValidationPassed": true,
+      "thermalStates": [
+        0
+      ],
+      "keyboardObservations": [
+        {
+          "becomeFirstResponderMs": 894.018,
+          "cycle": 0,
+          "editor": "schedule",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": true,
+          "keyboardDidShowMs": 1215.595,
+          "keyboardWillShowMs": 1017.657,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 33.941,
+          "cycle": 0,
+          "editor": "account",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 1415.364,
+          "keyboardWillShowMs": 73.237,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 47.917,
+          "cycle": 0,
+          "editor": "category",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 593.95,
+          "keyboardWillShowMs": 74.534,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 54.204,
+          "cycle": 0,
+          "editor": "transaction",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 606.652,
+          "keyboardWillShowMs": 78.474,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 56.913,
+          "cycle": 1,
+          "editor": "schedule",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 622.163,
+          "keyboardWillShowMs": 96.882,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 43.608,
+          "cycle": 1,
+          "editor": "account",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 580.288,
+          "keyboardWillShowMs": 72.512,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 45.069,
+          "cycle": 1,
+          "editor": "category",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 582.621,
+          "keyboardWillShowMs": 74.721,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 49.318,
+          "cycle": 1,
+          "editor": "transaction",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 586.847,
+          "keyboardWillShowMs": 75.608,
+          "thermalState": 0
+        }
+      ],
+      "scheduleMeasurements": [
+        {
+          "cpuMs": 317.981,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 8,
+            "rows": {
+              "accounts": 10,
+              "bookkeeping": 0,
+              "categories": 40,
+              "schedules": 2
+            },
+            "tables": {
+              "accounts": 1,
+              "bookkeeping": 4,
+              "categories": 1,
+              "schedules": 2
+            }
+          },
+          "displayCallbacks": 4,
+          "elapsedMs": 1053.051,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 549.977,
+          "gapsOver25ms": 2,
+          "maxCallbackGapMs": 302.404,
+          "p95CallbackGapMs": 148.803,
+          "phase": "push-schedule",
+          "residentMiB": 105.172,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 36.744,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 25,
+          "elapsedMs": 418.781,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 1.297,
+          "gapsOver25ms": 0,
+          "maxCallbackGapMs": 16.667,
+          "p95CallbackGapMs": 16.667,
+          "phase": "push-settle-schedule",
+          "residentMiB": 105.203,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 894.018,
+          "cpuMs": 230.072,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 3,
+          "elapsedMs": 1297.137,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 1231.327,
+          "firstKeyboardInProcess": true,
+          "gapsOver25ms": 0,
+          "keyboardDidShowMs": 1215.595,
+          "keyboardWillShowMs": 1017.657,
+          "maxCallbackGapMs": 18.601,
+          "p95CallbackGapMs": 16.667,
+          "phase": "focus-schedule",
+          "residentMiB": 117.594,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 115.964,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 45,
+          "elapsedMs": 775.364,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 14.327,
+          "gapsOver25ms": 0,
+          "keystrokes": 10,
+          "maxCallbackGapMs": 16.667,
+          "p95CallbackGapMs": 16.667,
+          "phase": "typing-schedule",
+          "residentMiB": 117.953,
+          "settleMs": 200,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 113.893,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 51,
+          "elapsedMs": 1026.278,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 13.795,
+          "gapsOver25ms": 3,
+          "maxCallbackGapMs": 99.016,
+          "p95CallbackGapMs": 17.657,
+          "phase": "pop-schedule",
+          "residentMiB": 117.656,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 160.076,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 8,
+            "rows": {
+              "accounts": 10,
+              "bookkeeping": 0,
+              "categories": 40,
+              "schedules": 2
+            },
+            "tables": {
+              "accounts": 1,
+              "bookkeeping": 4,
+              "categories": 1,
+              "schedules": 2
+            }
+          },
+          "displayCallbacks": 5,
+          "elapsedMs": 207.037,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 29.367,
+          "gapsOver25ms": 2,
+          "maxCallbackGapMs": 97.404,
+          "p95CallbackGapMs": 27.367,
+          "phase": "push-schedule",
+          "residentMiB": 122.172,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 56.545,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 23,
+          "elapsedMs": 414.622,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 15.936,
+          "gapsOver25ms": 0,
+          "maxCallbackGapMs": 16.668,
+          "p95CallbackGapMs": 16.668,
+          "phase": "push-settle-schedule",
+          "residentMiB": 122.234,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 56.913,
+          "cpuMs": 156.764,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 23,
+          "elapsedMs": 479.325,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 58.649,
+          "firstKeyboardInProcess": false,
+          "gapsOver25ms": 1,
+          "keyboardDidShowMs": null,
+          "keyboardWillShowMs": 96.882,
+          "maxCallbackGapMs": 42.738,
+          "p95CallbackGapMs": 16.668,
+          "phase": "focus-schedule",
+          "residentMiB": 122.75,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 267.843,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 48,
+          "elapsedMs": 820.92,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 12.422,
+          "gapsOver25ms": 1,
+          "keystrokes": 10,
+          "maxCallbackGapMs": 36.4,
+          "p95CallbackGapMs": 16.668,
+          "phase": "typing-schedule",
+          "residentMiB": 119.906,
+          "settleMs": 200,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 222.444,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 56,
+          "elapsedMs": 1029.237,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 14.867,
+          "gapsOver25ms": 2,
+          "maxCallbackGapMs": 46.242,
+          "p95CallbackGapMs": 20.428,
+          "phase": "pop-schedule",
+          "residentMiB": 119.562,
+          "thermalState": 0
+        }
+      ],
+      "traceSchedulePhases": [
+        {
+          "phase": "push-schedule",
+          "visit": 1,
+          "sampledCpuMs": 311.0,
+          "mainThreadSamples": 235,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 8,
+            "viewGraphUpdate": 140,
+            "collectionLayout": 107,
+            "cellCreation": 91,
+            "cellSizing": 85,
+            "navigationLayout": 22,
+            "toolbarUpdate": 16,
+            "hostingViewRelease": 0,
+            "hostingLayout": 23,
+            "windowAttachment": 9,
+            "layerLayout": 159,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 316.68,
+          "inclusiveStackSamples": {
+            "stickerInitialization": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "dynamicLoading": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "viewGraphUpdate": {
+              "allThreads": 140,
+              "mainThread": 140
+            },
+            "keyboardDock": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "textInputTraits": {
+              "allThreads": 0,
+              "mainThread": 0
+            }
+          }
+        },
+        {
+          "phase": "push-settle-schedule",
+          "visit": 1,
+          "sampledCpuMs": 38.0,
+          "mainThreadSamples": 35,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 4,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 1,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 1,
+            "windowAttachment": 2,
+            "layerLayout": 8,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "inclusiveStackSamples": {
+            "stickerInitialization": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "dynamicLoading": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "viewGraphUpdate": {
+              "allThreads": 4,
+              "mainThread": 4
+            },
+            "keyboardDock": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "textInputTraits": {
+              "allThreads": 0,
+              "mainThread": 0
+            }
+          }
+        },
+        {
+          "phase": "focus-schedule",
+          "visit": 1,
+          "sampledCpuMs": 218.0,
+          "mainThreadSamples": 184,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 7,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 7,
+            "hostingViewRelease": 0,
+            "hostingLayout": 21,
+            "windowAttachment": 4,
+            "layerLayout": 34,
+            "tabTransition": 0
+          },
+          "hitches": 3,
+          "maxHitchMs": 333.347,
+          "inclusiveStackSamples": {
+            "stickerInitialization": {
+              "allThreads": 2,
+              "mainThread": 0
+            },
+            "dynamicLoading": {
+              "allThreads": 8,
+              "mainThread": 6
+            },
+            "viewGraphUpdate": {
+              "allThreads": 7,
+              "mainThread": 7
+            },
+            "keyboardDock": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "textInputTraits": {
+              "allThreads": 0,
+              "mainThread": 0
+            }
+          }
+        },
+        {
+          "phase": "typing-schedule",
+          "visit": 1,
+          "sampledCpuMs": 110.0,
+          "mainThreadSamples": 87,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 14,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 4,
+            "windowAttachment": 0,
+            "layerLayout": 25,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "inclusiveStackSamples": {
+            "stickerInitialization": {
+              "allThreads": 7,
+              "mainThread": 0
+            },
+            "dynamicLoading": {
+              "allThreads": 7,
+              "mainThread": 0
+            },
+            "viewGraphUpdate": {
+              "allThreads": 14,
+              "mainThread": 14
+            },
+            "keyboardDock": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "textInputTraits": {
+              "allThreads": 0,
+              "mainThread": 0
+            }
+          }
+        },
+        {
+          "phase": "pop-schedule",
+          "visit": 1,
+          "sampledCpuMs": 115.0,
+          "mainThreadSamples": 93,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 7,
+            "collectionLayout": 4,
+            "cellCreation": 0,
+            "cellSizing": 1,
+            "navigationLayout": 16,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 10,
+            "hostingLayout": 16,
+            "windowAttachment": 11,
+            "layerLayout": 38,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 66.779,
+          "inclusiveStackSamples": {
+            "stickerInitialization": {
+              "allThreads": 8,
+              "mainThread": 0
+            },
+            "dynamicLoading": {
+              "allThreads": 8,
+              "mainThread": 0
+            },
+            "viewGraphUpdate": {
+              "allThreads": 7,
+              "mainThread": 7
+            },
+            "keyboardDock": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "textInputTraits": {
+              "allThreads": 0,
+              "mainThread": 0
+            }
+          }
+        },
+        {
+          "phase": "push-schedule",
+          "visit": 2,
+          "sampledCpuMs": 159.0,
+          "mainThreadSamples": 152,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 6,
+            "viewGraphUpdate": 77,
+            "collectionLayout": 68,
+            "cellCreation": 54,
+            "cellSizing": 48,
+            "navigationLayout": 17,
+            "toolbarUpdate": 10,
+            "hostingViewRelease": 0,
+            "hostingLayout": 18,
+            "windowAttachment": 4,
+            "layerLayout": 107,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 83.334,
+          "inclusiveStackSamples": {
+            "stickerInitialization": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "dynamicLoading": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "viewGraphUpdate": {
+              "allThreads": 77,
+              "mainThread": 77
+            },
+            "keyboardDock": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "textInputTraits": {
+              "allThreads": 0,
+              "mainThread": 0
+            }
+          }
+        },
+        {
+          "phase": "push-settle-schedule",
+          "visit": 2,
+          "sampledCpuMs": 60.0,
+          "mainThreadSamples": 55,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 9,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 1,
+            "hostingLayout": 5,
+            "windowAttachment": 1,
+            "layerLayout": 14,
+            "tabTransition": 0
+          },
+          "hitches": 0,
+          "maxHitchMs": 0,
+          "inclusiveStackSamples": {
+            "stickerInitialization": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "dynamicLoading": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "viewGraphUpdate": {
+              "allThreads": 9,
+              "mainThread": 9
+            },
+            "keyboardDock": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "textInputTraits": {
+              "allThreads": 0,
+              "mainThread": 0
+            }
+          }
+        },
+        {
+          "phase": "focus-schedule",
+          "visit": 2,
+          "sampledCpuMs": 161.0,
+          "mainThreadSamples": 150,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 10,
+            "collectionLayout": 1,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 4,
+            "hostingViewRelease": 0,
+            "hostingLayout": 25,
+            "windowAttachment": 1,
+            "layerLayout": 51,
+            "tabTransition": 0
+          },
+          "hitches": 2,
+          "maxHitchMs": 16.67,
+          "inclusiveStackSamples": {
+            "stickerInitialization": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "dynamicLoading": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "viewGraphUpdate": {
+              "allThreads": 10,
+              "mainThread": 10
+            },
+            "keyboardDock": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "textInputTraits": {
+              "allThreads": 0,
+              "mainThread": 0
+            }
+          }
+        },
+        {
+          "phase": "typing-schedule",
+          "visit": 2,
+          "sampledCpuMs": 264.0,
+          "mainThreadSamples": 250,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 54,
+            "collectionLayout": 0,
+            "cellCreation": 0,
+            "cellSizing": 0,
+            "navigationLayout": 0,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 0,
+            "hostingLayout": 19,
+            "windowAttachment": 2,
+            "layerLayout": 71,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 16.667,
+          "inclusiveStackSamples": {
+            "stickerInitialization": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "dynamicLoading": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "viewGraphUpdate": {
+              "allThreads": 54,
+              "mainThread": 54
+            },
+            "keyboardDock": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "textInputTraits": {
+              "allThreads": 0,
+              "mainThread": 0
+            }
+          }
+        },
+        {
+          "phase": "pop-schedule",
+          "visit": 2,
+          "sampledCpuMs": 221.0,
+          "mainThreadSamples": 207,
+          "inclusiveMainThreadSamples": {
+            "menuConstruction": 0,
+            "viewGraphUpdate": 9,
+            "collectionLayout": 7,
+            "cellCreation": 0,
+            "cellSizing": 2,
+            "navigationLayout": 21,
+            "toolbarUpdate": 0,
+            "hostingViewRelease": 25,
+            "hostingLayout": 19,
+            "windowAttachment": 13,
+            "layerLayout": 59,
+            "tabTransition": 0
+          },
+          "hitches": 1,
+          "maxHitchMs": 33.336,
+          "inclusiveStackSamples": {
+            "stickerInitialization": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "dynamicLoading": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "viewGraphUpdate": {
+              "allThreads": 9,
+              "mainThread": 9
+            },
+            "keyboardDock": {
+              "allThreads": 0,
+              "mainThread": 0
+            },
+            "textInputTraits": {
+              "allThreads": 0,
+              "mainThread": 0
+            }
+          }
+        }
+      ],
+      "traceCpuSpanSeconds": {
+        "start": 0.458,
+        "end": 45.463
+      },
+      "inclusiveFirstFocusMainSamples": {
+        "becomeFirstResponder": 89,
+        "keyboardDelegateSetup": 63,
+        "keyboardImageCacheDisplay": 17,
+        "note": "Overlapping inclusive samples; do not add counts into wall-time percentages."
+      }
+    },
+    "candidate": {
+      "completed": true,
+      "navigationAndPostCloseValidationPassed": true,
+      "thermalStates": [
+        0
+      ],
+      "keyboardObservations": [
+        {
+          "becomeFirstResponderMs": 445.857,
+          "cycle": 0,
+          "editor": "schedule",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": true,
+          "keyboardDidShowMs": 1092.589,
+          "keyboardWillShowMs": 507.632,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 35.479,
+          "cycle": 0,
+          "editor": "account",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 586.588,
+          "keyboardWillShowMs": 63.158,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 44.211,
+          "cycle": 0,
+          "editor": "category",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 584.525,
+          "keyboardWillShowMs": 70.004,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 35.077,
+          "cycle": 0,
+          "editor": "transaction",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 581.722,
+          "keyboardWillShowMs": 59.719,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 60.374,
+          "cycle": 1,
+          "editor": "schedule",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 602.722,
+          "keyboardWillShowMs": 88.4,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 50.399,
+          "cycle": 1,
+          "editor": "account",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 596.88,
+          "keyboardWillShowMs": 79.486,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 61.8,
+          "cycle": 1,
+          "editor": "category",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 614.185,
+          "keyboardWillShowMs": 95.708,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 59.015,
+          "cycle": 1,
+          "editor": "transaction",
+          "event": "keyboard-appearance",
+          "firstKeyboardInProcess": false,
+          "keyboardDidShowMs": 600.13,
+          "keyboardWillShowMs": 87.815,
+          "thermalState": 0
+        }
+      ],
+      "scheduleMeasurements": [
+        {
+          "cpuMs": 300.728,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 8,
+            "rows": {
+              "accounts": 10,
+              "bookkeeping": 0,
+              "categories": 40,
+              "schedules": 2
+            },
+            "tables": {
+              "accounts": 1,
+              "bookkeeping": 4,
+              "categories": 1,
+              "schedules": 2
+            }
+          },
+          "displayCallbacks": 4,
+          "elapsedMs": 1993.505,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 1078.407,
+          "gapsOver25ms": 2,
+          "maxCallbackGapMs": 645.361,
+          "p95CallbackGapMs": 231.768,
+          "phase": "push-schedule",
+          "residentMiB": 89.625,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 4.94,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 24,
+          "elapsedMs": 407.842,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 6.98,
+          "gapsOver25ms": 0,
+          "maxCallbackGapMs": 16.667,
+          "p95CallbackGapMs": 16.667,
+          "phase": "push-settle-schedule",
+          "residentMiB": 89.672,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 445.857,
+          "cpuMs": 223.326,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 5,
+          "elapsedMs": 928.005,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 453.917,
+          "firstKeyboardInProcess": true,
+          "gapsOver25ms": 2,
+          "keyboardDidShowMs": null,
+          "keyboardWillShowMs": 507.632,
+          "maxCallbackGapMs": 74.172,
+          "p95CallbackGapMs": 54.872,
+          "phase": "focus-schedule",
+          "residentMiB": 85.938,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 291.374,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 43,
+          "elapsedMs": 798.892,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 11.179,
+          "gapsOver25ms": 3,
+          "keystrokes": 10,
+          "maxCallbackGapMs": 53.989,
+          "p95CallbackGapMs": 17.582,
+          "phase": "typing-schedule",
+          "residentMiB": 100.094,
+          "settleMs": 200,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 164.69,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 56,
+          "elapsedMs": 1013.266,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 6.84,
+          "gapsOver25ms": 3,
+          "maxCallbackGapMs": 42.351,
+          "p95CallbackGapMs": 24.318,
+          "phase": "pop-schedule",
+          "residentMiB": 100.109,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 171.581,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 8,
+            "rows": {
+              "accounts": 10,
+              "bookkeeping": 0,
+              "categories": 40,
+              "schedules": 2
+            },
+            "tables": {
+              "accounts": 1,
+              "bookkeeping": 4,
+              "categories": 1,
+              "schedules": 2
+            }
+          },
+          "displayCallbacks": 4,
+          "elapsedMs": 234.475,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 35.068,
+          "gapsOver25ms": 3,
+          "maxCallbackGapMs": 120.946,
+          "p95CallbackGapMs": 29.06,
+          "phase": "push-schedule",
+          "residentMiB": 96.109,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 52.392,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 25,
+          "elapsedMs": 426.431,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 8.799,
+          "gapsOver25ms": 0,
+          "maxCallbackGapMs": 16.667,
+          "p95CallbackGapMs": 16.667,
+          "phase": "push-settle-schedule",
+          "residentMiB": 96.141,
+          "thermalState": 0
+        },
+        {
+          "becomeFirstResponderMs": 60.374,
+          "cpuMs": 123.958,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 25,
+          "elapsedMs": 482.384,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 66.799,
+          "firstKeyboardInProcess": false,
+          "gapsOver25ms": 0,
+          "keyboardDidShowMs": null,
+          "keyboardWillShowMs": 88.4,
+          "maxCallbackGapMs": 16.667,
+          "p95CallbackGapMs": 16.667,
+          "phase": "focus-schedule",
+          "residentMiB": 95.953,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 199.483,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 45,
+          "elapsedMs": 795.17,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 13.688,
+          "gapsOver25ms": 1,
+          "keystrokes": 10,
+          "maxCallbackGapMs": 36.143,
+          "p95CallbackGapMs": 16.667,
+          "phase": "typing-schedule",
+          "residentMiB": 96.219,
+          "settleMs": 200,
+          "thermalState": 0
+        },
+        {
+          "cpuMs": 222.943,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "displayCallbacks": 55,
+          "elapsedMs": 1027.548,
+          "event": "measurement",
+          "firstCallbackLatencyMs": 12.34,
+          "gapsOver25ms": 4,
+          "maxCallbackGapMs": 58.146,
+          "p95CallbackGapMs": 25.19,
+          "phase": "pop-schedule",
+          "residentMiB": 95.453,
+          "thermalState": 0
+        }
+      ],
+      "traceStatus": "rejected; no candidate cold rendering comparison",
+      "traceCpuSpanSeconds": {
+        "start": 0.458,
+        "end": 5.57
+      },
+      "traceWorkloadSpanSeconds": {
+        "start": 5.468,
+        "end": 41.671
+      },
+      "firstFocusStartSeconds": 8.014
+    }
+  },
+  "physicalRegressions": {
+    "schedule-recurrence": {
+      "passed": true,
+      "mainThreadQueries": 0,
+      "events": [
+        {
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 42,
+            "rows": {
+              "accounts": 30,
+              "bookkeeping": 0,
+              "categories": 120,
+              "other": 1,
+              "pragma_table_info": 1,
+              "schedules": 10,
+              "sqlite_master": 12
+            },
+            "tables": {
+              "accounts": 3,
+              "bookkeeping": 12,
+              "categories": 3,
+              "other": 1,
+              "pragma_table_info": 1,
+              "schedules": 10,
+              "sqlite_master": 12
+            }
+          },
+          "dayChoices": 7,
+          "event": "recurrence-checked",
+          "frequencyChoices": 8,
+          "savedAndRestored": true,
+          "thermalState": 0,
+          "weekChoices": 5
+        }
+      ]
+    },
+    "editor-save": {
+      "passed": true,
+      "mainThreadQueries": 0,
+      "events": [
+        {
+          "amountAndDateChecked": false,
+          "editor": "account",
+          "event": "editor-save-checked",
+          "restored": true,
+          "saveDelayMs": 67.664,
+          "thermalState": 0
+        },
+        {
+          "amountAndDateChecked": false,
+          "editor": "category",
+          "event": "editor-save-checked",
+          "restored": true,
+          "saveDelayMs": 54.178,
+          "thermalState": 0
+        },
+        {
+          "amountAndDateChecked": true,
+          "editor": "schedule",
+          "event": "editor-save-checked",
+          "restored": true,
+          "saveDelayMs": 52.965,
+          "thermalState": 0
+        },
+        {
+          "amountAndDateChecked": true,
+          "editor": "transaction",
+          "event": "editor-save-checked",
+          "restored": true,
+          "saveDelayMs": 53.128,
+          "thermalState": 0
+        }
+      ]
+    },
+    "editor-choices": {
+      "passed": true,
+      "mainThreadQueries": 0,
+      "events": [
+        {
+          "accessibilityTextChecked": true,
+          "accountChoices": 10,
+          "categoryChoices": 41,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "directFocusSwitchChecked": true,
+          "editor": "schedule",
+          "event": "choices-checked",
+          "keyboardDoneChecks": 2,
+          "thermalState": 0,
+          "transferChoices": 9
+        },
+        {
+          "accessibilityTextChecked": true,
+          "accountChoices": 10,
+          "categoryChoices": 41,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "directFocusSwitchChecked": true,
+          "editor": "transaction",
+          "event": "choices-checked",
+          "keyboardDoneChecks": 2,
+          "thermalState": 0,
+          "transferChoices": 9
+        }
+      ]
+    },
+    "editors": {
+      "passed": true,
+      "mainThreadQueries": 0,
+      "events": [
+        {
+          "controllerReleased": true,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "editor": "account",
+          "event": "editor-closed",
+          "thermalState": 0
+        },
+        {
+          "controllerReleased": true,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "editor": "category",
+          "event": "editor-closed",
+          "thermalState": 0
+        },
+        {
+          "controllerReleased": true,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "editor": "schedule",
+          "event": "editor-closed",
+          "thermalState": 0
+        },
+        {
+          "controllerReleased": true,
+          "cycle": 0,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "editor": "transaction",
+          "event": "editor-closed",
+          "thermalState": 0
+        },
+        {
+          "controllerReleased": true,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "editor": "account",
+          "event": "editor-closed",
+          "thermalState": 0
+        },
+        {
+          "controllerReleased": true,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "editor": "category",
+          "event": "editor-closed",
+          "thermalState": 0
+        },
+        {
+          "controllerReleased": true,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "editor": "schedule",
+          "event": "editor-closed",
+          "thermalState": 0
+        },
+        {
+          "controllerReleased": true,
+          "cycle": 1,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "editor": "transaction",
+          "event": "editor-closed",
+          "thermalState": 0
+        },
+        {
+          "controllerReleased": true,
+          "cycle": 2,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "editor": "account",
+          "event": "editor-closed",
+          "thermalState": 0
+        },
+        {
+          "controllerReleased": true,
+          "cycle": 2,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "editor": "category",
+          "event": "editor-closed",
+          "thermalState": 0
+        },
+        {
+          "controllerReleased": true,
+          "cycle": 2,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "editor": "schedule",
+          "event": "editor-closed",
+          "thermalState": 0
+        },
+        {
+          "controllerReleased": true,
+          "cycle": 2,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "editor": "transaction",
+          "event": "editor-closed",
+          "thermalState": 0
+        },
+        {
+          "event": "measurement",
+          "phase": "after-close-updates",
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 20,
+            "rows": {
+              "bookkeeping": 0,
+              "postings": 10
+            },
+            "tables": {
+              "bookkeeping": 10,
+              "postings": 10
+            }
+          }
+        }
+      ]
+    },
+    "tabs": {
+      "passed": true,
+      "mainThreadQueries": 0,
+      "events": [
+        {
+          "cycle": 0,
+          "database": {
+            "activeListeners": 35,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "event": "tab-cycle",
+          "residentMiB": 149.062,
+          "tabCount": 5,
+          "thermalState": 0
+        },
+        {
+          "cycle": 1,
+          "database": {
+            "activeListeners": 35,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "event": "tab-cycle",
+          "residentMiB": 150.328,
+          "tabCount": 5,
+          "thermalState": 0
+        },
+        {
+          "cycle": 2,
+          "database": {
+            "activeListeners": 35,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "event": "tab-cycle",
+          "residentMiB": 150.297,
+          "tabCount": 5,
+          "thermalState": 0
+        },
+        {
+          "cycle": 3,
+          "database": {
+            "activeListeners": 35,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "event": "tab-cycle",
+          "residentMiB": 150.141,
+          "tabCount": 5,
+          "thermalState": 0
+        },
+        {
+          "cycle": 4,
+          "database": {
+            "activeListeners": 35,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "event": "tab-cycle",
+          "residentMiB": 150.156,
+          "tabCount": 5,
+          "thermalState": 0
+        },
+        {
+          "cycle": 5,
+          "database": {
+            "activeListeners": 35,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "event": "tab-cycle",
+          "residentMiB": 150.156,
+          "tabCount": 5,
+          "thermalState": 0
+        },
+        {
+          "activityListReleased": true,
+          "controllerReleased": true,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "event": "tabs-closed",
+          "planListReleased": true,
+          "receiptListReleased": true,
+          "residentMiB": 145.391,
+          "thermalState": 0
+        },
+        {
+          "event": "measurement",
+          "phase": "after-close-updates",
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 20,
+            "rows": {
+              "bookkeeping": 0,
+              "postings": 10
+            },
+            "tables": {
+              "bookkeeping": 10,
+              "postings": 10
+            }
+          }
+        }
+      ]
+    },
+    "tab-resume": {
+      "passed": true,
+      "mainThreadQueries": 0,
+      "events": [
+        {
+          "event": "measurement",
+          "phase": "ACTIVITY",
+          "beforeItems": 7502,
+          "afterItems": 7502,
+          "beforeOffsetY": 1304,
+          "afterOffsetY": 1304,
+          "database": {
+            "activeListeners": 4,
+            "mainThreadQueries": 0,
+            "queries": 8,
+            "rows": {
+              "accounts": 10,
+              "bookkeeping": 0,
+              "categories": 40,
+              "postings": 10001,
+              "schedules": 1000
+            },
+            "tables": {
+              "accounts": 1,
+              "bookkeeping": 4,
+              "categories": 1,
+              "postings": 1,
+              "schedules": 1
+            }
+          }
+        },
+        {
+          "event": "measurement",
+          "phase": "PLAN",
+          "beforeItems": 1364,
+          "afterItems": 1364,
+          "beforeOffsetY": 1252,
+          "afterOffsetY": 1252,
+          "database": {
+            "activeListeners": 7,
+            "mainThreadQueries": 0,
+            "queries": 14,
+            "rows": {
+              "accounts": 10,
+              "bookkeeping": 0,
+              "categories": 40,
+              "postings": 359,
+              "schedule_exceptions": 0,
+              "schedules": 1000
+            },
+            "tables": {
+              "accounts": 1,
+              "bookkeeping": 7,
+              "categories": 1,
+              "postings": 1,
+              "schedule_exceptions": 3,
+              "schedules": 1
+            }
+          }
+        },
+        {
+          "event": "measurement",
+          "phase": "RECEIPTS",
+          "beforeItems": 251,
+          "afterItems": 251,
+          "beforeOffsetY": 1252,
+          "afterOffsetY": 1252,
+          "database": {
+            "activeListeners": 3,
+            "mainThreadQueries": 0,
+            "queries": 1,
+            "rows": {
+              "receipts": 250
+            },
+            "tables": {
+              "receipts": 1
+            }
+          }
+        },
+        {
+          "controllerReleased": true,
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 1,
+            "rows": {
+              "receipts": 250
+            },
+            "tables": {
+              "receipts": 1
+            }
+          },
+          "event": "resume-closed",
+          "thermalState": 0
+        }
+      ]
+    },
+    "plan-transitions": {
+      "passed": true,
+      "mainThreadQueries": 0,
+      "events": [
+        {
+          "event": "measurement",
+          "phase": "Schedules",
+          "cycle": 0,
+          "database": {
+            "activeListeners": 10,
+            "mainThreadQueries": 0,
+            "queries": 6,
+            "rows": {
+              "accounts": 10,
+              "bookkeeping": 0,
+              "categories": 40,
+              "schedules": 1000
+            },
+            "tables": {
+              "accounts": 1,
+              "bookkeeping": 3,
+              "categories": 1,
+              "schedules": 1
+            }
+          },
+          "listItems": 1002
+        },
+        {
+          "event": "measurement",
+          "phase": "Categories",
+          "cycle": 0,
+          "database": {
+            "activeListeners": 11,
+            "mainThreadQueries": 0,
+            "queries": 2,
+            "rows": {
+              "bookkeeping": 0,
+              "categories": 40
+            },
+            "tables": {
+              "bookkeeping": 1,
+              "categories": 1
+            }
+          },
+          "listItems": 41
+        },
+        {
+          "event": "measurement",
+          "phase": "Accounts",
+          "cycle": 0,
+          "database": {
+            "activeListeners": 12,
+            "mainThreadQueries": 0,
+            "queries": 2,
+            "rows": {
+              "accounts": 10,
+              "bookkeeping": 0
+            },
+            "tables": {
+              "accounts": 1,
+              "bookkeeping": 1
+            }
+          },
+          "listItems": 11
+        },
+        {
+          "event": "measurement",
+          "phase": "Overview",
+          "cycle": 0,
+          "database": {
+            "activeListeners": 12,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "listItems": 1364
+        },
+        {
+          "event": "measurement",
+          "phase": "By category",
+          "cycle": 0,
+          "database": {
+            "activeListeners": 12,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "listItems": 46
+        },
+        {
+          "event": "measurement",
+          "phase": "By day",
+          "cycle": 0,
+          "database": {
+            "activeListeners": 12,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "listItems": 1364
+        },
+        {
+          "event": "measurement",
+          "phase": "Schedules",
+          "cycle": 1,
+          "database": {
+            "activeListeners": 12,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "listItems": 1002
+        },
+        {
+          "event": "measurement",
+          "phase": "Categories",
+          "cycle": 1,
+          "database": {
+            "activeListeners": 12,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "listItems": 41
+        },
+        {
+          "event": "measurement",
+          "phase": "Accounts",
+          "cycle": 1,
+          "database": {
+            "activeListeners": 12,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "listItems": 11
+        },
+        {
+          "event": "measurement",
+          "phase": "Overview",
+          "cycle": 1,
+          "database": {
+            "activeListeners": 12,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "listItems": 1364
+        },
+        {
+          "event": "measurement",
+          "phase": "By category",
+          "cycle": 1,
+          "database": {
+            "activeListeners": 12,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "listItems": 46
+        },
+        {
+          "event": "measurement",
+          "phase": "By day",
+          "cycle": 1,
+          "database": {
+            "activeListeners": 12,
+            "mainThreadQueries": 0,
+            "queries": 0,
+            "rows": {},
+            "tables": {}
+          },
+          "listItems": 1364
+        },
+        {
+          "event": "plan-controls-checked",
+          "filters": 4,
+          "periods": 2,
+          "thermalState": 0
+        },
+        {
+          "database": {
+            "activeListeners": 0,
+            "mainThreadQueries": 0,
+            "queries": 28,
+            "rows": {
+              "accounts": 20,
+              "bookkeeping": 0,
+              "categories": 80,
+              "postings": 3582,
+              "schedule_exceptions": 0,
+              "schedules": 2000
+            },
+            "tables": {
+              "accounts": 2,
+              "bookkeeping": 14,
+              "categories": 2,
+              "postings": 2,
+              "schedule_exceptions": 6,
+              "schedules": 2
+            }
+          },
+          "event": "plan-closed",
+          "thermalState": 0
+        }
+      ]
+    }
+  },
+  "toolingValidation": {
+    "analyzerUnitTests": 4,
+    "unitTestsPassed": true,
+    "realBaselineExportAccepted": true,
+    "realTruncatedExportRejected": true,
+    "releaseDeviceBuildPassed": true,
+    "pythonCompilePassed": true,
+    "architectureGuardPassed": true
+  },
+  "fixtureCorrection": {
+    "originalFailure": "Plan resume expected 1000..<1010 rows; observed 1364.",
+    "change": "Scope list lookup to the selected tab, capture its populated count, require that exact count on return.",
+    "checkedWithNewFixture": [
+      "tab-resume",
+      "plan-transitions"
+    ],
+    "otherFiveSuites": "Frozen PR 60 app, same production UI."
+  },
+  "warmRecorderCheck": {
+    "completed": true,
+    "navigationAndPostCloseValidationPassed": true,
+    "thermalStates": [
+      0
+    ],
+    "keyboardObservations": [
+      {
+        "becomeFirstResponderMs": 225.274,
+        "cycle": 0,
+        "editor": "schedule",
+        "event": "keyboard-appearance",
+        "firstKeyboardInProcess": true,
+        "keyboardDidShowMs": 1410.444,
+        "keyboardWillShowMs": 273.531,
+        "thermalState": 0
+      },
+      {
+        "becomeFirstResponderMs": 41.05,
+        "cycle": 0,
+        "editor": "account",
+        "event": "keyboard-appearance",
+        "firstKeyboardInProcess": false,
+        "keyboardDidShowMs": 581.893,
+        "keyboardWillShowMs": 71.788,
+        "thermalState": 0
+      },
+      {
+        "becomeFirstResponderMs": 31.341,
+        "cycle": 0,
+        "editor": "category",
+        "event": "keyboard-appearance",
+        "firstKeyboardInProcess": false,
+        "keyboardDidShowMs": 570.029,
+        "keyboardWillShowMs": 57.174,
+        "thermalState": 0
+      },
+      {
+        "becomeFirstResponderMs": 46.653,
+        "cycle": 0,
+        "editor": "transaction",
+        "event": "keyboard-appearance",
+        "firstKeyboardInProcess": false,
+        "keyboardDidShowMs": 590.242,
+        "keyboardWillShowMs": 70.995,
+        "thermalState": 0
+      },
+      {
+        "becomeFirstResponderMs": 59.034,
+        "cycle": 1,
+        "editor": "schedule",
+        "event": "keyboard-appearance",
+        "firstKeyboardInProcess": false,
+        "keyboardDidShowMs": 606.991,
+        "keyboardWillShowMs": 87.087,
+        "thermalState": 0
+      },
+      {
+        "becomeFirstResponderMs": 68.266,
+        "cycle": 1,
+        "editor": "account",
+        "event": "keyboard-appearance",
+        "firstKeyboardInProcess": false,
+        "keyboardDidShowMs": 614.326,
+        "keyboardWillShowMs": 94.575,
+        "thermalState": 0
+      },
+      {
+        "becomeFirstResponderMs": 46.618,
+        "cycle": 1,
+        "editor": "category",
+        "event": "keyboard-appearance",
+        "firstKeyboardInProcess": false,
+        "keyboardDidShowMs": 580.757,
+        "keyboardWillShowMs": 75.352,
+        "thermalState": 0
+      },
+      {
+        "becomeFirstResponderMs": 50.317,
+        "cycle": 1,
+        "editor": "transaction",
+        "event": "keyboard-appearance",
+        "firstKeyboardInProcess": false,
+        "keyboardDidShowMs": 596.952,
+        "keyboardWillShowMs": 79.913,
+        "thermalState": 0
+      }
+    ],
+    "scheduleMeasurements": [
+      {
+        "cpuMs": 269.328,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 8,
+          "rows": {
+            "accounts": 10,
+            "bookkeeping": 0,
+            "categories": 40,
+            "schedules": 2
+          },
+          "tables": {
+            "accounts": 1,
+            "bookkeeping": 4,
+            "categories": 1,
+            "schedules": 2
+          }
+        },
+        "displayCallbacks": 4,
+        "elapsedMs": 776.053,
+        "event": "measurement",
+        "firstCallbackLatencyMs": 165.415,
+        "gapsOver25ms": 2,
+        "maxCallbackGapMs": 442.613,
+        "p95CallbackGapMs": 124.576,
+        "phase": "push-schedule",
+        "residentMiB": 87.719,
+        "thermalState": 0
+      },
+      {
+        "cpuMs": 12.5,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 25,
+        "elapsedMs": 433.593,
+        "event": "measurement",
+        "firstCallbackLatencyMs": 12.863,
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.668,
+        "p95CallbackGapMs": 16.668,
+        "phase": "push-settle-schedule",
+        "residentMiB": 87.828,
+        "thermalState": 0
+      },
+      {
+        "becomeFirstResponderMs": 225.274,
+        "cpuMs": 204.899,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 22,
+        "elapsedMs": 635.142,
+        "event": "measurement",
+        "firstCallbackLatencyMs": 234.973,
+        "firstKeyboardInProcess": true,
+        "gapsOver25ms": 2,
+        "keyboardDidShowMs": null,
+        "keyboardWillShowMs": 273.531,
+        "maxCallbackGapMs": 41.445,
+        "p95CallbackGapMs": 16.668,
+        "phase": "focus-schedule",
+        "residentMiB": 97.844,
+        "thermalState": 0
+      },
+      {
+        "cpuMs": 382.643,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 44,
+        "elapsedMs": 1575.814,
+        "event": "measurement",
+        "firstCallbackLatencyMs": 767.537,
+        "gapsOver25ms": 2,
+        "keystrokes": 10,
+        "maxCallbackGapMs": 45.901,
+        "p95CallbackGapMs": 20.769,
+        "phase": "typing-schedule",
+        "residentMiB": 98.344,
+        "settleMs": 200,
+        "thermalState": 0
+      },
+      {
+        "cpuMs": 183.734,
+        "cycle": 0,
+        "database": {
+          "activeListeners": 0,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 57,
+        "elapsedMs": 1034.357,
+        "event": "measurement",
+        "firstCallbackLatencyMs": 7.446,
+        "gapsOver25ms": 3,
+        "maxCallbackGapMs": 51.505,
+        "p95CallbackGapMs": 16.668,
+        "phase": "pop-schedule",
+        "residentMiB": 100.141,
+        "thermalState": 0
+      },
+      {
+        "cpuMs": 140.927,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 8,
+          "rows": {
+            "accounts": 10,
+            "bookkeeping": 0,
+            "categories": 40,
+            "schedules": 2
+          },
+          "tables": {
+            "accounts": 1,
+            "bookkeeping": 4,
+            "categories": 1,
+            "schedules": 2
+          }
+        },
+        "displayCallbacks": 4,
+        "elapsedMs": 187.07,
+        "event": "measurement",
+        "firstCallbackLatencyMs": 26.006,
+        "gapsOver25ms": 1,
+        "maxCallbackGapMs": 94.062,
+        "p95CallbackGapMs": 22.611,
+        "phase": "push-schedule",
+        "residentMiB": 110.781,
+        "thermalState": 0
+      },
+      {
+        "cpuMs": 43.343,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 24,
+        "elapsedMs": 414.365,
+        "event": "measurement",
+        "firstCallbackLatencyMs": 3.064,
+        "gapsOver25ms": 0,
+        "maxCallbackGapMs": 16.668,
+        "p95CallbackGapMs": 16.668,
+        "phase": "push-settle-schedule",
+        "residentMiB": 110.812,
+        "thermalState": 0
+      },
+      {
+        "becomeFirstResponderMs": 59.034,
+        "cpuMs": 124.625,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 23,
+        "elapsedMs": 460.599,
+        "event": "measurement",
+        "firstCallbackLatencyMs": 60.748,
+        "firstKeyboardInProcess": false,
+        "gapsOver25ms": 1,
+        "keyboardDidShowMs": null,
+        "keyboardWillShowMs": 87.087,
+        "maxCallbackGapMs": 26.58,
+        "p95CallbackGapMs": 16.668,
+        "phase": "focus-schedule",
+        "residentMiB": 110.641,
+        "thermalState": 0
+      },
+      {
+        "cpuMs": 133.577,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 3,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 45,
+        "elapsedMs": 788.309,
+        "event": "measurement",
+        "firstCallbackLatencyMs": 26.674,
+        "gapsOver25ms": 1,
+        "keystrokes": 10,
+        "maxCallbackGapMs": 27.01,
+        "p95CallbackGapMs": 16.668,
+        "phase": "typing-schedule",
+        "residentMiB": 110.875,
+        "settleMs": 200,
+        "thermalState": 0
+      },
+      {
+        "cpuMs": 187.249,
+        "cycle": 1,
+        "database": {
+          "activeListeners": 0,
+          "mainThreadQueries": 0,
+          "queries": 0,
+          "rows": {},
+          "tables": {}
+        },
+        "displayCallbacks": 61,
+        "elapsedMs": 1069.422,
+        "event": "measurement",
+        "firstCallbackLatencyMs": 10.548,
+        "gapsOver25ms": 2,
+        "maxCallbackGapMs": 45.492,
+        "p95CallbackGapMs": 16.668,
+        "phase": "pop-schedule",
+        "residentMiB": 110.453,
+        "thermalState": 0
+      }
+    ],
+    "traceSchedulePhases": [
+      {
+        "phase": "push-schedule",
+        "visit": 1,
+        "sampledCpuMs": 274.0,
+        "mainThreadSamples": 229,
+        "inclusiveMainThreadSamples": {
+          "menuConstruction": 0,
+          "viewGraphUpdate": 130,
+          "collectionLayout": 105,
+          "cellCreation": 86,
+          "cellSizing": 79,
+          "navigationLayout": 21,
+          "toolbarUpdate": 12,
+          "hostingViewRelease": 0,
+          "hostingLayout": 16,
+          "windowAttachment": 8,
+          "layerLayout": 154,
+          "tabTransition": 0
+        },
+        "hitches": 2,
+        "maxHitchMs": 433.359,
+        "inclusiveStackSamples": {
+          "stickerInitialization": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "dynamicLoading": {
+            "allThreads": 4,
+            "mainThread": 1
+          },
+          "viewGraphUpdate": {
+            "allThreads": 130,
+            "mainThread": 130
+          },
+          "keyboardDock": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "textInputTraits": {
+            "allThreads": 0,
+            "mainThread": 0
+          }
+        }
+      },
+      {
+        "phase": "push-settle-schedule",
+        "visit": 1,
+        "sampledCpuMs": 13.0,
+        "mainThreadSamples": 13,
+        "inclusiveMainThreadSamples": {
+          "menuConstruction": 0,
+          "viewGraphUpdate": 1,
+          "collectionLayout": 0,
+          "cellCreation": 0,
+          "cellSizing": 0,
+          "navigationLayout": 0,
+          "toolbarUpdate": 0,
+          "hostingViewRelease": 0,
+          "hostingLayout": 0,
+          "windowAttachment": 1,
+          "layerLayout": 0,
+          "tabTransition": 0
+        },
+        "hitches": 0,
+        "maxHitchMs": 0,
+        "inclusiveStackSamples": {
+          "stickerInitialization": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "dynamicLoading": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "viewGraphUpdate": {
+            "allThreads": 1,
+            "mainThread": 1
+          },
+          "keyboardDock": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "textInputTraits": {
+            "allThreads": 0,
+            "mainThread": 0
+          }
+        }
+      },
+      {
+        "phase": "focus-schedule",
+        "visit": 1,
+        "sampledCpuMs": 201.0,
+        "mainThreadSamples": 170,
+        "inclusiveMainThreadSamples": {
+          "menuConstruction": 0,
+          "viewGraphUpdate": 1,
+          "collectionLayout": 0,
+          "cellCreation": 0,
+          "cellSizing": 0,
+          "navigationLayout": 0,
+          "toolbarUpdate": 0,
+          "hostingViewRelease": 0,
+          "hostingLayout": 0,
+          "windowAttachment": 6,
+          "layerLayout": 18,
+          "tabTransition": 0
+        },
+        "hitches": 1,
+        "maxHitchMs": 33.334,
+        "inclusiveStackSamples": {
+          "stickerInitialization": {
+            "allThreads": 21,
+            "mainThread": 0
+          },
+          "dynamicLoading": {
+            "allThreads": 26,
+            "mainThread": 4
+          },
+          "viewGraphUpdate": {
+            "allThreads": 1,
+            "mainThread": 1
+          },
+          "keyboardDock": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "textInputTraits": {
+            "allThreads": 0,
+            "mainThread": 0
+          }
+        }
+      },
+      {
+        "phase": "typing-schedule",
+        "visit": 1,
+        "sampledCpuMs": 378.0,
+        "mainThreadSamples": 172,
+        "inclusiveMainThreadSamples": {
+          "menuConstruction": 0,
+          "viewGraphUpdate": 21,
+          "collectionLayout": 0,
+          "cellCreation": 0,
+          "cellSizing": 0,
+          "navigationLayout": 0,
+          "toolbarUpdate": 0,
+          "hostingViewRelease": 0,
+          "hostingLayout": 30,
+          "windowAttachment": 1,
+          "layerLayout": 46,
+          "tabTransition": 0
+        },
+        "hitches": 0,
+        "maxHitchMs": 0,
+        "inclusiveStackSamples": {
+          "stickerInitialization": {
+            "allThreads": 56,
+            "mainThread": 0
+          },
+          "dynamicLoading": {
+            "allThreads": 91,
+            "mainThread": 0
+          },
+          "viewGraphUpdate": {
+            "allThreads": 21,
+            "mainThread": 21
+          },
+          "keyboardDock": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "textInputTraits": {
+            "allThreads": 0,
+            "mainThread": 0
+          }
+        }
+      },
+      {
+        "phase": "pop-schedule",
+        "visit": 1,
+        "sampledCpuMs": 177.0,
+        "mainThreadSamples": 161,
+        "inclusiveMainThreadSamples": {
+          "menuConstruction": 0,
+          "viewGraphUpdate": 8,
+          "collectionLayout": 5,
+          "cellCreation": 0,
+          "cellSizing": 0,
+          "navigationLayout": 15,
+          "toolbarUpdate": 0,
+          "hostingViewRelease": 24,
+          "hostingLayout": 12,
+          "windowAttachment": 14,
+          "layerLayout": 46,
+          "tabTransition": 0
+        },
+        "hitches": 1,
+        "maxHitchMs": 50.002,
+        "inclusiveStackSamples": {
+          "stickerInitialization": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "dynamicLoading": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "viewGraphUpdate": {
+            "allThreads": 8,
+            "mainThread": 8
+          },
+          "keyboardDock": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "textInputTraits": {
+            "allThreads": 0,
+            "mainThread": 0
+          }
+        }
+      },
+      {
+        "phase": "push-schedule",
+        "visit": 2,
+        "sampledCpuMs": 141.0,
+        "mainThreadSamples": 135,
+        "inclusiveMainThreadSamples": {
+          "menuConstruction": 0,
+          "viewGraphUpdate": 65,
+          "collectionLayout": 65,
+          "cellCreation": 51,
+          "cellSizing": 43,
+          "navigationLayout": 11,
+          "toolbarUpdate": 10,
+          "hostingViewRelease": 0,
+          "hostingLayout": 13,
+          "windowAttachment": 4,
+          "layerLayout": 96,
+          "tabTransition": 0
+        },
+        "hitches": 2,
+        "maxHitchMs": 83.341,
+        "inclusiveStackSamples": {
+          "stickerInitialization": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "dynamicLoading": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "viewGraphUpdate": {
+            "allThreads": 65,
+            "mainThread": 65
+          },
+          "keyboardDock": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "textInputTraits": {
+            "allThreads": 0,
+            "mainThread": 0
+          }
+        }
+      },
+      {
+        "phase": "push-settle-schedule",
+        "visit": 2,
+        "sampledCpuMs": 45.0,
+        "mainThreadSamples": 43,
+        "inclusiveMainThreadSamples": {
+          "menuConstruction": 0,
+          "viewGraphUpdate": 6,
+          "collectionLayout": 0,
+          "cellCreation": 0,
+          "cellSizing": 0,
+          "navigationLayout": 1,
+          "toolbarUpdate": 0,
+          "hostingViewRelease": 1,
+          "hostingLayout": 4,
+          "windowAttachment": 3,
+          "layerLayout": 12,
+          "tabTransition": 0
+        },
+        "hitches": 0,
+        "maxHitchMs": 0,
+        "inclusiveStackSamples": {
+          "stickerInitialization": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "dynamicLoading": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "viewGraphUpdate": {
+            "allThreads": 6,
+            "mainThread": 6
+          },
+          "keyboardDock": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "textInputTraits": {
+            "allThreads": 0,
+            "mainThread": 0
+          }
+        }
+      },
+      {
+        "phase": "focus-schedule",
+        "visit": 2,
+        "sampledCpuMs": 130.0,
+        "mainThreadSamples": 122,
+        "inclusiveMainThreadSamples": {
+          "menuConstruction": 0,
+          "viewGraphUpdate": 2,
+          "collectionLayout": 0,
+          "cellCreation": 0,
+          "cellSizing": 0,
+          "navigationLayout": 0,
+          "toolbarUpdate": 0,
+          "hostingViewRelease": 0,
+          "hostingLayout": 1,
+          "windowAttachment": 1,
+          "layerLayout": 24,
+          "tabTransition": 0
+        },
+        "hitches": 1,
+        "maxHitchMs": 16.669,
+        "inclusiveStackSamples": {
+          "stickerInitialization": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "dynamicLoading": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "viewGraphUpdate": {
+            "allThreads": 2,
+            "mainThread": 2
+          },
+          "keyboardDock": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "textInputTraits": {
+            "allThreads": 0,
+            "mainThread": 0
+          }
+        }
+      },
+      {
+        "phase": "typing-schedule",
+        "visit": 2,
+        "sampledCpuMs": 124.0,
+        "mainThreadSamples": 121,
+        "inclusiveMainThreadSamples": {
+          "menuConstruction": 0,
+          "viewGraphUpdate": 17,
+          "collectionLayout": 0,
+          "cellCreation": 0,
+          "cellSizing": 0,
+          "navigationLayout": 0,
+          "toolbarUpdate": 0,
+          "hostingViewRelease": 0,
+          "hostingLayout": 24,
+          "windowAttachment": 0,
+          "layerLayout": 46,
+          "tabTransition": 0
+        },
+        "hitches": 0,
+        "maxHitchMs": 0,
+        "inclusiveStackSamples": {
+          "stickerInitialization": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "dynamicLoading": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "viewGraphUpdate": {
+            "allThreads": 17,
+            "mainThread": 17
+          },
+          "keyboardDock": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "textInputTraits": {
+            "allThreads": 0,
+            "mainThread": 0
+          }
+        }
+      },
+      {
+        "phase": "pop-schedule",
+        "visit": 2,
+        "sampledCpuMs": 185.0,
+        "mainThreadSamples": 173,
+        "inclusiveMainThreadSamples": {
+          "menuConstruction": 0,
+          "viewGraphUpdate": 9,
+          "collectionLayout": 6,
+          "cellCreation": 0,
+          "cellSizing": 2,
+          "navigationLayout": 17,
+          "toolbarUpdate": 0,
+          "hostingViewRelease": 21,
+          "hostingLayout": 13,
+          "windowAttachment": 13,
+          "layerLayout": 47,
+          "tabTransition": 0
+        },
+        "hitches": 1,
+        "maxHitchMs": 33.334,
+        "inclusiveStackSamples": {
+          "stickerInitialization": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "dynamicLoading": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "viewGraphUpdate": {
+            "allThreads": 9,
+            "mainThread": 9
+          },
+          "keyboardDock": {
+            "allThreads": 0,
+            "mainThread": 0
+          },
+          "textInputTraits": {
+            "allThreads": 0,
+            "mainThread": 0
+          }
+        }
+      }
+    ],
+    "note": "Fresh app process with an already used system keyboard; not a replacement cold run.",
+    "traceCpuSpanSeconds": {
+      "start": 0.425835333,
+      "end": 40.651835083
+    }
+  },
+  "remaining": [
+    "Cold keyboard startup",
+    "Schedule opening",
+    "Plan section rendering",
+    "Valid candidate post-reboot rendering capture; no production app change in this follow-up."
+  ]
+}
