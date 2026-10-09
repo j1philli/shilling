@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+python3 scripts/ci/desktop_artifacts.py prepare macos
+
 export PATH="$HOME/.cargo/bin:$PATH"
 test -f web-app-dist/index.html
 test -f web-app-dist/web-app.wasm
@@ -17,8 +19,8 @@ done
 # Tauri's DMG bundler skips Finder automation when CI=true. TeamCity does not
 # set this variable by default, and Finder automation blocks headless agents.
 rm -rf src-tauri/target/universal-apple-darwin/release/bundle
-CI=true cargo tauri build --bundles dmg --target universal-apple-darwin --no-sign \
-    --config '{"build":{"beforeBuildCommand":""}}'
+CI=true cargo tauri build --bundles app,dmg --target universal-apple-darwin --no-sign \
+    --config '{"build":{"beforeBuildCommand":""},"bundle":{"createUpdaterArtifacts":true}}'
 
 output="$PWD/desktop-artifacts/macos"
 rm -rf "$output"
@@ -30,6 +32,10 @@ if ! find "$output" -maxdepth 1 -type f -name '*.dmg' -print -quit | grep -q .; 
     echo "Missing macOS DMG package" >&2
     exit 1
 fi
+
+find src-tauri/target/universal-apple-darwin/release/bundle/macos -maxdepth 1 -type f -name '*.app.tar.gz' \
+    -exec cp {} "$output/" \;
+python3 scripts/ci/desktop_artifacts.py record macos
 
 echo "macOS desktop packages:"
 find "$output" -maxdepth 1 -type f -print

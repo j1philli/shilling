@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+python3 scripts/ci/desktop_artifacts.py prepare windows
+
 test -f web-app-dist/index.html
 test -f web-app-dist/web-app.wasm
 command -v docker >/dev/null
@@ -22,5 +24,7 @@ if ! find "$output" -maxdepth 1 -type f -name '*.exe' -print -quit | grep -q .; 
     exit 1
 fi
 
-echo "Windows desktop installer:"
+python3 scripts/ci/desktop_artifacts.py record windows
+
+echo "Desktop packages:"
 find "$output" -maxdepth 1 -type f -print

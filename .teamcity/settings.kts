@@ -25,6 +25,9 @@ project {
     buildType(DesktopLinux)
     buildType(DesktopMacOS)
     buildType(DesktopWindows)
+    buildType(DesktopLinuxBeta)
+    buildType(DesktopWindowsBeta)
+    buildType(DesktopMacOSBeta)
     buildType(LinuxTargets)
     buildType(AllTargets)
 
@@ -285,6 +288,7 @@ object DesktopLinux : BuildType({
     name = "Desktop Linux"
     description = "Build Linux desktop app (x86_64 AppImage, deb, and rpm)"
     artifactRules = "desktop-artifacts/linux/** => desktop-linux.zip"
+    params { param("env.TEAMCITY_BUILD_ID", "%teamcity.build.id%") }
 
     vcs {
         root(DslContext.settingsRoot)
@@ -316,6 +320,7 @@ object DesktopMacOS : BuildType({
     name = "Desktop macOS"
     description = "Build an unsigned macOS desktop DMG from the tested web bundle"
     artifactRules = "desktop-artifacts/macos/** => desktop-macos.zip\nsmoke-results/macos/** => macos-smoke.zip"
+    params { param("env.TEAMCITY_BUILD_ID", "%teamcity.build.id%") }
 
     vcs {
         root(DslContext.settingsRoot)
@@ -355,6 +360,7 @@ object DesktopWindows : BuildType({
     name = "Desktop Windows (Linux cross-build)"
     description = "Cross-build the Windows x86_64 NSIS installer on the Linux agent"
     artifactRules = "desktop-artifacts/windows/** => desktop-windows.zip"
+    params { param("env.TEAMCITY_BUILD_ID", "%teamcity.build.id%") }
 
     vcs {
         root(DslContext.settingsRoot)
@@ -381,6 +387,47 @@ object DesktopWindows : BuildType({
         equals("teamcity.agent.jvm.os.name", "Linux")
     }
 })
+
+// Every platform keeps its own publication baseline. One shared release lock
+// protects the complete Pages snapshot across all channels and manual releases.
+open class DesktopBeta(buildId: String, target: String, source: BuildType) : BuildType({
+    id(buildId)
+    name = "Desktop — $target Beta"
+    description = "Sign and publish the tested main package only when this target changed"
+    artifactRules = "desktop-update-output/** => desktop-update.zip"
+    params {
+        password("env.TAURI_SIGNING_PRIVATE_KEY", "%shilling.desktop.updater.private.key%", display = ParameterDisplay.HIDDEN)
+        password("env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD", "%shilling.desktop.updater.password%", display = ParameterDisplay.HIDDEN)
+    }
+    vcs { root(DslContext.settingsRoot) }
+    features { sharedResources { writeLock("shilling-release") } }
+    triggers { finishBuildTrigger {
+        buildType = "${AllTargets.id}"
+        successfulOnly = true
+        branchFilter = "+:<default>\n+:main"
+    } }
+    dependencies {
+        snapshot(AllTargets) {
+            onDependencyFailure = FailureAction.FAIL_TO_START
+            onDependencyCancel = FailureAction.CANCEL
+            reuseBuilds = ReuseBuilds.SUCCESSFUL
+        }
+        artifacts(source) {
+            buildRule = sameChain()
+            artifactRules = "desktop-$target.zip!** => release-input/clients/$target"
+            cleanDestination = true
+        }
+    }
+    steps { script {
+        name = "Clear previous update receipt"
+        scriptContent = "rm -rf desktop-update-output"
+    } }
+    BetaPublication.configure(this, target, "desktop-beta", "bash scripts/ci/desktop-python.sh scripts/ci/desktop_updates.py $target")
+    requirements { equals("teamcity.agent.jvm.os.name", "Linux") }
+})
+object DesktopLinuxBeta : DesktopBeta("DesktopLinuxBeta", "linux", DesktopLinux)
+object DesktopWindowsBeta : DesktopBeta("DesktopWindowsBeta", "windows", DesktopWindows)
+object DesktopMacOSBeta : DesktopBeta("DesktopMacOSBeta", "macos", DesktopMacOS)
 
 // =============================================================================
 // Phase 2d: Web build, runtime checks, and gated Cloudflare Pages deployment

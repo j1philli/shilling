@@ -14,6 +14,7 @@ import zipfile
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ios_provenance import load_candidate
 from apple_store import AppleAPI, approval, promote
+from desktop_updates import prepare_stable, publish_stable
 
 REPO = "j1philli/shilling"
 TARGETS = ("server", "web", "android", "ios", "linux", "windows", "macos")
@@ -158,6 +159,13 @@ def main():
                 raise
             print(f"iOS release blocked: {error}", flush=True)
         (output / "ios-approval.json").write_text(json.dumps(ios_approval or {"ready": False}, indent=2) + "\n")
+    desktop_candidates = []
+    try:
+        desktop_candidates = prepare_stable(targets, version, commit)
+    except ValueError as error:
+        if dry_run != "1":
+            raise
+        print(f"Desktop release blocked: {error}", flush=True)
     if "server" in targets:
         run("python3", "scripts/ci/deploy-coolify.py", "--check-only")
     if dry_run == "1":
@@ -191,7 +199,9 @@ def main():
         if marker not in (release.get("body") or ""):
             raise ValueError(f"{tag} already belongs to another release selection; bump VERSION first")
         if not release["draft"]:
-            print("This release is already published; nothing changed.")
+            # Resume a failed feed deployment after the GitHub release was published.
+            publish_stable(desktop_candidates, commit)
+            print("This release is already published; update feeds reconciled.")
             return
     if not ref:
         run("gh", "api", f"repos/{REPO}/git/refs", "--method", "POST", "-f", "ref=refs/tags/" + tag,
@@ -218,6 +228,7 @@ def main():
         run("gh", "release", "upload", tag, "release-output/ios-deployment.json", "--repo", REPO, "--clobber")
     # Publish the release last. A failure above leaves a resumable draft.
     run("gh", "release", "edit", tag, "--repo", REPO, "--draft=false", "--latest=" + ("false" if version.startswith("0.") else "true"))
+    publish_stable(desktop_candidates, commit)
     print(f"Released {tag}: https://github.com/{REPO}/releases/tag/{tag}")
 
 

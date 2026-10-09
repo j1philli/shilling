@@ -78,3 +78,6 @@ release-output/
 apple-output/
 beta-output/
 __pycache__/
+
+src-tauri/desktop-build.txt
+desktop-update-output/

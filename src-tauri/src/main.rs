@@ -1,6 +1,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod updates;
+
 use tauri::menu::{MenuBuilder, PredefinedMenuItem, SubmenuBuilder};
+use tauri::Emitter;
 #[cfg(target_os = "macos")]
 use tauri::Manager;
 
@@ -30,6 +33,23 @@ fn install_unified_toolbar(window: &tauri::WebviewWindow) -> tauri::Result<()> {
 fn main() {
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(
+            tauri::plugin::Builder::<tauri::Wry>::new("desktop-updates")
+                .js_init_script(include_str!("updates.js").to_string())
+                .build(),
+        )
+        .manage(updates::Updates::default())
+        .invoke_handler(tauri::generate_handler![
+            updates::desktop_update_status,
+            updates::desktop_update_check,
+            updates::desktop_update_install
+        ])
+        .on_menu_event(|app, event| {
+            if event.id().as_ref() == "check-updates" {
+                let _ = app.emit("desktop-update-open", ());
+            }
+        })
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(if cfg!(debug_assertions) {
@@ -42,6 +62,7 @@ fn main() {
         .setup(|app| {
             let app_menu = SubmenuBuilder::new(app, "Shilling")
                 .about(None)
+                .text("check-updates", "Check for Updates…")
                 .separator()
                 .services()
                 .separator()
