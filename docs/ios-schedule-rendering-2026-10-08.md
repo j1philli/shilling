@@ -3,8 +3,10 @@
 Schedule opening and typing use less CPU with ready-state draft initialization,
 deferred recurrence menus, and the existing native editor fields. Opening still
 hitches. Plan experiments did not establish a reliable rendering improvement and
-were discarded. A large keyboard pause recurred; a post-reboot comparison remains
-blocked by the test phone being unavailable.
+were discarded. A large keyboard pause recurred. The
+[October 9 follow-up](ios-cold-keyboard-2026-10-09.md) records post-reboot keyboard
+timings and completes the pending physical checks; cold-keyboard startup remains
+unresolved.
 
 ## Scope and method
 
@@ -107,7 +109,7 @@ window. An earlier prototype waited for the notification and changed the focus
 workload; its focus/typing cohort results are excluded from comparisons.
 
 The SE was rebooted for a truly cold baseline, but did not reconnect to Xcode.
-No post-reboot baseline/candidate pair was obtained. Cold-keyboard startup
+No post-reboot baseline/candidate pair was obtained in this October 8 pass. Cold-keyboard startup
 remains unresolved; no speculative keyboard prewarming or private API is added.
 
 The new recurrence fixture visits all eight frequency choices, verifies fresh
@@ -135,11 +137,11 @@ A live Device-panel review also created, saved, reopened and deleted a temporary
 Schedule, and exercised month-day and multiline Notes keyboard Done. The temporary
 record was removed. Simulator timing is not used as physical performance evidence.
 `python3 -m py_compile`, `git diff --check` and `just guard-architecture` passed.
-New recurrence and Save-restoration checks still need a physical iOS 18 rerun;
-the final phone build is ready when the SE reconnects.
+The new recurrence and Save-restoration checks subsequently passed on physical
+iOS 18 in the October 9 follow-up linked above.
 
 Remaining targets are Schedule's 83–100 ms opening, Plan's 50–67 ms section
-transitions, and a controlled cold-keyboard comparison. Compact samples, aligned
+transitions, and cold-keyboard startup. Compact samples, aligned
 trace summaries and regression evidence are in
 `scripts/perf/results/ios-schedule-rendering-2026-10-08.json`. Full local traces,
 exports and rejected app variants are under

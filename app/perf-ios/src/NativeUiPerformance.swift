@@ -785,13 +785,17 @@ final class NativeUiPerformanceController: UIViewController {
     private func runTabResume() async throws {
         var tabs: ShillingTabBarController? = ShillingTabBarController()
         mountController(tabs!)
-        for (key, minimum, maximum) in [("ACTIVITY", 7000, 7600), ("PLAN", 1000, 1010), ("RECEIPTS", 250, 252)] {
+        for (key, minimum, maximum) in [("ACTIVITY", 7000, 7600), ("PLAN", 1000, Int.max), ("RECEIPTS", 250, 252)] {
             guard let tab = tabs?.tabs.first(where: { $0.identifier == key }),
                   let settings = tabs?.tabs.first(where: { $0.identifier == "SETTINGS" }) else {
                 throw FixtureError("Missing tab")
             }
             tabs?.selectedTab = tab
-            let list = try await waitForList(minimum: minimum, maximum: maximum)
+            guard let selectedView = tabs?.selectedViewController?.view else { throw FixtureError("Selected tab has no view") }
+            // Plan's overview includes postings in its current date range, so
+            // its populated row count changes with the seeded day. Scope the
+            // search to this tab to exclude an outgoing Activity list.
+            let list = try await waitForList(minimum: minimum, maximum: maximum, in: selectedView)
             await pause(0.5)
             list.setContentOffset(CGPoint(x: 0, y: 1200), animated: false)
             await pause(0.5)
@@ -801,7 +805,8 @@ final class NativeUiPerformanceController: UIViewController {
             await pause(7) // Expires the shared StateFlow replay cache.
             begin("tab-resume", key)
             tabs?.selectedTab = tab
-            let resumed = try await waitForList(minimum: minimum, maximum: maximum)
+            guard let resumedView = tabs?.selectedViewController?.view else { throw FixtureError("Resumed tab has no view") }
+            let resumed = try await waitForList(minimum: previousItems, maximum: previousItems + 1, in: resumedView)
             // This checks populated cells in the hierarchy, not completed rendering.
             let listReadyMs = (CACurrentMediaTime() - phaseStarted) * 1000
             await pause(1)
@@ -1433,14 +1438,15 @@ final class NativeUiPerformanceController: UIViewController {
         picker.sendActions(for: .valueChanged)
     }
 
-    private func waitForList(minimum: Int, maximum: Int = .max) async throws -> UIScrollView {
+    private func waitForList(minimum: Int, maximum: Int = .max, in root: UIView? = nil) async throws -> UIScrollView {
+        let container = root ?? view!
         let deadline = CACurrentMediaTime() + 30
         while CACurrentMediaTime() < deadline {
-            if let list = descendants(view).compactMap({ $0 as? UIScrollView })
+            if let list = descendants(container).compactMap({ $0 as? UIScrollView })
                 .first(where: { displayed($0) && itemCount($0) >= minimum && itemCount($0) < maximum && !visibleCells($0).isEmpty }) { return list }
             await pause(0.05)
         }
-        let observed = descendants(view).compactMap { $0 as? UIScrollView }
+        let observed = descendants(container).compactMap { $0 as? UIScrollView }
             .map { "items=\(itemCount($0)),visible=\(visibleCells($0).count)" }
         throw FixtureError("No populated native list rendered within 30 seconds (expected \(minimum)..<\(maximum), observed \(observed))")
     }
