@@ -53,19 +53,23 @@ def validate_editor_navigation(records):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", required=True)
-    parser.add_argument("--screen", choices=["activity", "receipts", "plan", "plan-transitions", "hosted-settings", "home", "editors", "editor-navigation", "editor-choices", "editor-save", "tabs", "tab-resume", "tab-isolation", "receipt-table", "activity-table", "loaded-empty", "receipt-previews", "import-regression"], required=True)
+    parser.add_argument("--screen", choices=["activity", "receipts", "plan", "plan-transitions", "schedule-recurrence", "hosted-settings", "home", "editors", "editor-navigation", "editor-choices", "editor-save", "tabs", "tab-resume", "tab-isolation", "receipt-table", "activity-table", "loaded-empty", "receipt-previews", "import-regression"], required=True)
     parser.add_argument("--allow-scroll-reset", action="store_true", help="Record a known-bad tab-resume baseline without requiring scroll-position preservation")
     parser.add_argument("--hosted-server", help="Local synthetic control-plane fixture URL, required for hosted-settings")
     parser.add_argument("--runs", type=int, default=3, choices=range(1, 6))
     parser.add_argument("--label", required=True)
     parser.add_argument("--output", type=pathlib.Path, required=True)
     parser.add_argument("--check-navigation", action="store_true", help="Also verify Plan section switching after measurement")
+    parser.add_argument("--editor-first", choices=["account", "category", "schedule", "transaction"],
+                        help="First editor to open/focus in editor-navigation; an app restart does not make the system keyboard cold")
     parser.add_argument("--baseline-receipts", action="store_true", help="Reproduce the former synchronous picker and retained preview copies")
     parser.add_argument("--isolation-uikit-outgoing", action="store_true", help="Use a plain UIKit outgoing screen for tab-isolation controls")
     parser.add_argument("--isolation-screenshots", action="store_true", help="Capture tab-isolation screens outside the measured phases")
     parser.add_argument("--isolation-probe", action="append", choices=ISOLATION_PROBES,
                         help="Run only the specified tab-isolation probes, in argument order; repeat for multiple probes")
     args = parser.parse_args()
+    if args.editor_first and args.screen != "editor-navigation":
+        parser.error("--editor-first requires --screen editor-navigation")
     if args.screen == "hosted-settings" and not args.hosted_server:
         parser.error("--hosted-server is required for hosted-settings")
     if args.baseline_receipts and args.screen != "receipt-previews":
@@ -83,6 +87,8 @@ def main():
                    "--perf-ui", "--ui-screen", args.screen, "--ui-run", run, "--ui-hold"]
         if args.check_navigation:
             command.append("--ui-check-navigation")
+        if args.editor_first:
+            command.extend(["--ui-editor-first", args.editor_first])
         if args.baseline_receipts:
             command.append("--ui-preview-baseline")
         if args.isolation_uikit_outgoing:
@@ -142,6 +148,11 @@ def main():
                     checked = [r for r in records if r["run"] == run and r["event"] == "choices-checked"]
                     if len(checked) != 2 or any(r.get("keyboardDoneChecks") != 2 or not r.get("directFocusSwitchChecked") or not r.get("accessibilityTextChecked") or r["database"]["activeListeners"] for r in checked):
                         raise RuntimeError("Editor choice/keyboard checks did not complete or left database listeners active")
+                if args.screen == "schedule-recurrence":
+                    checked = [r for r in records if r["run"] == run and r["event"] == "recurrence-checked"]
+                    if (len(checked) != 1 or not checked[0]["savedAndRestored"] or checked[0]["frequencyChoices"] != 8
+                            or checked[0]["database"]["activeListeners"] or checked[0]["database"]["mainThreadQueries"]):
+                        raise RuntimeError("Schedule recurrence checks failed or retained listeners")
                 if args.screen == "editor-save":
                     checked = [r for r in records if r["run"] == run and r["event"] == "editor-save-checked"]
                     if (len(checked) != 4 or any(not r["restored"] or r["saveDelayMs"] >= 120 for r in checked)
@@ -161,10 +172,12 @@ def main():
                     current = [r for r in records if r["run"] == run]
                     measured = [r for r in current if r["event"] == "measurement"]
                     closed = [r for r in current if r["event"] == "plan-closed"]
+                    controls = [r for r in current if r["event"] == "plan-controls-checked"]
                     sections = {"Schedules", "Categories", "Accounts", "Overview", "By category", "By day"}
                     expected = {(section, cycle) for section in sections for cycle in (0, 1)}
                     if (len(measured) != 12 or {(r["phase"], r["cycle"]) for r in measured} != expected
-                            or len(closed) != 1 or closed[0]["database"]["activeListeners"]
+                            or len(closed) != 1 or closed[0]["database"]["activeListeners"] or closed[0]["database"]["mainThreadQueries"]
+                            or len(controls) != 1 or controls[0]["periods"] != 2 or controls[0]["filters"] != 4
                             or any(r["database"]["mainThreadQueries"] or
                                    (r["cycle"] == 1 and r["database"]["queries"]) for r in measured)):
                         raise RuntimeError("Plan transitions did not complete or left database listeners active")
