@@ -46,6 +46,8 @@ import finance.shilling.shared.session.sessionModule
 
 private fun isTauriEnvironment(): Boolean = js("typeof window.__TAURI__ !== 'undefined'")
 
+private fun openDesktopUpdates(): Unit = js("window.ShillingDesktopUpdates?.open()")
+
 private fun isSelfHostedDistribution(): Boolean = js("window.SHILLING_SELF_HOSTED_ONLY === true")
 
 private fun browserOrigin(): String = js("window.location.origin")
@@ -111,15 +113,20 @@ fun main() {
 
         val tauriTopPadding = titleStripHeight.dp
 
-        ShillingAppBootstrap(
-            scaffoldConfig = AppBootstrapScaffoldConfig(
-                onboardingTopPadding = tauriTopPadding,
-                navRailTopPadding = tauriTopPadding,
-                navRailWidth = if (tauriMac) MAC_NAV_RAIL_WIDTH.dp else Dp.Unspecified,
-                navControllerHook = { navController -> BrowserHistoryBinding(navController) },
-                developerToolsEnabled = isDevToolsBuild()
+        androidx.compose.runtime.CompositionLocalProvider(
+            finance.shilling.shared.ui.LocalDesktopUpdates provides
+                (if (isTauriEnvironment()) ({ openDesktopUpdates() }) else null)
+        ) {
+            ShillingAppBootstrap(
+                scaffoldConfig = AppBootstrapScaffoldConfig(
+                    onboardingTopPadding = tauriTopPadding,
+                    navRailTopPadding = tauriTopPadding,
+                    navRailWidth = if (tauriMac) MAC_NAV_RAIL_WIDTH.dp else Dp.Unspecified,
+                    navControllerHook = { navController -> BrowserHistoryBinding(navController) },
+                    developerToolsEnabled = isDevToolsBuild()
+                )
             )
-        )
+        }
     }
 }
 

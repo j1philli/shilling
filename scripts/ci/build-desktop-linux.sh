@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+python3 scripts/ci/desktop_artifacts.py prepare linux
+
 test -f web-app-dist/index.html
 test -f web-app-dist/web-app.wasm
 command -v docker >/dev/null
@@ -24,5 +26,7 @@ for extension in deb rpm AppImage; do
     fi
 done
 
-echo "Linux desktop packages:"
+python3 scripts/ci/desktop_artifacts.py record linux
+
+echo "Desktop packages:"
 find "$output" -maxdepth 1 -type f -print

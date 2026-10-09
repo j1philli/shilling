@@ -52,6 +52,9 @@ import kotlinx.datetime.DayOfWeek
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
+/** Desktop shell supplies this action; mobile and browser leave it absent. */
+val LocalDesktopUpdates = androidx.compose.runtime.staticCompositionLocalOf<(() -> Unit)?> { null }
+
 @Composable
 fun SettingsView(
     developerToolsEnabled: Boolean,
@@ -114,6 +117,10 @@ fun SettingsView(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+
+            LocalDesktopUpdates.current?.let { openUpdates ->
+                OutlinedButton(onClick = openUpdates) { Text("Check for updates") }
             }
 
             val developer = state.developer
