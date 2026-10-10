@@ -373,7 +373,7 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
   building again succeeds.
 - **KMP-NativeCoroutines version is tied to Kotlin**: `kmp-nativecoroutines` in
   `libs.versions.toml`, the compiler plugin and the Swift package in `app/ios-app/module.yaml`
-  must all use the release built for the project's Kotlin version (1.0.6 = Kotlin 2.4.20).
+  must all use the release built for the project's Kotlin version (1.0.6 = Kotlin 2.4.20, also used with 2.4.21).
 - **Icons are generated, then committed**: `icons/source/base-1024.png` is the
   master. `just generate-icons` (ImageMagick + `cargo tauri`) rewrites every
   platform asset; commit the results. Builds never generate or copy icons; they
