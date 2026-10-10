@@ -9,6 +9,7 @@ import co.touchlab.kermit.Logger
 import finance.shilling.shared.data.IdGenerator
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.ReceiptFileBlock
+import finance.shilling.shared.data.sniffReceiptExtension
 import finance.shilling.shared.data.store.StagedReceiptFileStorage
 import finance.shilling.shared.data.store.Store5ReceiptFileStore
 import kotlinx.coroutines.IO
@@ -193,7 +194,13 @@ private class IosReceiptFileStorage(private val spaceId: String?) : StagedReceip
                     NSData.dataWithBytes(if (bytes.isEmpty()) null else pinned.addressOf(0), bytes.size.toULong())
                 }
                 val safeName = originalName.substringAfterLast('/').substringAfterLast('\\')
-                    .takeUnless { it.isBlank() || it == "." || it == ".." } ?: "$receiptId.bin"
+                    .takeUnless { it.isBlank() || it == "." || it == ".." }
+                    ?.let { name ->
+                        // Quick Look picks the viewer from the extension; without one it shows "data".
+                        if ('.' in name.drop(1)) name
+                        else sniffReceiptExtension(bytes.copyOf(minOf(12, bytes.size)))?.let { "$name.$it" } ?: name
+                    }
+                    ?: "$receiptId.bin"
                 val scope = spaceId?.let(::receiptSpaceFolder) ?: "legacy"
                 val safeId = finance.shilling.shared.data.store.safeReceiptStorageId(receiptId)
                 val tempDir = "${NSTemporaryDirectory().trimEnd('/')}/receipts/$scope/$safeId"
