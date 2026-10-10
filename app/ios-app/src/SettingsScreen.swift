@@ -117,6 +117,7 @@ struct SettingsScreen: View {
                     DeveloperSections(developer: developer, screen: model.screen, toast: $toast)
                 }
             }
+            .readableWidth(720)
             .navigationTitle("Settings")
         }
         .alert("Confirm membership change", isPresented: Binding(get: { pendingSpaceAction != nil }, set: { if !$0 { pendingSpaceAction = nil } })) {

@@ -143,6 +143,7 @@ app/ios-app/              # native SwiftUI iOS app (no Compose) over the shared 
     ReceiptsScreenModel.kt / ReceiptsScreen.swift # native SwiftUI Receipts
     PlanScreenModel.kt / PlanScreen.swift # native SwiftUI Plan (Overview + Schedules/Categories/Accounts)
     Toast.swift          # snackbar stand-in with optional action (Undo)
+    ListDetailLayout.swift # iPad two-pane list/detail (mirrors Compose's ListDetailLayout), DetailLink, readableWidth
     SimpleEditorScreenModels.kt / SimpleEditors.swift # native Category/Account editors; FlowModel + EditorChrome helpers
     ScheduleEditorScreenModel.kt / ScheduleEditorScreen.swift # native schedule editor
     TransactionEditorScreenModel.kt / TransactionEditorScreen.swift # native transaction editor (+ UndoHandle, NSData bridge)
@@ -261,7 +262,12 @@ annotations out of `app/shared`: its compiler plugin crashes non-Apple compilati
 toolchain can't scope `compilerPlugins` per platform, so it's only enabled in `ios-app`.
 `App.swift` shows `OnboardingScreen`, a startup spinner, or `ShillingTabBarController` by
 `AppRoot.phase`; the tab controller maps each tab to its SwiftUI screen, and screens push their
-editors onto their own `NavigationStack`. Undoable results cross to Swift as `UndoHandle` (it
+editors onto their own `NavigationStack`. Layouts follow the window width, never the device
+(`WideLayout.minWidth` = Compose's 720dp), so iPad multitasking, rotation and foldables reflow live:
+`ListDetailLayout` shows Activity, Receipts and Plan's Schedules/Categories/Accounts editors beside the
+list (rows use `DetailLink`) and moves the open editor between the pane and the push stack when the
+width crosses the breakpoint; Home switches to its wide tiles; forms, Settings, Plan Overview and
+Import are capped with `readableWidth` (640/720/840). Undoable results cross to Swift as `UndoHandle` (it
 outlives the editor that produced it, so the caller's `Toast` can offer Undo). SwiftUI follows the
 app's Light/Dark/System choice through `AppearanceModel` (`preferredColorScheme` at the app root).
 
