@@ -40,7 +40,7 @@ settings:
     enabled: true
     version: 1.12.0
   kotlin:
-    version: "2.4.20"
+    version: "2.4.21"
   android:
     compileSdk: 37
     minSdk: 28
