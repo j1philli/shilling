@@ -46,7 +46,7 @@ dependencies@nativeBilling:
 settings:
   compose:
     enabled: true
-    version: 1.12.0
+    version: 1.13.0-alpha02
   kotlin:
     version: "2.4.21"
     serialization: json
