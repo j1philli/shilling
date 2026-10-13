@@ -34,10 +34,10 @@ version at that commit.
 | Event | Result |
 | --- | --- |
 | Push to a feature branch | CI, runtime checks, Android, Linux desktop and Windows desktop build on Linux. |
-| Merge to `main` | All targets build and tests run. After the complete matrix passes, **iOS — TestFlight** uploads the exact signed IPA only if iOS inputs changed since the last delivered beta. No production deployment or GitHub release. |
+| Merge to `main` | All targets build and tests run. After the complete matrix passes, **iOS — TestFlight** and the three **Desktop — Beta** jobs publish exact tested packages only if that target’s inputs changed since its last delivered beta. Desktop packages use dedicated GitHub prereleases; stable feeds and production deployments stay unchanged. |
 | Create a release tag | Identifies the tested release commit. No additional automatic build or deployment. |
 
-Packages remain in TeamCity; changed iOS main builds also become internal TestFlight betas. The two release jobs
+Packages remain in TeamCity; changed iOS main builds become internal TestFlight betas and changed desktop builds become signed updater betas. The two release jobs
 reuse successful builds at the same revision, or build missing dependencies.
 Both require the full matrix to pass, even for a single-target release.
 
@@ -81,17 +81,72 @@ a first run, legacy run without state, or cleaned-up state artifact publishes
 once to establish a new baseline. Keep these small artifacts under the project's
 artifact retention policy. Jobs are serialized to keep baseline updates ordered.
 
-Future Android and desktop beta jobs can use the same `BetaPublication.configure(build,
+Future Android beta jobs can use the same `BetaPublication.configure(build,
 target, channel, command)` TeamCity helper around their publisher after a successful
 matrix. Each target/channel needs its own build configuration and credentials for
 its destination; the helper supplies the gate, report artifacts, serialization,
-and manual override. Only TestFlight is connected to a publisher today.
+and manual override. TestFlight and Linux, Windows and macOS desktop beta publishers use it today.
 
 The full build matrix still runs on main, and manual GA release behavior is
 unchanged. For iOS review/release, select the original chain that actually uploaded
 the tested IPA. A later skipped chain has its own unuploaded IPA and cannot stand
 in for that candidate; explicitly force its TestFlight upload and test it first
 if that later chain must be promoted.
+
+## Desktop updates
+
+Desktop updates use Tauri with static feeds at `https://updates.shilling.finance`
+(Cloudflare Pages project `shilling-updates`) and immutable binaries in public
+GitHub Releases. This hosts application packages and release metadata only; user
+data and device sync never pass through the update service.
+
+Each channel has separate feeds for `linux-x86_64`, `windows-x86_64`,
+`darwin-x86_64` and `darwin-aarch64`: `/<stable|beta>/<platform>.json`.
+The two macOS feeds reference the same universal app archive. Linux updates use
+AppImage; Debian/RPM installations must be updated through their package manager.
+
+Installed releases default to stable. **Settings → Check for updates** (or the
+application menu) opens the updater and its **Get beta updates** preference.
+Checks also run shortly after startup and every six hours while the app is visible.
+Installation always requires **Install and restart**. Disabling beta waits for a
+newer stable build; it never downgrades an installed app. Debug builds and local
+builds without a TeamCity build ID do not self-update. Existing installers without
+this updater require one manual installation of an updater-enabled release.
+
+The shared product version stays `X.Y.Z`. Each packaged shell embeds its own
+TeamCity build ID, and its feed uses `X.Y.Z+build.N`. A custom comparator orders
+product versions, then build IDs numerically, so repeated main builds at the same
+product version update correctly. The beta publisher signs the exact package from
+the successful matrix, uploads and downloads it to verify its hash/signature,
+then advances only that platform’s beta feed. Public asset tags are
+`desktop-<target>-b<build>`; existing published assets are never replaced.
+
+Before Full or desktop Single Target release, select the same tested chain as the
+**currently published beta** for each included desktop platform. Release preflight
+verifies its source, version, embedded build provenance, package hash and signature.
+A later chain whose beta job skipped is not that candidate: force beta publication
+and test it first if it must be promoted. Stable promotion reuses the beta binary
+and signature. Preview validates readiness without changing any feed.
+
+All desktop publishers and release buttons share the `shilling-release` lock.
+Each Pages deployment preserves the complete feed snapshot, reading the previous
+immutable deployment’s `state.json`; feeds use `Cache-Control: no-store`.
+A failed asset upload leaves a resumable draft. A failed Pages deployment leaves
+the previous feed active; rerunning the exact job reconciles it. The final live
+state is checked before success is recorded. Retain immutable desktop releases
+referenced by either channel. Rollbacks require a new, higher build/version.
+
+The updater public key is committed in `src-tauri/tauri.conf.json`. Its private key
+and password are protected parent-project parameters
+`shilling.desktop.updater.private.key` and `shilling.desktop.updater.password`.
+Only beta publisher configurations map them to the Tauri signing environment.
+Keep an offline backup of both; losing them prevents updates to existing installs.
+The publishers inherit the project’s GitHub release and Cloudflare Pages credentials.
+Cloudflare DNS permissions are needed only when attaching the custom domain.
+
+Updater signatures authenticate downloaded updates. They do not replace Windows
+publisher signing or macOS Developer ID signing/notarization, which remain separate
+setup work. Initial unsigned installers can still trigger OS installation warnings.
 
 ## Two release buttons
 
@@ -165,7 +220,7 @@ blocked; credential/API failures fail the preview.
 The release jobs share a lock so only one can publish at a time. The version
 is read from `VERSION`, and the tag must belong to the checked-out commit on
 `main`. The job refuses to reuse a tag for another commit or target selection.
-An already-completed release is a no-op. Publishing failures leave a GitHub
+An already-completed release reconciles any pending desktop stable-feed promotion. Publishing failures leave a GitHub
 draft that can be retried with the same revision and selection. Images, Coolify, Pages and the App Store cannot be published atomically; a failure can leave images uploaded or
 hosted targets deployed while the GitHub release is still a draft. Inspect the failed
 step and rerun that exact release to finish it.
@@ -175,7 +230,7 @@ marked as GitHub prereleases; that label is separate from Apple distribution. An
 debug APK and unsigned AAB; iOS exports an App Store-signed IPA when signing is
 enabled (an unsigned app ZIP otherwise); macOS is an unsigned universal DMG; Windows is an unsigned x86_64
 NSIS installer; Linux includes x86_64 AppImage, Debian and RPM packages.
-Android/desktop signing, macOS notarization, and Play upload still need setup.
+Desktop updater packages are signed and verified separately from OS signing. Android/OS code signing, macOS notarization, and Play upload still need setup.
 iOS TestFlight upload, App Review submission, and approved App Store promotion
 are automated by the separate jobs described above.
 Release notes state these limitations. An App Store-signed IPA is intended for

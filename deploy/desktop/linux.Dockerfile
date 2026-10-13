@@ -25,8 +25,8 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/usr/local/cargo/git \
     --mount=type=cache,target=/workspace/src-tauri/target \
     rm -rf target/release/bundle && \
-    tauri build --bundles deb,rpm,appimage \
-      --config '{"build":{"beforeBuildCommand":""}}' && \
+    tauri build --no-sign --bundles deb,rpm,appimage \
+      --config '{"build":{"beforeBuildCommand":""},"bundle":{"createUpdaterArtifacts":true}}' && \
     mkdir -p /out && \
     cp target/release/bundle/deb/*.deb /out/ && \
     cp target/release/bundle/rpm/*.rpm /out/ && \

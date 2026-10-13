@@ -40,6 +40,8 @@ class ReleaseTests(unittest.TestCase):
             patch.object(release, "AppleAPI"),
             patch.object(release, "approval", return_value={"apple_build_id": "apple-42"}),
             patch.object(release, "promote"),
+            patch.object(release, "prepare_stable", return_value=[]),
+            patch.object(release, "publish_stable"),
             patch.dict(os.environ, {"SHILLING_RELEASE_MODE": "full", "SHILLING_RELEASE_DRY_RUN": "0",
                 "BUILD_VCS_BRANCH": "main", "GITHUB_TOKEN": "test", "GHCR_TOKEN": "test",
                 "CLOUDFLARE_ACCOUNT_ID": "test", "CLOUDFLARE_API_TOKEN": "test",
@@ -237,6 +239,23 @@ class ReleaseTests(unittest.TestCase):
         release.AppleAPI.assert_not_called()
         release.approval.assert_not_called()
         release.promote.assert_not_called()
+
+    def test_desktop_beta_mismatch_blocks_all_publication(self):
+        release.prepare_stable.side_effect = ValueError("candidate is not the published beta")
+        with self.assertRaisesRegex(ValueError, "published beta"):
+            release.main()
+        self.assertFalse(any(c[0] in ("gh", "bash", "docker") for c in self.commands()))
+        release.publish_stable.assert_not_called()
+
+    def test_preview_never_advances_desktop_feeds(self):
+        os.environ["SHILLING_RELEASE_DRY_RUN"] = "1"
+        release.main()
+        release.publish_stable.assert_not_called()
+
+    def test_retry_of_published_release_reconciles_feed(self):
+        self.existing_release = {"body": f"<!-- shilling-release:{COMMIT}:{','.join(release.TARGETS)} -->", "draft": False}
+        release.main()
+        release.publish_stable.assert_called_once_with([], COMMIT)
 
     def test_invalid_target_is_rejected(self):
         with self.assertRaises(ValueError):
