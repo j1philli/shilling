@@ -3,6 +3,7 @@ package finance.shilling.shared.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import finance.shilling.shared.data.DEFAULT_SELF_HOSTED_SERVER_URL
+import finance.shilling.shared.data.WELCOME_NOTICE_ACCOUNT_DELETED
 import finance.shilling.shared.data.analytics.ProductAnalytics
 import finance.shilling.shared.data.analytics.ProductEvent
 import finance.shilling.shared.session.HostedCredentialsMode
@@ -41,12 +42,15 @@ data class OnboardingUiState(
     val selfHostedError: String? = null,
     val validatingSelfHosted: Boolean = false,
     /** Set while the "Replace your saved budget?" confirmation is up. */
-    val destructiveConfirm: ConfirmCopy? = null
+    val destructiveConfirm: ConfirmCopy? = null,
+    /** The account was just deleted from Settings. */
+    val accountDeleted: Boolean = false
 ) {
     val analyticsNotice: String get() = ANALYTICS_PRIVACY_NOTICE
     val welcomeTitle: String get() = "Welcome to Shilling"
     val welcomeMessage: String get() =
-        "Get started quickly, sign in to an existing account, or connect to your own server."
+        (if (accountDeleted) "Your account was deleted. " else "") +
+            "Get started quickly, sign in to an existing account, or connect to your own server."
     val heldDataMessage: String get() =
         "Sign in with the same account to pick up where you left off. Starting over or using a different account will replace what's here."
     val heldDataAction: String get() = "Sign in to keep it"
@@ -88,6 +92,7 @@ class OnboardingViewModel(
             route = if (selfHostedOnly) OnboardingRoute.SELF_HOSTED else l.route ?: OnboardingRoute.LANDING,
             selfHostedOnly = selfHostedOnly,
             hasHeldLocalData = held,
+            accountDeleted = onboarding?.welcomeNotice == WELCOME_NOTICE_ACCOUNT_DELETED,
             heldDataTitle = if (!held) null else when (onboarding?.welcomeNotice) {
                 "session_expired", "signed_out" -> "You're signed out, but your budget is still here."
                 else -> "Your budget is still saved on this device."

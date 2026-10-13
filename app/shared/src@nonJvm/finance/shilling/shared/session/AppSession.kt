@@ -11,6 +11,10 @@ import finance.shilling.shared.data.LocalDataWiper
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.SETTINGS_KEY_SERVER_URL
 import finance.shilling.shared.data.SETTINGS_KEY_CLOUD_RELAY_ENABLED
+import finance.shilling.shared.data.SETTINGS_KEY_WELCOME_NOTICE
+import finance.shilling.shared.data.WELCOME_NOTICE_ACCOUNT_DELETED
+import finance.shilling.shared.data.auth.AccountDeletionException
+import finance.shilling.shared.data.auth.AccountDeletionResult
 import finance.shilling.shared.data.auth.AuthRuntime
 import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.shared.data.auth.DeviceIdentity
@@ -276,6 +280,31 @@ class AppSession(
      * the auth SDK restoring the old one from its own storage.
      */
     suspend fun startOver() = onMain {
+        signOutAndWipe()
+        resetOnboarding()
+    }
+
+    /**
+     * Settings "Delete account": the server removes the hosted account (memberships, devices,
+     * profile, Auth user, billing customer). Then this device ends the session, wipes its local
+     * data, and returns to Welcome. Other devices keep their own local copies.
+     */
+    suspend fun deleteHostedAccount(acknowledgeActiveSubscription: Boolean): Result<AccountDeletionResult> = onMain {
+        val service = authRuntime?.authService ?: startupIdentity?.authService
+            ?: return@onMain Result.failure(AccountDeletionException("Sign in to delete your account"))
+        val result = runCatching {
+            ServerApi(httpClient, serverUrl, service).deleteAccount(acknowledgeActiveSubscription)
+        }
+        if (result.getOrNull() == AccountDeletionResult.Deleted) {
+            signOutAndWipe()
+            settings.putString(SETTINGS_KEY_WELCOME_NOTICE, WELCOME_NOTICE_ACCOUNT_DELETED)
+            resetOnboarding()
+        }
+        result
+    }
+
+    /** Stop sync, end every auth session, and delete all local data. */
+    private suspend fun signOutAndWipe() {
         clearMainEffects(includeBootstrap = true)
         val activeServices = listOfNotNull(startupIdentity?.authService, authRuntime?.authService, welcomeAuthService)
         val services = if (activeServices.isEmpty() && savedDeploymentSelection(settings) == DeploymentSelection.HOSTED) {
@@ -287,7 +316,6 @@ class AppSession(
             .distinct()
             .forEach { service -> runCatching { service.signOut() } }
         graphs.wipeAll()
-        resetOnboarding()
     }
 
     /** After local data was wiped: back to a fresh Welcome. */

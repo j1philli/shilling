@@ -6,7 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -16,6 +18,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,6 +36,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.russhwolf.settings.Settings
+import finance.shilling.shared.presentation.AccountDeletionStep
 import finance.shilling.shared.presentation.DeveloperInfo
 import finance.shilling.shared.presentation.SettingsAccount
 import finance.shilling.shared.presentation.SettingsUiState
@@ -70,7 +74,7 @@ fun SettingsView(
 
             state.account?.let { account ->
                 ListSectionHeader("Account")
-                AccountSection(account, viewModel)
+                AccountSection(account, viewModel, devicesState)
             }
             state.sync?.let { sync ->
                 ListSectionHeader("Sync")
@@ -302,7 +306,7 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
 }
 
 @Composable
-private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewModel) {
+private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewModel, devices: HostedDevicesUiState) {
     val scope = rememberCoroutineScope()
     var confirming by remember { mutableStateOf(false) }
     var password by remember { mutableStateOf("") }
@@ -363,7 +367,19 @@ private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewMode
         }
         accountMessage?.let { Text(it) }
         OutlinedButton(onClick = { confirming = true }) { Text(account.actionLabel) }
+        if (account is SettingsAccount.SignedIn) {
+            TextButton(
+                onClick = { viewModel.startAccountDeletion(devices.accountPlan) },
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) { Text(AccountDeletionStep.ACTION_LABEL) }
+            Text(
+                AccountDeletionStep.FOOTNOTE,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
+    AccountDeletionDialogs(viewModel, devices)
 
     if (confirming) {
         ConfirmDialog(
@@ -373,6 +389,64 @@ private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewMode
             destructive = account.confirm.destructive,
             onConfirm = { scope.launch { viewModel.confirmAccountAction() } },
             onDismiss = { confirming = false }
+        )
+    }
+}
+
+@Composable
+private fun AccountDeletionDialogs(viewModel: SettingsViewModel, devices: HostedDevicesUiState) {
+    val step by viewModel.deletion.collectAsState()
+    val scope = rememberCoroutineScope()
+    val snackbar = LocalSnackbarController.current
+    val uriHandler = LocalUriHandler.current
+
+    when (val current = step) {
+        AccountDeletionStep.Idle -> Unit
+        is AccountDeletionStep.SubscriptionWarning -> {
+            // Native stores expose a management URL; web purchasers use their billing email.
+            var managementUrl by remember(current) { mutableStateOf<String?>(null) }
+            LaunchedEffect(current) {
+                val config = devices.billingConfig ?: return@LaunchedEffect
+                val key = PlatformBilling.publicKey(config) ?: return@LaunchedEffect
+                val userId = devices.userId ?: return@LaunchedEffect
+                if (!PlatformBilling.usesNativeStore) return@LaunchedEffect
+                managementUrl = runCatching {
+                    PlatformBilling.configure(key, userId)
+                    PlatformBilling.managementUrl()
+                }.getOrNull()
+            }
+            AlertDialog(
+                onDismissRequest = viewModel::cancelAccountDeletion,
+                title = { Text(current.title) },
+                text = { Text(current.message) },
+                confirmButton = {
+                    TextButton(onClick = viewModel::continueAccountDeletion) { Text(current.continueLabel) }
+                },
+                dismissButton = {
+                    managementUrl?.let { url ->
+                        TextButton(onClick = { uriHandler.openUri(url) }) { Text(current.manageLabel) }
+                    }
+                    TextButton(onClick = viewModel::cancelAccountDeletion) { Text("Cancel") }
+                }
+            )
+        }
+        is AccountDeletionStep.Confirm -> ConfirmDialog(
+            title = current.confirmCopy.title,
+            message = current.confirmCopy.message,
+            confirmLabel = current.confirmCopy.confirmLabel,
+            destructive = current.confirmCopy.destructive,
+            onConfirm = {
+                scope.launch {
+                    viewModel.confirmAccountDeletion(current.acknowledgeActiveSubscription)?.let { snackbar.show(it) }
+                }
+            },
+            onDismiss = viewModel::cancelAccountDeletion
+        )
+        AccountDeletionStep.Deleting -> AlertDialog(
+            onDismissRequest = {},
+            confirmButton = {},
+            title = { Text(AccountDeletionStep.DELETING_LABEL) },
+            text = { CircularProgressIndicator(modifier = Modifier.size(24.dp)) }
         )
     }
 }
