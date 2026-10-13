@@ -1,6 +1,6 @@
 {
   "name": "shilling",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Kotlin Multiplatform household budgeting app",
   "private": true,
   "scripts": {
