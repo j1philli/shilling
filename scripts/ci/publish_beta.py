@@ -38,8 +38,7 @@ class TeamCity:
     def previous_state(self, build_type):
         if not re.fullmatch(r"[A-Za-z0-9_-]+", build_type):
             raise ValueError("Invalid TeamCity build configuration ID")
-        # The build's own credentials may download artifacts but not query builds through the REST API,
-        # so read the state through the artifact download path. It excludes personal builds.
+        # The artifact download path excludes personal builds.
         branch = urllib.parse.urlencode({"branch": "<default>"})
         return self.get(f"repository/download/{build_type}/.lastSuccessful/{STATE_ARTIFACT}?{branch}")
 
@@ -103,7 +102,8 @@ def main():
     (Path(args.output) / STATE_ARTIFACT).unlink(missing_ok=True)
     (Path(args.output) / "beta-decision.json").unlink(missing_ok=True)
     current = snapshot(args.target)
-    previous = TeamCity().previous_state(os.environ["BETA_TEAMCITY_BUILD_TYPE"])
+    # A forced publish never consults the baseline, so it must not depend on reading it.
+    previous = None if force == "1" else TeamCity().previous_state(os.environ["BETA_TEAMCITY_BUILD_TYPE"])
     publish(args.target, args.channel, current, previous, command, args.output, force == "1")
 
 
