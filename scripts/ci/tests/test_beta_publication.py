@@ -174,6 +174,17 @@ class PublicationTest(unittest.TestCase):
             beta.main()
         api.assert_not_called()
 
+    @patch.dict(os.environ, {"BUILD_VCS_BRANCH": "main", "SHILLING_BETA_FORCE": "1"})
+    @patch.object(beta, "publish")
+    @patch.object(beta, "snapshot", return_value={"commit": "abc", "fingerprint": "f", "inputs": {}})
+    @patch.object(beta, "TeamCity")
+    @patch.object(sys, "argv", ["publish_beta.py", "--target", "ios", "--channel", "testflight", "--", "publish"])
+    def test_forced_publish_does_not_read_baseline(self, api, snapshot, publish):
+        beta.main()
+        api.assert_not_called()
+        self.assertIsNone(publish.call_args.args[3])
+        self.assertTrue(publish.call_args.args[6])
+
 
 class BaselineTest(unittest.TestCase):
     def setUp(self):
