@@ -27,6 +27,9 @@ trap cleanup EXIT
 cp -R web-app-dist "$context/web"
 cp -R web-app-dist "$context/hosted-web"
 node scripts/ci/prepare-self-host-web.mjs "$context/web"
+# Clients require HTTPS signaling, so serve the self-hosted image over TLS with Caddy's internal CA.
+awk 'NR == 1 { print "{\n\tskip_install_trust\n}\n" } $0 == ":80 {" { print "web {\n\ttls internal"; next } { print }' \
+    deploy/self-host/Caddyfile > "$context/web/Caddyfile"
 sed 's/server:8081/hosted-server:8081/g' deploy/self-host/Caddyfile > "$context/hosted-web/Caddyfile"
 docker build --build-arg "VERSION=$(cat VERSION)" -t "shilling-smoke-server:$SHILLING_SMOKE_TAG" \
     -f deploy/self-host/server.Dockerfile release-input/server
