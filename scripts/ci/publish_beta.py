@@ -24,32 +24,24 @@ class TeamCity:
         self.authorization = "Basic " + base64.b64encode(credentials.encode()).decode()
 
     def get(self, path):
-        request = urllib.request.Request(self.url + "/httpAuth/app/rest/" + path,
+        request = urllib.request.Request(self.url + "/httpAuth/" + path,
                                         headers={"Accept": "application/json", "Authorization": self.authorization})
         try:
             with urllib.request.urlopen(request, timeout=60) as response:
                 return json.load(response)
         except urllib.error.HTTPError as error:
-            if error.code == 404 and "/artifacts/content/" in path:
-                return None  # Legacy run or cleaned-up artifact: publish to establish a baseline.
+            if error.code == 404 and path.startswith("repository/download/"):
+                return None  # No successful run yet, or its artifact was cleaned up: publish to establish a baseline.
             # Never confuse an auth/server error with unchanged inputs.
             raise RuntimeError(f"TeamCity baseline lookup failed: HTTP {error.code}") from None
 
     def previous_state(self, build_type):
         if not re.fullmatch(r"[A-Za-z0-9_-]+", build_type):
             raise ValueError("Invalid TeamCity build configuration ID")
-        query = urllib.parse.urlencode({
-            "locator": f"buildType:{build_type},state:finished,status:SUCCESS,branch:(default:true),personal:false,count:1",
-            "fields": "count,build(id,branchName)",
-        })
-        rows = self.get("builds?" + query).get("build", [])
-        if not rows:
-            return None
-        # TeamCity can omit the logical name on default-branch custom runs.
-        # The locator already restricts these to the default branch.
-        if rows[0].get("branchName", "main") != "main":
-            raise ValueError("Beta baseline must belong to main")
-        return self.get(f"builds/id:{int(rows[0]['id'])}/artifacts/content/{STATE_ARTIFACT}")
+        # The build's own credentials may download artifacts but not query builds through the REST API,
+        # so read the state through the artifact download path. It excludes personal builds.
+        branch = urllib.parse.urlencode({"branch": "<default>"})
+        return self.get(f"repository/download/{build_type}/.lastSuccessful/{STATE_ARTIFACT}?{branch}")
 
 
 def validate_state(state, target, channel):
