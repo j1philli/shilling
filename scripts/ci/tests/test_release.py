@@ -40,6 +40,10 @@ class ReleaseTests(unittest.TestCase):
             patch.object(release, "AppleAPI"),
             patch.object(release, "approval", return_value={"apple_build_id": "apple-42"}),
             patch.object(release, "promote"),
+            patch.object(release, "load_android_candidate", return_value={"version_code": "42", "commit": COMMIT}),
+            patch.object(release, "PlayAPI"),
+            patch.object(release, "android_readiness", return_value={"ready": True}),
+            patch.object(release, "promote_android"),
             patch.dict(os.environ, {"SHILLING_RELEASE_MODE": "full", "SHILLING_RELEASE_DRY_RUN": "0",
                 "BUILD_VCS_BRANCH": "main", "GITHUB_TOKEN": "test", "GHCR_TOKEN": "test",
                 "CLOUDFLARE_ACCOUNT_ID": "test", "CLOUDFLARE_API_TOKEN": "test",
@@ -237,6 +241,33 @@ class ReleaseTests(unittest.TestCase):
         release.AppleAPI.assert_not_called()
         release.approval.assert_not_called()
         release.promote.assert_not_called()
+
+    def test_android_readiness_blocks_every_remote_publication(self):
+        release.android_readiness.side_effect = ValueError("Exact Android version is not active")
+        with self.assertRaisesRegex(ValueError, "not active"):
+            release.main()
+        self.assertFalse(any(c[0] in ("gh", "bash", "docker") for c in self.commands()))
+        release.promote_android.assert_not_called()
+
+    def test_android_preview_never_promotes(self):
+        os.environ["SHILLING_RELEASE_DRY_RUN"] = "1"
+        release.android_readiness.side_effect = ValueError("not uploaded")
+        release.main()
+        release.promote_android.assert_not_called()
+        self.assertFalse(self.published())
+
+    def test_android_promotion_failure_keeps_github_draft(self):
+        release.promote_android.side_effect = RuntimeError("Play unavailable")
+        with self.assertRaisesRegex(RuntimeError, "Play unavailable"):
+            release.main()
+        self.assertFalse(self.published())
+
+    def test_non_android_release_never_contacts_play(self):
+        os.environ.update(SHILLING_RELEASE_MODE="single", SHILLING_RELEASE_TARGET="web")
+        release.main()
+        release.PlayAPI.assert_not_called()
+        release.android_readiness.assert_not_called()
+        release.promote_android.assert_not_called()
 
     def test_invalid_target_is_rejected(self):
         with self.assertRaises(ValueError):
