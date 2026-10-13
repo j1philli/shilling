@@ -17,6 +17,8 @@ import finance.shilling.shared.data.sync.PeerConnectionStatus
 import finance.shilling.shared.data.sync.ServerApi
 import finance.shilling.shared.session.SessionState
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -158,7 +160,7 @@ class HostedDevicesViewModel(
             "Device removed"
         }.getOrElse {
             if (it is CancellationException) throw it
-            it.message ?: "Could not remove device"
+            devicesErrorMessage(it, fallback = "Could not remove device")
         }
     }
 
@@ -194,7 +196,11 @@ class HostedDevicesViewModel(
         } catch (error: Exception) {
             if (error is CancellationException) throw error
             currentCoroutineContext().ensureActive()
-            mutableState.value = state.value.copy(loading = false, error = error.message ?: "Could not load devices")
+            mutableState.value = state.value.copy(
+                loading = false,
+                accountPlanLabel = state.value.accountPlanLabel ?: "Unavailable",
+                error = devicesErrorMessage(error)
+            )
             cachedBilling
         }
     }
@@ -227,3 +233,12 @@ class HostedDevicesViewModel(
 
     private fun serverUrl(): String = settings.getStringOrNull(SETTINGS_KEY_SERVER_URL) ?: DEFAULT_SERVER_URL
 }
+
+/** Readable copy for control-plane failures; never the raw HTTP client message. */
+internal fun devicesErrorMessage(error: Throwable, fallback: String = "Could not load devices"): String =
+    when ((error as? ResponseException)?.response?.status) {
+        HttpStatusCode.NotFound -> "This server doesn't support plans or device management yet."
+        HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden -> "Sign in again to manage devices."
+        null -> "$fallback. Check your connection and try again."
+        else -> "$fallback. The server had a problem; try again later."
+    }

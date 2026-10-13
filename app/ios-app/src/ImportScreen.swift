@@ -46,6 +46,7 @@ struct ImportScreen: View {
                 reviewSection(state)
             }
         }
+        .readableWidth(840)
         .navigationTitle(state.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

@@ -4,6 +4,7 @@ package finance.shilling.app
 
 import finance.shilling.shared.data.ReceiptFileReader
 import finance.shilling.shared.data.ReceiptFileStore
+import finance.shilling.shared.data.sniffReceiptExtension
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +17,13 @@ suspend fun ReceiptFileStore.prepareIosReceiptPreview(receiptId: String, origina
     withContext(Dispatchers.IO) {
         val reader = openReader(receiptId) ?: return@withContext null
         val safeName = originalName.substringAfterLast('/').substringAfterLast('\\')
-            .takeUnless { it.isBlank() || it == "." || it == ".." } ?: "receipt.bin"
+            .takeUnless { it.isBlank() || it == "." || it == ".." }
+            ?.let { name ->
+                // Quick Look picks the viewer from the extension; without one it shows "data".
+                if ('.' in name.drop(1)) name
+                else sniffReceiptExtension(reader.readRange(0, minOf(12L, reader.size).toInt()).copyBytes())?.let { "$name.$it" } ?: name
+            }
+            ?: "receipt.bin"
         val manager = NSFileManager.defaultManager
         val directory = "${NSTemporaryDirectory().trimEnd('/')}/receipt-preview-${NSUUID().UUIDString()}"
         check(manager.createDirectoryAtPath(directory, true, null, null))

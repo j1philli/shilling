@@ -26,11 +26,13 @@ dependencies:
 settings:
   compose:
     enabled: true
-    version: 1.12.0
+    version: 1.13.0-alpha02
   kotlin:
-    version: "2.4.20"
+    version: "2.4.21"
   android:
-    compileSdk: 37
+    compileSdk:
+      apiLevel: 37
+      minorApiLevel: 1
     minSdk: 28
     targetSdk: 35
     namespace: finance.shilling.perf

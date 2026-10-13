@@ -4,7 +4,7 @@ import KotlinModules
 /// Native Home: the same tiles and copy as the Compose Home, driven by the shared `HomeViewModel`.
 struct HomeScreen: View {
     @StateObject private var model: HomeModel
-    @Environment(\.horizontalSizeClass) private var sizeClass
+    @State private var width: CGFloat = 0
     let onDestination: (HomeDestination) -> Void
 
     init(createModel: @escaping @MainActor () -> HomeModel = { HomeModel() },
@@ -21,7 +21,7 @@ struct HomeScreen: View {
                     Text(state.dateLabel)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
-                    if sizeClass == .regular {
+                    if width >= WideLayout.minWidth {
                         wideLayout(state)
                     } else {
                         compactLayout(state)
@@ -34,6 +34,8 @@ struct HomeScreen: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle(state.greeting)
+            // The window's width, not the device: iPad multitasking and foldables change it live.
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
         }
         .task { await model.observe() }
     }

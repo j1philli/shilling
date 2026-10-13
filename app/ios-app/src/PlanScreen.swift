@@ -84,8 +84,10 @@ struct PlanScreen: View {
     @State private var pickingDate = false
     @State private var amountEdit: AmountEdit?
     @State private var path: [PlanEditor] = []
+    @State private var selected: PlanEditor?
+    @State private var twoPane = false
 
-    /** Native editors pushed onto Plan's navigation stack. */
+    /** Native editors pushed onto Plan's navigation stack, or shown beside a section's list when wide. */
     enum PlanEditor: Hashable {
         case category(String?)
         case account(String?)
@@ -100,45 +102,16 @@ struct PlanScreen: View {
     }
 
     var body: some View {
-        NavigationStack(path: $path) {
-            List {
-                Section {
-                    Picker("Section", selection: $section) {
-                        ForEach(PlanSection.entries, id: \.self) { Text($0.label).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
-                }
-                switch section {
-                case .schedules: schedulesContent
-                case .categories: categoriesContent
-                case .accounts: accountsContent
-                default: overviewContent
-                }
-            }
-            .listStyle(.insetGrouped)
-            .navigationTitle("Plan")
-            .navigationDestination(for: PlanEditor.self) { editor in
-                switch editor {
-                case .category(let id):
-                    CategoryEditorScreen(categoryId: id) { message in toast = Toast(message) }
-                case .account(let id):
-                    AccountEditorScreen(accountId: id) { message in toast = Toast(message) }
-                case .schedule(let id, let type):
-                    ScheduleEditorScreen(scheduleId: id, presetType: type) { message in toast = Toast(message) }
-                case .transaction(let id):
-                    TransactionEditorScreen(postingId: id) { result in toast = result }
-                }
-            }
-            .toolbar {
-                if section != .overview && path.isEmpty {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: addInSection) { Label("Add", systemImage: "plus") }
-                    }
-                }
-            }
-        }
+        // Like Compose: Overview has no detail pane; the other sections are list/detail.
+        ListDetailLayout(
+            selection: $selected,
+            path: $path,
+            enabled: section != .overview,
+            emptyTitle: emptyDetail.title,
+            emptyMessage: emptyDetail.message,
+            list: { list(twoPane: $0) },
+            detail: { editor($0) }
+        )
         .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .sheet(isPresented: $pickingDate) { datePickerSheet }
         .alert(amountEdit?.prompt.title ?? "", isPresented: Binding(
@@ -159,7 +132,74 @@ struct PlanScreen: View {
         .task(id: section) { await model.observe(section) }
         .task { await model.observeRequests() }
         .onChange(of: model.pendingRequest) { _, request in apply(request) }
+        .onChange(of: section) { _, _ in selected = nil }
         .onAppear { apply(model.pendingRequest) }
+    }
+
+    private var emptyDetail: (title: String, message: String) {
+        switch section {
+        case .schedules: ("No schedule selected", "Choose a schedule to edit it.")
+        case .categories: ("No category selected", "Choose a category to edit it.")
+        default: ("No account selected", "Choose an account to edit it.")
+        }
+    }
+
+    private func list(twoPane: Bool) -> some View {
+        NavigationStack(path: $path) {
+            List {
+                Section {
+                    Picker("Section", selection: $section) {
+                        ForEach(PlanSection.entries, id: \.self) { Text($0.label).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                }
+                switch section {
+                case .schedules: schedulesContent
+                case .categories: categoriesContent
+                case .accounts: accountsContent
+                default: overviewContent
+                }
+            }
+            .listStyle(.insetGrouped)
+            .readableWidth(section == .overview ? 840 : .infinity)
+            .navigationTitle("Plan")
+            .navigationDestination(for: PlanEditor.self) { editor($0) }
+            .toolbar {
+                if section != .overview && path.isEmpty {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: addInSection) { Label("Add", systemImage: "plus") }
+                    }
+                }
+            }
+        }
+        .onAppear { self.twoPane = twoPane }
+        .onChange(of: twoPane) { _, value in self.twoPane = value }
+    }
+
+    @ViewBuilder
+    private func editor(_ editor: PlanEditor) -> some View {
+        switch editor {
+        case .category(let id):
+            CategoryEditorScreen(categoryId: id) { message in done(Toast(message)) }
+        case .account(let id):
+            AccountEditorScreen(accountId: id) { message in done(Toast(message)) }
+        case .schedule(let id, let type):
+            ScheduleEditorScreen(scheduleId: id, presetType: type) { message in done(Toast(message)) }
+        case .transaction(let id):
+            TransactionEditorScreen(postingId: id) { result in done(result) }
+        }
+    }
+
+    private func done(_ result: Toast) {
+        toast = result
+        selected = nil
+    }
+
+    /// Two-pane sections open editors beside the list; otherwise they're pushed.
+    private func open(_ editor: PlanEditor) {
+        if twoPane { selected = editor } else { path.append(editor) }
     }
 
     // MARK: Overview
@@ -323,12 +363,12 @@ struct PlanScreen: View {
             .listRowInsets(EdgeInsets())
         }
         if let empty = state.empty {
-            emptySection(empty) { path.append(.schedule(nil, state.filter)) }
+            emptySection(empty) { open(.schedule(nil, state.filter)) }
         } else {
             ForEach(Array(state.groups.enumerated()), id: \.offset) { _, group in
                 Section {
                     ForEach(group.rows, id: \.id) { row in
-                        NavigationLink(value: PlanEditor.schedule(row.id, nil)) {
+                        DetailLink(value: PlanEditor.schedule(row.id, nil), selection: twoPane ? $selected : nil) {
                             ListRow(title: row.title, supporting: row.supporting, trailing: row.amount,
                                     trailingColor: row.type.amountColor, dot: Color(hex: row.categoryColor))
                         }
@@ -344,11 +384,11 @@ struct PlanScreen: View {
     private var categoriesContent: some View {
         let state = model.categories
         if let empty = state.empty {
-            emptySection(empty) { path.append(.category(nil)) }
+            emptySection(empty) { open(.category(nil)) }
         } else {
             Section {
                 ForEach(state.rows, id: \.id) { row in
-                    NavigationLink(value: PlanEditor.category(row.id)) {
+                    DetailLink(value: PlanEditor.category(row.id), selection: twoPane ? $selected : nil) {
                         ListRow(title: row.name, dot: Color(hex: row.color) ?? Color(.tertiaryLabel))
                     }
                 }
@@ -360,11 +400,11 @@ struct PlanScreen: View {
     private var accountsContent: some View {
         let state = model.accounts
         if let empty = state.empty {
-            emptySection(empty) { path.append(.account(nil)) }
+            emptySection(empty) { open(.account(nil)) }
         } else {
             Section {
                 ForEach(state.rows, id: \.id) { row in
-                    NavigationLink(value: PlanEditor.account(row.id)) {
+                    DetailLink(value: PlanEditor.account(row.id), selection: twoPane ? $selected : nil) {
                         ListRow(title: row.name, trailing: row.balance)
                     }
                 }
@@ -391,9 +431,9 @@ struct PlanScreen: View {
 
     private func addInSection() {
         switch section {
-        case .schedules: path.append(.schedule(nil, model.schedules.filter))
-        case .categories: path.append(.category(nil))
-        case .accounts: path.append(.account(nil))
+        case .schedules: open(.schedule(nil, model.schedules.filter))
+        case .categories: open(.category(nil))
+        case .accounts: open(.account(nil))
         default: break
         }
     }

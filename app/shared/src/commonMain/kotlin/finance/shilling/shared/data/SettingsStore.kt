@@ -8,7 +8,7 @@ class RestartHostedLoginCallback(val onRestart: suspend () -> Unit)
 
 const val SETTINGS_KEY_SERVER_URL = "shilling_server_url"
 const val DEFAULT_SERVER_URL = "https://api.shilling.finance"
-const val DEFAULT_SELF_HOSTED_SERVER_URL = "http://localhost:8081"
+const val DEFAULT_SELF_HOSTED_SERVER_URL = "https://localhost:8443"
 const val SETTINGS_KEY_ONBOARDING_COMPLETED = "shilling_onboarding_completed"
 const val SETTINGS_KEY_DEPLOYMENT_SELECTION = "shilling_deployment_selection"
 const val SETTINGS_KEY_HOSTED_ENTRY_MODE = "shilling_hosted_entry_mode"

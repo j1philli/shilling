@@ -236,7 +236,7 @@ setup-webrtc:
 ios: setup-webrtc ensure-plugin
     #!/usr/bin/env bash
     set -euo pipefail
-    ./kotlin run ios-app -p iosSimulatorArm64
+    ./kotlin run -m ios-app -p iosSimulatorArm64
     echo "==> App launched, attaching to logs..."
     sleep 1
     DATA_DIR="$(xcrun simctl get_app_container booted finance.shilling.app data 2>/dev/null)"
@@ -523,7 +523,7 @@ homelab: build-web setup-webrtc ensure-plugin
 
     # Launch iOS simulator in background
     echo "==> Starting iOS simulator..."
-    ./kotlin run ios-app -p iosSimulatorArm64 &
+    ./kotlin run -m ios-app -p iosSimulatorArm64 &
     IOS_PID=$!
 
     # Launch desktop in foreground

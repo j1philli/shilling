@@ -56,7 +56,7 @@ data class OnboardingUiState(
     val heldDataAction: String get() = "Sign in to keep it"
     val selfHostedLabel: String get() = "Self-hosted"
     val selfHostedMessage: String get() = "Connect to a server you operate yourself."
-    val selfHostedHint: String get() = selfHostedError ?: "Enter the server URL for the instance you operate."
+    val selfHostedHint: String get() = selfHostedError ?: "Enter the HTTPS URL for the instance you operate."
     val canContinueSelfHosted: Boolean get() = selfHostedUrl.isNotBlank() && !validatingSelfHosted
     val keepLabel: String get() = "Keep budget and go back"
     /** The self-hosted screen has no way back when it's the only option. */

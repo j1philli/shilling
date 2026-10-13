@@ -143,6 +143,7 @@ app/ios-app/              # native SwiftUI iOS app (no Compose) over the shared 
     ReceiptsScreenModel.kt / ReceiptsScreen.swift # native SwiftUI Receipts
     PlanScreenModel.kt / PlanScreen.swift # native SwiftUI Plan (Overview + Schedules/Categories/Accounts)
     Toast.swift          # snackbar stand-in with optional action (Undo)
+    ListDetailLayout.swift # iPad two-pane list/detail (mirrors Compose's ListDetailLayout), DetailLink, readableWidth
     SimpleEditorScreenModels.kt / SimpleEditors.swift # native Category/Account editors; FlowModel + EditorChrome helpers
     ScheduleEditorScreenModel.kt / ScheduleEditorScreen.swift # native schedule editor
     TransactionEditorScreenModel.kt / TransactionEditorScreen.swift # native transaction editor (+ UndoHandle, NSData bridge)
@@ -261,7 +262,12 @@ annotations out of `app/shared`: its compiler plugin crashes non-Apple compilati
 toolchain can't scope `compilerPlugins` per platform, so it's only enabled in `ios-app`.
 `App.swift` shows `OnboardingScreen`, a startup spinner, or `ShillingTabBarController` by
 `AppRoot.phase`; the tab controller maps each tab to its SwiftUI screen, and screens push their
-editors onto their own `NavigationStack`. Undoable results cross to Swift as `UndoHandle` (it
+editors onto their own `NavigationStack`. Layouts follow the window width, never the device
+(`WideLayout.minWidth` = Compose's 720dp), so iPad multitasking, rotation and foldables reflow live:
+`ListDetailLayout` shows Activity, Receipts and Plan's Schedules/Categories/Accounts editors beside the
+list (rows use `DetailLink`) and moves the open editor between the pane and the push stack when the
+width crosses the breakpoint; Home switches to its wide tiles; forms, Settings, Plan Overview and
+Import are capped with `readableWidth` (640/720/840). Undoable results cross to Swift as `UndoHandle` (it
 outlives the editor that produced it, so the caller's `Toast` can offer Undo). SwiftUI follows the
 app's Light/Dark/System choice through `AppearanceModel` (`preferredColorScheme` at the app root).
 
@@ -367,7 +373,7 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
   building again succeeds.
 - **KMP-NativeCoroutines version is tied to Kotlin**: `kmp-nativecoroutines` in
   `libs.versions.toml`, the compiler plugin and the Swift package in `app/ios-app/module.yaml`
-  must all use the release built for the project's Kotlin version (1.0.6 = Kotlin 2.4.20).
+  must all use the release built for the project's Kotlin version (1.0.6 = Kotlin 2.4.20, also used with 2.4.21).
 - **Icons are generated, then committed**: `icons/source/base-1024.png` is the
   master. `just generate-icons` (ImageMagick + `cargo tauri`) rewrites every
   platform asset; commit the results. Builds never generate or copy icons; they

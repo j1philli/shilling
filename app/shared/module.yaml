@@ -60,7 +60,7 @@ plugins:
 
 settings:
   kotlin:
-    version: "2.4.20"
+    version: "2.4.21"
     serialization: json
     # Opt into Kotlin/Native klib incremental compilation (Kotlin 2.4.20 Beta).
     # Companion flag: gradle.properties kotlin.incremental.native=true
