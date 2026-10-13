@@ -12,6 +12,8 @@ import finance.shilling.shared.data.SETTINGS_KEY_LOCAL_HOUSEHOLD_ID
 import finance.shilling.shared.data.SETTINGS_KEY_SERVER_URL
 import finance.shilling.shared.data.ServerUrlCallback
 import finance.shilling.shared.data.analytics.ProductAnalytics
+import finance.shilling.shared.data.sync.secureServerUrl
+import finance.shilling.shared.data.sync.SECURE_SIGNALING_REQUIRED
 import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.shared.data.auth.AuthState
 import finance.shilling.shared.data.auth.DependencyReachability
@@ -246,7 +248,11 @@ class SettingsViewModel(
 
     /** Returns the snackbar message. */
     fun saveServerUrl(url: String): String {
-        val trimmed = url.trim()
+        val trimmed = try {
+            secureServerUrl(url).toString().trimEnd('/')
+        } catch (_: IllegalArgumentException) {
+            return SECURE_SIGNALING_REQUIRED
+        }
         settings.putString(SETTINGS_KEY_SERVER_URL, trimmed)
         serverUrlCallback.onChange(trimmed)
         return "Reconnecting to $trimmed"

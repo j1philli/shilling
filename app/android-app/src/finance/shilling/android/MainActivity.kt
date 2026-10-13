@@ -2,7 +2,6 @@ package finance.shilling.android
 
 import android.content.pm.ApplicationInfo
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,7 +13,6 @@ import co.touchlab.kermit.Logger
 import com.russhwolf.settings.Settings
 import finance.shilling.shared.data.IdGenerator
 import finance.shilling.shared.data.ReceiptFileStore
-import finance.shilling.shared.data.SETTINGS_KEY_SERVER_URL
 import finance.shilling.shared.data.ensureLocalSchemaReady
 import finance.shilling.shared.data.initKoin
 import finance.shilling.shared.data.sync.BOOTSTRAP_NETWORK_TIMEOUT_MS
@@ -48,21 +46,6 @@ import finance.shilling.shared.session.sessionModule
 
 private val log = Logger.withTag("Android")
 
-private fun isRunningOnEmulator(): Boolean {
-    val fingerprint = Build.FINGERPRINT.lowercase()
-    val model = Build.MODEL.lowercase()
-    val product = Build.PRODUCT.lowercase()
-    return fingerprint.contains("generic") ||
-        fingerprint.contains("emulator") ||
-        model.contains("emulator") ||
-        model.contains("android sdk built for") ||
-        product.contains("sdk") ||
-        product.contains("emulator") ||
-        Build.MANUFACTURER.contains("Genymotion", ignoreCase = true) ||
-        Build.HARDWARE.contains("goldfish", ignoreCase = true) ||
-        Build.HARDWARE.contains("ranchu", ignoreCase = true)
-}
-
 class MainActivity : ComponentActivity() {
     private val accountRefreshScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private lateinit var appSession: AppSession
@@ -77,24 +60,13 @@ class MainActivity : ComponentActivity() {
         }
 
         val settings = Settings()
-        // Emulators cannot reach the host via 127.0.0.1/localhost — use the
-        // special host-loopback alias so self-hosted signaling works out of the box.
-        val existingServerUrl = settings.getStringOrNull(SETTINGS_KEY_SERVER_URL)
-        if (isRunningOnEmulator() && (
-                existingServerUrl.isNullOrBlank() ||
-                    existingServerUrl.contains("localhost") ||
-                    existingServerUrl.contains("127.0.0.1")
-                )
-        ) {
-            settings.putString(SETTINGS_KEY_SERVER_URL, "http://10.0.2.2:8081")
-            log.i { "Emulator detected — defaulting server URL to http://10.0.2.2:8081" }
-        }
+        val developmentBuild = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         val appContext = applicationContext
         // Returns the running graph if this Activity is recreated in the same process.
         initKoin(module {
             single {
                 finance.shilling.shared.data.analytics.ProductAnalyticsEnvironment(
-                    developmentBuild = (appContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                    developmentBuild = developmentBuild
                 )
             }
             single { AppSessionConfig(logTag = "Android", authRedirectUrl = "shilling.finance://auth-callback") }

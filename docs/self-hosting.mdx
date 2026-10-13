@@ -22,28 +22,37 @@ docker compose pull
 docker compose up -d
 ```
 
-Open <http://localhost:8080> **on the Docker host**. The server URL is already
-filled in; select **Continue**. This web package opens in self-hosted mode and
-does not send you to the Shilling hosted sign-in flow.
+Set up the HTTPS reverse proxy below, then open the HTTPS URL. The server URL
+is already filled in; select **Continue**. This web package opens in self-hosted
+mode and does not send you to the Shilling hosted sign-in flow.
 
 The Compose file publishes only the web service on `127.0.0.1:8080`. The
 signaling service is available only to the web container. Neither image needs a
 data volume, because the server does not hold household data.
 
-## Other devices and HTTPS
+## HTTPS is required for signaling
 
-For another device, put the web service behind a trusted HTTPS reverse proxy
+Put the web service behind a trusted HTTPS reverse proxy
 or use a private network with HTTPS. Point the proxy at `http://127.0.0.1:8080`
 on the Docker host. Keep its `/api/*` and `/ws/*` paths on the same origin as
 the web app, and preserve WebSocket upgrades. The proxy must send the
 `Cross-Origin-Opener-Policy: same-origin` and
 `Cross-Origin-Embedder-Policy: require-corp` headers served by the included
 Caddy configuration. Browsers require a secure context for the web features
-used by Shilling; `localhost` is allowed for local use.
+used by Shilling. Although browsers allow HTTP localhost as a secure context,
+Shilling requires encrypted signaling even on localhost.
 
-The Android and desktop apps also require HTTPS when connecting to a server on
-another device. Localhost HTTP remains available for local development, and the
-Android emulator can use `http://10.0.2.2:8081` to reach the host machine.
+Every client, including debug builds, requires an `https://` server URL and
+connects to signaling over `wss://`. HTTP/WS URLs and signaling redirects are
+rejected. Existing HTTP settings must be changed to the HTTPS URL; the app does
+not silently upgrade them or fall back to an unencrypted connection.
+
+For local development, terminate TLS on a separate port such as 8443 and proxy
+to the HTTP development server on port 8081. Use a certificate trusted by each
+client, with the hostname or IP address the client connects to in its certificate
+names. An Android emulator may use `https://10.0.2.2:8443` when its certificate
+and trust configuration cover that address. The server's HTTP port is an internal
+proxy upstream, not a client signaling endpoint.
 
 **Restrict access to the entire instance.** Self-hosted mode currently accepts
 the household ID claimed in a signaling `Join` message without verifying a

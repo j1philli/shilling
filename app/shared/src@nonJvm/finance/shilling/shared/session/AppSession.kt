@@ -46,6 +46,7 @@ import finance.shilling.shared.data.sync.FileTransferManager
 import finance.shilling.shared.data.sync.PeerConnectionStatus
 import finance.shilling.shared.data.sync.IncomingChangeRouter
 import finance.shilling.shared.data.sync.ServerApi
+import finance.shilling.shared.data.sync.secureServerUrl
 import finance.shilling.shared.data.sync.SignalingClient
 import finance.shilling.shared.data.sync.SyncConfig
 import finance.shilling.shared.data.sync.WebRtcConnectionManager
@@ -620,9 +621,10 @@ class AppSession(
     }
 
     private suspend fun validateSelfHostedServer(url: String): Result<Unit> {
-        val trimmedUrl = url.trim()
-        if (!trimmedUrl.startsWith("http://") && !trimmedUrl.startsWith("https://")) {
-            return Result.failure(IllegalArgumentException("Enter a full URL including http:// or https://."))
+        val trimmedUrl = try {
+            secureServerUrl(url).toString().trimEnd('/')
+        } catch (error: IllegalArgumentException) {
+            return Result.failure(error)
         }
         return runCatching {
             val serverConfig = ServerApi(httpClient, trimmedUrl).fetchConfig()
