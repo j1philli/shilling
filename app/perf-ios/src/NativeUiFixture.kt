@@ -71,6 +71,7 @@ object NativeUiFixture {
             single { HostedBootstrapRetryCallback { } }
             single { ResetOnboardingCallback { error("Fixture reset disabled") } }
             single { RestartHostedLoginCallback { error("Fixture login disabled") } }
+            single { finance.shilling.shared.data.auth.DeleteHostedAccountCallback { error("Fixture account deletion disabled") } }
             single { ServerUrlCallback { error("Fixture network disabled") } }
             single { HouseholdIdCallback { error("Fixture network disabled") } }
         })

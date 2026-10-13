@@ -73,6 +73,16 @@ The hosted project uses Resend SMTP, with sender name `Shilling`. For another de
 
 References: [Resend Supabase SMTP setup](https://resend.com/docs/send-with-supabase-smtp), [Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp).
 
+## Account deletion
+
+Signed-in accounts can delete themselves from **Settings → Account → Delete account** on every client. The public instructions for app-store listings are in [Delete your account](delete-account.mdx). The client calls `POST /api/account/delete`, and the server:
+
+1. Checks RevenueCat for an active Silver or Gold entitlement. If one exists and the request lacks `acknowledgeActiveSubscription`, it returns `409` with the plan. The client then reminds the user that deleting the account does not cancel a store or web subscription and offers **Manage subscription** before asking for confirmation again. Deletion is never blocked by a subscription.
+2. Runs `delete_hosted_account` (`supabase/migrations/20261009120000_hosted_account_deletion.sql`). It closes spaces where the account is the only member. In shared spaces it removes the membership and the account's registered devices, and promotes a successor if the account was the last owner. It also deletes invitations to the account's email, the space selection, and the profile.
+3. Closes the account's signaling sessions, deletes the Auth user through the Auth admin API, then deletes the RevenueCat customer (best effort, logged on failure).
+
+Each step is idempotent, so a failed request can be retried. After success the client signs out, wipes local data, and shows Welcome with "Your account was deleted." Other devices keep their local copies. PostHog events use a random installation identifier unrelated to the account, so they need no deletion step.
+
 ## Guest signup abuse controls
 
 The `shilling.finance` project is configured for 10 anonymous sign-ins per IP per hour. Monitor Auth 429 responses and anonymous account creation to tune the limit. This rate limit reduces bulk creation but does not prove a request is human. If abuse warrants a CAPTCHA, Supabase can accept a Turnstile token for anonymous sign-in, but native clients still need a browser engine for the challenge.

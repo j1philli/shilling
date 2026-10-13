@@ -12,12 +12,22 @@ final class SettingsModel: ObservableObject {
     @Published private(set) var goldOffers: [IosBillingOffer] = []
     @Published private(set) var managementURL: String?
     @Published private(set) var billingError: String?
+    @Published private(set) var deletion: AccountDeletionStep
     let screen = SettingsScreenModel()
 
     init() {
         state = screen.state
         devicesState = screen.devicesState
         spacesState = screen.spacesState
+        deletion = screen.deletion
+    }
+
+    func observeDeletion() async {
+        do {
+            for try await value in asyncSequence(for: screen.deletionFlow) {
+                if deletion !== value { deletion = value }
+            }
+        } catch {}
     }
 
     func observe() async {
@@ -78,6 +88,7 @@ struct SettingsScreen: View {
     @State private var transferAmount = ""
     @State private var transferDate = ""
     @State private var pendingSpaceAction: (() -> Void)?
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         let state = model.state
@@ -125,8 +136,10 @@ struct SettingsScreen: View {
         } message: {
             Text("This changes access to the space. Leaving or removing a member stops future sync; copies already saved on devices remain. A space must retain an owner while other members remain.")
         }
+        .modifier(AccountDeletionAlerts(model: model, toast: $toast, openURL: openURL))
         .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .task { await model.observe() }
+        .task { await model.observeDeletion() }
         .task(id: scenePhase) {
             if scenePhase == .active { await model.observeSpaces() }
         }
@@ -335,6 +348,12 @@ struct SettingsScreen: View {
                 }
             } message: {
                 Text(account.confirm.message)
+            }
+            if account is SettingsAccountSignedIn {
+                Button(model.screen.deleteAccountLabel, role: .destructive) {
+                    model.screen.startAccountDeletion()
+                }
+                Text(model.screen.deleteAccountFootnote).font(.footnote).foregroundStyle(.secondary)
             }
         }
     }
@@ -563,6 +582,78 @@ private struct DeveloperSections: View {
             Text("Sample data")
         } footer: {
             Text("Adds demo accounts, categories and schedules for testing.")
+        }
+    }
+}
+
+/// Settings "Delete account": subscription reminder (paid plans), final confirmation, progress.
+/// Each button sets the next step itself; the bindings never write, so a dismissing alert
+/// cannot cancel the step that replaced it.
+private struct AccountDeletionAlerts: ViewModifier {
+    @ObservedObject var model: SettingsModel
+    @Binding var toast: Toast?
+    let openURL: OpenURLAction
+
+    private var warning: AccountDeletionStepSubscriptionWarning? {
+        model.deletion as? AccountDeletionStepSubscriptionWarning
+    }
+    private var confirm: AccountDeletionStepConfirm? { model.deletion as? AccountDeletionStepConfirm }
+    private var deleting: Bool { model.deletion is AccountDeletionStepDeleting }
+
+    func body(content: Content) -> some View {
+        content
+            .alert(warning?.title ?? "", isPresented: Binding(get: { warning != nil }, set: { _ in })) {
+                warningButtons
+            } message: {
+                Text(warning?.message ?? "")
+            }
+            .alert(confirm?.confirmCopy.title ?? "", isPresented: Binding(get: { confirm != nil }, set: { _ in })) {
+                confirmButtons
+            } message: {
+                Text(confirm?.confirmCopy.message ?? "")
+            }
+            .disabled(deleting)
+            .overlay { progress }
+    }
+
+    @ViewBuilder
+    private var warningButtons: some View {
+        if let warning {
+            Button(warning.continueLabel) { model.screen.continueAccountDeletion() }
+            // Native purchases have a management URL; web purchasers use their billing email.
+            if let link = model.managementURL, let url = URL(string: link) {
+                Button(warning.manageLabel) {
+                    model.screen.cancelAccountDeletion()
+                    openURL(url)
+                }
+            }
+        }
+        Button("Cancel", role: .cancel) { model.screen.cancelAccountDeletion() }
+    }
+
+    @ViewBuilder
+    private var confirmButtons: some View {
+        if let confirm {
+            Button(confirm.confirmCopy.confirmLabel, role: .destructive) { delete(acknowledging: confirm.acknowledgeActiveSubscription) }
+        }
+        Button("Cancel", role: .cancel) { model.screen.cancelAccountDeletion() }
+    }
+
+    @ViewBuilder
+    private var progress: some View {
+        if deleting {
+            ProgressView(model.screen.deletingAccountLabel)
+                .padding()
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        }
+    }
+
+    private func delete(acknowledging: Bool) {
+        Task {
+            let result = try? await asyncFunction(
+                for: model.screen.confirmAccountDeletion(acknowledgeActiveSubscription: acknowledging)
+            )
+            if let message = result ?? nil { toast = Toast(message) }
         }
     }
 }

@@ -112,7 +112,7 @@ val dataModule: Module = module {
     viewModel { params -> TransactionEditorViewModel(params.getOrNull(), get(), get(), get(), get(), get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.files, get(), get()) }
     viewModel { params -> ScheduleEditorViewModel(params.getOrNull(), params.getOrNull(), get(), get(), get(), get(), get()) }
     // Needs SessionState and the Settings callbacks from sessionModule.
-    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { finance.shilling.shared.presentation.HostedSpacesViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { HostedDevicesViewModel(get(), get(), get(), get(), get()) }
 

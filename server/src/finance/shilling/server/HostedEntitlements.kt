@@ -31,6 +31,8 @@ interface HostedEntitlementLookup {
     suspend fun accountPlan(userId: String): HostedPlan
     suspend fun householdPlan(householdId: String): HostedPlan
     fun invalidate(userId: String) = Unit
+    /** Removes the billing customer record. Does not cancel a store subscription. */
+    suspend fun deleteCustomer(userId: String) = Unit
 }
 
 object FreeHostedEntitlementLookup : HostedEntitlementLookup {
@@ -80,6 +82,21 @@ class RevenueCatEntitlementLookup(
         }
         cache[userId] = CachedPlan(plan, now + 30_000)
         return plan
+    }
+
+    override suspend fun deleteCustomer(userId: String) = withContext(Dispatchers.IO) {
+        val url = "https://api.revenuecat.com/v2/projects/${encode(projectId)}/customers/${encode(userId)}"
+        val request = HttpRequest.newBuilder(URI.create(url))
+            .timeout(Duration.ofSeconds(5))
+            .header("Authorization", "Bearer $revenueCatSecretKey")
+            .DELETE().build()
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+        // 404: the account never opened the store or web checkout.
+        check(response.statusCode() in 200..299 || response.statusCode() == 404) {
+            "RevenueCat customer deletion failed: ${response.statusCode()}"
+        }
+        cache.remove(userId)
+        Unit
     }
 
     override suspend fun householdPlan(householdId: String): HostedPlan = withContext(Dispatchers.IO) {

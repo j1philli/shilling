@@ -31,6 +31,7 @@ const val SETTINGS_KEY_HOSTED_HOUSEHOLD_ID = "shilling_hosted_household_id"
 const val SETTINGS_KEY_HELD_LOCAL_DATA = "shilling_held_local_data"
 const val SETTINGS_KEY_PENDING_RESTORE_USER_ID = "shilling_pending_restore_user_id"
 const val SETTINGS_KEY_WELCOME_NOTICE = "shilling_welcome_notice"
+const val WELCOME_NOTICE_ACCOUNT_DELETED = "account_deleted"
 const val SETTINGS_KEY_TAB_ORDER = "shilling_tab_order"
 const val SETTINGS_KEY_CLOUD_RELAY_ENABLED = "shilling_cloud_relay_enabled"
 
