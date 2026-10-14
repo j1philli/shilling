@@ -1,0 +1,186 @@
+---
+title: Windows builds and publisher signing
+---
+
+# Windows builds and publisher signing
+
+Windows installers are built on the Linux **Tower Agent**. No Windows VM,
+Visual Studio installation, hardware signing token, or Azure CLI on the agent
+is needed. Docker Buildx supplies the Rust/MSVC cross-toolchain, NSIS, Jsign,
+and signature verifier.
+
+## What is ready
+
+- **Desktop Windows (Linux cross-build)** continues producing unsigned development
+  installers on branches and main. Linux build 2711 successfully built main
+  revision `4393a2b` before the signing integration was added.
+- **Desktop Windows — Signed (Linux)** is a separate manual job restricted to
+  main. It uses the matching Web Build artifact, signs through Azure, and exports
+  `desktop-windows-signed.zip` only after the installer and its extracted app
+  payload pass signature verification.
+- Signing uses Tauri's custom signing hook, including the NSIS components that
+  Tauri sends to that hook. SHA-256 Authenticode signatures receive RFC 3161
+  timestamps. Azure keeps the private signing key.
+- Missing configuration, authentication failure, signing failure, or signature
+  verification failure stops the signed build. There is no unsigned fallback.
+
+The new job becomes available after its PR is merged and TeamCity imports the DSL.
+It has no automatic publishing trigger. Existing release buttons still consume
+the unsigned Windows job. First validate the signed candidate; then switch
+publication to these signed artifacts and update the release status text.
+The desktop updater work in PR #62 is separate: its update signature must be
+generated **after** Authenticode signing, and its Windows build must not use
+`--no-sign` when publisher signing is requested (that flag disables Tauri's
+Windows signing hooks too).
+
+## 1. Set up the signing account
+
+Use [Azure Artifact Signing](https://azure.microsoft.com/en-us/products/artifact-signing)
+(previously Trusted Signing). As checked on October 14, 2026, Microsoft lists
+Basic at **US$9.99 per month**, including 5,000 signatures; overage is $0.005 per
+signature. Confirm the currency and price in your Azure checkout. One installer
+build can consume several signing operations, including NSIS components and
+Jsign's certificate-chain requests.
+
+1. Sign in to [Azure Portal](https://portal.azure.com/) and select/create the
+   subscription that should pay for Shilling's signing.
+2. In **Subscriptions → your subscription → Resource providers**, register
+   `Microsoft.CodeSigning`.
+3. Search for **Artifact Signing Accounts** (some screens may say Trusted
+   Signing), then create an account with:
+
+   | Field | Suggested value |
+   | --- | --- |
+   | Resource group | `shilling-signing` |
+   | Account name | `shillingsigning` (choose another if unavailable) |
+   | Region | **East US** |
+   | Pricing tier | **Basic** |
+
+4. Give your own user **Artifact Signing Identity Verifier** in the account's
+   **Access control (IAM)**. Owner/Contributor does not itself grant the verifier
+   or signing role.
+5. Under **Identity validations**, create a **Public** identity. Canadian
+   individual developers and organizations are eligible. Choose Individual if
+   publishing under your legal personal name, or Organization for the legal
+   business entity. For Individual, the Azure billing account must have account
+   type Individual and its legal name/address must match your identification.
+6. Complete Microsoft's verification flow and wait for **Completed**. This step
+   needs your identity documents and must be done by you. Check the certificate
+   subject preview: this is the publisher identity Windows users will see;
+   setting the app name to Shilling does not change that legal identity.
+7. Create a certificate profile named `shillingwindows`, with type **Public
+   Trust**, using the verified identity. Keep Program Type at None. Public Trust
+   Test and Private Trust do not provide the public production trust we need.
+
+Microsoft's [setup guide](https://learn.microsoft.com/en-us/azure/artifact-signing/quickstart)
+has current eligibility and identity-validation screens. For the suggested East
+US region, the endpoint is `https://eus.codesigning.azure.net`. Use your account's
+actual endpoint if you choose a different region.
+
+## 2. Give TeamCity permission to sign
+
+1. In **Microsoft Entra ID → App registrations → New registration**, create
+   `shilling-teamcity-signing`, single tenant, with no redirect URI.
+2. Record its **Application (client) ID** and **Directory (tenant) ID**.
+3. Open **Certificates & secrets → Client secrets → New client secret**. Give it
+   a description such as `TeamCity Windows signing` and choose an expiry you can
+   maintain. Save the **Value**, not the Secret ID, privately; Azure shows the
+   value only when it is created. Set a reminder to rotate it before expiry.
+4. Assign that application's service principal **Artifact Signing Certificate
+   Profile Signer**, scoped to the `shillingwindows` certificate profile. It does
+   not need subscription Owner, Contributor, or identity-verification access.
+
+For profile-level scope, run this in Azure Cloud Shell (Bash), replacing the
+capitalized values. The object ID is the service principal's **Enterprise
+applications → shilling-teamcity-signing → Object ID**, not the application ID.
+Use the subscription's actual role name if the portal still displays the former
+name, **Code Signing Certificate Profile Signer**.
+
+```bash
+az role assignment create \
+  --assignee-object-id 'SERVICE_PRINCIPAL_OBJECT_ID' \
+  --assignee-principal-type ServicePrincipal \
+  --role 'Artifact Signing Certificate Profile Signer' \
+  --scope '/subscriptions/SUBSCRIPTION_ID/resourceGroups/shilling-signing/providers/Microsoft.CodeSigning/codeSigningAccounts/ACTUAL_ACCOUNT_NAME/certificateProfiles/shillingwindows'
+```
+
+See Microsoft's [role assignment guide](https://learn.microsoft.com/en-us/azure/artifact-signing/tutorial-assign-roles).
+Allow time for a new role assignment to propagate before retrying a 403.
+
+## 3. Configure TeamCity
+
+Under the parent **Shilling → Parameters** (the versioned **Shilling Monorepo**
+child is read-only), add these **configuration parameters**, with no `env.` prefix:
+
+| Parameter | Value | Type |
+| --- | --- | --- |
+| `shilling.windows.azure.tenant.id` | Directory (tenant) ID | Text |
+| `shilling.windows.azure.client.id` | Application (client) ID | Text |
+| `shilling.windows.azure.client.secret` | Client secret **Value** | **Password**, hidden |
+| `shilling.windows.azure.endpoint` | `https://eus.codesigning.azure.net` | Text |
+| `shilling.windows.azure.account` | Actual signing account name | Text |
+| `shilling.windows.azure.profile` | `shillingwindows` | Text |
+
+Paste the secret directly into TeamCity's password field; do not put it in chat,
+Git, command history, or build parameters supplied on a command line. The signed
+job maps these configuration parameters into its environment. These inherited
+parameters and the shared Docker agent assume trusted repository authors and
+TeamCity administrators; a separate job and branch check are not isolation from
+hostile code running on the same agent. Do not enable untrusted fork builds with
+these credentials available.
+
+The wrapper creates a mode-600 temporary credential file outside the Docker
+build context, mounts it only in the packaging step through BuildKit, and removes
+it on exit. OAuth tokens are passed to Jsign through an environment variable,
+never command arguments. The packaging step bypasses Docker layer caching so
+changed/revoked credentials cannot silently reuse an old signed build; Cargo's
+compilation caches remain available.
+
+## 4. Run the first signed build
+
+After the PR is merged, identity validation is complete, and all parameters are
+saved, run **Desktop Windows — Signed (Linux)** on **main**. From an authenticated
+TeamCity CLI:
+
+```bash
+teamcity run start Shilling_finance_ShillingMonorepo_DesktopWindowsSigned \
+  --branch main --comment 'First Azure-signed Windows installer'
+```
+
+Download `desktop-windows-signed.zip` from the successful build's Artifacts tab.
+The build verifies the signatures on Linux, but a Windows machine should still
+check the installer, first launch, uninstallation, and publisher name before
+public distribution. That can be someone else's Windows PC or a temporary
+machine; it does not require maintaining a Windows CI runner.
+
+On Windows, the installer check is:
+
+```powershell
+Get-AuthenticodeSignature .\Shilling_0.1.3_x64-setup.exe |
+  Format-List Status,StatusMessage,SignerCertificate,TimeStamperCertificate
+```
+
+Use the actual artifact filename/version. Expect `Status: Valid`, the intended
+publisher, and a timestamp certificate. A trusted signature establishes the
+publisher; SmartScreen warnings can still depend on reputation and policy.
+
+## What to send back
+
+Send the tenant ID, application/client ID, signing account name, certificate
+profile name, endpoint, and whether identity validation is Completed. These are
+not secrets. Confirm the secret was saved in TeamCity, without sending its value.
+With that in place, the remaining work is a real Azure-signed run, Windows runtime
+validation, and connecting the validated artifact to beta/release publication.
+
+## Troubleshooting
+
+- Missing/unresolved `%shilling.windows...%`: add the exact parent parameter.
+- OAuth 401: check tenant, application ID, secret **Value**, and expiry.
+- Signing 403: check the service principal's signer role, profile scope, and
+  the endpoint region; wait for role propagation.
+- Identity not completed / profile missing: finish Azure verification and
+  create a Public Trust profile.
+- Timestamp or verification failure: inspect the build error and connectivity.
+  Do not bypass verification or distribute an unsigned fallback.
+- Signed job fails on a feature branch: merge the reviewed integration first;
+  publisher signing intentionally accepts only main.

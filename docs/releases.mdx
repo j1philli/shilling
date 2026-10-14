@@ -31,6 +31,10 @@ version at that commit.
 
 ## Everyday builds
 
+Windows packages are cross-built on Linux. For the separate Azure publisher
+signing job and account setup, see [Windows builds and publisher signing](./windows-signing.mdx).
+No Windows CI runner is required.
+
 | Event | Result |
 | --- | --- |
 | Push to a feature branch | CI, runtime checks, Android, Linux desktop and Windows desktop build on Linux. |

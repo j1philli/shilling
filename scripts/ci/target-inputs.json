@@ -21,7 +21,7 @@
     {"paths": ["server/*", "supabase/*", "scripts/ci/deploy-coolify.py"], "targets": ["server"]},
     {"paths": ["src-tauri/*"], "targets": ["desktop"]},
     {"paths": ["scripts/ci/build-desktop-linux.sh"], "targets": ["linux"]},
-    {"paths": ["scripts/ci/build-desktop-windows.sh", "scripts/ci/check-windows-agent.ps1", "scripts/ci/setup-windows-agent.ps1"], "targets": ["windows"]},
+    {"paths": ["scripts/ci/build-desktop-windows.sh", "scripts/ci/windows_signing.py", "deploy/desktop/windows-cross.Dockerfile", "scripts/ci/check-windows-agent.ps1", "scripts/ci/setup-windows-agent.ps1"], "targets": ["windows"]},
     {"paths": ["scripts/ci/build-desktop-macos.sh"], "targets": ["macos"]},
     {"paths": ["scripts/ci/check-macos-agent.sh", "scripts/ci/setup-macos-agent.sh"], "targets": ["ios", "macos"]},
     {"paths": ["scripts/ci/check-linux-agent.sh", "scripts/ci/setup-linux-agent.sh"], "targets": ["android", "webBundle", "server"]},

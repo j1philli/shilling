@@ -25,6 +25,7 @@ project {
     buildType(DesktopLinux)
     buildType(DesktopMacOS)
     buildType(DesktopWindows)
+    buildType(DesktopWindowsSigned)
     buildType(LinuxTargets)
     buildType(AllTargets)
 
@@ -380,6 +381,45 @@ object DesktopWindows : BuildType({
     requirements {
         equals("teamcity.agent.jvm.os.name", "Linux")
     }
+})
+
+// Only this main-only job maps Azure signing parameters into its environment.
+// Manual until the publisher has completed identity validation and a signed
+// installer has been tested. No fallback to an unsigned artifact on failure.
+object DesktopWindowsSigned : BuildType({
+    name = "Desktop Windows — Signed (Linux)"
+    description = "Manually build and verify an Azure-signed Windows installer from main on Linux"
+    artifactRules = "desktop-artifacts/windows/** => desktop-windows-signed.zip"
+    maxRunningBuilds = 1
+    vcs {
+        root(DslContext.settingsRoot)
+        branchFilter = "+:<default>"
+    }
+    params {
+        param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
+        param("env.WINDOWS_SIGNING_TENANT_ID", "%shilling.windows.azure.tenant.id%")
+        param("env.WINDOWS_SIGNING_CLIENT_ID", "%shilling.windows.azure.client.id%")
+        password("env.WINDOWS_SIGNING_CLIENT_SECRET", "%shilling.windows.azure.client.secret%",
+            display = ParameterDisplay.HIDDEN)
+        param("env.WINDOWS_SIGNING_ENDPOINT", "%shilling.windows.azure.endpoint%")
+        param("env.WINDOWS_SIGNING_ACCOUNT", "%shilling.windows.azure.account%")
+        param("env.WINDOWS_SIGNING_PROFILE", "%shilling.windows.azure.profile%")
+    }
+    dependencies {
+        snapshot(WebDeploy) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        artifacts(WebDeploy) {
+            buildRule = sameChain()
+            artifactRules = "web-app-dist.zip!** => web-app-dist"
+            cleanDestination = true
+        }
+    }
+    steps {
+        script {
+            name = "Build, sign, and verify Windows installer"
+            scriptContent = "SHILLING_WINDOWS_SIGNED=1 bash scripts/ci/build-desktop-windows.sh"
+        }
+    }
+    requirements { equals("teamcity.agent.jvm.os.name", "Linux") }
 })
 
 // =============================================================================
