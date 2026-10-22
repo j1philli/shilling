@@ -10,7 +10,8 @@ For bugs that are not security sensitive, use a regular GitHub issue.
 
 The patched artifacts pass the checks below. The patched production server
 is deployed, the Cloudflare tunnel has recovered, and TeamCity agent 1 has
-restarted on patched Java. Verification scope and remaining limits are below. Machine-readable evidence is in
+restarted on patched Java. **Full clearance remains blocked by the TeamCity
+server update:** it still runs 2026.2 and needs the 2026.2.1 security release. Machine-readable evidence is in
 [`docs/security-verification-2026-10-21.json`](docs/security-verification-2026-10-21.json).
 
 ### Changes
@@ -87,6 +88,10 @@ safety defect.
   October 22. The runtime and selection are retained under its configuration
   directory. Health checks publish their selected toolchain to subsequent
   TeamCity steps; Shilling jobs use their agent JVM for `JAVA_HOME`.
+- TeamCity server reports 2026.2 build 238924. JetBrains recommends
+  [2026.2.1 for security fixes](https://blog.jetbrains.com/teamcity/2026/10/teamcity-2026-2-1-2026-1-5-bugfix/).
+  Updating its Docker container requires access to Unraid Tower at 192.168.1.17;
+  the configured Coolify instance does not manage that host.
 - Local Node defaults now select 22.23.4, and this project's direnv configuration
   prefers the installed patched Java. Existing unrelated processes were not stopped.
 
