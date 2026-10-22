@@ -68,7 +68,19 @@ object CI : BuildType({
         }
         script {
             name = "Install npm dependencies"
-            scriptContent = "npm install"
+            scriptContent = "npm ci"
+        }
+        script {
+            name = "Node security regression checks"
+            scriptContent = "npm run test:security"
+        }
+        script {
+            name = "GLib safety regression checks"
+            scriptContent = "just test-glib-security"
+        }
+        script {
+            name = "npm security advisories"
+            scriptContent = "npm audit --audit-level=low && npm audit --prefix scripts/ci/smoke --audit-level=low"
         }
         script {
             name = "Architecture guard"

@@ -18,39 +18,20 @@ function Check-Command {
 }
 
 function Check-Java {
-    $cmd = Get-Command java -ErrorAction SilentlyContinue
-    if (-not $cmd) {
-        Write-Host "FAIL: JDK 21+ - 'java' not found"
-        $script:fail = 1
-        return
-    }
-    $verOutput = & java -version 2>&1 | Select-Object -First 1
-    if ($verOutput -match '"(\d+)') {
-        $ver = [int]$Matches[1]
-        if ($ver -lt 21) {
-            Write-Host "FAIL: JDK 21+ - found JDK $ver"
-            $script:fail = 1
-        } else {
-            Write-Host "  OK: JDK - version $ver"
-        }
-    } else {
-        Write-Host "WARN: JDK - could not parse version from: $verOutput"
-    }
+    & node (Join-Path $PSScriptRoot "check-java-version.cjs")
+    if ($LASTEXITCODE -ne 0) { $script:fail = 1 }
 }
 
 function Check-Node {
     $cmd = Get-Command node -ErrorAction SilentlyContinue
     if (-not $cmd) {
-        Write-Host "FAIL: Node.js 18+ - 'node' not found"
+        Write-Host "FAIL: Patched Node.js (see .nvmrc) - 'node' not found"
         $script:fail = 1
         return
     }
-    $ver = (& node --version) -replace 'v(\d+).*', '$1'
-    if ([int]$ver -lt 18) {
-        Write-Host "FAIL: Node.js 18+ - found Node $ver"
+    & node (Join-Path $PSScriptRoot "check-node-version.cjs")
+    if ($LASTEXITCODE -ne 0) {
         $script:fail = 1
-    } else {
-        Write-Host "  OK: Node.js - v$ver"
     }
 }
 

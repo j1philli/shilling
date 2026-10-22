@@ -7,6 +7,20 @@ if [ -f /etc/profile.d/shilling-ci-agent.sh ]; then
   source /etc/profile.d/shilling-ci-agent.sh
 fi
 
+# Prefer the side-by-side security toolchain without replacing system tools.
+managed_tools="$HOME/.local/share/shilling"
+if [ -x "$managed_tools/jdk-25.0.5.0.2/bin/java" ]; then
+  export JAVA_HOME="$managed_tools/jdk-25.0.5.0.2"
+  export PATH="$JAVA_HOME/bin:$PATH"
+fi
+case "$(uname -s)/$(uname -m)" in
+  Linux/x86_64) managed_node="$managed_tools/node-v22.23.4-linux-x64" ;;
+  *) managed_node='' ;;
+esac
+if [ -n "$managed_node" ] && [ -x "$managed_node/bin/node" ]; then
+  export PATH="$managed_node/bin:$PATH"
+fi
+
 fail=0
 
 check_command() {
@@ -23,36 +37,20 @@ check_command() {
 }
 
 check_java() {
-  if ! command -v java &>/dev/null; then
-    echo "FAIL: JDK 21+ — 'java' not found"
+  if ! node "$(dirname "${BASH_SOURCE[0]}")/check-java-version.cjs"; then
     fail=1
-    return
-  fi
-
-  local ver
-  ver=$(java -version 2>&1 | awk -F'"' '/version/ { split($2, parts, "."); print parts[1]; exit }')
-  if [ "$ver" -lt 21 ]; then
-    echo "FAIL: JDK 21+ — found JDK $ver"
-    fail=1
-  else
-    echo "  OK: JDK — version $ver"
   fi
 }
 
 check_node() {
   if ! command -v node &>/dev/null; then
-    echo "FAIL: Node.js 18+ — 'node' not found"
+    echo "FAIL: Patched Node.js (see .nvmrc) — 'node' not found"
     fail=1
     return
   fi
 
-  local ver
-  ver=$(node --version | sed 's/v\([0-9]*\).*/\1/')
-  if [ "$ver" -lt 18 ]; then
-    echo "FAIL: Node.js 18+ — found Node $ver"
+  if ! node "$(dirname "${BASH_SOURCE[0]}")/check-node-version.cjs"; then
     fail=1
-  else
-    echo "  OK: Node.js — $(node --version)"
   fi
 }
 

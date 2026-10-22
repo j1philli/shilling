@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+node "$(dirname "$0")/scripts/ci/check-node-version.cjs"
+node "$(dirname "$0")/scripts/ci/check-java-version.cjs"
+
 SHILLING_DB_NAME="${SHILLING_DB_NAME:-shilling}"
 SHILLING_WASM_VARIANT="${SHILLING_WASM_VARIANT:-Release}"
 

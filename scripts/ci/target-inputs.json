@@ -19,7 +19,7 @@
     {"paths": ["app/shared/src@jvm/*", "app/shared/src/jvmMain/*"], "targets": []},
     {"paths": ["app/shared/*"], "targets": ["clients"]},
     {"paths": ["server/*", "supabase/*", "scripts/ci/deploy-coolify.py"], "targets": ["server"]},
-    {"paths": ["src-tauri/*"], "targets": ["desktop"]},
+    {"paths": ["src-tauri/*", "third_party/glib/*"], "targets": ["desktop"]},
     {"paths": ["scripts/ci/build-desktop-linux.sh"], "targets": ["linux"]},
     {"paths": ["scripts/ci/build-desktop-windows.sh", "scripts/ci/check-windows-agent.ps1", "scripts/ci/setup-windows-agent.ps1"], "targets": ["windows"]},
     {"paths": ["scripts/ci/build-desktop-macos.sh"], "targets": ["macos"]},

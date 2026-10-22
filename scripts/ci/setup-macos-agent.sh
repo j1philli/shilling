@@ -44,12 +44,21 @@ sudo xcodebuild -license accept 2>/dev/null || true
 
 # ---------- Node.js ----------
 
-if ! command -v node &>/dev/null || [ "$(node --version | sed 's/v\([0-9]*\).*/\1/')" -lt 18 ]; then
-    echo "Installing Node.js..."
-    brew install node
-else
-    echo "Node.js $(node --version) already installed"
+if ! command -v node &>/dev/null || ! node "$(dirname "${BASH_SOURCE[0]}")/check-node-version.cjs"; then
+    echo "Installing a patched Node.js LTS release..."
+    if brew list --versions node@22 >/dev/null 2>&1; then
+        brew upgrade node@22
+    else
+        brew install node@22
+    fi
+    export PATH="$(brew --prefix node@22)/bin:$PATH"
+    echo "Add $(brew --prefix node@22)/bin to the CI agent PATH."
 fi
+node "$(dirname "${BASH_SOURCE[0]}")/check-node-version.cjs"
+
+export JAVA_HOME="$(bash "$(dirname "${BASH_SOURCE[0]}")/setup-java.sh)"
+export PATH="$JAVA_HOME/bin:$PATH"
+node "$(dirname "${BASH_SOURCE[0]}")/check-java-version.cjs"
 
 # ---------- Rust ----------
 

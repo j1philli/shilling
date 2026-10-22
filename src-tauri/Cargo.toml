@@ -16,3 +16,7 @@ objc2-app-kit = { version = "0.3", features = ["NSResponder", "NSToolbar", "NSWi
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
+
+# Backport of gtk-rs/gtk-rs-core#1343 until Tauri supports GLib >=0.20.
+[patch.crates-io]
+glib = { path = "../third_party/glib" }

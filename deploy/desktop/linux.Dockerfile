@@ -1,3 +1,5 @@
+FROM node:22.23.4-bookworm-slim AS node
+
 FROM rust:1.90-bookworm AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8,16 +10,19 @@ ENV LIBCLANG_PATH=/usr/lib/llvm-14/lib
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential ca-certificates curl file libayatana-appindicator3-dev \
     libdbus-1-dev libfuse2 libpipewire-0.3-dev libssl-dev libwebkit2gtk-4.1-dev libxdo-dev \
-    librsvg2-dev nodejs npm patchelf pkg-config rpm wget xz-utils \
+    librsvg2-dev patchelf pkg-config rpm wget xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y --no-install-recommends libclang-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN npm install --global @tauri-apps/cli@2.10.0
+COPY --from=node /usr/local/ /usr/local/
+
+RUN node --version && npm install --global @tauri-apps/cli@2.10.0
 
 WORKDIR /workspace
 COPY src-tauri/ src-tauri/
+COPY third_party/glib/ third_party/glib/
 COPY web-app-dist/ web-app-dist/
 
 WORKDIR /workspace/src-tauri
