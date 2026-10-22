@@ -82,3 +82,6 @@ if ($fail -ne 0) {
     exit 1
 }
 Write-Host "RESULT: All checks passed."
+
+node (Join-Path $PSScriptRoot "export-teamcity-runtime.cjs")
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

@@ -23,3 +23,12 @@ test('Java security floor rejects outdated, EOL and early access releases', () =
     assert.equal(isSupportedJava(version), true, version);
   }
 });
+
+const { runtimeMessages } = require('../export-teamcity-runtime.cjs');
+test('TeamCity retains the selected toolchain between steps with escaped paths', () => {
+  assert.deepEqual(runtimeMessages({ PATH: '/local/bin' }), []);
+  assert.deepEqual(runtimeMessages({ TEAMCITY_VERSION: '2026.2', PATH: "/tools/[jdk]/it's|bin\n/bin", JAVA_HOME: '/tools/jdk' }), [
+    "##teamcity[setParameter name='env.PATH' value='/tools/|[jdk|]/it|'s||bin|n/bin']",
+    "##teamcity[setParameter name='env.JAVA_HOME' value='/tools/jdk']",
+  ]);
+});

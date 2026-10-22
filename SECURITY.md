@@ -8,9 +8,9 @@ For bugs that are not security sensitive, use a regular GitHub issue.
 
 ## Dependency review — October 21, 2026
 
-The patched artifacts pass the checks below. **The live environment is not yet
-cleared:** the agent JVM update remains open. The patched production server
-is deployed, and the Cloudflare tunnel has recovered. Machine-readable evidence is in
+The patched artifacts pass the checks below. The patched production server
+is deployed, the Cloudflare tunnel has recovered, and TeamCity agent 1 has
+restarted on patched Java. Verification scope and remaining limits are below. Machine-readable evidence is in
 [`docs/security-verification-2026-10-21.json`](docs/security-verification-2026-10-21.json).
 
 ### Changes
@@ -83,8 +83,10 @@ safety defect.
   API returns HTTP 200 for `/health` and `/api/config`; error 1033 has cleared.
 - TeamCity agent 1 now has checksum-verified Node 22.23.4 and Java 25.0.5.0.2
   installed beside system tools. The new health scripts prefer these. Its
-  already-running agent JVM still reports Corretto 21.0.10 and needs a safe
-  restart with the updated Java selected.
+  agent launcher and JVM were gracefully restarted on Java 25.0.5.0.2 on
+  October 22. The runtime and selection are retained under its configuration
+  directory. Health checks publish their selected toolchain to subsequent
+  TeamCity steps; Shilling jobs use their agent JVM for `JAVA_HOME`.
 - Local Node defaults now select 22.23.4, and this project's direnv configuration
   prefers the installed patched Java. Existing unrelated processes were not stopped.
 

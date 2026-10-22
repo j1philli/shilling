@@ -1,5 +1,5 @@
 {
-  "reviewed_at_utc": "2026-10-22T14:19:30.377707+00:00",
+  "reviewed_at_utc": "2026-10-22T14:28:30.710391+00:00",
   "scope": "Repository, packaged server/web images, macOS release compilation, and accessible live services",
   "images": [
     {
@@ -87,7 +87,7 @@
     "agent_id": 1,
     "agent_installed_node": "22.23.4",
     "agent_installed_java": "25.0.5.0.2",
-    "agent_running_jvm": "21.0.10",
+    "agent_running_jvm": "25.0.5.0.2",
     "cloudflare_access": "Configured TeamCity token and local cloudflared certificate cannot see the shilling.finance zone; browser is signed out.",
     "unraid_tunnel_connections": 4,
     "production_rollout": "passed: existing release helper public health and Supabase verification",
@@ -106,13 +106,15 @@
       "legacy_app_stopped": null,
       "previous_image_name": "ghcr.io/j1philli/shilling-server@sha256",
       "previous_image_tag": "d7a4bfde9768142242ae92650deee6871b019a69886ddefed2818ad3a576c3a8"
-    }
+    },
+    "agent_restart_build": 3640,
+    "agent_persisted_java": "/opt/buildagent/conf/security-runtime/jdk-25.0.5.0.2",
+    "source_merge_commit": "0ff29a6a78164e16a5e7549ae427c6e3f86eff84"
   },
   "limits": [
     "Mobile and Windows/Linux installers have not been rebuilt.",
     "CI Maven DSL generator fails locally with a pre-existing JDOM incompatibility.",
-    "Git-sourced/native dependencies are not certified by package-database scans.",
-    "Agent JVM restart with patched Java is still pending."
+    "Git-sourced/native dependencies are not certified by package-database scans."
   ],
   "published_candidate": {
     "repository": "ghcr.io/j1philli/shilling-server",
