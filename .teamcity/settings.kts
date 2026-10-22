@@ -44,6 +44,8 @@ project {
         param("env.CLOUDFLARE_PAGES_DOMAIN", "app.shilling.finance")
         param("env.AMPER_SHARED_CACHES_ROOT", "/opt/shilling-ci/amper-cache")
         param("env.AMPER_BOOTSTRAP_CACHE_DIR", "/opt/shilling-ci/amper-bootstrap")
+        // Build jobs use the same maintained JDK as their agent process.
+        param("env.JAVA_HOME", "%teamcity.agent.jvm.java.home%")
         param("env.CI_RETRY_ATTEMPTS", "5")
         param("env.CI_RETRY_DELAY_SECONDS", "120")
     }

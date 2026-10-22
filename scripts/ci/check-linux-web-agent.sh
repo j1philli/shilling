@@ -112,3 +112,5 @@ if [ "$fail" -ne 0 ]; then
   exit 1
 fi
 echo "RESULT: All checks passed."
+
+node "$(dirname "${BASH_SOURCE[0]}")/export-teamcity-runtime.cjs"

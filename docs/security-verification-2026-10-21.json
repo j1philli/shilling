@@ -1,5 +1,5 @@
 {
-  "reviewed_at_utc": "2026-10-22T14:19:30.377707+00:00",
+  "reviewed_at_utc": "2026-10-22T14:38:59.321149+00:00",
   "scope": "Repository, packaged server/web images, macOS release compilation, and accessible live services",
   "images": [
     {
@@ -63,7 +63,11 @@
     "ci_python_tests_on_live_ci": 71,
     "npm_audit_root_advisory_matches": 0,
     "npm_audit_smoke_advisory_matches": 0,
-    "live_personal_build_status": "SUCCESS"
+    "live_personal_build_status": "SUCCESS",
+    "full_live_ci_build": 3651,
+    "full_live_ci_tests_passed": 206,
+    "full_live_ci_status": "SUCCESS",
+    "runtime_security_regression_tests": 4
   },
   "source_backport": {
     "package": "glib",
@@ -87,7 +91,7 @@
     "agent_id": 1,
     "agent_installed_node": "22.23.4",
     "agent_installed_java": "25.0.5.0.2",
-    "agent_running_jvm": "21.0.10",
+    "agent_running_jvm": "25.0.5.0.2",
     "cloudflare_access": "Configured TeamCity token and local cloudflared certificate cannot see the shilling.finance zone; browser is signed out.",
     "unraid_tunnel_connections": 4,
     "production_rollout": "passed: existing release helper public health and Supabase verification",
@@ -106,13 +110,26 @@
       "legacy_app_stopped": null,
       "previous_image_name": "ghcr.io/j1philli/shilling-server@sha256",
       "previous_image_tag": "d7a4bfde9768142242ae92650deee6871b019a69886ddefed2818ad3a576c3a8"
-    }
+    },
+    "agent_restart_build": 3640,
+    "agent_persisted_java": "/opt/buildagent/conf/security-runtime/jdk-25.0.5.0.2",
+    "source_merge_commit": "0ff29a6a78164e16a5e7549ae427c6e3f86eff84",
+    "teamcity_server_version": "2026.2.1 (build 239120)",
+    "teamcity_server_update": "Verified after user updated the Docker host deployment.",
+    "teamcity_server_advisory": "https://blog.jetbrains.com/teamcity/2026/10/teamcity-2026-2-1-2026-1-5-bugfix/",
+    "teamcity_server_backup_requested": "pre-security-update-20261022_20261022_083125.zip",
+    "teamcity_server_backup_status": "API returned Idle after initiating the configuration/database/personal-changes backup; verify the archive on the host before updating.",
+    "agent_restart_postcheck_build": 3641,
+    "teamcity_server_running_jvm": "21.0.10+7",
+    "teamcity_server_jvm_verification": "Startup diagnostic dated 2026-10-22 08:33:23 MDT; only Java version identifiers were extracted, without exposing log contents.",
+    "agent_connected_after_server_update": true,
+    "agent_distribution_version": "239120"
   },
   "limits": [
     "Mobile and Windows/Linux installers have not been rebuilt.",
     "CI Maven DSL generator fails locally with a pre-existing JDOM incompatibility.",
     "Git-sourced/native dependencies are not certified by package-database scans.",
-    "Agent JVM restart with patched Java is still pending."
+    "TeamCity server software is updated to 2026.2.1, but its bundled JVM still reports 21.0.10+7 and requires a patched runtime through the Docker host."
   ],
   "published_candidate": {
     "repository": "ghcr.io/j1philli/shilling-server",

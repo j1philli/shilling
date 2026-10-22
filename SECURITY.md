@@ -8,9 +8,11 @@ For bugs that are not security sensitive, use a regular GitHub issue.
 
 ## Dependency review — October 21, 2026
 
-The patched artifacts pass the checks below. **The live environment is not yet
-cleared:** the agent JVM update remains open. The patched production server
-is deployed, and the Cloudflare tunnel has recovered. Machine-readable evidence is in
+The patched artifacts pass the checks below. The patched production server
+is deployed, the Cloudflare tunnel has recovered, and TeamCity agent 1 has
+restarted on patched Java. **Full clearance remains blocked by the TeamCity
+server JVM:** the server software is updated to 2026.2.1, but its startup
+diagnostics still report Java 21.0.10+7. Machine-readable evidence is in
 [`docs/security-verification-2026-10-21.json`](docs/security-verification-2026-10-21.json).
 
 ### Changes
@@ -83,8 +85,17 @@ safety defect.
   API returns HTTP 200 for `/health` and `/api/config`; error 1033 has cleared.
 - TeamCity agent 1 now has checksum-verified Node 22.23.4 and Java 25.0.5.0.2
   installed beside system tools. The new health scripts prefer these. Its
-  already-running agent JVM still reports Corretto 21.0.10 and needs a safe
-  restart with the updated Java selected.
+  agent launcher and JVM were gracefully restarted on Java 25.0.5.0.2 on
+  October 22. The runtime and selection are retained under its configuration
+  directory. Health checks publish their selected toolchain to subsequent
+  TeamCity steps; Shilling jobs use their agent JVM for `JAVA_HOME`.
+- TeamCity server now reports 2026.2.1 build 239120 after the user updated it
+  on Unraid Tower. Agent 1 automatically upgraded to build 239120, reconnected,
+  and retained Java 25.0.5.0.2. Full CI build 3651 passed all 206 tests. The
+  server startup diagnostic at 08:33:23 MDT still reports Java 21.0.10+7;
+  updating the TeamCity application did not update its bundled JVM to the
+  October security floor. Its Docker host must select a patched Java runtime
+  (21.0.13+ or 25.0.5+) before the CI environment can be cleared.
 - Local Node defaults now select 22.23.4, and this project's direnv configuration
   prefers the installed patched Java. Existing unrelated processes were not stopped.
 
