@@ -18,10 +18,12 @@ persist_environment() {
     local android_platform_tools="$android_home/platform-tools"
     local profile_file="/etc/profile.d/shilling-ci-agent.sh"
     local env_file="/etc/environment"
-    local path_prefix="$cargo_home/bin:$android_tools:$android_platform_tools"
+    local path_prefix="$JAVA_HOME/bin:$cargo_home/bin:$android_tools:$android_platform_tools"
     local agent_props
 
     cat > "$profile_file" <<EOF
+export JAVA_HOME="$JAVA_HOME"
+export PATH="$JAVA_HOME/bin:\$PATH"
 export RUSTUP_HOME="$rustup_home"
 export CARGO_HOME="$cargo_home"
 export ANDROID_HOME="$android_home"
@@ -44,8 +46,9 @@ EOF
     chmod 0644 "$profile_file"
 
     touch "$env_file"
-    sed -i '/^RUSTUP_HOME=/d;/^CARGO_HOME=/d;/^ANDROID_HOME=/d;/^ANDROID_SDK_ROOT=/d;/^AMPER_SHARED_CACHES_ROOT=/d;/^AMPER_BOOTSTRAP_CACHE_DIR=/d;/^PATH=/d' "$env_file"
+    sed -i '/^JAVA_HOME=/d;/^RUSTUP_HOME=/d;/^CARGO_HOME=/d;/^ANDROID_HOME=/d;/^ANDROID_SDK_ROOT=/d;/^AMPER_SHARED_CACHES_ROOT=/d;/^AMPER_BOOTSTRAP_CACHE_DIR=/d;/^PATH=/d' "$env_file"
     {
+        echo "JAVA_HOME=$JAVA_HOME"
         echo "RUSTUP_HOME=$rustup_home"
         echo "CARGO_HOME=$cargo_home"
         echo "ANDROID_HOME=$android_home"
@@ -60,8 +63,9 @@ EOF
         /opt/buildagent/conf/buildAgent.properties
     do
       if [ -f "$agent_props" ]; then
-        sed -i '/^env\.RUSTUP_HOME=/d;/^env\.CARGO_HOME=/d;/^env\.ANDROID_HOME=/d;/^env\.ANDROID_SDK_ROOT=/d;/^env\.AMPER_SHARED_CACHES_ROOT=/d;/^env\.AMPER_BOOTSTRAP_CACHE_DIR=/d;/^env\.PATH=/d' "$agent_props"
+        sed -i '/^env\.JAVA_HOME=/d;/^env\.RUSTUP_HOME=/d;/^env\.CARGO_HOME=/d;/^env\.ANDROID_HOME=/d;/^env\.ANDROID_SDK_ROOT=/d;/^env\.AMPER_SHARED_CACHES_ROOT=/d;/^env\.AMPER_BOOTSTRAP_CACHE_DIR=/d;/^env\.PATH=/d' "$agent_props"
         {
+            echo "env.JAVA_HOME=$JAVA_HOME"
             echo "env.RUSTUP_HOME=$rustup_home"
             echo "env.CARGO_HOME=$cargo_home"
             echo "env.ANDROID_HOME=$android_home"
@@ -125,14 +129,17 @@ else
     echo "JDK 21+ already installed"
 fi
 
-# Node.js 22 LTS (via NodeSource)
-if ! command -v node &>/dev/null || [ "$(node --version | sed 's/v\([0-9]*\).*/\1/')" -lt 18 ]; then
-    echo "Installing Node.js 22..."
+# Node.js 22 LTS with the October 2026 security fixes.
+if ! command -v node &>/dev/null || ! node "$(dirname "${BASH_SOURCE[0]}")/check-node-version.cjs"; then
+    echo "Installing a patched Node.js 22 release..."
     curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
     apt-get install -y -qq nodejs
-else
-    echo "Node.js $(node --version) already installed"
 fi
+node "$(dirname "${BASH_SOURCE[0]}")/check-node-version.cjs"
+
+export JAVA_HOME="$(bash "$(dirname "${BASH_SOURCE[0]}")/setup-java.sh)"
+export PATH="$JAVA_HOME/bin:$PATH"
+node "$(dirname "${BASH_SOURCE[0]}")/check-java-version.cjs"
 
 # ripgrep (used by architecture guard)
 if ! command -v rg &>/dev/null; then

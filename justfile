@@ -23,7 +23,10 @@ generate-icons:
 # ─── Setup ─────────────────────────────────────────────────────────
 
 # One-time setup after fresh clone (deps + WebRTC framework)
-setup: deps setup-webrtc
+setup: setup-java deps setup-webrtc
+
+setup-java:
+    bash scripts/ci/setup-java.sh
 
 # ─── Build ───────────────────────────────────────────────────────────
 
@@ -548,6 +551,10 @@ ios-logs:
 # Enforce architecture invariants around transport and data flow
 guard-architecture:
     ./scripts/enforce-architecture.sh
+
+# Check the vendored GLib safety fix with optimizations enabled.
+test-glib-security:
+    CARGO_TARGET_DIR="{{justfile_directory()}}/src-tauri/target/glib-security" cargo test --manifest-path third_party/glib/Cargo.toml --release --lib variant_iter::tests
 
 # Run the architecture guard and JVM tests
 test:

@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "test": "just test",
-    "test:web": "node --test app/web-app/test/*.test.cjs"
+    "test:web": "node --test app/web-app/test/*.test.cjs",
+    "preinstall": "node scripts/ci/check-node-version.cjs",
+    "test:security": "node --test scripts/ci/tests/node-version.test.cjs"
   },
   "keywords": [],
   "author": "",
@@ -20,5 +22,8 @@
   },
   "devDependencies": {
     "binaryen": "132.0.0"
+  },
+  "engines": {
+    "node": ">=22.23.4 <23 || >=24.22.1 <25 || >=26.12.1 <27"
   }
 }
