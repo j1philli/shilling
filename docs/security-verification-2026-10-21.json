@@ -1,5 +1,5 @@
 {
-  "reviewed_at_utc": "2026-10-22T14:28:30.710391+00:00",
+  "reviewed_at_utc": "2026-10-22T14:38:59.321149+00:00",
   "scope": "Repository, packaged server/web images, macOS release compilation, and accessible live services",
   "images": [
     {
@@ -63,7 +63,11 @@
     "ci_python_tests_on_live_ci": 71,
     "npm_audit_root_advisory_matches": 0,
     "npm_audit_smoke_advisory_matches": 0,
-    "live_personal_build_status": "SUCCESS"
+    "live_personal_build_status": "SUCCESS",
+    "full_live_ci_build": 3651,
+    "full_live_ci_tests_passed": 206,
+    "full_live_ci_status": "SUCCESS",
+    "runtime_security_regression_tests": 4
   },
   "source_backport": {
     "package": "glib",
@@ -110,18 +114,22 @@
     "agent_restart_build": 3640,
     "agent_persisted_java": "/opt/buildagent/conf/security-runtime/jdk-25.0.5.0.2",
     "source_merge_commit": "0ff29a6a78164e16a5e7549ae427c6e3f86eff84",
-    "teamcity_server_version": "2026.2 (build 238924)",
-    "teamcity_server_update": "Pending 2026.2.1 security update: requires Unraid Tower host login; TeamCity CLI cannot replace the Docker container.",
+    "teamcity_server_version": "2026.2.1 (build 239120)",
+    "teamcity_server_update": "Verified after user updated the Docker host deployment.",
     "teamcity_server_advisory": "https://blog.jetbrains.com/teamcity/2026/10/teamcity-2026-2-1-2026-1-5-bugfix/",
     "teamcity_server_backup_requested": "pre-security-update-20261022_20261022_083125.zip",
     "teamcity_server_backup_status": "API returned Idle after initiating the configuration/database/personal-changes backup; verify the archive on the host before updating.",
-    "agent_restart_postcheck_build": 3641
+    "agent_restart_postcheck_build": 3641,
+    "teamcity_server_running_jvm": "21.0.10+7",
+    "teamcity_server_jvm_verification": "Startup diagnostic dated 2026-10-22 08:33:23 MDT; only Java version identifiers were extracted, without exposing log contents.",
+    "agent_connected_after_server_update": true,
+    "agent_distribution_version": "239120"
   },
   "limits": [
     "Mobile and Windows/Linux installers have not been rebuilt.",
     "CI Maven DSL generator fails locally with a pre-existing JDOM incompatibility.",
     "Git-sourced/native dependencies are not certified by package-database scans.",
-    "TeamCity server remains on 2026.2 and needs the 2026.2.1 security update through its Docker host."
+    "TeamCity server software is updated to 2026.2.1, but its bundled JVM still reports 21.0.10+7 and requires a patched runtime through the Docker host."
   ],
   "published_candidate": {
     "repository": "ghcr.io/j1philli/shilling-server",
