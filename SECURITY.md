@@ -9,8 +9,8 @@ For bugs that are not security sensitive, use a regular GitHub issue.
 ## Dependency review — October 21, 2026
 
 The patched artifacts pass the checks below. **The live environment is not yet
-cleared:** production rollout, the agent JVM update, and a Cloudflare tunnel
-outage remain open. Machine-readable evidence is in
+cleared:** the agent JVM update remains open. The patched production server
+is deployed, and the Cloudflare tunnel has recovered. Machine-readable evidence is in
 [`docs/security-verification-2026-10-21.json`](docs/security-verification-2026-10-21.json).
 
 ### Changes
@@ -74,13 +74,13 @@ safety defect.
   provenance are in the JSON evidence. Registry verification is recorded separately
   from local image scans. TeamCity personal build 3619 finished successfully,
   and both architectures of its immutable registry digest were scanned independently.
-- The production origin returns healthy responses in Supabase auth mode, but its
-  current image uses Java 25.0.4.1. Deploy and verify the patched image before
-  clearing production. The old image reference is retained for rollback. The
-  release helper requires public health/authentication verification; the tunnel
-  outage currently prevents that check, so production has not been changed.
-- The public API returns Cloudflare error 1033 while the origin succeeds. Restore
-  the tunnel before claiming the public service is healthy.
+- The production origin returns healthy responses in Supabase auth mode, and its
+  current image is the verified Java 25.0.5.0.2 candidate. The existing release
+  helper deployed it and passed public health/Supabase checks on October 22.
+  Missing and invalid tokens are rejected by live signaling with close code 1008.
+  The old image reference is retained for rollback.
+- The `unraid` tunnel has four active connections as of October 22. The public
+  API returns HTTP 200 for `/health` and `/api/config`; error 1033 has cleared.
 - TeamCity agent 1 now has checksum-verified Node 22.23.4 and Java 25.0.5.0.2
   installed beside system tools. The new health scripts prefer these. Its
   already-running agent JVM still reports Corretto 21.0.10 and needs a safe
@@ -92,8 +92,8 @@ These checks do not certify installed mobile apps, end-user operating systems,
 or every embedded native library. Windows/Linux installers and mobile releases
 have not been rebuilt in this review. The local TeamCity DSL generator also has
 an existing Maven/JDOM incompatibility. Personal build 3619 passed on the live
-Linux agent, but the Git-managed branch settings have not been imported from an
-unpushed source commit.
+Linux agent. The source branch is now pushed; import and validation of the
+Git-managed branch settings remain separate from that personal build.
 
 The source changes are committed unsigned at the user's explicit request after
 the configured 1Password signing request expired. The Git signing configuration
