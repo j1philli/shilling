@@ -14,24 +14,64 @@ before a stable release.
 
 ## Try it locally
 
-On macOS, install [Homebrew](https://brew.sh/) and the required command-line tools:
+Development is done on macOS (Apple silicon or Intel). You need:
+
+- [Homebrew](https://brew.sh/) and the Xcode command-line tools (`xcode-select --install`)
+- Xcode 15 or later with an iOS Simulator runtime, for the iOS app only
+- Android Studio with the Android SDK 37 platform and an emulator, for the Android app only
+
+### 1. Install the tools
 
 ```sh
-brew bundle
-cargo install tauri-cli
-just setup
-just desktop
+brew bundle                                      # just, direnv, node@22, openjdk@21, rust, imagemagick
+cargo install tauri-cli --version "^2" --locked  # desktop shell
 ```
 
-`just setup` installs npm dependencies, generates app icons, and downloads the iOS WebRTC framework. It requires Xcode command-line tools and a working Java 21 installation. The desktop command also needs the Tauri build dependencies for your operating system. For the browser development build, run `just web` instead. To run the iOS simulator or Android emulator, use `just ios` or `just android` after installing the corresponding SDK and simulator/emulator.
+If you already manage Rust with [rustup](https://rustup.rs/), its toolchain in `~/.cargo/bin` takes precedence over Homebrew's.
 
-To try sync between devices, start the signaling server in a separate terminal:
+### 2. Load the project environment
+
+`node@22` and `openjdk@21` are keg-only in Homebrew, so they are not on your `PATH` by default. The repository's `.envrc` adds them (and `~/.cargo/bin`) when you enter the directory. [Hook direnv into your shell](https://direnv.net/docs/hook.html) once, for example with `eval "$(direnv hook zsh)"` in `~/.zshrc`, then allow the project:
+
+```sh
+cd shilling
+direnv allow
+```
+
+The build checks for patched runtimes: Node.js 22.23.4+ (or 24.22.1+ / 26.12.1+) and Java 21.0.13+ (or 25.0.5+). Without direnv, put a supported `node` on your `PATH` and set `JAVA_HOME` yourself before running `just`.
+
+### 3. Set up and run
+
+```sh
+just setup     # Java runtime, npm dependencies, iOS WebRTC framework
+just desktop   # build the web bundle and launch the Tauri desktop app
+```
+
+`just setup` downloads a pinned JDK 25 into `~/.local/share/shilling/` (it does not change your system Java; `.envrc` selects it), runs `npm install`, and downloads `WebRTC.xcframework` for iOS. The first build also downloads the Kotlin Toolchain and its dependencies, so it takes several minutes.
+
+Other targets:
+
+| Command | What it does |
+| --- | --- |
+| `just web` | Serve the web build at `http://localhost:3000` and rebuild on source changes |
+| `just ios` | Build and launch the native iOS app in the Simulator |
+| `just android` | Build and install on an emulator; set `ANDROID_AVD` to your emulator name (default `Pixel_9_Pro_XL_API_35`). Expects the SDK at `~/Library/Android/sdk` |
+| `just server` | Run the signaling server on port 8081 |
+| `just build-all` | Compile every module for every platform |
+
+Development builds use a separate `shilling-dev` database and dev icons, so they don't touch data from a production install.
+
+### Sync between devices
+
+Start the signaling server in a separate terminal:
 
 ```sh
 just server
 ```
 
-It defaults to self-hosted mode on port 8081 and needs no Supabase credentials. In the app, choose **Self-hosted** and enter a server URL reachable from each device. The self-hosted server does not authenticate household joins; operate it only in an environment where you control access. For optional TURN configuration and hosted Supabase setup, see the [server overview](docs/server/overview.mdx) and [hosted auth guide](docs/hosted-auth.mdx).
+It defaults to self-hosted mode on port 8081 and needs no Supabase credentials. Clients only connect to signaling over HTTPS/WSS, including debug builds and localhost, so put a TLS-terminating reverse proxy (for example on port 8443) in front of port 8081 with a certificate every device trusts. See [HTTPS is required for signaling](docs/self-hosting.mdx#https-is-required-for-signaling). In the app, choose **Self-hosted** and enter that `https://` URL on each device.
+
+The self-hosted server does not authenticate household joins; operate it only in an environment where you control access. For optional TURN configuration and hosted Supabase setup, see the [server overview](docs/server/overview.mdx) and [hosted auth guide](docs/hosted-auth.mdx).
 
 ## Development
 

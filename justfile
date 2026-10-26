@@ -22,7 +22,7 @@ generate-icons:
 
 # ─── Setup ─────────────────────────────────────────────────────────
 
-# One-time setup after fresh clone (deps + WebRTC framework)
+# One-time setup after fresh clone (pinned JDK + npm deps + WebRTC framework)
 setup: setup-java deps setup-webrtc
 
 setup-java:
