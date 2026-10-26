@@ -1,4 +1,5 @@
 brew "just"
+brew "direnv"
 brew "node@22"
 brew "openjdk@21"
 brew "rust"
