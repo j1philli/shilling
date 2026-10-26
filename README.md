@@ -14,76 +14,76 @@ before a stable release.
 
 ## Try it locally
 
-Development is done on macOS (Apple silicon or Intel). You need:
+[mise](https://mise.jdx.dev/) installs everything the build needs at pinned, checksum-verified versions (Node.js, Java, Rust, the Tauri CLI) and runs the project tasks. It doesn't change your system-wide tools.
 
-- [Homebrew](https://brew.sh/) and the Xcode command-line tools (`xcode-select --install`)
-- Xcode 15 or later with an iOS Simulator runtime, for the iOS app only
-- Android Studio with the Android SDK 37 platform and an emulator, for the Android app only
-
-### 1. Install the tools
+### 1. Install mise
 
 ```sh
-brew bundle                                      # just, direnv, node@22, openjdk@21, rust, imagemagick
-cargo install tauri-cli --version "^2" --locked  # desktop shell
+curl https://mise.run | sh     # or: brew install mise
 ```
 
-If you already manage Rust with [rustup](https://rustup.rs/), its toolchain in `~/.cargo/bin` takes precedence over Homebrew's.
+Optionally, [activate it in your shell](https://mise.jdx.dev/getting-started.html#activate-mise) (for example `eval "$(mise activate zsh)"` in `~/.zshrc`) so `node`, `java` and `cargo` resolve to the project versions whenever you're in the repository. `mise run` works without it.
 
-### 2. Load the project environment
-
-`node@22` and `openjdk@21` are keg-only in Homebrew, so they are not on your `PATH` by default. The repository's `.envrc` adds them (and `~/.cargo/bin`) when you enter the directory. [Hook direnv into your shell](https://direnv.net/docs/hook.html) once, for example with `eval "$(direnv hook zsh)"` in `~/.zshrc`, then allow the project:
+### 2. Clone and run
 
 ```sh
+git clone https://github.com/j1philli/shilling.git
 cd shilling
-direnv allow
+mise trust        # allow this repository's mise.toml
+mise install      # pinned tools from mise.lock
+mise run desktop  # build the web bundle and launch the Tauri desktop app
 ```
 
-The build checks for patched runtimes: Node.js 22.23.4+ (or 24.22.1+ / 26.12.1+) and Java 21.0.13+ (or 25.0.5+). Without direnv, put a supported `node` on your `PATH` and set `JAVA_HOME` yourself before running `just`.
-
-### 3. Set up and run
-
-```sh
-just setup     # Java runtime, npm dependencies, iOS WebRTC framework
-just desktop   # build the web bundle and launch the Tauri desktop app
-```
-
-`just setup` downloads a pinned JDK 25 into `~/.local/share/shilling/` (it does not change your system Java; `.envrc` selects it), runs `npm install`, and downloads `WebRTC.xcframework` for iOS. The first build also downloads the Kotlin Toolchain and its dependencies, so it takes several minutes.
-
-Other targets:
+Tasks prepare what they need: npm packages are reinstalled whenever `package-lock.json` changes, and iOS tasks download `WebRTC.xcframework`. The first build also downloads the Kotlin Toolchain and its dependencies, so it takes several minutes. Run `mise tasks` to list every task.
 
 | Command | What it does |
 | --- | --- |
-| `just web` | Serve the web build at `http://localhost:3000` and rebuild on source changes |
-| `just ios` | Build and launch the native iOS app in the Simulator |
-| `just android` | Build and install on an emulator; set `ANDROID_AVD` to your emulator name (default `Pixel_9_Pro_XL_API_35`). Expects the SDK at `~/Library/Android/sdk` |
-| `just server` | Run the signaling server on port 8081 |
-| `just build-all` | Compile every module for every platform |
+| `mise run web` | Serve the web build at `http://localhost:3000` and rebuild on source changes |
+| `mise run ios` | Build and launch the native iOS app in the Simulator |
+| `mise run android` | Build and install on an emulator; set `ANDROID_AVD` to your emulator name (default `Pixel_9_Pro_XL_API_35`) and `ANDROID_HOME` if the SDK isn't at `~/Library/Android/sdk` |
+| `mise run server` | Run the signaling server on port 8081 |
+| `mise run sync-proxy` | Serve the signaling server over HTTPS on port 8443 |
+| `mise run build-all` | Compile every module for every platform |
 
 Development builds use a separate `shilling-dev` database and dev icons, so they don't touch data from a production install.
 
+### Platform SDKs
+
+mise can't install Apple's or Google's SDKs. You only need them for the mobile apps:
+
+- **iOS:** macOS with Xcode 15 or later and an iOS Simulator runtime.
+- **Android:** Android Studio with the Android SDK 37 platform and an emulator.
+
+`mise doctor project` checks for both and says what to install.
+
+macOS is the tested development platform. The web, desktop, server and Android tasks are expected to work on Linux once [Tauri's Linux prerequisites](https://v2.tauri.app/start/prerequisites/#linux) are installed, but this isn't regularly tested.
+
 ### Sync between devices
 
-Start the signaling server in a separate terminal:
+Clients only connect to signaling over HTTPS/WSS, including debug builds and localhost. Run the server and an HTTPS proxy in two terminals:
 
 ```sh
-just server
+mise run server      # self-hosted mode on port 8081, no Supabase credentials needed
+mise run sync-proxy  # https://<this machine>:8443 -> the server
 ```
 
-It defaults to self-hosted mode on port 8081 and needs no Supabase credentials. Clients only connect to signaling over HTTPS/WSS, including debug builds and localhost, so put a TLS-terminating reverse proxy (for example on port 8443) in front of port 8081 with a certificate every device trusts. See [HTTPS is required for signaling](docs/self-hosting.mdx#https-is-required-for-signaling). In the app, choose **Self-hosted** and enter that `https://` URL on each device.
+`sync-proxy` creates a certificate with [mkcert](https://github.com/FiloSottile/mkcert), trusts its local CA on this Mac (it asks for your password the first time) and in a booted iOS Simulator, and prints the URLs to use. In the app, choose **Self-hosted** and enter one of them on each device. Real phones and the Android emulator must also trust the printed `rootCA.pem`; see [HTTPS is required for signaling](docs/self-hosting.mdx#https-is-required-for-signaling). `mise run homelab` starts the server, the proxy, the desktop app and the iOS Simulator together.
 
 The self-hosted server does not authenticate household joins; operate it only in an environment where you control access. For optional TURN configuration and hosted Supabase setup, see the [server overview](docs/server/overview.mdx) and [hosted auth guide](docs/hosted-auth.mdx).
 
 ## Development
 
 ```sh
-just test                # architecture guard and JVM tests
-just guard-architecture  # WebRTC, signaling, and Store5 invariant checks
+mise run test                # architecture guard and JVM tests
+mise run guard-architecture  # WebRTC, signaling, and Store5 invariant checks
 ```
 
 The main modules are `app/shared` (data and sync), `app/shared-ui` (Compose UI), the platform apps under `app/`, `core` (shared protocol models), and `server` (signaling and hosted metadata). More details are in the [getting started guide](docs/getting-started.mdx) and [server docs](docs/server/overview.mdx).
 
+Tool versions live in `mise.toml`. To update one, change it there and run `mise lock` to refresh the checksums in `mise.lock`.
+
 Release numbers and the current target publishing status are in the
-[release guide](docs/releases.mdx). Run `just check-version` before tagging.
+[release guide](docs/releases.mdx). Run `mise run check-version` before tagging.
 
 ## Contributing
 

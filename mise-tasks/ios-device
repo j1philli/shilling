@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+#MISE description="Build, sign and deploy the iOS app to a connected device (set IOS_TEAM_ID)"
+#MISE depends=["setup-webrtc", "ensure-plugin"]
+set -euo pipefail
+
+TEAM_ID="${IOS_TEAM_ID:-7QN6HR273V}"
+
+# Find connected physical iOS devices (only from == Devices == section)
+DEVICE_LINES=$(xcrun xctrace list devices 2>/dev/null \
+    | sed -n '/^== Devices ==/,/^== /{/^==/d;p;}' \
+    | grep -v "^$" \
+    | grep -v "MacBook" | grep -v "Watch" | grep -v "Offline" \
+    | grep "iPhone\|iPad" || true)
+if [ -z "$DEVICE_LINES" ]; then
+    echo "Error: No real iOS device found. Connect via USB and trust the computer."
+    exit 1
+fi
+
+DEVICE_COUNT=$(echo "$DEVICE_LINES" | wc -l | tr -d ' ')
+if [ "$DEVICE_COUNT" -eq 1 ]; then
+    SELECTED="$DEVICE_LINES"
+else
+    echo "==> Multiple iOS devices found:"
+    echo ""
+    i=1
+    while IFS= read -r line; do
+        echo "  $i) $line"
+        i=$((i + 1))
+    done <<< "$DEVICE_LINES"
+    echo ""
+    printf "Select device [1-%d]: " "$DEVICE_COUNT"
+    read -r CHOICE
+    if ! [[ "$CHOICE" =~ ^[0-9]+$ ]] || [ "$CHOICE" -lt 1 ] || [ "$CHOICE" -gt "$DEVICE_COUNT" ]; then
+        echo "Error: Invalid selection."
+        exit 1
+    fi
+    SELECTED=$(echo "$DEVICE_LINES" | sed -n "${CHOICE}p")
+fi
+
+UDID=$(echo "$SELECTED" | sed 's/.*(\([0-9A-Fa-f-]*\))$/\1/')
+if [ -z "$UDID" ]; then
+    echo "Error: Could not parse UDID from: $SELECTED"
+    exit 1
+fi
+DEVICE_NAME=$(echo "$SELECTED" | sed 's/ *(.*//')
+echo "==> Selected device: $DEVICE_NAME ($UDID)"
+
+LAN_IP=$(ipconfig getifaddr en0 2>/dev/null || echo "unknown")
+echo "==> Host LAN IP: $LAN_IP"
+echo "    Run 'mise run sync-proxy', then use https://$LAN_IP:8443 as the self-hosted server URL"
+echo ""
+
+
+echo "==> Building Kotlin framework with Kotlin Toolchain (iosArm64)..."
+./kotlin build -m ios-app -p iosArm64
+
+echo "==> Building and signing with Xcode..."
+PROJ_DIR="app/ios-app/module.xcodeproj"
+export KOTLIN_CLI_WRAPPER_PATH="$(realpath ./kotlin)"
+xcodebuild -project "$PROJ_DIR" \
+    -scheme app \
+    -configuration Debug \
+    -destination "id=$UDID" \
+    -allowProvisioningUpdates \
+    DEVELOPMENT_TEAM="$TEAM_ID" \
+    CODE_SIGN_STYLE=Automatic \
+    build 2>&1 | tail -10
+
+echo "==> Installing on device..."
+APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData \
+    -name "ios-app.app" -path "*/Debug-iphoneos/*" \
+    -not -path "*/Index.noindex/*" 2>/dev/null \
+    | sort -t/ -k8 -r | head -1)
+if [ -z "$APP_PATH" ]; then
+    echo "Error: Could not find .app bundle in DerivedData"
+    exit 1
+fi
+echo "    App: $APP_PATH"
+
+# Sign embedded frameworks with the same identity used for the app
+# Match the signing identity to the team ID so Team IDs are consistent
+SIGN_ID=$(security find-identity -v -p codesigning \
+    | grep -v "Created via API" \
+    | head -1 | awk -F'"' '{print $2}')
+if [ -z "$SIGN_ID" ]; then
+    SIGN_ID=$(security find-identity -v -p codesigning | head -1 | awk -F'"' '{print $2}')
+fi
+echo "    Signing identity: $SIGN_ID"
+
+# Extract entitlements before re-signing (needed to preserve application-identifier)
+ENTITLEMENTS_FILE=$(mktemp)
+codesign -d --entitlements "$ENTITLEMENTS_FILE" --xml "$APP_PATH" 2>/dev/null
+echo "    Extracted entitlements to $ENTITLEMENTS_FILE"
+
+for fw in "$APP_PATH"/Frameworks/*.framework; do
+    if [ -d "$fw" ]; then
+        echo "    Signing $(basename "$fw")..."
+        codesign --force --sign "$SIGN_ID" --timestamp=none "$fw"
+    fi
+done
+# Re-sign embedded app extensions (PlugIns/) preserving their entitlements
+for ext in "$APP_PATH"/PlugIns/*.appex; do
+    if [ -d "$ext" ]; then
+        EXT_NAME=$(basename "$ext")
+        EXT_ENTITLEMENTS=$(mktemp)
+        codesign -d --entitlements "$EXT_ENTITLEMENTS" --xml "$ext" 2>/dev/null || true
+        echo "    Signing $EXT_NAME..."
+        if [ -s "$EXT_ENTITLEMENTS" ]; then
+            codesign --force --sign "$SIGN_ID" --entitlements "$EXT_ENTITLEMENTS" --timestamp=none "$ext"
+        else
+            codesign --force --sign "$SIGN_ID" --timestamp=none "$ext"
+        fi
+        rm -f "$EXT_ENTITLEMENTS"
+    fi
+done
+# Re-sign the app bundle with original entitlements so the seal covers the updated frameworks
+codesign --force --sign "$SIGN_ID" --entitlements "$ENTITLEMENTS_FILE" --timestamp=none "$APP_PATH"
+rm -f "$ENTITLEMENTS_FILE"
+
+xcrun devicectl device install app --device "$UDID" "$APP_PATH"
+
+echo "==> Launching app and attaching to console (Ctrl-C to stop)..."
+xcrun devicectl device process launch --device "$UDID" --console finance.shilling.app

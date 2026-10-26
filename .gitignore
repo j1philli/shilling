@@ -62,8 +62,6 @@ node_modules/
 .packager/
 supabase/.temp/
 
-# direnv
-.direnv/
 
 # SQLite database files (local dev data, never commit)
 *.db

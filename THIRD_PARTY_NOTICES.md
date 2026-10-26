@@ -40,5 +40,5 @@ copyright and license notices remain in effect. A copy of that license is in
   remove the Cargo patch, this directory, and the corresponding build-context
   copies together. Version-only scanners may still flag 0.18.5; inspect the
   resolved source and the backport rather than suppressing all GLib findings.
-- Regression check: `just test-glib-security` runs the upstream iterator tests
+- Regression check: `mise run test-glib-security` runs the upstream iterator tests
   with release optimizations, which expose the original undefined behavior.

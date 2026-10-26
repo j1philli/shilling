@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Clear iOS Simulator app state"
+set -euo pipefail
+
+xcrun simctl uninstall booted finance.shilling.app >/dev/null 2>&1 || true
+echo "Cleared iOS simulator state for finance.shilling.app"

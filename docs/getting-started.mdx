@@ -43,8 +43,8 @@ Shilling works in two broad modes:
 For local self-hosted development:
 
 ```sh
-just server
-just desktop
+mise run server
+mise run desktop
 ```
 
 Sync requires a trusted HTTPS reverse proxy in front of the development server,
@@ -52,4 +52,4 @@ including for localhost and debug builds. Configure the client with that HTTPS
 URL; signaling uses WSS and never falls back to WS. See the
 [local TLS setup requirements](self-hosting.mdx#https-is-required-for-signaling).
 
-`just server` defaults to `SHILLING_AUTH_MODE=none` and loads a repo-root `.env` when present. To test hosted mode, copy `.env.example` to `.env`, set `SHILLING_AUTH_MODE=supabase`, and fill in the hosted variables. See [Hosted Auth & Bootstrap](./hosted-auth.mdx) for the required Supabase setup.
+`mise run server` defaults to `SHILLING_AUTH_MODE=none` and loads a repo-root `.env` when present. To test hosted mode, copy `.env.example` to `.env`, set `SHILLING_AUTH_MODE=supabase`, and fill in the hosted variables. See [Hosted Auth & Bootstrap](./hosted-auth.mdx) for the required Supabase setup.

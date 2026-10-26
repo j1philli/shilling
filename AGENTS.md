@@ -28,4 +28,4 @@ These rules are mandatory for any change in this repo.
 
 ## Regression Check
 
-Run `just guard-architecture` before finishing changes that touch sync, server, or data flow code.
+Run `mise run guard-architecture` before finishing changes that touch sync, server, or data flow code.

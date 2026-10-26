@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+#MISE description="Build and launch the Android app on an emulator (set ANDROID_AVD to choose one)"
+#MISE depends=["ensure-plugin"]
+set -euo pipefail
+
+AVD="${ANDROID_AVD:-Pixel_9_Pro_XL_API_35}"
+EMU="${ANDROID_HOME:-$HOME/Library/Android/sdk}/emulator/emulator"
+ADB="${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb"
+
+# Start emulator with a visible window if not already running
+if ! "$ADB" devices | grep -q "emulator-"; then
+    echo "==> Starting emulator ($AVD)..."
+    "$EMU" -avd "$AVD" -no-snapshot-load &
+    # Wait for the emulator to boot
+    echo "==> Waiting for emulator to boot..."
+    "$ADB" wait-for-device
+    "$ADB" shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+    echo "==> Emulator ready."
+else
+    echo "==> Emulator already running."
+fi
+
+SERIAL=$("$ADB" devices | grep "emulator-" | head -1 | awk '{print $1}')
+
+echo "==> Building android-app..."
+./kotlin build -m android-app
+
+echo "==> Installing APK..."
+APK=$(find build/tasks -name "*.apk" -path "*android-app*" | head -1)
+"$ADB" -s "$SERIAL" install -r "$APK"
+
+echo "==> Launching app..."
+"$ADB" -s "$SERIAL" shell am start -n finance.shilling.android/.MainActivity
+
+echo "==> Attaching to logs (Ctrl-C to stop)..."
+sleep 1
+PID=$("$ADB" -s "$SERIAL" shell pidof finance.shilling.android 2>/dev/null || true)
+if [ -n "$PID" ]; then
+    "$ADB" -s "$SERIAL" logcat --pid="$PID"
+else
+    "$ADB" -s "$SERIAL" logcat -s "Android:*" "Shilling:*" "AndroidRuntime:E"
+fi

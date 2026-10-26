@@ -78,7 +78,7 @@ object CI : BuildType({
         }
         script {
             name = "GLib safety regression checks"
-            scriptContent = "just test-glib-security"
+            scriptContent = "bash scripts/ci/test-glib-security.sh"
         }
         script {
             name = "npm security advisories"
@@ -427,7 +427,7 @@ object WebDeploy : BuildType({
         }
         script {
             name = "Prepare SQLDelight plugin"
-            scriptContent = "just ensure-plugin"
+            scriptContent = "bash scripts/ensure-plugin.sh"
         }
         script {
             name = "Build wasmJs artifacts"

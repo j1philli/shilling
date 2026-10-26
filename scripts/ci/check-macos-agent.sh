@@ -40,7 +40,7 @@ check_java() {
 
 check_node() {
   if ! command -v node &>/dev/null; then
-    echo "FAIL: Patched Node.js (see .nvmrc) — 'node' not found"
+    echo "FAIL: Patched Node.js (see mise.toml) — 'node' not found"
     fail=1
     return
   fi

@@ -4,7 +4,7 @@
   "description": "Kotlin Multiplatform household budgeting app",
   "private": true,
   "scripts": {
-    "test": "just test",
+    "test": "mise run test",
     "test:web": "node --test app/web-app/test/*.test.cjs",
     "preinstall": "node scripts/ci/check-node-version.cjs",
     "test:security": "node --test scripts/ci/tests/node-version.test.cjs"
