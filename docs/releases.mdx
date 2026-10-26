@@ -16,13 +16,11 @@ targets stay at `0.1.0`. Previews use tags such as `v0.1.1-beta.1`; stable
 releases use `v0.1.1`. There is no fourth public version component.
 
 Android `versionCode` and iOS `CFBundleVersion` are separate, increasing store
-build numbers. TeamCity sets the iOS build number to its globally increasing
-build ID in both the app and widget, without changing the checked-in defaults.
-Every main build can therefore upload at the same product version. Increase
-Android versionCode for each Play upload.
+build numbers. TeamCity sets Android versionCode and the iOS app/widget build number to their
+globally increasing package-build IDs, without changing checked-in defaults.
+Every main build can therefore upload at the same product version.
 
-Run `just set-version 0.1.1` to update all product manifests. Add `--android`
-for a Play upload. `--ios` advances only the local Xcode default; CI assigns its own build number. For example,
+Run `just set-version 0.1.1` to update all product manifests. `--android` advances the local Android default; CI assigns its own build number. `--ios` advances only the local Xcode default; CI assigns its own build number. For example,
 `just set-version 0.1.2 --android` prepares a full mobile release;
 `just set-version 0.1.2 --android` prepares an Android-only patch. The command
 checks the manifests before and after the update. `just check-version` runs in
@@ -34,10 +32,10 @@ version at that commit.
 | Event | Result |
 | --- | --- |
 | Push to a feature branch | CI, runtime checks, Android, Linux desktop and Windows desktop build on Linux. |
-| Merge to `main` | All targets build and tests run. After the complete matrix passes, **iOS — TestFlight** uploads the exact signed IPA only if iOS inputs changed since the last delivered beta. No production deployment or GitHub release. |
+| Merge to `main` | All targets build and tests run. After the complete matrix passes, **iOS — TestFlight** and **Android — Play Internal** upload their exact signed artifacts only if that target’s inputs changed since its last delivered beta. No production deployment or GitHub release. |
 | Create a release tag | Identifies the tested release commit. No additional automatic build or deployment. |
 
-Packages remain in TeamCity; changed iOS main builds also become internal TestFlight betas. The two release jobs
+Packages remain in TeamCity; changed mobile main builds also become internal TestFlight/Play betas. The two release jobs
 reuse successful builds at the same revision, or build missing dependencies.
 Both require the full matrix to pass, even for a single-target release.
 
@@ -81,17 +79,17 @@ a first run, legacy run without state, or cleaned-up state artifact publishes
 once to establish a new baseline. Keep these small artifacts under the project's
 artifact retention policy. Jobs are serialized to keep baseline updates ordered.
 
-Future Android and desktop beta jobs can use the same `BetaPublication.configure(build,
+Future desktop beta jobs can use the same `BetaPublication.configure(build,
 target, channel, command)` TeamCity helper around their publisher after a successful
 matrix. Each target/channel needs its own build configuration and credentials for
 its destination; the helper supplies the gate, report artifacts, serialization,
-and manual override. Only TestFlight is connected to a publisher today.
+and manual override. TestFlight and Google Play internal testing use this gate.
 
-The full build matrix still runs on main, and manual GA release behavior is
-unchanged. For iOS review/release, select the original chain that actually uploaded
+The full build matrix still runs on main. For iOS review/release, select the original chain that actually uploaded
 the tested IPA. A later skipped chain has its own unuploaded IPA and cannot stand
 in for that candidate; explicitly force its TestFlight upload and test it first
-if that later chain must be promoted.
+if that later chain must be promoted. The same rule applies to Android: a skipped
+chain has a new version code that has not been uploaded or tested on Play.
 
 ## Two release buttons
 
@@ -130,13 +128,14 @@ the job fails the approval check; test and submit that new candidate explicitly.
 In TeamCity, run **Release — Full** on `main`.
 
 It waits for all builds and checks, verifies that Apple approved the exact iOS
-candidate for manual release, then creates `vX.Y.Z` at that exact commit,
+candidate for manual release and that Android matches the active Play internal
+candidate, then creates `vX.Y.Z` at that exact commit,
 collects all client packages, publishes server and web images for Linux
 amd64/arm64, deploys the server image to Coolify by immutable digest, verifies its health and
 Supabase mode, deploys the tested hosted web bundle to Pages, and publishes the
 GitHub release with packages, Compose files and an artifact hash manifest.
-It requests release of the approved iOS build before publishing the GitHub
-release. App Store availability may lag Apple’s accepted release request.
+It requests release of the approved iOS build and promotes the tested Android
+bundle to Play production before publishing the GitHub release. App Store availability may lag Apple’s accepted release request.
 No manual tagging, image-target parameters or asset uploads are required.
 
 ### Single-target release
@@ -148,7 +147,8 @@ Windows and macOS.
 Only the selected target is published. Web publishes its self-hosted image and
 deploys hosted Pages. Server publishes its image and JAR and deploys the image to Coolify. A client publishes
 its package files to GitHub; **iOS also releases the already-approved App Store
-build**, with the same approval gate as Full. Other installed/published targets retain their
+build** and **Android promotes its internally tested Play bundle to production**,
+with the same checks as Full. Other installed/published targets retain their
 previous version. A single-image release omits Compose files because the two
 image versions differ.
 
@@ -160,27 +160,93 @@ release notes and hashes without creating tags, pushing images or deploying. If 
 preview also performs a read-only Coolify configuration/connectivity check.
 For iOS, preview validates provenance and reports Apple approval readiness without
 uploading, submitting for review, or releasing. Pending approval is reported as
-blocked; credential/API failures fail the preview.
+blocked; credential/API failures fail the preview. Android preview verifies the
+bundle hash/version in Play and internal-track readiness using a temporary edit
+that is deleted without uploading, updating tracks, or committing changes.
 
 The release jobs share a lock so only one can publish at a time. The version
 is read from `VERSION`, and the tag must belong to the checked-out commit on
 `main`. The job refuses to reuse a tag for another commit or target selection.
 An already-completed release is a no-op. Publishing failures leave a GitHub
-draft that can be retried with the same revision and selection. Images, Coolify, Pages and the App Store cannot be published atomically; a failure can leave images uploaded or
+draft that can be retried with the same revision and selection. Images, Coolify, Pages, Play and the App Store cannot be published atomically; a failure can leave images uploaded or
 hosted targets deployed while the GitHub release is still a draft. Inspect the failed
 step and rerun that exact release to finish it.
 
 **iOS releases promote an approved App Store build.** Versions `0.x` remain
 marked as GitHub prereleases; that label is separate from Apple distribution. Android includes a
-debug APK and unsigned AAB; iOS exports an App Store-signed IPA when signing is
+debug APK and an upload-signed AAB; iOS exports an App Store-signed IPA when signing is
 enabled (an unsigned app ZIP otherwise); macOS is an unsigned universal DMG; Windows is an unsigned x86_64
 NSIS installer; Linux includes x86_64 AppImage, Debian and RPM packages.
-Android/desktop signing, macOS notarization, and Play upload still need setup.
+Desktop signing and macOS notarization still need setup.
 iOS TestFlight upload, App Review submission, and approved App Store promotion
 are automated by the separate jobs described above.
 Release notes state these limitations. An App Store-signed IPA is intended for
 App Store Connect upload; downloading it from GitHub does not install it on an
 iPhone. An unsigned iOS archive is also not an installable iPhone release.
+
+### Android signing and Play setup
+
+The application ID is `finance.shilling.android`. Builds target API 36 (the
+current Play submission minimum), with minimum API 28. **Android Build** produces
+an unsigned AAB and a debug APK on every branch. **Android — Sign Bundle** is a
+main-chain dependency of **Build all targets**; it validates the actual bundle
+manifest and signs that bundle with `jarsigner`, without recompiling. Signing
+secrets are not mapped into the compilation job. Bundle inspection uses a pinned,
+SHA-256-verified Google bundletool JAR cached outside the checkout.
+
+The signed bundle and `Shilling_X.Y.Z_android-build.json` record source commit,
+package, version, versionCode, target SDK, and SHA-256. **Android — Play Internal**
+uploads that same-chain artifact after the full matrix succeeds. Release jobs
+reuse it and compare the exact version code and signed bundle hash against Play;
+they never choose “latest”, re-sign, or reupload during production promotion.
+Keep the original signed artifacts: re-signing an already-uploaded version code
+can change its hash and will be rejected. A rebuilt candidate must be uploaded
+and tested again. Play's internal track must still contain the candidate at
+promotion time (unless that exact version is already in production on a retry).
+
+Configure these **password**, non-environment parameters on the parent Shilling
+TeamCity project:
+
+- `shilling.android.upload.key.base64`: base64 PKCS12 upload keystore, alias `shilling-upload`.
+- `shilling.android.upload.key.password`: keystore/key password.
+- `shilling.play.service.account.json`: Google service-account JSON.
+
+Only the signing job maps the first two to environment variables. Only Play
+internal and release jobs map the service-account JSON. Never commit these values
+or put them in artifact directories. Keep an independent encrypted backup of the
+upload keystore and password. Google Play App Signing manages the distribution
+signing key; this CI key is only the upload key.
+
+Enable the Google Play Android Developer API in the service account's Cloud
+project and invite its email in Play Console **Users and permissions**, scoped to
+Shilling. Grant **View app information (read-only)** and **Release apps to testing
+tracks**. The same account can also have **Release to production, exclude devices,
+and use Play App Signing** for the manual release jobs; automatic main jobs still
+only address `internal`.
+
+First-time setup in Play Console:
+
+1. Create an Internal testing release and enroll in Google Play App Signing
+   (let Google generate the app signing key).
+2. Upload the first signed `Shilling_X.Y.Z_android-release.aab`. Its signer
+   establishes the upload certificate. The `.p12` and password stay private.
+3. Complete the app setup and required declarations, configure internal testers,
+   and roll out the internal release. A draft-only app can reject automated
+   completed releases until this bootstrap is finished.
+4. Merge the CI configuration and wait for a successful main matrix/internal
+   upload; install and test that candidate before using a production release job.
+
+Production uses a `completed` Play release (full rollout), submitted through the
+normal Play edit/commit workflow. Google review, managed publishing, store
+metadata, agreements, and any account testing requirements still control actual
+availability. CI does not answer legal declarations, grant production access, or
+bypass review. It refuses to replace an existing production draft/staged rollout
+or downgrade a newer version. Internal uploads and manual releases share a lock
+so their Play edits do not race each other; avoid simultaneous Console edits.
+
+Sources: [Play signing](https://developer.android.com/studio/publish/app-signing),
+[target API requirements](https://support.google.com/googleplay/android-developer/answer/11926878),
+[track releases](https://developers.google.com/android-publisher/api-ref/rest/v3/edits.tracks).
 
 ### Hosted server deployment
 
