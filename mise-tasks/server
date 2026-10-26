@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+#MISE description="Run the signaling server (self-hosted mode by default, port 8081)"
+#MISE depends=["ensure-plugin"]
+set -euo pipefail
+
+if [ -f .env ]; then
+    set -a
+    source .env
+    set +a
+fi
+
+if [ "${SHILLING_AUTH_MODE:-none}" = "supabase" ]; then
+    missing=()
+    [ -n "${SHILLING_SUPABASE_URL:-}" ] || missing+=("SHILLING_SUPABASE_URL")
+    [ -n "${SHILLING_SUPABASE_ANON_KEY:-}" ] || missing+=("SHILLING_SUPABASE_ANON_KEY")
+    [ -n "${SHILLING_SUPABASE_SERVICE_KEY:-}" ] || missing+=("SHILLING_SUPABASE_SERVICE_KEY")
+    if [ "${#missing[@]}" -gt 0 ]; then
+        echo "Error: hosted Supabase mode is missing required env vars: ${missing[*]}" >&2
+        echo "Update .env or export the missing variables, then rerun 'mise run server'." >&2
+        exit 1
+    fi
+fi
+
+./kotlin run --module server

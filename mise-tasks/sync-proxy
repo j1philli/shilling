@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+#MISE description="Serve the local signaling server over HTTPS (clients require https/wss) with a locally trusted certificate"
+#MISE tools={caddy="2.11.7", mkcert="1.4.4"}
+#USAGE flag "--port <port>" help="HTTPS port to listen on" default="8443"
+#USAGE flag "--upstream <address>" help="Signaling server address" default="127.0.0.1:8081"
+set -euo pipefail
+
+port="${usage_port:-8443}"
+upstream="${usage_upstream:-127.0.0.1:8081}"
+tls_dir="$SHILLING_ROOT/build/dev-tls"
+mkdir -p "$tls_dir"
+
+# Trust mkcert's local CA on this machine (asks for your password the first time).
+# Without JAVA_HOME, mkcert leaves the mise-managed JDK's trust store alone.
+env -u JAVA_HOME mkcert -install
+
+# Certificate names: this machine, its LAN addresses (for real devices), and the
+# Android emulator's alias for the host.
+names=(localhost 127.0.0.1 ::1 10.0.2.2 "$(hostname)")
+if command -v ipconfig >/dev/null; then
+    for iface in en0 en1; do
+        ip=$(ipconfig getifaddr "$iface" 2>/dev/null || true)
+        [ -n "$ip" ] && names+=("$ip")
+    done
+elif command -v hostname >/dev/null && hostname -I >/dev/null 2>&1; then
+    for ip in $(hostname -I); do names+=("$ip"); done
+fi
+mkcert -cert-file "$tls_dir/cert.pem" -key-file "$tls_dir/key.pem" "${names[@]}" 2>/dev/null
+
+# Booted iOS Simulators trust their own keychain, not the Mac's.
+if command -v xcrun >/dev/null && xcrun simctl list devices booted 2>/dev/null | grep -q Booted; then
+    xcrun simctl keychain booted add-root-cert "$(mkcert -CAROOT)/rootCA.pem" \
+        && echo "Trusted the local CA in the booted iOS Simulator."
+fi
+
+cat > "$tls_dir/Caddyfile" <<CADDY
+{
+	admin off
+	auto_https disable_redirects
+}
+
+https://:$port {
+	tls $tls_dir/cert.pem $tls_dir/key.pem
+	reverse_proxy $upstream
+}
+CADDY
+
+echo ""
+echo "Signaling over HTTPS on port $port -> http://$upstream"
+echo "Use one of these as the self-hosted server URL:"
+for name in "${names[@]}"; do
+    case "$name" in ::1) ;; *) echo "  https://$name:$port" ;; esac
+done
+echo "Real phones and the Android emulator must also trust $(mkcert -CAROOT)/rootCA.pem;"
+echo "see docs/self-hosting.mdx#https-is-required-for-signaling."
+echo ""
+
+exec caddy run --adapter caddyfile --config "$tls_dir/Caddyfile"

@@ -1,6 +1,6 @@
 {
     "scripts": {
-        "setup": "just build-all && entire enable --telemetry=false --agent claude-code",
-        "run": "just web"
+        "setup": "mise trust && mise run build-all && entire enable --telemetry=false --agent claude-code",
+        "run": "mise run web"
     }
 }

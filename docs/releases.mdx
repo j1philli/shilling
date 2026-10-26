@@ -21,11 +21,11 @@ build ID in both the app and widget, without changing the checked-in defaults.
 Every main build can therefore upload at the same product version. Increase
 Android versionCode for each Play upload.
 
-Run `just set-version 0.1.1` to update all product manifests. Add `--android`
+Run `mise run set-version 0.1.1` to update all product manifests. Add `--android`
 for a Play upload. `--ios` advances only the local Xcode default; CI assigns its own build number. For example,
-`just set-version 0.1.2 --android` prepares a full mobile release;
-`just set-version 0.1.2 --android` prepares an Android-only patch. The command
-checks the manifests before and after the update. `just check-version` runs in
+`mise run set-version 0.1.2 --android` prepares a full mobile release;
+`mise run set-version 0.1.2 --android` prepares an Android-only patch. The command
+checks the manifests before and after the update. `mise run check-version` runs in
 TeamCity CI and before self-hosted image publishing. The tag must match the
 version at that commit.
 
@@ -96,8 +96,8 @@ if that later chain must be promoted.
 ## Two release buttons
 
 Prepare the shared version in the normal code PR, then merge it. For example,
-`just set-version 0.1.2 --android` prepares a full release;
-`just set-version 0.1.2 --android` prepares an Android-only patch. Each public
+`mise run set-version 0.1.2 --android` prepares a full release;
+`mise run set-version 0.1.2 --android` prepares an Android-only patch. Each public
 release needs a fresh shared version, including single-target releases.
 
 ### Prepare the iOS candidate for Apple review

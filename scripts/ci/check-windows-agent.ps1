@@ -25,7 +25,7 @@ function Check-Java {
 function Check-Node {
     $cmd = Get-Command node -ErrorAction SilentlyContinue
     if (-not $cmd) {
-        Write-Host "FAIL: Patched Node.js (see .nvmrc) - 'node' not found"
+        Write-Host "FAIL: Patched Node.js (see mise.toml) - 'node' not found"
         $script:fail = 1
         return
     }

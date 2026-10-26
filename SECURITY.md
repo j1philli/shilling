@@ -23,8 +23,10 @@ diagnostics still report Java 21.0.10+7. Machine-readable evidence is in
 - Pin checksum-verified Oracle Java 25.0.5.0.2 archives, released October 21,
   while Temurin/Corretto/Zulu images lag the
   [October security update](https://www.oracle.com/java/technologies/javase/25-0-5-relnotes.html).
-  Server images use a current Wolfi base. `just setup-java` installs Java beside
-  system tools; CI checks reject unpatched Java 21/25 versions.
+  Server images use a current Wolfi base. CI agents install it beside system
+  tools with `scripts/ci/setup-java.sh`; local development uses the checksummed
+  Temurin 25.0.5 build pinned in `mise.toml`/`mise.lock`. CI checks reject
+  unpatched Java 21/25 versions.
 - Select Jackson core/databind 2.22.3 instead of vulnerable JWT/JWKS transitives
   at 2.22.0, removing ten advisory matches from the server dependency graph.
 - Backport the upstream GLib iterator safety fix for

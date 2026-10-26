@@ -180,15 +180,6 @@ else
     echo "Rust already installed"
 fi
 
-# ---------- just ----------
-
-if ! command -v just &>/dev/null; then
-    echo "Installing just..."
-    "$CARGO_HOME/bin/cargo" install just --locked
-else
-    echo "just already installed"
-fi
-
 # ---------- GitHub CLI ----------
 
 if ! command -v gh &>/dev/null; then

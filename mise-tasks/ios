@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE description="Build and launch the iOS app in the Simulator, then stream its logs"
+#MISE depends=["setup-webrtc", "ensure-plugin"]
+set -euo pipefail
+
+./kotlin run -m ios-app -p iosSimulatorArm64
+echo "==> App launched, attaching to logs..."
+sleep 1
+exec mise run ios-logs

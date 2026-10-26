@@ -4,25 +4,32 @@ Kotlin Multiplatform household budgeting app. Tauri desktop (wasmJs) + iOS. SQLi
 
 ## Build & Run
 
-Uses [just](https://github.com/casey/just) as task runner and [direnv](https://direnv.net/) for PATH setup.
+Uses [mise](https://mise.jdx.dev/) for everything around the build: pinned tools (`[tools]` in
+`mise.toml`, checksums in `mise.lock`), npm dependencies (`[deps.npm]`, reinstalled automatically
+before tasks when `package-lock.json` changes), and tasks (inline in `mise.toml`, longer ones as
+scripts in `mise-tasks/`). Run tasks with `mise run <task>`; `mise tasks` lists them.
 
 ```sh
-just desktop              # build wasmJs + launch Tauri desktop
-just ios                  # launch on iOS Simulator (auto-downloads WebRTC framework)
-just setup-webrtc         # download WebRTC.xcframework for iOS (idempotent)
-just generate-icons       # regenerate committed platform icons after icons/source changes
-just build-web            # build only wasmJs artifacts
-just build-all            # compile everything (all platforms)
-just guard-architecture   # fail on forbidden relay/server data-sync patterns
-just test                 # run all tests
-just clean                # remove build outputs
-just deps                 # npm install (sql.js, js-joda)
-just tasks web-app        # show Kotlin Toolchain tasks for a module
+mise install                  # install pinned tools (Node, Temurin Java, Rust, tauri-cli)
+mise run desktop              # build wasmJs + launch Tauri desktop
+mise run web                  # serve wasmJs in a browser with rebuild on change
+mise run ios                  # launch on iOS Simulator (auto-downloads WebRTC framework)
+mise run server               # signaling server on :8081 (self-hosted mode)
+mise run sync-proxy           # HTTPS on :8443 in front of the server (clients require https/wss)
+mise run setup-webrtc         # download WebRTC.xcframework for iOS (idempotent)
+mise run generate-icons       # regenerate committed platform icons after icons/source changes
+mise run build-web            # build only wasmJs artifacts
+mise run build-all            # compile everything (all platforms)
+mise run guard-architecture   # fail on forbidden relay/server data-sync patterns
+mise run test                 # run all tests
+mise run clean                # remove build outputs
+mise run kotlin-tasks web-app # show Kotlin Toolchain tasks for a module
+mise doctor project           # check Xcode / iOS Simulator / Android SDK prerequisites
 ```
 
 DB file: `~/.shilling/expenses.db` (auto-created on first run, desktop uses IndexedDB via sql.js).
 
-`just desktop` and `just build-web` use a **dev database** (`shilling-dev` IndexedDB).
+`mise run desktop` and `mise run build-web` use a **dev database** (`shilling-dev` IndexedDB).
 Production builds use `./build-web.sh` directly (defaults to `shilling` IndexedDB).
 Set `SHILLING_DB_NAME` to override (e.g. `SHILLING_DB_NAME=shilling-staging ./build-web.sh`).
 
@@ -361,7 +368,7 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
 - **iOS WebRTC framework**: `ktor-client-webrtc` on iOS requires a native
   `WebRTC.xcframework` (from `webrtc-sdk/Specs` GitHub releases, version
   137.7151.04). It's gitignored so each clone must run `./setup-webrtc.sh`
-  (or `just setup-webrtc`) to download it. `just ios` runs this automatically.
+  (or `mise run setup-webrtc`) to download it. `mise run ios` runs this automatically.
   Override version with `WEBRTC_SDK_VERSION` env var if needed.
 - **iOS Xcode project**: Kotlin Toolchain manages `app/ios-app/module.xcodeproj`. The
   `-lsqlite3` linker flag was manually added to `OTHER_LDFLAGS` — don't
@@ -375,7 +382,7 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
   `libs.versions.toml`, the compiler plugin and the Swift package in `app/ios-app/module.yaml`
   must all use the release built for the project's Kotlin version (1.0.6 = Kotlin 2.4.20, also used with 2.4.21).
 - **Icons are generated, then committed**: `icons/source/base-1024.png` is the
-  master. `just generate-icons` (ImageMagick + `cargo tauri`) rewrites every
+  master. `mise run generate-icons` (ImageMagick via mise + `cargo tauri`) rewrites every
   platform asset; commit the results. Builds never generate or copy icons; they
   pick a committed variant (`dev`/`beta`/`ga`):
   - Beta is the early-release channel. On iOS (TestFlight) and Android (Play testing
@@ -386,18 +393,24 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
   - Desktop: `src-tauri/icons/{ga,beta,dev}/`; `tauri.conf.json` uses GA,
     `tauri.dev.conf.json` / `tauri.beta.conf.json` overlays switch via `--config`.
   - Web: `app/web-app/icons/<variant>/` copied into `web-app-dist` by `build-web.sh`
-    (`SHILLING_ICON_VARIANT`, defaults to `ga`; `just` recipes use `dev`).
+    (`SHILLING_ICON_VARIANT`, defaults to `ga`; mise tasks use `dev`).
   - Android: GA in `app/android-app/res/mipmap-*`; dev in `app/android-app/src/debug/res/`
     (standard Android debug source set, merged over main for debug builds only).
   - In-app logo: `app/shared-ui/composeResources/drawable/app_logo.png`
     (Compose resource, `Res.drawable.app_logo`).
+- **mise owns the dev toolchain**: tool versions are pinned in `mise.toml` with checksums in
+  `mise.lock` (macOS + Linux platforms). After changing a version, run `mise lock` and commit
+  both files. Tools needed by only one task (ImageMagick, Python, Caddy, mkcert) are declared
+  on that task, not in `[tools]`. CI agents don't use mise; they provision tools with
+  `scripts/ci/setup-*-agent.sh` and call scripts directly (e.g. `scripts/ensure-plugin.sh`),
+  so keep task logic in scripts that CI can call too.
 - **Tauri build**: Run `./build-web.sh` to build wasmJs artifacts into `web-app-dist/`,
   then `cargo tauri dev` to launch the desktop app. The `tauri.conf.json` points
   `frontendDist` to `../web-app-dist`. Direct builds use the optimized Release
-  package; `just desktop` and `just web` use the Debug package for development.
+  package; `mise run desktop` and `mise run web` use the Debug package for development.
 - **Store5 is experimental**: Uses `@ExperimentalStoreApi`. The library is at
   `5.1.0-alpha07`. Monitor for breaking API changes.
-- **Dev vs production database**: `just desktop`/`just build-web` inject
+- **Dev vs production database**: `mise run desktop`/`mise run build-web` inject
   `SHILLING_DB_NAME=shilling-dev` so dev data stays separate from production.
   Production builds call `./build-web.sh` directly (no env var → defaults to
   `"shilling"`). The server has no local app database; hosted metadata lives in
@@ -413,7 +426,7 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
 When I ask you to test a feature or verify a UI change:
 
 1. **Build the app**: Run the build command and wait for success
-2. **Launch logs observe script**: Run just ios-logs in an observable way to view logs for the simulator
+2. **Launch logs observe script**: Run `mise run ios-logs` in an observable way to view logs for the simulator
 3. **Launch in simulator**: Use `launch_app` with the bundle ID
 4. **Navigate to the feature**: Use `ui_tap` and `ui_swipe` to get there (refer to sitemap.md available in the root directory)
 5. **Verify the state**: Use the accessibility describe tools to read what’s on screen

@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+#MISE description="Run server, HTTPS proxy, desktop and iOS Simulator together for sync testing"
+#MISE depends=["build-web", "setup-webrtc", "ensure-plugin"]
+set -euo pipefail
+
+# Recursively kill a process and all its descendants
+kill_tree() {
+    local pid=$1
+    local children
+    children=$(pgrep -P "$pid" 2>/dev/null || true)
+    for child in $children; do
+        kill_tree "$child"
+    done
+    kill -TERM "$pid" 2>/dev/null || true
+}
+
+cleanup() {
+    echo ""
+    echo "Shutting down homelab..."
+    [ -n "${SERVER_PID:-}" ] && kill_tree $SERVER_PID
+    [ -n "${PROXY_PID:-}" ] && kill_tree $PROXY_PID
+    [ -n "${IOS_PID:-}" ] && kill_tree $IOS_PID
+    [ -n "${DESKTOP_PID:-}" ] && kill_tree $DESKTOP_PID
+    wait 2>/dev/null
+}
+trap cleanup EXIT INT TERM
+
+# Start server
+echo "==> Starting server..."
+mise run server &
+SERVER_PID=$!
+
+# Wait for server to be ready (includes compile time)
+echo "==> Waiting for server on :8081..."
+for i in $(seq 1 120); do
+    if curl -sf http://localhost:8081/api/ice-servers > /dev/null 2>&1; then
+        echo "==> Server ready!"
+        break
+    fi
+    if ! kill -0 $SERVER_PID 2>/dev/null; then
+        echo "==> Server process died"
+        exit 1
+    fi
+    if [ $i -eq 120 ]; then
+        echo "==> Timed out waiting for server (120s)"
+        exit 1
+    fi
+    sleep 1
+done
+
+# Terminate TLS for signaling (clients require https/wss)
+echo "==> Starting HTTPS proxy on :8443..."
+mise run sync-proxy &
+PROXY_PID=$!
+
+# Launch iOS simulator in background
+echo "==> Starting iOS simulator..."
+./kotlin run -m ios-app -p iosSimulatorArm64 &
+IOS_PID=$!
+
+# Launch desktop in foreground
+echo "==> Starting desktop app..."
+cargo tauri dev --config src-tauri/tauri.dev.conf.json
