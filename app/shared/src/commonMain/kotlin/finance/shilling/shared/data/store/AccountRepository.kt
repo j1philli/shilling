@@ -1,7 +1,6 @@
 package finance.shilling.shared.data.store
 
 import finance.shilling.shared.data.Account
-import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.EntityType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -32,7 +31,7 @@ class AccountRepository(
 
     suspend fun delete(accountId: String) {
         store.clear(AccountKey.ById(accountId))
-        broadcastChange(sync, EntityType.ACCOUNT, ChangeOp.DELETE, accountId)
+        broadcastEntityState(sync, EntityType.ACCOUNT, accountId)
         notifier.notifyChanged()
     }
 

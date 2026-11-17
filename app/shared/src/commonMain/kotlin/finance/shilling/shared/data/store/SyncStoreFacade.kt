@@ -8,7 +8,6 @@ import finance.shilling.shared.data.Receipt
 import finance.shilling.shared.data.Schedule
 import finance.shilling.shared.data.ScheduleException
 import finance.shilling.shared.data.sync.ChangeMessage
-import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.ChangePayload
 import finance.shilling.shared.data.sync.EntityType
 import finance.shilling.shared.db.ShillingDatabase
@@ -23,8 +22,12 @@ internal data class EntityChangeVersion(
 )
 
 internal sealed interface ApplyIncomingChangeResult {
+    /** The merge changed nothing here. */
+    data object IgnoredStale : ApplyIncomingChangeResult
+    /** The entity exists after the merge. */
     data object Applied : ApplyIncomingChangeResult
-    data class IgnoredStale(val current: EntityChangeVersion?) : ApplyIncomingChangeResult
+    /** The entity is deleted after the merge. */
+    data object Deleted : ApplyIncomingChangeResult
 }
 
 internal data class SyncFullStateSnapshot(
@@ -46,8 +49,15 @@ class SyncStoreFacade(
     private val scheduleStore: ScheduleStore = createScheduleStore(db, spaceId = spaceId),
     private val scheduleExceptionStore: ScheduleExceptionStore = createScheduleExceptionStore(db, spaceId = spaceId),
     private val postingStore: PostingStore = createPostingStore(db, spaceId = spaceId),
-    private val receiptStore: ReceiptStore = createReceiptStore(db, spaceId = spaceId)
+    private val receiptStore: ReceiptStore = createReceiptStore(db, spaceId = spaceId),
+    /** Shared with the stores' writers so local edits and merges take turns per space. */
+    private val scope: FinanceSpaceScope = FinanceSpaceScope(spaceId),
+    private val versions: SyncVersions = SyncVersions(db, spaceId, "local")
 ) {
+    /**
+     * Every entity's sync state, including tombstones, so a reconnecting peer learns about
+     * edits and deletes made while the two were apart.
+     */
     internal suspend fun buildFullStateSnapshot(deviceId: String): SyncFullStateSnapshot {
         val accounts = accountStore.readLocalSourceOfTruth(AccountKey.All)
         val categories = categoryStore.readLocalSourceOfTruth(CategoryKey.All)
@@ -55,33 +65,31 @@ class SyncStoreFacade(
         val exceptions = scheduleExceptionStore.readLocalSourceOfTruth(ScheduleExceptionKey.All)
         val postings = postingStore.readLocalSourceOfTruth(PostingKey.All)
         val receipts = receiptStore.readLocalSourceOfTruth(ReceiptKey.All)
+        val states = versions.loadAll()
 
+        val rows: List<ChangePayload> = buildList {
+            accounts.forEach { add(ChangePayload.AccountPayload(it)) }
+            categories.forEach { add(ChangePayload.CategoryPayload(it)) }
+            schedules.forEach { add(ChangePayload.SchedulePayload(it)) }
+            exceptions.forEach { add(ChangePayload.ScheduleExceptionPayload(it)) }
+            postings.forEach { add(ChangePayload.PostingPayload(it)) }
+            receipts.forEach { add(ChangePayload.ReceiptPayload(it)) }
+        }
+        val present = HashSet<Pair<EntityType, String>>()
         val changes = buildList {
-            accounts.forEach { account ->
-                add(snapshotChange(deviceId, EntityType.ACCOUNT, account.id, ChangePayload.AccountPayload(account)))
+            rows.forEach { payload ->
+                val key = payload.entityType to payload.entityId
+                present += key
+                val values = payload.toFields()
+                val state = states[key]?.copy(values = values) ?: versions.legacyState(key.first, key.second, values)
+                add(state.toChangeMessage(state.snapshotId(key.first, key.second), key.first, key.second, deviceId))
             }
-            categories.forEach { category ->
-                add(snapshotChange(deviceId, EntityType.CATEGORY, category.id, ChangePayload.CategoryPayload(category)))
-            }
-            schedules.forEach { schedule ->
-                add(snapshotChange(deviceId, EntityType.SCHEDULE, schedule.id, ChangePayload.SchedulePayload(schedule)))
-            }
-            exceptions.forEach { exception ->
-                val entityId = "${exception.scheduleId}_${exception.date.toEpochDays()}"
-                add(
-                    snapshotChange(
-                        deviceId,
-                        EntityType.SCHEDULE_EXCEPTION,
-                        entityId,
-                        ChangePayload.ScheduleExceptionPayload(exception)
-                    )
-                )
-            }
-            postings.forEach { posting ->
-                add(snapshotChange(deviceId, EntityType.POSTING, posting.id, ChangePayload.PostingPayload(posting)))
-            }
-            receipts.forEach { receipt ->
-                add(snapshotChange(deviceId, EntityType.RECEIPT, receipt.id, ChangePayload.ReceiptPayload(receipt)))
+            // Deleted entities. Rows removed by a local cascade without a tombstone stay out:
+            // their peers run the same cascade when the parent's delete arrives.
+            states.forEach { (key, state) ->
+                if (key !in present && !state.alive) {
+                    add(state.toChangeMessage(state.snapshotId(key.first, key.second), key.first, key.second, deviceId))
+                }
             }
         }
 
@@ -110,144 +118,75 @@ class SyncStoreFacade(
 
     internal suspend fun receiptExists(receiptId: String): Boolean = receiptById(receiptId) != null
 
+    /**
+     * Merges a peer's change field group by field group, then writes the result through the
+     * stores. Holding the space's write lock keeps a local edit from landing between the
+     * merge and the write.
+     */
     internal suspend fun applyIncomingChange(change: ChangeMessage): ApplyIncomingChangeResult =
         withContext(SuppressStoreBroadcast()) {
-            val current = db.latestEntityVersion(change.entityType, change.entityId, spaceId)
-            if (change.isStaleComparedTo(current)) {
-                return@withContext ApplyIncomingChangeResult.IgnoredStale(current)
+            val remote = change.toEntityState()
+            scope.write {
+                val type = change.entityType
+                val row = currentRow(type, change.entityId)
+                val merged = versions.merge(type, change.entityId, remote, row?.toFields())
+                    ?: return@write ApplyIncomingChangeResult.IgnoredStale
+                // Write first: if the entity can't be written (a delete blocked by linked
+                // transfers), the merge isn't recorded and the next snapshot retries it.
+                val result = if (merged.alive) {
+                    val payload = type.payloadFrom(merged.values!!)
+                    if (payload != row) write(payload)
+                    ApplyIncomingChangeResult.Applied
+                } else {
+                    if (row != null) delete(type, change.entityId)
+                    ApplyIncomingChangeResult.Deleted
+                }
+                versions.save(type, change.entityId, merged)
+                result
             }
-
-            when (change.entityType) {
-                EntityType.ACCOUNT -> applyAccountChange(change)
-                EntityType.CATEGORY -> applyCategoryChange(change)
-                EntityType.SCHEDULE -> applyScheduleChange(change)
-                EntityType.SCHEDULE_EXCEPTION -> applyScheduleExceptionChange(change)
-                EntityType.POSTING -> applyPostingChange(change)
-                EntityType.RECEIPT -> applyReceiptChange(change)
-            }
-
-            db.recordEntityChange(change, spaceId)
-            ApplyIncomingChangeResult.Applied
         }
 
-    private suspend fun snapshotChange(
-        deviceId: String,
-        entityType: EntityType,
-        entityId: String,
-        payload: ChangePayload
-    ): ChangeMessage {
-        val version = db.latestEntityVersion(entityType, entityId, spaceId)
-        return ChangeMessage(
-            id = version?.changeId ?: "snapshot:$deviceId:${entityType.name}:$entityId",
-            entityType = entityType,
-            op = ChangeOp.UPSERT,
-            entityId = entityId,
-            timestamp = version?.timestamp ?: 0L,
-            deviceId = deviceId,
-            payload = payload
-        )
+    private suspend fun currentRow(type: EntityType, entityId: String): ChangePayload? = when (type) {
+        EntityType.ACCOUNT -> accountStore.readLocalSourceOfTruth(AccountKey.ById(entityId)).firstOrNull()?.let(ChangePayload::AccountPayload)
+        EntityType.CATEGORY -> categoryStore.readLocalSourceOfTruth(CategoryKey.ById(entityId)).firstOrNull()?.let(ChangePayload::CategoryPayload)
+        EntityType.SCHEDULE -> scheduleStore.readLocalSourceOfTruth(ScheduleKey.ById(entityId)).firstOrNull()?.let(ChangePayload::SchedulePayload)
+        EntityType.SCHEDULE_EXCEPTION -> parseExceptionEntityId(entityId)?.let { (scheduleId, date) ->
+            scheduleExceptionStore.readLocalSourceOfTruth(ScheduleExceptionKey.ByKey(scheduleId, date)).firstOrNull()
+        }?.let(ChangePayload::ScheduleExceptionPayload)
+        EntityType.POSTING -> postingStore.readLocalSourceOfTruth(PostingKey.ById(entityId)).firstOrNull()?.let(ChangePayload::PostingPayload)
+        EntityType.RECEIPT -> receiptStore.readLocalSourceOfTruth(ReceiptKey.ById(entityId)).firstOrNull()?.let(ChangePayload::ReceiptPayload)
     }
 
-    private suspend fun applyAccountChange(change: ChangeMessage) {
-        when (change.op) {
-            ChangeOp.UPSERT -> {
-                val account = (change.payload as? ChangePayload.AccountPayload)?.account ?: return
-                accountStore.writeLocally(
-                    StoreWriteRequest.of<AccountKey, List<Account>, Unit>(
-                        AccountKey.ById(account.id),
-                        listOf(account)
-                    )
-                )
-            }
-            ChangeOp.DELETE -> accountStore.clear(AccountKey.ById(change.entityId))
-        }
-    }
-
-    private suspend fun applyCategoryChange(change: ChangeMessage) {
-        when (change.op) {
-            ChangeOp.UPSERT -> {
-                val category = (change.payload as? ChangePayload.CategoryPayload)?.category ?: return
-                categoryStore.writeLocally(
-                    StoreWriteRequest.of<CategoryKey, List<Category>, Unit>(
-                        CategoryKey.ById(category.id),
-                        listOf(category)
-                    )
-                )
-            }
-            ChangeOp.DELETE -> categoryStore.clear(CategoryKey.ById(change.entityId))
+    private suspend fun write(payload: ChangePayload) {
+        when (payload) {
+            is ChangePayload.AccountPayload -> accountStore.writeLocally(
+                StoreWriteRequest.of<AccountKey, List<Account>, Unit>(AccountKey.ById(payload.account.id), listOf(payload.account)))
+            is ChangePayload.CategoryPayload -> categoryStore.writeLocally(
+                StoreWriteRequest.of<CategoryKey, List<Category>, Unit>(CategoryKey.ById(payload.category.id), listOf(payload.category)))
+            is ChangePayload.SchedulePayload -> scheduleStore.writeLocally(
+                StoreWriteRequest.of<ScheduleKey, List<Schedule>, Unit>(ScheduleKey.ById(payload.schedule.id), listOf(payload.schedule)))
+            is ChangePayload.ScheduleExceptionPayload -> scheduleExceptionStore.writeLocally(
+                StoreWriteRequest.of<ScheduleExceptionKey, List<ScheduleException>, Unit>(
+                    ScheduleExceptionKey.ByKey(payload.exception.scheduleId, payload.exception.date), listOf(payload.exception)))
+            is ChangePayload.PostingPayload -> postingStore.writeLocally(
+                StoreWriteRequest.of<PostingKey, List<Posting>, Unit>(PostingKey.ById(payload.posting.id), listOf(payload.posting)))
+            is ChangePayload.ReceiptPayload -> receiptStore.writeLocally(
+                StoreWriteRequest.of<ReceiptKey, List<Receipt>, Unit>(ReceiptKey.ById(payload.receipt.id), listOf(payload.receipt)))
         }
     }
 
-    private suspend fun applyScheduleChange(change: ChangeMessage) {
-        when (change.op) {
-            ChangeOp.UPSERT -> {
-                val schedule = (change.payload as? ChangePayload.SchedulePayload)?.schedule ?: return
-                scheduleStore.writeLocally(
-                    StoreWriteRequest.of<ScheduleKey, List<Schedule>, Unit>(
-                        ScheduleKey.ById(schedule.id),
-                        listOf(schedule)
-                    )
-                )
+    private suspend fun delete(type: EntityType, entityId: String) {
+        when (type) {
+            EntityType.ACCOUNT -> accountStore.clear(AccountKey.ById(entityId))
+            EntityType.CATEGORY -> categoryStore.clear(CategoryKey.ById(entityId))
+            EntityType.SCHEDULE -> scheduleStore.clear(ScheduleKey.ById(entityId))
+            EntityType.SCHEDULE_EXCEPTION -> parseExceptionEntityId(entityId)?.let { (scheduleId, date) ->
+                scheduleExceptionStore.clear(ScheduleExceptionKey.ByKey(scheduleId, date))
             }
-            ChangeOp.DELETE -> scheduleStore.clear(ScheduleKey.ById(change.entityId))
+            EntityType.POSTING -> postingStore.clear(PostingKey.ById(entityId))
+            EntityType.RECEIPT -> receiptStore.clear(ReceiptKey.ById(entityId))
         }
     }
-
-    private suspend fun applyScheduleExceptionChange(change: ChangeMessage) {
-        when (change.op) {
-            ChangeOp.UPSERT -> {
-                val exception = (change.payload as? ChangePayload.ScheduleExceptionPayload)?.exception ?: return
-                scheduleExceptionStore.writeLocally(
-                    StoreWriteRequest.of<ScheduleExceptionKey, List<ScheduleException>, Unit>(
-                        ScheduleExceptionKey.ByKey(exception.scheduleId, exception.date),
-                        listOf(exception)
-                    )
-                )
-            }
-            ChangeOp.DELETE -> {
-                val parts = change.entityId.split("_", limit = 2)
-                if (parts.size != 2) return
-                val epochDay = parts[1].toLongOrNull() ?: return
-                scheduleExceptionStore.clear(
-                    ScheduleExceptionKey.ByKey(
-                        scheduleId = parts[0],
-                        date = kotlinx.datetime.LocalDate.fromEpochDays(epochDay.toInt())
-                    )
-                )
-            }
-        }
-    }
-
-    private suspend fun applyPostingChange(change: ChangeMessage) {
-        when (change.op) {
-            ChangeOp.UPSERT -> {
-                val posting = (change.payload as? ChangePayload.PostingPayload)?.posting ?: return
-                postingStore.writeLocally(
-                    StoreWriteRequest.of<PostingKey, List<Posting>, Unit>(
-                        PostingKey.ById(posting.id),
-                        listOf(posting)
-                    )
-                )
-            }
-            ChangeOp.DELETE -> postingStore.clear(PostingKey.ById(change.entityId))
-        }
-    }
-
-    private suspend fun applyReceiptChange(change: ChangeMessage) {
-        when (change.op) {
-            ChangeOp.UPSERT -> {
-                val receipt = (change.payload as? ChangePayload.ReceiptPayload)?.receipt ?: return
-                receiptStore.writeLocally(
-                    StoreWriteRequest.of<ReceiptKey, List<Receipt>, Unit>(
-                        ReceiptKey.ById(receipt.id),
-                        listOf(receipt)
-                    )
-                )
-            }
-            ChangeOp.DELETE -> receiptStore.clear(ReceiptKey.ById(change.entityId))
-        }
-    }
-
 }
 
 internal suspend fun ShillingDatabase.latestEntityVersion(
@@ -266,30 +205,13 @@ internal suspend fun ShillingDatabase.latestEntityVersion(
         )
     }
 
-internal suspend fun ShillingDatabase.recordEntityChange(change: ChangeMessage, spaceId: String = LOCAL_SPACE_ID) {
-    changeLogQueries.insert(
-        household_id = spaceId,
-        change_id = change.id,
-        entity_type = change.entityType.name,
-        entity_id = change.entityId,
-        op = change.op.name,
-        timestamp = change.timestamp,
-        payload_json = null
-    )
-}
-
 /**
- * Clears Store5-internal sync metadata (change log + bookkeeping). These are not entity data —
+ * Clears Store5-internal sync metadata (change log, entity versions, bookkeeping). These are not entity data —
  * they track sync state and retry state. Declared here in the `store` package because the
  * SourceOfTruth and Bookkeeper own these tables; no other layer may touch them directly.
  */
 suspend fun ShillingDatabase.clearAllSyncMetadata(spaceId: String = LOCAL_SPACE_ID) {
     bookkeepingQueries.deleteAll(spaceId)
     changeLogQueries.deleteForSpace(spaceId)
+    entityStateQueries.deleteForSpace(spaceId)
 }
-
-internal fun ChangeMessage.isStaleComparedTo(current: EntityChangeVersion?): Boolean =
-    current != null && (
-        timestamp < current.timestamp ||
-            (timestamp == current.timestamp && id <= current.changeId)
-        )

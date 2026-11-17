@@ -200,7 +200,8 @@ class Store5BehaviourTest {
         assertEquals(2450, broadcasts.size)
         assertEquals(1225, rows.count { it.type == ScheduleType.EXPENSE })
         assertTrue(rows.all { it.amount == 12.0 })
-        assertTrue(rows.all { db.latestEntityVersion(finance.shilling.shared.data.sync.EntityType.POSTING, it.id) != null })
+        val versions = SyncVersions(db, LOCAL_SPACE_ID, "test")
+        assertTrue(rows.all { versions.load(finance.shilling.shared.data.sync.EntityType.POSTING, it.id)?.alive == true })
         assertEquals(20, repo.loadRecentPostings(20).size)
         assertEquals(beforeVersion + 1, notifier.version.value)
     }

@@ -2,7 +2,6 @@ package finance.shilling.shared.data.store
 
 import finance.shilling.shared.data.Schedule
 import finance.shilling.shared.data.ScheduleException
-import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.EntityType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -58,7 +57,7 @@ class ScheduleRepository(
 
     suspend fun delete(scheduleId: String) {
         store.clear(ScheduleKey.ById(scheduleId))
-        broadcastChange(sync, EntityType.SCHEDULE, ChangeOp.DELETE, scheduleId)
+        broadcastEntityState(sync, EntityType.SCHEDULE, scheduleId)
         notifier.notifyChanged()
     }
 
@@ -74,7 +73,7 @@ class ScheduleRepository(
 
     suspend fun removeException(scheduleId: String, date: LocalDate) {
         exceptionStore.clear(ScheduleExceptionKey.ByKey(scheduleId, date))
-        broadcastChange(sync, EntityType.SCHEDULE_EXCEPTION, ChangeOp.DELETE, "${scheduleId}_${date.toEpochDays()}")
+        broadcastEntityState(sync, EntityType.SCHEDULE_EXCEPTION, exceptionEntityId(scheduleId, date))
         notifier.notifyChanged()
     }
 
