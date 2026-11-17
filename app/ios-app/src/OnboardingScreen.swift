@@ -27,8 +27,9 @@ struct OnboardingScreen: View {
     @StateObject private var model: FlowModel<OnboardingUiState, OnboardingScreenModel>
 
     init() {
-        let screen = OnboardingScreenModel()
-        _model = StateObject(wrappedValue: FlowModel(screen: screen, initial: screen.state, flow: screen.stateFlow))
+        _model = StateObject(wrappedValue: FlowModel(
+            create: { OnboardingScreenModel() }, state: { $0.state }, flow: { $0.stateFlow }
+        ))
     }
 
     private var screen: OnboardingScreenModel { model.screen }
@@ -93,6 +94,13 @@ struct OnboardingScreen: View {
                     .padding()
                     .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
+                if state.analyticsAvailable {
+                    Toggle("Share usage events", isOn: Binding(
+                        get: { state.analyticsConsent },
+                        set: { screen.setAnalyticsConsent(value: $0) }
+                    ))
+                    Text(state.analyticsNotice).font(.footnote).foregroundStyle(.secondary)
+                }
                 OptionCard(option: state.getStarted) { screen.getStarted() }
                 OptionCard(option: state.signIn) { screen.open(route: .login) }
                 Button(state.selfHostedLabel) { screen.open(route: .selfHosted) }
@@ -116,6 +124,7 @@ struct OnboardingScreen: View {
                 Text(state.loginSubtitle).textCase(nil)
             }
         }
+        .readableWidth(640)
         .navigationTitle(state.signIn.title)
     }
 }
@@ -166,6 +175,15 @@ private struct SelfHostedForm: View {
             } footer: {
                 Text(state.selfHostedHint).foregroundStyle(state.selfHostedError == nil ? Color.secondary : Color.red)
             }
+            if state.analyticsAvailable {
+                Section {
+                    Toggle("Share usage events", isOn: Binding(
+                        get: { state.analyticsConsent },
+                        set: { screen.setAnalyticsConsent(value: $0) }
+                    ))
+                    Text(state.analyticsNotice).font(.footnote).foregroundStyle(.secondary)
+                }
+            }
             Section {
                 Button {
                     screen.continueSelfHosted()
@@ -178,6 +196,7 @@ private struct SelfHostedForm: View {
                 .disabled(!state.canContinueSelfHosted)
             }
         }
+        .readableWidth(640)
         .navigationTitle(state.selfHostedLabel)
         .onAppear {
             guard !loaded else { return }

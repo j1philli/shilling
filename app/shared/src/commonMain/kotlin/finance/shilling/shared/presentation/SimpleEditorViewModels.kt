@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import finance.shilling.shared.data.Account
 import finance.shilling.shared.data.Category
 import finance.shilling.shared.data.IdGenerator
+import finance.shilling.shared.data.analytics.ProductAnalytics
+import finance.shilling.shared.data.analytics.ProductEvent
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -92,7 +94,7 @@ class CategoryEditorViewModel(
     init {
         if (categoryId != null) {
             viewModelScope.launch {
-                val category = categoryRepository.watchAll().first().firstOrNull { it.id == categoryId }
+                val category = categoryRepository.watchById(categoryId).first()
                 existing = category
                 _state.value = if (category == null) {
                     _state.value.copy(load = EditorLoad.MISSING)
@@ -114,7 +116,7 @@ class CategoryEditorViewModel(
                 if (category != null) {
                     // Deleted elsewhere (e.g. on another device) while open: show it as deleted, since saving
                     // would bring it back.
-                    categoryRepository.watchAll().first { list -> list.none { it.id == categoryId } }
+                    categoryRepository.watchById(categoryId).first { it == null }
                     _state.update { it.copy(load = EditorLoad.MISSING) }
                 }
             }
@@ -166,7 +168,8 @@ data class AccountEditorUiState(
 class AccountEditorViewModel(
     private val accountId: String?,
     private val accountRepository: AccountRepository,
-    private val idGenerator: IdGenerator
+    private val idGenerator: IdGenerator,
+    private val analytics: ProductAnalytics
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         if (accountId == null) AccountEditorUiState(EditorLoad.READY, isNew = true, title = "New account")
@@ -178,7 +181,7 @@ class AccountEditorViewModel(
     init {
         if (accountId != null) {
             viewModelScope.launch {
-                val account = accountRepository.watchAll().first().firstOrNull { it.id == accountId }
+                val account = accountRepository.watchById(accountId).first()
                 existing = account
                 _state.value = if (account == null) {
                     _state.value.copy(load = EditorLoad.MISSING)
@@ -201,7 +204,7 @@ class AccountEditorViewModel(
                 if (account != null) {
                     // Deleted elsewhere (e.g. on another device) while open: show it as deleted, since saving
                     // would bring it back.
-                    accountRepository.watchAll().first { list -> list.none { it.id == accountId } }
+                    accountRepository.watchById(accountId).first { it == null }
                     _state.update { it.copy(load = EditorLoad.MISSING) }
                 }
             }
@@ -217,6 +220,7 @@ class AccountEditorViewModel(
         val balance = current.balance ?: return null
         if (!current.saveEnabled) return null
         accountRepository.upsert(Account(id = existing?.id ?: idGenerator.newId(), name = current.name.trim(), balance = balance))
+        if (existing == null) analytics.captureAsync(ProductEvent.ACCOUNT_CREATED)
         return if (existing == null) "Account added" else "Account updated"
     }
 

@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.TextAutoSize
 import com.composables.icons.materialicons.MaterialIcons
 import com.composables.icons.materialicons.filled.Account_balance
 import com.composables.icons.materialicons.filled.Bar_chart
@@ -43,6 +44,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.koin.compose.viewmodel.koinViewModel
 import finance.shilling.shared.presentation.ActivityRowUi
 import finance.shilling.shared.presentation.HomeDestination
@@ -167,6 +169,7 @@ private fun ThisMonthTile(t: HomeUiState, go: (HomeDestination) -> Unit, modifie
         icon = MaterialIcons.Filled.Bar_chart,
         label = "This month",
         value = t.monthValue,
+        singleLineValue = true,
         caption = t.monthCaption,
         accent = netColor(t.monthNet),
         onClick = { go(HomeDestination.MONTH) }
@@ -316,6 +319,7 @@ private fun BentoTile(
     icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    singleLineValue: Boolean = false,
     content: @Composable (() -> Unit)? = null
 ) {
     val tileBackground = MaterialTheme.colorScheme.surfaceContainerLow
@@ -342,7 +346,10 @@ private fun BentoTile(
                         value,
                         style = MaterialTheme.typography.titleLarge,
                         color = accent,
-                        maxLines = 2,
+                        maxLines = if (singleLineValue) 1 else 2,
+                        autoSize = if (singleLineValue) TextAutoSize.StepBased(
+                            minFontSize = 14.sp, maxFontSize = MaterialTheme.typography.titleLarge.fontSize
+                        ) else null,
                         overflow = TextOverflow.Ellipsis
                     )
                     caption?.let {

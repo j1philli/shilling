@@ -4,6 +4,7 @@ import app.cash.sqldelight.async.coroutines.awaitAsOne
 import app.cash.sqldelight.async.coroutines.await
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
+import app.cash.sqldelight.db.SqlPreparedStatement
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import finance.shilling.shared.db.ShillingDatabase
 import kotlinx.coroutines.runBlocking
@@ -13,6 +14,18 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class DatabaseBootstrapTest {
+    @Test
+    fun androidMetadataAloneDoesNotMakeAFreshDatabaseRequireMigration() = runBlocking {
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        try {
+            driver.execute(null, "CREATE TABLE android_metadata (locale TEXT);", 0)
+            ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
+            assertEquals(ShillingDatabase.Schema.version, userVersion(driver))
+            assertTrue(tableExists(driver, "accounts"))
+            assertTrue(tableExists(driver, "android_metadata"))
+        } finally { driver.close() }
+    }
+
     @Test
     fun emptyDatabaseIsInitialized() = runBlocking {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
@@ -25,6 +38,19 @@ class DatabaseBootstrapTest {
     }
 
     @Test
+    fun freshAndroidDatabaseIsInitialized() = runBlocking {
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        // What SQLiteOpenHelper leaves behind before the (no-op) schema callback runs.
+        driver.execute(null, "CREATE TABLE android_metadata (locale TEXT);", 0)
+        driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0)
+
+        ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
+
+        assertTrue(tableExists(driver, "accounts"))
+        assertTrue(tableExists(driver, "local_spaces"))
+    }
+
+    @Test
     fun validSchemaIsLeftIntact() = runBlocking {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         ShillingDatabase.Schema.create(driver).await()
@@ -32,8 +58,35 @@ class DatabaseBootstrapTest {
         val db = ShillingDatabase(driver)
         db.accountQueries.upsert("acct-1", "Checking", 123.45, space_id = "__local__").await()
 
+        val writes = mutableListOf<String>()
+        val recording = object : SqlDriver by driver {
+            override fun execute(identifier: Int?, sql: String, parameters: Int,
+                binders: (SqlPreparedStatement.() -> Unit)?): QueryResult<Long> {
+                writes += sql
+                return driver.execute(identifier, sql, parameters, binders)
+            }
+        }
+        ensureLocalSchemaReady(recording, logTag = "DatabaseBootstrapTest")
+
+        assertEquals(1L, rowCount(driver, "accounts"))
+        assertEquals(listOf("PRAGMA foreign_keys = ON;"), writes,
+            "An up-to-date database must not issue DDL that makes the web worker persist a snapshot")
+    }
+
+    @Test
+    fun missingPerformanceIndexIsAddedWithoutRebuildingData() = runBlocking {
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        ShillingDatabase.Schema.create(driver).await()
+        driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0)
+        driver.execute(null, "DROP INDEX idx_change_log_entity_latest;", 0)
+        driver.execute(null, "DROP INDEX postings_pair_idx;", 0)
+        val db = ShillingDatabase(driver)
+        db.accountQueries.upsert("acct-1", "Checking", 123.45, "__local__").await()
+
         ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
 
+        assertTrue(indexExists(driver, "idx_change_log_entity_latest"))
+        assertTrue(indexExists(driver, "postings_pair_idx"))
         assertEquals(1L, rowCount(driver, "accounts"))
     }
 
@@ -126,6 +179,19 @@ class DatabaseBootstrapTest {
             1
         ) {
             bindString(0, tableName)
+        }.value
+
+    private fun indexExists(driver: SqlDriver, indexName: String): Boolean =
+        driver.executeQuery(
+            null,
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'index' AND name = ?;",
+            { cursor ->
+                cursor.next()
+                QueryResult.Value((cursor.getLong(0) ?: 0L) > 0L)
+            },
+            1
+        ) {
+            bindString(0, indexName)
         }.value
 
     private fun rowCount(driver: SqlDriver, tableName: String): Long =

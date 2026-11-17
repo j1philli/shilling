@@ -1,0 +1,61 @@
+{
+  "tool": "macOS /usr/bin/heap",
+  "limitations": [
+    "Native class counts do not measure retained Kotlin objects or identify their allocation stacks.",
+    "heap reported failed mapping of some large Wasm reservation regions."
+  ],
+  "runs": [
+    {
+      "label": "baseline, after complete workload",
+      "capturedAt": "2026-10-03 10:27:08.293 -0600",
+      "process": "com.apple.WebKit.WebContent [10126]",
+      "classes": {
+        "WebCore::JSEventListener": {
+          "count": 43662,
+          "objectBytes": 3492960
+        },
+        "WebCore::FetchResponse": {
+          "count": 728,
+          "objectBytes": 745472
+        }
+      }
+    },
+    {
+      "label": "worker facade only, during navigation",
+      "capturedAt": "2026-10-03 10:30:58.126 -0600",
+      "process": "com.apple.WebKit.WebContent [34361]",
+      "classes": {
+        "WebCore::JSEventListener": {
+          "count": 100,
+          "objectBytes": 8000
+        }
+      }
+    },
+    {
+      "label": "worker facade only, after complete workload",
+      "capturedAt": "2026-10-03 10:36:36.043 -0600",
+      "process": "com.apple.WebKit.WebContent [34361]",
+      "classes": {
+        "WebCore::JSEventListener": {
+          "count": 219,
+          "objectBytes": 17520
+        },
+        "WebCore::FetchResponse": {
+          "count": 1,
+          "objectBytes": 1024
+        }
+      }
+    },
+    {
+      "label": "final implementation, after complete workload",
+      "capturedAt": "2026-10-03 11:27:29.959 -0600",
+      "process": "com.apple.WebKit.WebContent [53104]",
+      "classes": {
+        "WebCore::JSEventListener": {
+          "count": 226,
+          "objectBytes": 18080
+        }
+      }
+    }
+  ]
+}

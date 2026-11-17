@@ -1,0 +1,662 @@
+{
+  "date": "2026-10-02",
+  "target": "isolated Shilling Perf Desktop, macOS WebKit WebContent",
+  "workload": "Four 50 MiB synthetic PNG preview open/close cycles, then receipt editor close",
+  "sampling": "ps RSS approximately every 0.25 seconds; process snapshots, not application allocation trace",
+  "sampleCount": 128,
+  "initialWebContentRssKiB": 27200,
+  "peakWebContentRssKiB": 984352,
+  "peakAtSeconds": 27.153,
+  "endWebContentRssKiB": 934592,
+  "vmmapDuringPreview": {
+    "physicalFootprintGiB": 1.8,
+    "webKitMallocResidentMiB": 298.5,
+    "webKitMallocSwappedMiB": 782.7,
+    "jsVmReservationsResidentMiB": 42.3,
+    "jsVmReservationsSwappedMiB": 591.1,
+    "note": "vmmap sampled a subsequent 50 MiB preview; categories overlap with process footprint and must not be summed"
+  },
+  "instrumentsAllocationTrace": "xctrace Allocations attach did not finalize after its 35-second time limit; no allocation-level result",
+  "samples": [
+    {
+      "elapsedSeconds": 0.018,
+      "tauriHostRssKiB": 98096,
+      "webContentRssKiB": 27200
+    },
+    {
+      "elapsedSeconds": 0.291,
+      "tauriHostRssKiB": 98096,
+      "webContentRssKiB": 27200
+    },
+    {
+      "elapsedSeconds": 0.563,
+      "tauriHostRssKiB": 98096,
+      "webContentRssKiB": 27200
+    },
+    {
+      "elapsedSeconds": 0.838,
+      "tauriHostRssKiB": 98096,
+      "webContentRssKiB": 27200
+    },
+    {
+      "elapsedSeconds": 1.117,
+      "tauriHostRssKiB": 98096,
+      "webContentRssKiB": 27200
+    },
+    {
+      "elapsedSeconds": 1.396,
+      "tauriHostRssKiB": 97856,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 1.67,
+      "tauriHostRssKiB": 97856,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 1.953,
+      "tauriHostRssKiB": 97856,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 2.227,
+      "tauriHostRssKiB": 97856,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 2.496,
+      "tauriHostRssKiB": 97856,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 2.765,
+      "tauriHostRssKiB": 97856,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 3.04,
+      "tauriHostRssKiB": 97856,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 3.313,
+      "tauriHostRssKiB": 97856,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 3.586,
+      "tauriHostRssKiB": 97856,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 3.858,
+      "tauriHostRssKiB": 97840,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 4.131,
+      "tauriHostRssKiB": 97840,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 4.402,
+      "tauriHostRssKiB": 97840,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 4.674,
+      "tauriHostRssKiB": 97840,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 4.943,
+      "tauriHostRssKiB": 97840,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 5.215,
+      "tauriHostRssKiB": 97840,
+      "webContentRssKiB": 26192
+    },
+    {
+      "elapsedSeconds": 5.49,
+      "tauriHostRssKiB": 98864,
+      "webContentRssKiB": 27888
+    },
+    {
+      "elapsedSeconds": 5.768,
+      "tauriHostRssKiB": 99712,
+      "webContentRssKiB": 205344
+    },
+    {
+      "elapsedSeconds": 6.037,
+      "tauriHostRssKiB": 101328,
+      "webContentRssKiB": 212528
+    },
+    {
+      "elapsedSeconds": 6.313,
+      "tauriHostRssKiB": 106912,
+      "webContentRssKiB": 212848
+    },
+    {
+      "elapsedSeconds": 6.585,
+      "tauriHostRssKiB": 106912,
+      "webContentRssKiB": 212848
+    },
+    {
+      "elapsedSeconds": 6.857,
+      "tauriHostRssKiB": 106912,
+      "webContentRssKiB": 212848
+    },
+    {
+      "elapsedSeconds": 7.131,
+      "tauriHostRssKiB": 106912,
+      "webContentRssKiB": 212848
+    },
+    {
+      "elapsedSeconds": 7.403,
+      "tauriHostRssKiB": 106912,
+      "webContentRssKiB": 212848
+    },
+    {
+      "elapsedSeconds": 7.673,
+      "tauriHostRssKiB": 106912,
+      "webContentRssKiB": 212848
+    },
+    {
+      "elapsedSeconds": 7.944,
+      "tauriHostRssKiB": 106912,
+      "webContentRssKiB": 212848
+    },
+    {
+      "elapsedSeconds": 8.213,
+      "tauriHostRssKiB": 106912,
+      "webContentRssKiB": 212848
+    },
+    {
+      "elapsedSeconds": 8.483,
+      "tauriHostRssKiB": 106912,
+      "webContentRssKiB": 212848
+    },
+    {
+      "elapsedSeconds": 8.757,
+      "tauriHostRssKiB": 106912,
+      "webContentRssKiB": 212848
+    },
+    {
+      "elapsedSeconds": 9.029,
+      "tauriHostRssKiB": 106992,
+      "webContentRssKiB": 213232
+    },
+    {
+      "elapsedSeconds": 9.301,
+      "tauriHostRssKiB": 106992,
+      "webContentRssKiB": 213232
+    },
+    {
+      "elapsedSeconds": 9.578,
+      "tauriHostRssKiB": 106976,
+      "webContentRssKiB": 213248
+    },
+    {
+      "elapsedSeconds": 9.85,
+      "tauriHostRssKiB": 106976,
+      "webContentRssKiB": 213248
+    },
+    {
+      "elapsedSeconds": 10.123,
+      "tauriHostRssKiB": 106976,
+      "webContentRssKiB": 213248
+    },
+    {
+      "elapsedSeconds": 10.399,
+      "tauriHostRssKiB": 107008,
+      "webContentRssKiB": 213472
+    },
+    {
+      "elapsedSeconds": 10.672,
+      "tauriHostRssKiB": 107008,
+      "webContentRssKiB": 246400
+    },
+    {
+      "elapsedSeconds": 10.942,
+      "tauriHostRssKiB": 107072,
+      "webContentRssKiB": 250384
+    },
+    {
+      "elapsedSeconds": 11.216,
+      "tauriHostRssKiB": 106992,
+      "webContentRssKiB": 250400
+    },
+    {
+      "elapsedSeconds": 11.489,
+      "tauriHostRssKiB": 106992,
+      "webContentRssKiB": 250400
+    },
+    {
+      "elapsedSeconds": 11.758,
+      "tauriHostRssKiB": 106992,
+      "webContentRssKiB": 250400
+    },
+    {
+      "elapsedSeconds": 12.032,
+      "tauriHostRssKiB": 106992,
+      "webContentRssKiB": 250400
+    },
+    {
+      "elapsedSeconds": 12.305,
+      "tauriHostRssKiB": 106992,
+      "webContentRssKiB": 250400
+    },
+    {
+      "elapsedSeconds": 12.58,
+      "tauriHostRssKiB": 106688,
+      "webContentRssKiB": 246304
+    },
+    {
+      "elapsedSeconds": 12.853,
+      "tauriHostRssKiB": 106672,
+      "webContentRssKiB": 238032
+    },
+    {
+      "elapsedSeconds": 13.127,
+      "tauriHostRssKiB": 106672,
+      "webContentRssKiB": 231760
+    },
+    {
+      "elapsedSeconds": 13.4,
+      "tauriHostRssKiB": 106640,
+      "webContentRssKiB": 228144
+    },
+    {
+      "elapsedSeconds": 13.675,
+      "tauriHostRssKiB": 104048,
+      "webContentRssKiB": 224864
+    },
+    {
+      "elapsedSeconds": 13.947,
+      "tauriHostRssKiB": 103904,
+      "webContentRssKiB": 224864
+    },
+    {
+      "elapsedSeconds": 14.222,
+      "tauriHostRssKiB": 103904,
+      "webContentRssKiB": 224864
+    },
+    {
+      "elapsedSeconds": 14.492,
+      "tauriHostRssKiB": 103904,
+      "webContentRssKiB": 224864
+    },
+    {
+      "elapsedSeconds": 14.767,
+      "tauriHostRssKiB": 103904,
+      "webContentRssKiB": 224864
+    },
+    {
+      "elapsedSeconds": 15.042,
+      "tauriHostRssKiB": 103840,
+      "webContentRssKiB": 224864
+    },
+    {
+      "elapsedSeconds": 15.315,
+      "tauriHostRssKiB": 103840,
+      "webContentRssKiB": 224960
+    },
+    {
+      "elapsedSeconds": 15.584,
+      "tauriHostRssKiB": 103840,
+      "webContentRssKiB": 224960
+    },
+    {
+      "elapsedSeconds": 15.875,
+      "tauriHostRssKiB": 103952,
+      "webContentRssKiB": 225376
+    },
+    {
+      "elapsedSeconds": 16.15,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 248032
+    },
+    {
+      "elapsedSeconds": 16.443,
+      "tauriHostRssKiB": 104160,
+      "webContentRssKiB": 249072
+    },
+    {
+      "elapsedSeconds": 16.717,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 16.989,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 17.259,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 17.533,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 17.806,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 18.077,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 18.347,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 18.617,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 18.887,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 19.159,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 19.434,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 19.706,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 19.98,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 20.253,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 20.527,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 20.802,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 21.076,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244064
+    },
+    {
+      "elapsedSeconds": 21.347,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244048
+    },
+    {
+      "elapsedSeconds": 21.618,
+      "tauriHostRssKiB": 104144,
+      "webContentRssKiB": 244048
+    },
+    {
+      "elapsedSeconds": 21.893,
+      "tauriHostRssKiB": 104480,
+      "webContentRssKiB": 241024
+    },
+    {
+      "elapsedSeconds": 22.171,
+      "tauriHostRssKiB": 104496,
+      "webContentRssKiB": 228960
+    },
+    {
+      "elapsedSeconds": 22.443,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 593344
+    },
+    {
+      "elapsedSeconds": 22.714,
+      "tauriHostRssKiB": 105840,
+      "webContentRssKiB": 565776
+    },
+    {
+      "elapsedSeconds": 22.988,
+      "tauriHostRssKiB": 105936,
+      "webContentRssKiB": 599328
+    },
+    {
+      "elapsedSeconds": 23.262,
+      "tauriHostRssKiB": 105904,
+      "webContentRssKiB": 652848
+    },
+    {
+      "elapsedSeconds": 23.534,
+      "tauriHostRssKiB": 105872,
+      "webContentRssKiB": 639104
+    },
+    {
+      "elapsedSeconds": 23.807,
+      "tauriHostRssKiB": 105872,
+      "webContentRssKiB": 742896
+    },
+    {
+      "elapsedSeconds": 24.086,
+      "tauriHostRssKiB": 105856,
+      "webContentRssKiB": 717632
+    },
+    {
+      "elapsedSeconds": 24.368,
+      "tauriHostRssKiB": 105888,
+      "webContentRssKiB": 746912
+    },
+    {
+      "elapsedSeconds": 24.644,
+      "tauriHostRssKiB": 105888,
+      "webContentRssKiB": 759664
+    },
+    {
+      "elapsedSeconds": 24.926,
+      "tauriHostRssKiB": 105888,
+      "webContentRssKiB": 757968
+    },
+    {
+      "elapsedSeconds": 25.2,
+      "tauriHostRssKiB": 104960,
+      "webContentRssKiB": 910496
+    },
+    {
+      "elapsedSeconds": 25.478,
+      "tauriHostRssKiB": 104880,
+      "webContentRssKiB": 880720
+    },
+    {
+      "elapsedSeconds": 25.755,
+      "tauriHostRssKiB": 104992,
+      "webContentRssKiB": 931088
+    },
+    {
+      "elapsedSeconds": 26.025,
+      "tauriHostRssKiB": 104992,
+      "webContentRssKiB": 954624
+    },
+    {
+      "elapsedSeconds": 26.302,
+      "tauriHostRssKiB": 104992,
+      "webContentRssKiB": 884384
+    },
+    {
+      "elapsedSeconds": 26.579,
+      "tauriHostRssKiB": 104992,
+      "webContentRssKiB": 965232
+    },
+    {
+      "elapsedSeconds": 26.872,
+      "tauriHostRssKiB": 104992,
+      "webContentRssKiB": 965472
+    },
+    {
+      "elapsedSeconds": 27.153,
+      "tauriHostRssKiB": 104976,
+      "webContentRssKiB": 984352
+    },
+    {
+      "elapsedSeconds": 27.425,
+      "tauriHostRssKiB": 104976,
+      "webContentRssKiB": 968656
+    },
+    {
+      "elapsedSeconds": 27.697,
+      "tauriHostRssKiB": 104960,
+      "webContentRssKiB": 968720
+    },
+    {
+      "elapsedSeconds": 27.967,
+      "tauriHostRssKiB": 104928,
+      "webContentRssKiB": 968720
+    },
+    {
+      "elapsedSeconds": 28.24,
+      "tauriHostRssKiB": 104864,
+      "webContentRssKiB": 962752
+    },
+    {
+      "elapsedSeconds": 28.512,
+      "tauriHostRssKiB": 104864,
+      "webContentRssKiB": 962752
+    },
+    {
+      "elapsedSeconds": 28.783,
+      "tauriHostRssKiB": 104864,
+      "webContentRssKiB": 962752
+    },
+    {
+      "elapsedSeconds": 29.051,
+      "tauriHostRssKiB": 104864,
+      "webContentRssKiB": 962752
+    },
+    {
+      "elapsedSeconds": 29.318,
+      "tauriHostRssKiB": 104864,
+      "webContentRssKiB": 962752
+    },
+    {
+      "elapsedSeconds": 29.588,
+      "tauriHostRssKiB": 104864,
+      "webContentRssKiB": 962752
+    },
+    {
+      "elapsedSeconds": 29.864,
+      "tauriHostRssKiB": 104848,
+      "webContentRssKiB": 951968
+    },
+    {
+      "elapsedSeconds": 30.136,
+      "tauriHostRssKiB": 104848,
+      "webContentRssKiB": 949344
+    },
+    {
+      "elapsedSeconds": 30.409,
+      "tauriHostRssKiB": 104848,
+      "webContentRssKiB": 949344
+    },
+    {
+      "elapsedSeconds": 30.683,
+      "tauriHostRssKiB": 104848,
+      "webContentRssKiB": 949344
+    },
+    {
+      "elapsedSeconds": 30.955,
+      "tauriHostRssKiB": 104848,
+      "webContentRssKiB": 943952
+    },
+    {
+      "elapsedSeconds": 31.225,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 943952
+    },
+    {
+      "elapsedSeconds": 31.507,
+      "tauriHostRssKiB": 104832,
+      "webContentRssKiB": 934544
+    },
+    {
+      "elapsedSeconds": 31.791,
+      "tauriHostRssKiB": 104816,
+      "webContentRssKiB": 934576
+    },
+    {
+      "elapsedSeconds": 32.064,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 934576
+    },
+    {
+      "elapsedSeconds": 32.338,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 934592
+    },
+    {
+      "elapsedSeconds": 32.613,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 934592
+    },
+    {
+      "elapsedSeconds": 32.887,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 934592
+    },
+    {
+      "elapsedSeconds": 33.16,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 934592
+    },
+    {
+      "elapsedSeconds": 33.434,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 934592
+    },
+    {
+      "elapsedSeconds": 33.708,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 934592
+    },
+    {
+      "elapsedSeconds": 33.982,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 934592
+    },
+    {
+      "elapsedSeconds": 34.256,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 934592
+    },
+    {
+      "elapsedSeconds": 34.529,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 934592
+    },
+    {
+      "elapsedSeconds": 34.803,
+      "tauriHostRssKiB": 104800,
+      "webContentRssKiB": 934592
+    }
+  ]
+}

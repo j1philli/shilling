@@ -2,6 +2,8 @@ package finance.shilling.shared.ui
 
 import finance.shilling.shared.session.HostedCredentialsMode
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,6 +36,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -71,7 +76,9 @@ fun FirstLaunchOnboardingView(
                         modifier = Modifier
                             .align(Alignment.Center)
                             .widthIn(max = 720.dp)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .padding(bottom = 64.dp)
+                            .verticalScroll(rememberScrollState()),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(18.dp)
                     ) {
@@ -91,6 +98,15 @@ fun FirstLaunchOnboardingView(
                                 action = state.heldDataAction,
                                 onRelogin = { viewModel.open(OnboardingRoute.LOGIN) }
                             )
+                        }
+
+                        if (state.analyticsAvailable) {
+                            Row {
+                                Text("Share usage events", modifier = Modifier.weight(1f))
+                                Switch(checked = state.analyticsConsent, onCheckedChange = viewModel::setAnalyticsConsent,
+                                        modifier = Modifier.semantics { contentDescription = "Share usage events" })
+                            }
+                            Text(state.analyticsNotice, style = MaterialTheme.typography.bodySmall)
                         }
 
                         OnboardingActionCard(state.getStarted, onClick = viewModel::getStarted)
@@ -148,7 +164,7 @@ fun FirstLaunchOnboardingView(
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
-                            modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth(),
+                            modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth().verticalScroll(rememberScrollState()),
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             ShillingCard {
@@ -162,6 +178,14 @@ fun FirstLaunchOnboardingView(
                                     singleLine = true,
                                     modifier = Modifier.fillMaxWidth()
                                 )
+                                if (state.analyticsAvailable) {
+                                    Row {
+                                        Text("Share usage events", modifier = Modifier.weight(1f))
+                                        Switch(checked = state.analyticsConsent, onCheckedChange = viewModel::setAnalyticsConsent,
+                                        modifier = Modifier.semantics { contentDescription = "Share usage events" })
+                                    }
+                                    Text(state.analyticsNotice, style = MaterialTheme.typography.bodySmall)
+                                }
                                 Button(onClick = viewModel::continueSelfHosted, enabled = state.canContinueSelfHosted) {
                                     if (state.validatingSelfHosted) {
                                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)

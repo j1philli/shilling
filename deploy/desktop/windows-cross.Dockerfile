@@ -1,3 +1,5 @@
+FROM node:22.23.4-bookworm-slim AS node
+
 FROM rust:1.90-bookworm AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -6,16 +8,19 @@ ENV XWIN_CACHE_DIR=/usr/local/cargo/xwin-cache
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential ca-certificates clang curl file libssl-dev lld llvm \
-    nodejs npm nsis pkg-config wget xz-utils \
+    nsis pkg-config wget xz-utils \
     && rm -rf /var/lib/apt/lists/* \
     && ln -s "$(find /usr/bin -maxdepth 1 -name 'llvm-rc-*' | sort -V | tail -1)" /usr/local/bin/llvm-rc
 
-RUN npm install --global @tauri-apps/cli@2.10.0 \
+COPY --from=node /usr/local/ /usr/local/
+
+RUN node --version && npm install --global @tauri-apps/cli@2.10.0 \
     && rustup target add x86_64-pc-windows-msvc \
     && cargo install --locked cargo-xwin --version 0.23.1
 
 WORKDIR /workspace
 COPY src-tauri/ src-tauri/
+COPY third_party/glib/ third_party/glib/
 COPY web-app-dist/ web-app-dist/
 
 WORKDIR /workspace/src-tauri

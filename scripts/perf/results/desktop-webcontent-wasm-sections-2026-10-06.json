@@ -1,0 +1,122 @@
+{
+  "perf-web": {
+    "bytes": 9405360,
+    "sections": [
+      {
+        "section": 1,
+        "bytes": 419839,
+        "entries": 2884
+      },
+      {
+        "section": 2,
+        "bytes": 1317348,
+        "entries": 26713
+      },
+      {
+        "section": 3,
+        "bytes": 55414,
+        "entries": 26490
+      },
+      {
+        "section": 6,
+        "bytes": 718420,
+        "entries": 19504
+      },
+      {
+        "section": 7,
+        "bytes": 12
+      },
+      {
+        "section": 8,
+        "bytes": 3
+      },
+      {
+        "section": 9,
+        "bytes": 13262
+      },
+      {
+        "section": 12,
+        "bytes": 1
+      },
+      {
+        "section": 0,
+        "bytes": 57,
+        "name": "binaryen.js.called"
+      },
+      {
+        "section": 10,
+        "bytes": 5099588,
+        "entries": 26490
+      },
+      {
+        "section": 11,
+        "bytes": 59018
+      },
+      {
+        "section": 0,
+        "bytes": 1722350,
+        "name": "name"
+      }
+    ]
+  },
+  "type-merged": {
+    "bytes": 9203175,
+    "sections": [
+      {
+        "section": 1,
+        "bytes": 344539,
+        "entries": 1943
+      },
+      {
+        "section": 2,
+        "bytes": 1313129,
+        "entries": 26579
+      },
+      {
+        "section": 3,
+        "bytes": 50948,
+        "entries": 25804
+      },
+      {
+        "section": 6,
+        "bytes": 708713,
+        "entries": 19238
+      },
+      {
+        "section": 7,
+        "bytes": 12
+      },
+      {
+        "section": 8,
+        "bytes": 3
+      },
+      {
+        "section": 9,
+        "bytes": 12168
+      },
+      {
+        "section": 12,
+        "bytes": 1
+      },
+      {
+        "section": 0,
+        "bytes": 57,
+        "name": "binaryen.js.called"
+      },
+      {
+        "section": 10,
+        "bytes": 5041311,
+        "entries": 25804
+      },
+      {
+        "section": 11,
+        "bytes": 59018
+      },
+      {
+        "section": 0,
+        "bytes": 1673228,
+        "name": "name"
+      }
+    ]
+  }
+}

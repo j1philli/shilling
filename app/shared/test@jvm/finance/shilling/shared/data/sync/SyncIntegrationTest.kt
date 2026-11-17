@@ -11,6 +11,7 @@ import finance.shilling.shared.data.IdGenerator
 import finance.shilling.shared.data.Posting
 import finance.shilling.shared.data.Receipt
 import finance.shilling.shared.data.ReceiptFileStore
+import finance.shilling.shared.data.asReceiptReader
 import finance.shilling.shared.data.Schedule
 import finance.shilling.shared.data.ScheduleException
 import finance.shilling.shared.data.ScheduleType
@@ -705,8 +706,6 @@ class SyncIntegrationTest {
             receiptRepository = ReceiptRepository(
                 notifier = notifier,
                 store = receiptStore,
-                postingStore = postingStore,
-                scheduleStore = scheduleStore,
                 sync = syncDeps
             )
         }
@@ -774,6 +773,7 @@ class SyncIntegrationTest {
         }
 
         override suspend fun read(receiptId: String): ByteArray? = files[receiptId]
+        override suspend fun openReader(receiptId: String) = read(receiptId)?.asReceiptReader()
 
         override suspend fun hasFile(receiptId: String): Boolean = receiptId in files
 

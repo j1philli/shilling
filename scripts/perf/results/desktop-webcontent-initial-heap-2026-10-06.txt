@@ -1,0 +1,852 @@
+Failed to map remote region at [0x8052000000-0x8152800000]
+Failed to map remote region at [0x8152800000-0x8253000000]
+Failed to map remote region at [0x8253000000-0x8353800000]
+Failed to map remote region at [0x8052000000-0x8152800000]
+Failed to map remote region at [0x8152800000-0x8253000000]
+Failed to map remote region at [0x8253000000-0x8353800000]
+Process:         com.apple.WebKit.WebContent [3679]
+Path:            /System/Volumes/Preboot/Cryptexes/OS/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent
+Load Address:    0x1043c0000
+Identifier:      com.apple.WebKit.WebContent
+Version:         22625 (22625.1.29.11.28)
+Code Type:       ARM64E
+Platform:        macOS
+Parent Process:  launchd [1]
+Target Type:     live task
+
+Date/Time:       2026-10-06 20:17:09.067 -0600
+Launch Time:     2026-10-06 20:16:50.244 -0600
+OS Version:      macOS 27.0.1 (26A434)
+Report Version:  7
+Analysis Tool:   /usr/bin/heap
+
+Physical footprint:         297.1M
+Physical footprint (peak):  401.6M
+Idle exit:                  clean
+----
+
+Process 3679: 4 zones
+
+All zones: 748797 nodes malloced - Sizes: 4.2025e+06KB[3] 9873.55KB[1] 8776.48KB[1] 6747.09KB[1] 6164.03KB[1] 4738.7KB[1] 2166.42KB[1] 1681.98KB[1] 1280KB[1] 1044.66KB[1] 1043.48KB[1] 1034.77KB[1] 1024.02KB[1] 827.828KB[1] 768.016KB[1] 632.781KB[1] 569.578KB[1] 512.109KB[1] 512.016KB[3] 492.109KB[1] 455.672KB[1] 428.375KB[1] 413.922KB[2] 387.625KB[1] 368KB[1] 280KB[1] 276KB[1] 266.492KB[1] 256KB[1] 252KB[1] 236KB[1] 228KB[1] 220KB[1] 208KB[5] 160KB[1] 152KB[2] 144KB[2] 137.719KB[2] 132KB[2] 128KB[4] 124KB[3] 116KB[3] 110.676KB[1] 108KB[2] 105.938KB[2] 104KB[1] 100KB[3] 96KB[1] 92KB[5] 86.7891KB[1] 84KB[1] 78.1602KB[1] 76KB[6] 72.1367KB[1] 68.4844KB[1] 68.3438KB[1] 68KB[5] 62.3711KB[1] 60KB[3] 56.75KB[1] 56KB[1] 52.25KB[1] 52KB[5] 51.5KB[1] 50.25KB[1] 48KB[8] 47.25KB[1] 45KB[1] 44KB[1] 40.25KB[1] 40KB[4] 39KB[1] 38.5KB[1] 36KB[14] 35.75KB[1] 34.25KB[2] 32.75KB[1] 32KB[7] 31.75KB[2] 31KB[1] 30.5KB[2] 29.75KB[1] 29.5KB[2] 29KB[1] 28.5KB[2] 28.25KB[2] 27.5KB[2] 27KB[2] 25.5KB[4] 25.25KB[1] 25KB[5] 24.5KB[6] 24KB[10] 23.75KB[2] 23.5KB[2] 23.25KB[1] 23KB[2] 22.5KB[5] 22KB[4] 21.75KB[1] 21.5KB[1] 21.25KB[1] 21KB[1] 20.5KB[8] 20KB[8] 19.75KB[1] 19.5KB[8] 19.25KB[2] 19KB[3] 18.75KB[1] 18.5KB[12] 18.25KB[1] 18KB[6] 17.5KB[6] 17.25KB[2] 17KB[5] 16.75KB[2] 16.5KB[14] 16.25KB[3] 16KB[3588] 15.75KB[1] 15.5KB[5] 15KB[9] 14.75KB[3] 14.5KB[13] 14.25KB[2] 14KB[7] 13.75KB[4] 13.5KB[9] 13.25KB[4] 13KB[10] 12.75KB[6] 12.5KB[15] 12.25KB[3] 12KB[15] 11.75KB[2] 11.5KB[15] 11.25KB[3] 11KB[18] 10.75KB[6] 10.5KB[48] 10.25KB[6] 10KB[25] 9.75KB[4] 9.5KB[30] 9.25KB[5] 9KB[27] 8.75KB[13] 8.5KB[44] 8.25KB[10] 8KB[194] 7.75KB[12] 7.5KB[22] 7.25KB[9] 7KB[16] 6.75KB[15] 6.5KB[10] 6.25KB[17] 6KB[322] 5.75KB[26] 5.5KB[9] 5.25KB[17] 5KB[32] 4.75KB[27] 4.5KB[229] 4.25KB[36] 4KB[592] 3.75KB[51] 3.5KB[105] 3.25KB[67] 3KB[536] 2.75KB[106] 2.5KB[910] 2.25KB[143] 2KB[1510] 1.75KB[318] 1.5KB[1941] 1.45312KB[681] 1.4375KB[2] 1.3125KB[5] 1.25KB[19] 1.125KB[696] 1.0625KB[818] 1.04688KB[545] 1KB[3801] 944[1] 896[9] 848[20] 816[111] 800[4916] 768[216] 736[2] 704[261] 672[19] 640[210] 624[878] 608[875] 576[1549] 528[869] 512[4772] 480[199] 464[2] 448[991] 432[77] 416[4476] 400[16] 384[57] 368[65] 352[4253] 336[29] 320[728] 304[6475] 288[7736] 272[32] 256[7092] 240[39] 224[8758] 208[8] 192[68173] 176[669] 160[21695] 144[539] 128[23844] 112[4586] 96[17212] 80[42650] 64[84295] 48[107191] 32[149087] 16[155030]
+
+Found:  379 ObjC classes  79 Swift classes  589 C++ classes  105 CFTypes
+Type names for non-objects could be derived from allocation backtraces if the process used MallocStackLogging
+
+-----------------------------------------------------------------------
+All zones: 748797 nodes (12.2G)
+
+   COUNT      BYTES       AVG   CLASS_NAME                                        TYPE    BINARY
+   =====      =====       ===   ==========                                        ====    ======
+  738373      12.2G      17.4K  non-object
+    2717        85K      32.0   JSC::NativeJITCode                                C++     JavaScriptCore
+      21        84K       4.0K  WebKit::RemoteImageBufferSetProxy                 C++     WebKit
+     153        62K     416.0   JSC::DFG::JITCode                                 C++     JavaScriptCore
+     383        60K     160.0   JSC::StringSourceProvider                         C++     WebCore
+      26        53K    2091.7   CFDictionary (Value Storage)                      C       CoreFoundation
+     111        49K     449.9   NSMutableDictionary (Storage)                     C       CoreFoundation
+      46        48K    1072.0   WebKit::PlatformCALayerRemote                     C++     WebKit
+     306        48K     160.0   JSC::BaselineJITCode                              C++     JavaScriptCore
+     359        47K     133.3   Class.methodCache._buckets (bucket_t)             C       libobjc.A.dylib
+       2        44K      22.0K  WebCore::JSVMClientData                           C++     WebCore
+     166        42K     257.5   JSC::IsoSubspace                                  C++     JavaScriptCore
+      39        41K    1072.0   WebKit::GraphicsLayerCARemote                     C++     WebKit
+      11        38K    3495.3   CFData (Bytes Storage)                            C       CoreFoundation
+     609        32K      54.0   CFString                                          ObjC    CoreFoundation
+      20        29K    1464.8   CFDictionary (Key Storage)                        C       CoreFoundation
+     128        28K     224.0   APComponent_FromBundle_Loadable                   C++     AudioToolboxCore
+       6        24K       4.1K  CFDictionary (Weak Key Storage)                   C       CoreFoundation
+       4        22K       5.5K  __DataStorage._bytes (malloc)                             Foundation
+     324        20K      64.0   OS_os_log                                         ObjC    libsystem_trace.dylib
+     221        16K      75.4   CFData                                            ObjC    CoreFoundation
+     451        14K      32.0   Metaclass.data (metaclass_rw_v2_t)                C       libobjc.A.dylib
+     256        12K      48.0   JSC::FastMallocAlignedMemoryAllocator             C++     JavaScriptCore
+       3        12K       4.0K  @autoreleasepool content                          C       libobjc.A.dylib
+      95        10K     112.0   WebCore::Text                                     C++     WebCore
+      25        10K     416.0   JSC::FTL::JITCode                                 C++     JavaScriptCore
+      21         9K     432.0   WebKit::RemoteLayerWithRemoteRenderingBackingStore  C++     WebKit
+     129         9K      70.2   NSDictionary                                      ObjC    CoreFoundation
+      89         8K      96.0   JSC::ObjectPropertyChangeAdaptiveWatchpoint<JSC::InlineWatchpointSet>  C++     JavaScriptCore
+      26         8K     320.0   WebCore::RenderLayerBacking                       C++     WebCore
+      29         8K     272.0   WebCore::RenderBlockFlow                          C++     WebCore
+     451         7K      16.0   Class.data (class_rw_v2_t)                        C       libobjc.A.dylib
+      50         7K     144.0   WebCore::HTMLBRElement                            C++     WebCore
+      29         7K     240.0   WebCore::MessageEvent                             C++     WebCore
+      48         7K     144.0   WebCore::HTMLDivElement                           C++     WebCore
+     106         7K      64.3   NSMutableArray (Storage)                          C       CoreFoundation
+      42         7K     160.0   WebCore::Layout::ElementBox                       C++     WebCore
+      20         6K     320.0   NSCache._cache (struct cache_s)                   C       CoreFoundation
+       8         6K     800.0   WebCore::CachedScript                             C++     WebCore
+      78         6K      80.0   WebCore::JSEventListener                          C++     WebCore
+       2         6K    3072.0   CFRunLoop                                         CFType  CoreFoundation
+      44         6K     128.0   dispatch_queue_t (serial)                         ObjC    libdispatch.dylib
+      39         5K     144.0   WebCore::Layout::InlineTextBox                    C++     WebCore
+       7         5K     800.0   WebCore::CachedRawResource                        C++     WebCore
+     112         5K      48.0   NSMutableArray                                    ObjC    CoreFoundation
+      18         5K     270.2   ColorSyncProfile                                  CFType  ColorSync
+      39         4K     112.0   WebCore::RenderText                               C++     WebCore
+      17         4K     256.0   JSC::Strong<JSC::Unknown, (JSC::ShouldStrongDestructorGrabLock)0>  C++     JavaScriptCore
+     129         4K      32.0   NSMutableDictionary                               ObjC    CoreFoundation
+     128         4K      32.0   std::__shared_ptr_pointer<APComponent_FromBundle_Loadable*, std::shared_ptr<APComponent_FromBundle_Loadable>::__shared_ptr_default_delete<APComponent_FromBundle_Loadable, APComponent_FromBundle_Loadable>>  C++     AudioToolboxCore
+      16         4K     256.0   JSC::SlotVisitor                                  C++     JavaScriptCore
+       2         4K    2048.0   JSC::JITThunks                                    C++     JavaScriptCore
+       1         4K       4.0K  WebCore::DocumentLoader                           C++     WebCore
+       1         4K       4.0K  WebCore::HTMLDocument                             C++     WebCore
+      25       4000     160.0   WebCore::RenderLineBreak                          C++     WebCore
+      79       3840      48.6   __NSMallocBlock__                                 ObjC    libsystem_blocks.dylib
+      30       3840     128.0   IIOReader_RawCamera                               C++     ImageIO
+      26       3328     128.0   dispatch_source_t                                 ObjC    libdispatch.dylib
+      18       3296     183.1   Class.data.methods (method_array_t)               C       libobjc.A.dylib
+      40       3136      78.4   NSURL                                             ObjC    CoreFoundation
+      23       2944     128.0   JSC::AdaptiveValuePropertyInlineCacheClearingWatchpoint  C++     JavaScriptCore
+       9       2880     320.0   xpc_connection_t                                  ObjC    libxpc.dylib
+      44       2816      64.0   CFDictionary                                      ObjC    CoreFoundation
+      22       2816     128.0   WebCore::ContentSecurityPolicySourceListDirective  C++     WebCore
+      34       2720      80.0   Class.data.readonly (class_ro_t)                  C       libobjc.A.dylib
+       4       2624     656.0   Class.data.methods.lists (method_list_t)          C       libobjc.A.dylib
+       5       2608     521.6   NSData                                            ObjC    Foundation
+       4       2560     640.0   CUICommonAssetStorage                             ObjC    CoreUI
+       4       2560     640.0   TBaseFont                                         C++     CoreText
+       4       2560     640.0   TFPFont                                           C++     libFontParser.dylib
+      23       2544     110.6   CFArray                                           ObjC    CoreFoundation
+      51       2448      48.0   JSC::DirectJITCode                                C++     JavaScriptCore
+      50       2400      48.0   WebCore::InlineCSSStyleProperties                 C++     WebCore
+      15       2400     160.0   CFPrefsPlistSource                                ObjC    CoreFoundation
+      24       2304      96.0   CGColorSpace                                      CFType  CoreGraphics
+       3       2304     768.0   _LocaleICU                                        Swift   Foundation
+      67       2144      32.0   JSC::WeakGCMap<JSC::StructureTransitionTable::Hash::Key, JSC::Structure, JSC::StructureTransitionTable::Hash, WTF::SimpleClassHashTraits<JSC::StructureTransitionTable::Hash::Key>>  C++     JavaScriptCore
+       2       2112    1056.0   icu::UVector (Storage)                            C       libicucore.A.dylib
+       1       2048    2048.0   WKWebProcessPlugInBrowserContextController        ObjC    WebKit
+       1       2048    2048.0   WebCore::LocalFrameView                           C++     WebCore
+       8       1792     224.0   WebCore::WebGLProgram                             C++     WebCore
+       4       1792     448.0   CUICommonAssetStorage._header (struct _carheader)  C       CoreUI
+       1       1792    1792.0   _LSDatabase                                       ObjC    LaunchServices
+      36       1728      48.0   Class.data.extended (class_rw_ext_t)              C       libobjc.A.dylib
+      10       1600     160.0   CFPrefsManagedSource                              ObjC    CoreFoundation
+      10       1600     160.0   CFPrefsSuiteSearchListSource                      ObjC    CoreFoundation
+      10       1600     160.0   dispatch_mach_t                                   ObjC    libdispatch.dylib
+       5       1600     320.0   APComponent_NSExtension                           C++     AudioToolboxCore
+      33       1584      48.0   CFSet                                             ObjC    CoreFoundation
+       4       1536     384.0   CUICommonAssetStorage._bitmapKeydb (malloc)       C       CoreUI
+       4       1536     384.0   CUICommonAssetStorage._colordb (malloc)           C       CoreUI
+       4       1536     384.0   CUICommonAssetStorage._facetKeysdb (malloc)       C       CoreUI
+       4       1536     384.0   CUICommonAssetStorage._imagedb (malloc)           C       CoreUI
+       1       1536    1536.0   llvm::DenseMap<TypeNameCacheKey, std::pair<const char *, size_t>>  C++     libswiftCore.dylib
+       1       1472    1472.0   WebCore::DedicatedWorkerGlobalScope               C++     WebCore
+      26       1424      54.8   CFSet (Value Storage)                             C       CoreFoundation
+      13       1408     108.3   CGColor                                           CFType  CoreGraphics
+      17       1392      81.9   Swift.StringStorage                               Swift   libswiftCore.dylib
+       6       1344     224.0   CFBundle                                          CFType  CoreFoundation
+       8       1280     160.0   WebCore::CachedScriptSourceProvider               C++     WebCore
+       2       1280     640.0   NSCTFont                                          ObjC    UIFoundation
+       2       1280     640.0   NSURLSessionConfiguration                         ObjC    CFNetwork
+       4       1216     304.0   WebCore::HTMLScriptElement                        C++     WebCore
+      24       1152      48.0   WTF::Detail::CallableWrapper<WebCore::EventTarget::addEventListener(WTF::AtomString const&, WTF::Ref<WebCore::EventListener, WTF::RawPtrTraits<WebCore::EventListener>, WTF::DefaultRefDerefTraits<WebCore::EventListener>>&&, WebCore::AddEventListenerOptions const&)::$_0, void, JSC::JSValue>  C++     WebCore
+      18       1152      64.0   JSC::SimpleMarkingConstraint                      C++     JavaScriptCore
+       6       1152     192.0   NSTimer                                           ObjC    CoreFoundation
+       2       1152     576.0   JSC::RegExpCache                                  C++     JavaScriptCore
+       1       1152    1152.0   WebCore::WebGL2RenderingContext                   C++     WebCore
+       1       1152    1152.0   WebKit::PlatformCALayerRemoteTiledBacking         C++     WebKit
+       1       1152    1152.0   WebKit::WebProcess                                C++     WebKit
+      35       1120      32.0   JSC::B3::DataSection                              C++     JavaScriptCore
+       5       1120     224.0   CFRunLoopMode                                     CFType  CoreFoundation
+      23       1056      45.9   CFString (Storage)                                C       CoreFoundation
+       3       1056     352.0   WebCore::PerformanceResourceTiming                C++     WebCore
+       4       1024     256.0   NSURLRequestInternal                              ObjC    CFNetwork
+       1       1024    1024.0   WebCore::FetchResponse                            C++     WebCore
+      20        960      48.0   NSCache                                           ObjC    CoreFoundation
+      15        960      64.0   WebCore::SharedBuffer                             C++     WebCore
+       6        960     160.0   JSC::StringSourceProvider                         C++     JavaScriptCore
+       2        960     480.0   WebCore::Performance                              C++     WebCore
+       1        944     944.0   WebCore::ScrollingStateFrameScrollingNode         C++     WebCore
+       4        896     224.0   TTrueTypeDataForkFont                             C++     libFontParser.dylib
+       4        896     224.0   dispatch_workloop_t                               ObjC    libdispatch.dylib
+       2        896     448.0   WebCore::IDBTransaction                           C++     WebCore
+       1        896     896.0   WebCore::LocalDOMWindow                           C++     WebCore
+      14        880      62.9   xpc_dictionary_t (Storage)                        C       libxpc.dylib
+      10        880      88.0   NSSet                                             ObjC    CoreFoundation
+       5        880     176.0   WebCore::HTMLMetaElement                          C++     WebCore
+       5        864     172.8   NSPathStore2                                      ObjC    Foundation
+       2        864     432.0   WebCore::IDBRequest                               C++     WebCore
+      17        816      48.0   WTF::WorkQueue                                    C++     JavaScriptCore
+      10        800      80.0   JSC::Wasm::Worklist::Thread                       C++     JavaScriptCore
+       5        800     160.0   CFPDSource                                        ObjC    CoreFoundation
+       5        800     160.0   CFPrefsSearchListSource                           ObjC    CoreFoundation
+       1        800     800.0   WebCore::Settings                                 C++     WebCore
+       1        800     800.0   WebKit::WebSocketChannel                          C++     WebKit
+      16        768      48.0   WebCore::WebGLShader                              C++     WebCore
+      16        768      48.0   WebCore::WebGLTexture                             C++     WebCore
+       4        768     192.0   CFXNotificationRegistrar                          CFType  CoreFoundation
+       3        768     256.0   CFHTTPMessage                                     CFType  CFNetwork
+       1        768     768.0   std::__shared_ptr_emplace<__CFURLCache>           C++     CFNetwork
+       3        720     240.0   WebCore::ScriptBufferSourceProvider               C++     WebCore
+       7        704     100.6   xpc_dictionary_t                                  ObjC    libxpc.dylib
+       3        672     224.0   CFAllocator                                       CFType  CoreFoundation
+       3        672     224.0   icu::OlsonTimeZone                                C++     libicucore.A.dylib
+       1        672     672.0   WebCore::RenderView                               C++     WebCore
+       5        640     128.0   OS_dispatch_queue_runloop                         ObjC    libdispatch.dylib
+       2        640     320.0   icu::GregorianCalendar                            C++     libicucore.A.dylib
+       1        640     640.0   CFPrefsDaemon                                     ObjC    CoreFoundation
+       2        608     304.0   WebCore::HTMLLinkElement                          C++     WebCore
+       9        576      64.0   IIO_Reader_HEIF                                   C++     ImageIO
+       3        576     192.0   WebCore::LoadableClassicScript                    C++     WebCore
+       3        576     192.0   WebCore::RenderLayerScrollableArea                C++     WebCore
+       2        576     288.0   WebCore::ShadowRoot                               C++     WebCore
+       7        560      80.0   NSHashTable                                       ObjC    Foundation
+       7        560      80.0   __DataStorage                                     Swift   Foundation
+       3        528     176.0   WebCore::AbortSignal                              C++     WebCore
+      16        512      32.0   JSC::WebAssemblyBuiltinValueTypeExpectation       C++     JavaScriptCore
+       4        512     128.0   CGFont                                            CFType  CoreGraphics
+       4        512     128.0   NSMapTable                                        ObjC    Foundation
+       1        512     512.0   NSOperationQueue                                  ObjC    Foundation
+       1        512     512.0   WebCore::PerformanceNavigationTiming              C++     WebCore
+      15        480      32.0   WTF::Detail::CallableWrapper<std::__bind<void (WebCore::CachedResource::*&)(), WebCore::CachedResource*>, void>  C++     WebCore
+       6        480      80.0   WTF::ParallelHelperPool::Thread                   C++     JavaScriptCore
+       3        480     160.0   NWConcrete_nw_context                             ObjC    Network
+       1        448     448.0   NSWorkspaceNotificationCenter                     ObjC    AppKit
+       1        448     448.0   __NSURLSessionLocal                               ObjC    CFNetwork
+       2        416     208.0   WebCore::HTMLStyleElement                         C++     WebCore
+       2        416     208.0   WebCore::IDBObjectStore                           C++     WebCore
+       1        416     416.0   JSC::DFG::Plan                                    C++     JavaScriptCore
+       1        400     400.0   WebCore::RenderLayerCompositor                    C++     WebCore
+       6        384      64.0   WebCore::DeferredPromise                          C++     WebCore
+       5        384      76.8   CFPDSource._actualPath (char[])                   C       CoreFoundation
+       4        384      96.0   CUIStructuredThemeStore                           ObjC    CoreUI
+       3        384     128.0   WebCore::ReadableStream                           C++     WebCore
+       2        384     192.0   CFRunLoopSource                                   CFType  CoreFoundation
+       2        384     192.0   WebCore::MicrotaskQueue                           C++     WebCore
+       1        384     384.0   WebCore::TileController                           C++     WebCore
+       1        384     384.0   WebKit::RemoteLayerTreeDrawingAreaMac             C++     WebKit
+       1        384     384.0   _CSStore                                          ObjC    CoreServicesStore
+       6        368      61.3   NSArray                                           ObjC    CoreFoundation
+       1        368     368.0   WebCore::WindowEventLoop                          C++     WebCore
+       2        352     176.0   Inspector::JSGlobalObjectInspectorController      C++     JavaScriptCore
+       1        352     352.0   WebCore::LocalFrame                               C++     WebCore
+       5        320      64.0   CFBag                                             CFType  CoreFoundation
+       5        320      64.0   WTF::SharedTaskFunctor<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&), WTF::Ref<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>, WTF::RawPtrTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>, WTF::DefaultRefDerefTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>> JSC::FTL::createLazyCallGenerator<JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID>(JSC::VM&, WTF::CodePtr<(WTF::PtrTag)1, (WTF::FunctionAttributes)0>, JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID)::'lambda'(JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>  C++     JavaScriptCore
+       4        320      80.0   JSC::JITWorklistThread                            C++     JavaScriptCore
+       4        320      80.0   NSBundle                                          ObjC    Foundation
+       2        320     160.0   NSCompositeAppearance                             ObjC    AppKit
+       2        320     160.0   NSVibrantLightAppearance                          ObjC    AppKit
+       2        320     160.0   WTF::RunLoop                                      C++     JavaScriptCore
+       1        320     320.0   __NSAppKitThreadSpecificData                      ObjC    AppKit
+      19        304      16.0   NSArray                                           ObjC    CoreFoundation
+       1        304     304.0   WebCore::HTMLCanvasElement                        C++     WebCore
+       1        304     304.0   WebKit::(anonymous namespace)::RemoteGraphicsContextGLProxyCocoa  C++     WebKit
+       6        288      48.0   JSC::NativeDOMJITCode                             C++     JavaScriptCore
+       6        288      48.0   JSC::StructureAlignedMemoryAllocator              C++     JavaScriptCore
+       6        288      48.0   WebCore::WebGLBuffer                              C++     WebCore
+       3        288      96.0   NSLock                                            ObjC    Foundation
+       1        272     272.0   WebCore::HTMLTextAreaElement                      C++     WebCore
+       8        256      32.0   NSConcreteData                                    ObjC    Foundation
+       8        256      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::Document, WebCore::Document>(WebCore::Document&, void (WebCore::Document::*)())::'lambda'(), void>  C++     WebCore
+       7        256      36.6   NSHashTable (Weak Object Storage)                 C       Foundation
+       5        256      51.2   Swift._ContiguousArrayStorage<Swift.UInt8>        Swift   libswiftCore.dylib
+       4        256      64.0   CUICoreThemeRenderer                              C++     CoreUI
+       2        256     128.0   JSC::MicrotaskQueue                               C++     JavaScriptCore
+       2        256     128.0   dispatch_queue_t (concurrent)                     ObjC    libdispatch.dylib
+       1        256     256.0   WebCore::FrameSelection                           C++     WebCore
+       1        256     256.0   WebKit::LibWebRTCNetwork                          C++     WebKit
+       1        256     256.0   WebKit::RemoteScrollingCoordinator                C++     WebKit
+       1        256     256.0   WebKit::UserMediaCaptureManager                   C++     WebKit
+       5        240      48.0   CFError                                           ObjC    CoreFoundation
+       3        240      80.0   WebCore::WebInjectedScriptManager                 C++     WebCore
+       3        240      80.0   _CharacterSet                                     Swift   Foundation
+       3        240      80.0   _NSBPlistMappedData                               ObjC    Foundation
+       1        240     240.0   WebCore::ServicesOverlayController                C++     WebCore
+       1        240     240.0   WebCore::WorkerMessagingProxy                     C++     WebCore
+      14        224      16.0   JSC::WebAssemblyBuiltinExternrefTypeExpectation   C++     JavaScriptCore
+      14        224      16.0   NSMutableDictionary.cow (struct __cow_state_t)    C       CoreFoundation
+       7        224      32.0   NSDictionary                                      ObjC    CoreFoundation
+       7        224      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::LocalFrameView, WebCore::LocalFrameView>(WebCore::LocalFrameView&, void (WebCore::LocalFrameView::*)())::'lambda'(), void>  C++     WebCore
+       3        224      74.7   NWConcrete_nw_context.identifier (char[])         C       Network
+       2        224     112.0   CGCMSConverter                                    CFType  CoreGraphics
+       2        224     112.0   CGColorTransform                                  CFType  CoreGraphics
+       2        224     112.0   JSC::StochasticSpaceTimeMutatorScheduler          C++     JavaScriptCore
+       2        224     112.0   WebCore::Comment                                  C++     WebCore
+       2        224     112.0   WebCore::DOMTimer                                 C++     WebCore
+       2        224     112.0   WebCore::MediaQueryList                           C++     WebCore
+       1        224     224.0   NSRecursiveLock                                   ObjC    Foundation
+       1        224     224.0   NWConcrete_nw_context.globals (struct nw_context_globals)  C       Network
+       1        224     224.0   TLocalFontRegistryImp                             C++     libFontRegistry.dylib
+       1        224     224.0   TTrueTypeFontDataHandler                          C++     libFontParser.dylib
+       1        224     224.0   WebCore::DedicatedWorkerThread                    C++     WebCore
+       1        224     224.0   WebCore::RenderHTMLCanvas                         C++     WebCore
+       1        224     224.0   WebKit::GPUProcessConnection                      C++     WebKit
+       1        224     224.0   WebKit::LibWebRTCProvider                         C++     WebKit
+       1        224     224.0   WebKit::RemoteAudioSession                        C++     WebKit
+       1        224     224.0   WebKit::RemoteRenderingBackendProxy               C++     WebKit
+       1        208     208.0   WebCore::GeolocationController                    C++     WebCore
+       1        208     208.0   WebCore::TileGrid                                 C++     WebCore
+       1        208     208.0   WebCore::WebSocket                                C++     WebCore
+       1        208     208.0   WebCore::Worker                                   C++     WebCore
+       6        192      32.0   CFPDPurgeableBuffer                               ObjC    CoreFoundation
+       6        192      32.0   NSNumber                                          ObjC    CoreFoundation
+       6        192      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::EventHandler, WebCore::EventHandler>(WebCore::EventHandler&, void (WebCore::EventHandler::*)())::'lambda'(), void>  C++     WebCore
+       6        192      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::PerformanceMonitor, WebCore::PerformanceMonitor>(WebCore::PerformanceMonitor&, void (WebCore::PerformanceMonitor::*)())::'lambda'(), void>  C++     WebCore
+       4        192      48.0   CFNotificationCenter                              CFType  CoreFoundation
+       4        192      48.0   Class (objc_class)                                C       libobjc.A.dylib
+       4        192      48.0   Inspector::ConsoleBackendDispatcher               C++     JavaScriptCore
+       4        192      48.0   WTF::SharedTaskFunctor<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&), WTF::Ref<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>, WTF::RawPtrTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>, WTF::DefaultRefDerefTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>> JSC::FTL::createLazyCallGenerator<JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr>(JSC::VM&, WTF::CodePtr<(WTF::PtrTag)1, (WTF::FunctionAttributes)0>, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr)::'lambda'(JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>  C++     JavaScriptCore
+       4        192      48.0   _NSStateMarker                                    ObjC    AppKit
+       4        192      48.0   xpc_string_t                                      ObjC    libxpc.dylib
+       3        192      64.0   CUICommonAssetStorage._keyfmt (struct _renditionkeyfmt)  C       CoreUI
+       3        192      64.0   IIO_Reader_ASTC                                   C++     ImageIO
+       3        192      64.0   IIO_Reader_BC                                     C++     ImageIO
+       3        192      64.0   IIO_Reader_PVR                                    C++     ImageIO
+       2        192      96.0   Inspector::InspectorConsoleAgent                  C++     JavaScriptCore
+       2        192      96.0   JSC::DeferredWorkTimer                            C++     JavaScriptCore
+       2        192      96.0   JSC::PreciseSubspace                              C++     JavaScriptCore
+       2        192      96.0   WebCore::EventLoopTimer                           C++     WebCore
+       2        192      96.0   WebCore::ThreadGlobalData                         C++     WebCore
+       1        192     192.0   Swift._DictionaryStorage<Swift.ObjectIdentifier, CoreGraphics.CodingOverride.Protocol>  Swift   libswiftCore.dylib
+       1        192     192.0   WKWebProcessPlugInFrame                           ObjC    WebKit
+       1        192     192.0   WebCore::CSSFontSelector                          C++     WebCore
+       1        192     192.0   WebCore::IDBDatabase                              C++     WebCore
+       1        192     192.0   WebCore::Navigation                               C++     WebCore
+       1        192     192.0   WebCore::NavigationHistoryEntry                   C++     WebCore
+       1        192     192.0   WebCore::WorkerEventLoop                          C++     WebCore
+       1        192     192.0   WebCore::WorkerSWClientConnection                 C++     WebCore
+       1        192     192.0   WebKit::RemoteVideoFrameObjectHeapProxyProcessor  C++     WebKit
+       1        192     192.0   XTubeManager                                      C++     CFNetwork
+       1        192     192.0   _NSThreadData                                     ObjC    Foundation
+       1        176     176.0   WebCore::ScrollingStateFixedNode                  C++     WebCore
+       5        160      32.0   __NSExactBlockVariable__                          ObjC    libsystem_blocks.dylib
+       5        160      32.0   std::__shared_ptr_pointer<APComponent_NSExtension*, std::shared_ptr<APComponent_NSExtension>::__shared_ptr_default_delete<APComponent_NSExtension, APComponent_NSExtension>>  C++     AudioToolboxCore
+       4        160      40.0   NSMapTable (Key Storage)                          C       Foundation
+       4        160      40.0   NSMapTable (Weak Value Storage)                   C       Foundation
+       2        160      80.0   CFPrefsSource                                     ObjC    CoreFoundation
+       2        160      80.0   Inspector::JSGlobalObjectConsoleClient            C++     JavaScriptCore
+       2        160      80.0   NSPointerArray                                    ObjC    Foundation
+       2        160      80.0   NWConcrete_nw_context.cache (struct nw_context_cache)  C       Network
+       2        160      80.0   WTF::SharedTaskFunctor<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&), WTF::Ref<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>, WTF::RawPtrTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>, WTF::DefaultRefDerefTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>> JSC::FTL::createLazyCallGenerator<JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImm64>(JSC::VM&, WTF::CodePtr<(WTF::PtrTag)1, (WTF::FunctionAttributes)0>, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImm64)::'lambda'(JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>  C++     JavaScriptCore
+       2        160      80.0   WebCore::Event                                    C++     WebCore
+       2        160      80.0   dispatch_group_t                                  ObjC    libdispatch.dylib
+       1        160     160.0   CFPDMirroredSource                                ObjC    CoreFoundation
+       1        160     160.0   CFRunLoopObserver                                 CFType  CoreFoundation
+       1        160     160.0   NSAquaAppearance                                  ObjC    AppKit
+       1        160     160.0   NSSystemAppearance                                ObjC    AppKit
+       1        160     160.0   NSXPCConnection                                   ObjC    Foundation
+       1        160     160.0   Swift._DictionaryStorage<Swift.String, Foundation._LocaleProtocol & Swift.AnyObject>  Swift   libswiftCore.dylib
+       1        160     160.0   TGlobalStaticRegistryImp                          C++     libFontRegistry.dylib
+       1        160     160.0   WKAccessibilityWebPageObject                      ObjC    WebKit
+       1        160     160.0   WebCore::CSSFontFaceSet                           C++     WebCore
+       1        160     160.0   WebCore::CSSStyleSheet                            C++     WebCore
+       1        160     160.0   WebCore::HTMLTitleElement                         C++     WebCore
+       1        160     160.0   WebCore::Layout::InitialContainingBlock           C++     WebCore
+       1        160     160.0   WebCore::LoadableModuleScript                     C++     WebCore
+       1        160     160.0   WebCore::PageInspectorController                  C++     WebCore
+       1        160     160.0   WebKit::WebLoaderStrategy                         C++     WebKit
+       1        160     160.0   _NSSwiftProcessInfo                               Swift   Foundation
+       3        144      48.0   IPC::StreamClientConnection::DedicatedConnectionClient  C++     WebKit
+       3        144      48.0   Swift._ContiguousArrayStorage<Swift.String>       Swift   libswiftCore.dylib
+       3        144      48.0   WTF::RunLoop::Timer                               C++     JavaScriptCore
+       3        144      48.0   WebCore::DOMPromise                               C++     WebCore
+       3        144      48.0   WebCore::WebInjectedScriptHost                    C++     WebCore
+       3        144      48.0   __NSSwiftData                                     Swift   Foundation
+       1        144     144.0   WebCore::HTMLBodyElement                          C++     WebCore
+       1        144     144.0   WebCore::HTMLHeadElement                          C++     WebCore
+       1        144     144.0   WebCore::HTMLHtmlElement                          C++     WebCore
+       1        144     144.0   WebCore::Navigator                                C++     WebCore
+       1        144     144.0   WebCore::OpacityCaretAnimator                     C++     WebCore
+       1        144     144.0   WebCore::TextControlInnerTextElement              C++     WebCore
+       1        144     144.0   WebKit::LibWebRTCCodecs                           C++     WebKit
+       1        144     144.0   WebKit::RemoteLayerBackingStoreCollection         C++     WebKit
+       4        128      32.0   CUICFType                                         CFType  CoreUI
+       4        128      32.0   IPC::FunctionDispatcherQueue                      C++     WebKit
+       4        128      32.0   _NS1DVelocityFilter                               ObjC    AppKit
+       4        128      32.0   _NS1DVelocityFilterIvars                          ObjC    AppKit
+       2        128      64.0   IIO_Reader_ETC                                    C++     ImageIO
+       2        128      64.0   Inspector::InjectedScriptManager                  C++     JavaScriptCore
+       2        128      64.0   JSC::Heap::HeapThread                             C++     JavaScriptCore
+       2        128      64.0   JSC::IncrementalSweeper                           C++     JavaScriptCore
+       2        128      64.0   JSC::JSGlobalObjectDebuggable                     C++     JavaScriptCore
+       2        128      64.0   WTF::Detail::CallableWrapper<WebCore::ScriptModuleLoader::createImportMetaProperties(JSC::JSGlobalObject*, JSC::JSModuleLoader*, JSC::JSValue, JSC::JSModuleRecord*, WTF::RefPtr<JSC::ScriptFetcher, WTF::RawPtrTraits<JSC::ScriptFetcher>, WTF::DefaultRefDerefTraits<JSC::ScriptFetcher>>)::$_0, long long, JSC::JSGlobalObject*, JSC::CallFrame*>  C++     WebCore
+       2        128      64.0   WTF::SharedTaskFunctor<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&), WTF::Ref<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>, WTF::RawPtrTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>, WTF::DefaultRefDerefTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>> JSC::FTL::createLazyCallGenerator<JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::ARM64Registers::RegisterID>(JSC::VM&, WTF::CodePtr<(WTF::PtrTag)1, (WTF::FunctionAttributes)0>, JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::ARM64Registers::RegisterID)::'lambda'(JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>  C++     JavaScriptCore
+       2        128      64.0   WebCore::CubicBezierTimingFunction                C++     WebCore
+       2        128      64.0   WebCore::DOMGCOutputConstraint                    C++     WebCore
+       2        128      64.0   WebCore::InlineClassicScript                      C++     WebCore
+       2        128      64.0   WebCore::ScriptModuleLoader                       C++     WebCore
+       1        128     128.0   IIO_Reader_WebP                                   C++     ImageIO
+       1        128     128.0   Swift._DictionaryStorage<Swift.String, Foundation._NSSwiftLocale>  Swift   libswiftCore.dylib
+       1        128     128.0   TFileDataReference                                C++     libFontParser.dylib
+       1        128     128.0   WebCore::DocumentType                             C++     WebCore
+       1        128     128.0   WebCore::NetworkSendQueue                         C++     WebCore
+       1        128     128.0   WebCore::ReportingScope                           C++     WebCore
+       1        128     128.0   WebCore::WorkerInspectorController                C++     WebCore
+       1        128     128.0   WebKit::NetworkProcessConnection                  C++     WebKit
+       1        128     128.0   WebKit::RemoteLayerTreeContext                    C++     WebKit
+       1        128     128.0   WebKit::RemoteResourceCacheProxy                  C++     WebKit
+       1        128     128.0   WebKit::StorageAreaMap                            C++     WebKit
+       1        128     128.0   WebKit::WebFoundTextRangeController               C++     WebKit
+       1        128     128.0   WebKit::WebResourceLoadObserver                   C++     WebKit
+       1        128     128.0   WebKit::WebSWClientConnection                     C++     WebKit
+       1        128     128.0   WebKit::WebUserContentController                  C++     WebKit
+       1        112     112.0   IIO_ReaderHandler                                 C++     ImageIO
+       1        112     112.0   WebCore::Clipboard                                C++     WebCore
+       1        112     112.0   WebCore::ControlFactoryMac                        C++     WebCore
+       1        112     112.0   WebCore::FrameInspectorController                 C++     WebCore
+       1        112     112.0   WebCore::PageConsoleAgent                         C++     WebCore
+       1        112     112.0   WebKit::FindController                            C++     WebKit
+       1        112     112.0   _CFXPreferences                                   ObjC    CoreFoundation
+       6         96      16.0   WTF::Detail::CallableWrapper<WTF::RefPtr<WebCore::SharedBuffer, WTF::RawPtrTraits<WebCore::SharedBuffer>, WTF::DefaultRefDerefTraits<WebCore::SharedBuffer>> (*)(WebCore::SharedBuffer const&), WTF::RefPtr<WebCore::SharedBuffer, WTF::RawPtrTraits<WebCore::SharedBuffer>, WTF::DefaultRefDerefTraits<WebCore::SharedBuffer>>, WebCore::SharedBuffer const&>  C++     WebCore
+       6         96      16.0   WTF::Detail::CallableWrapper<std::optional<WTF::Vector<WTF::Ref<WebCore::SharedBuffer, WTF::RawPtrTraits<WebCore::SharedBuffer>, WTF::DefaultRefDerefTraits<WebCore::SharedBuffer>>, 0ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>> (*)(WebCore::SharedBuffer const&), std::optional<WTF::Vector<WTF::Ref<WebCore::SharedBuffer, WTF::RawPtrTraits<WebCore::SharedBuffer>, WTF::DefaultRefDerefTraits<WebCore::SharedBuffer>>, 0ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>>, WebCore::SharedBuffer const&>  C++     WebCore
+       3         96      32.0   HTTPHeaderDict                                    CFType  CFNetwork
+       3         96      32.0   NSMutableSet                                      ObjC    CoreFoundation
+       3         96      32.0   WTF::Detail::CallableWrapper<WebCore::DOMPromise::whenPromiseIsSettled(WebCore::JSDOMGlobalObject*, JSC::JSPromise*, WTF::Function<void (WebCore::JSDOMGlobalObject*, bool, JSC::JSValue)>&&, JSC::JSObject*, WebCore::DOMPromise::ShouldCallCallbackOnRegistrationFailure)::$_0, long long, JSC::JSGlobalObject*, JSC::CallFrame*>  C++     WebCore
+       3         96      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::Page, WebCore::Page>(WebCore::Page&, void (WebCore::Page::*)())::'lambda'(), void>  C++     WebCore
+       3         96      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::Style::Scope, WebCore::Style::Scope>(WebCore::Style::Scope&, void (WebCore::Style::Scope::*)())::'lambda'(), void>  C++     WebCore
+       3         96      32.0   WebKit::(anonymous namespace)::DisplayBufferFence  C++     WebKit
+       3         96      32.0   _NSSwiftLocale                                    Swift   Foundation
+       2         96      48.0   AXUIElement                                       CFType  HIServices
+       2         96      48.0   Inspector::InjectedScriptHost                     C++     JavaScriptCore
+       2         96      48.0   JSC::EdenGCActivityCallback                       C++     JavaScriptCore
+       2         96      48.0   JSC::GigacageAlignedMemoryAllocator               C++     JavaScriptCore
+       2         96      48.0   JSC::MarkStackMergingConstraint                   C++     JavaScriptCore
+       2         96      48.0   JSC::StopIfNecessaryTimer                         C++     JavaScriptCore
+       2         96      48.0   NSAccessibilityRemoteUIElement                    ObjC    AppKit
+       2         96      48.0   NSColorSpace                                      ObjC    AppKit
+       2         96      48.0   NSDynamicSystemColor                              ObjC    AppKit
+       2         96      48.0   NSPointerArray (Object Storage)                   C       Foundation
+       2         96      48.0   WTF::Detail::CallableWrapper<std::function<void (bool)>, void, bool>  C++     WebCore
+       2         96      48.0   WTF::SharedTaskFunctor<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&), WTF::Ref<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>, WTF::RawPtrTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>, WTF::DefaultRefDerefTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>> JSC::FTL::createLazyCallGenerator<JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr>(JSC::VM&, WTF::CodePtr<(WTF::PtrTag)1, (WTF::FunctionAttributes)0>, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr)::'lambda'(JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>  C++     JavaScriptCore
+       2         96      48.0   WebCore::Crypto                                   C++     WebCore
+       2         96      48.0   WebCore::LinkLoader                               C++     WebCore
+       2         96      48.0   WebCore::SubtleCrypto                             C++     WebCore
+       2         96      48.0   WebCore::WebGLSampler                             C++     WebCore
+       2         96      48.0   WebCore::WheelEventDeltaFilterMac                 C++     WebCore
+       2         96      48.0   icu::UVector                                      C++     libicucore.A.dylib
+       1         96      96.0   AccessibilitySupportOverrides                     ObjC    libAccessibility.dylib
+       1         96      96.0   CUICatalog                                        ObjC    CoreUI
+       1         96      96.0   LockdownModeManagerInternal                       Swift   LockdownMode
+       1         96      96.0   NSClassicMapTable                                 ObjC    Foundation
+       1         96      96.0   WebCore::CredentialRequestCoordinator             C++     WebCore
+       1         96      96.0   WebCore::VisualViewport                           C++     WebCore
+       1         96      96.0   WebCore::WorkerConsoleAgent                       C++     WebCore
+       1         96      96.0   WebCore::WorkerDedicatedRunLoop                   C++     WebCore
+       1         96      96.0   WebCore::WorkerNavigator                          C++     WebCore
+       1         96      96.0   WebKit::StorageNamespaceImpl                      C++     WebKit
+       1         96      96.0   WebKit::VisitedLinkTableController                C++     WebKit
+       1         96      96.0   WebKit::WebLocalFrameLoaderClient                 C++     WebKit
+       1         96      96.0   _LSDefaults                                       ObjC    LaunchServices
+       1         96      96.0   _NSActivityAssertion                              ObjC    Foundation
+       5         80      16.0   JSC::WebAssemblyBuiltinRefExternTypeExpectation   C++     JavaScriptCore
+       4         80      20.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::FocusController, WebCore::FocusController>(WebCore::FocusController&, void (WebCore::FocusController::*)())::'lambda'(), void>  C++     WebCore
+       1         80      80.0   CGRegion                                          CFType  CoreGraphics
+       1         80      80.0   CUIRuntimeStatistics                              ObjC    CoreUI
+       1         80      80.0   Inspector::LegacyIdentifierRegistry               C++     WebCore
+       1         80      80.0   WebCore::JSErrorHandler                           C++     WebCore
+       1         80      80.0   WebCore::OpportunisticTaskScheduler::EdenGCActivityCallback  C++     WebCore
+       1         80      80.0   WebCore::OpportunisticTaskScheduler::FullGCActivityCallback  C++     WebCore
+       1         80      80.0   WebCore::PageOverlayController                    C++     WebCore
+       1         80      80.0   WebCore::WebGLFramebuffer                         C++     WebCore
+       1         80      80.0   WebCore::WebGLVertexArrayObject                   C++     WebCore
+       1         80      80.0   WebKit::DigitalCredentialsCoordinator             C++     WebKit
+       1         80      80.0   WebKit::WebPaymentCoordinator                     C++     WebKit
+       1         80      80.0   WebKit::WebScreenOrientationManager               C++     WebKit
+       1         80      80.0   _NSXPCConnectionExportedObjectTable               ObjC    Foundation
+       1         80      80.0   _ProcessInfo                                      Swift   Foundation
+       4         64      16.0   WTF::Detail::CallableWrapper<PAL::HysteresisActivity::HysteresisActivity(WTF::Function<void (PAL::HysteresisState)>&&, WTF::Seconds)::'lambda'(), void>  C++     WebCore
+       4         64      16.0   xpc_string_t (Storage)                            C       libxpc.dylib
+       2         64      32.0   JSC::WeakGCSet<JSC::JSGlobalObject, JSC::WeakGCSetHash<JSC::JSGlobalObject>, JSC::WeakGCSetHashTraits<JSC::JSGlobalObject>>  C++     WebCore
+       2         64      32.0   NSMutableURLRequest                               ObjC    CFNetwork
+       2         64      32.0   NSTaggedPointerStringCStringContainer             ObjC    CoreFoundation
+       2         64      32.0   NSURLRequest                                      ObjC    CFNetwork
+       2         64      32.0   PAL::TextCodecUTF8                                C++     WebCore
+       2         64      32.0   TFontPathIndex                                    C++     libFontRegistry.dylib
+       2         64      32.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_0, void, JSC::AbstractSlotVisitor&>  C++     JavaScriptCore
+       2         64      32.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_1, void, JSC::SlotVisitor&>  C++     JavaScriptCore
+       2         64      32.0   WTF::Detail::CallableWrapper<JSC::JSWebAssemblyInstance::tryCreate(JSC::VM&, JSC::Structure*, JSC::JSGlobalObject*, JSC::Identifier const&, JSC::JSWebAssemblyModule*, JSC::JSObject*, JSC::Wasm::CreationMode, WTF::RefPtr<JSC::SourceProvider, WTF::RawPtrTraits<JSC::SourceProvider>, WTF::DefaultRefDerefTraits<JSC::SourceProvider>>&&)::$_0, void, JSC::Wasm::Memory::GrowSuccess, JSC::PageCount, JSC::PageCount>  C++     JavaScriptCore
+       2         64      32.0   WTF::Detail::CallableWrapper<WTF::RunLoop::Timer::Timer<JSC::JSRunLoopTimer::Manager>(WTF::Ref<WTF::RunLoop, WTF::RawPtrTraits<WTF::RunLoop>, WTF::DefaultRefDerefTraits<WTF::RunLoop>>&&, WTF::ASCIILiteral, JSC::JSRunLoopTimer::Manager*, void (JSC::JSRunLoopTimer::Manager::*)())::'lambda'(), void>  C++     JavaScriptCore
+       2         64      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::CachedResourceLoader, WebCore::CachedResourceLoader>(WebCore::CachedResourceLoader&, void (WebCore::CachedResourceLoader::*)())::'lambda'(), void>  C++     WebCore
+       2         64      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::FrameLoader, WebCore::FrameLoader>(WebCore::FrameLoader&, void (WebCore::FrameLoader::*)())::'lambda'(), void>  C++     WebCore
+       2         64      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::LocalFrameViewLayoutContext, WebCore::LocalFrameViewLayoutContext>(WebCore::LocalFrameViewLayoutContext&, void (WebCore::LocalFrameViewLayoutContext::*)())::'lambda'(), void>  C++     WebCore
+       2         64      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::Performance, WebCore::Performance>(WebCore::Performance&, void (WebCore::Performance::*)())::'lambda'(), void>  C++     WebCore
+       2         64      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::RenderLayerCompositor, WebCore::RenderLayerCompositor>(WebCore::RenderLayerCompositor&, void (WebCore::RenderLayerCompositor::*)())::'lambda'(), void>  C++     WebCore
+       2         64      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::ServicesOverlayController, WebCore::ServicesOverlayController>(WebCore::ServicesOverlayController&, void (WebCore::ServicesOverlayController::*)())::'lambda'(), void>  C++     WebCore
+       2         64      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::Style::MatchedDeclarationsCache, WebCore::Style::MatchedDeclarationsCache>(WebCore::Style::MatchedDeclarationsCache&, void (WebCore::Style::MatchedDeclarationsCache::*)())::'lambda'(), void>  C++     WebCore
+       2         64      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::WindowEventLoop, WebCore::WindowEventLoop>(WebCore::WindowEventLoop&, void (WebCore::WindowEventLoop::*)())::'lambda'(), void>  C++     WebCore
+       2         64      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebKit::RemoteLayerTreeDrawingArea, WebKit::RemoteLayerTreeDrawingArea>(WebKit::RemoteLayerTreeDrawingArea&, void (WebKit::RemoteLayerTreeDrawingArea::*)())::'lambda'(), void>  C++     WebKit
+       2         64      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebKit::WebPage, WebKit::WebPage>(WebKit::WebPage&, void (WebKit::WebPage::*)())::'lambda'(), void>  C++     WebKit
+       2         64      32.0   WTF::SharedTaskFunctor<void (void*), JSC::JSWebAssemblyMemory::associateArrayBuffer(JSC::JSGlobalObject*, bool)::$_0>  C++     JavaScriptCore
+       2         64      32.0   WebCore::EventLoopFunctionDispatchTask            C++     WebCore
+       2         64      32.0   WebCore::TrivialFontAccessor                      C++     WebCore
+       2         64      32.0   WebCore::WebCoreTypedArrayController              C++     WebCore
+       2         64      32.0   _NS2DVelocityFilter                               ObjC    AppKit
+       2         64      32.0   _NSScrollingPredominantAxisFilter                 ObjC    AppKit
+       2         64      32.0   _NSSwiftCharacterSet                              Swift   Foundation
+       2         64      32.0   _NSXPCConnectionClassCache                        ObjC    Foundation
+       1         64      64.0   CFBasicHash                                       CFType  Foundation
+       1         64      64.0   CFPDMirroredSource._actualPath (char[])           C       CoreFoundation
+       1         64      64.0   IIO_Reader_AI                                     C++     ImageIO
+       1         64      64.0   IIO_Reader_ATX                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_AppleJPEG                              C++     ImageIO
+       1         64      64.0   IIO_Reader_BMP                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_CUR                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_GIF                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_ICNS                                   C++     ImageIO
+       1         64      64.0   IIO_Reader_ICO                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_JP2                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_KTX                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_KTX2                                   C++     ImageIO
+       1         64      64.0   IIO_Reader_LibJPEG                                C++     ImageIO
+       1         64      64.0   IIO_Reader_MPO                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_OpenEXR                                C++     ImageIO
+       1         64      64.0   IIO_Reader_PBM                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_PDF                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_PICT                                   C++     ImageIO
+       1         64      64.0   IIO_Reader_PNG                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_PSD                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_RAD                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_SGI                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_TGA                                    C++     ImageIO
+       1         64      64.0   IIO_Reader_TIFF                                   C++     ImageIO
+       1         64      64.0   NSAffineTransform                                 ObjC    Foundation
+       1         64      64.0   NSRunLoop                                         ObjC    CoreFoundation
+       1         64      64.0   NSXPCInterface                                    ObjC    Foundation
+       1         64      64.0   Swift._ContiguousArrayStorage<Swift.Array<Swift.UInt8>>  Swift   libswiftCore.dylib
+       1         64      64.0   WKWebProcessPlugInScriptWorld                     ObjC    WebKit
+       1         64      64.0   WTF::SharedTaskFunctor<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&), WTF::Ref<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>, WTF::RawPtrTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>, WTF::DefaultRefDerefTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>> JSC::FTL::createLazyCallGenerator<JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID>(JSC::VM&, WTF::CodePtr<(WTF::PtrTag)1, (WTF::FunctionAttributes)0>, JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID)::'lambda'(JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>  C++     JavaScriptCore
+       1         64      64.0   WTF::SharedTaskFunctor<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&), WTF::Ref<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>, WTF::RawPtrTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>, WTF::DefaultRefDerefTraits<WTF::SharedTask<void (JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>>> JSC::FTL::createLazyCallGenerator<JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID>(JSC::VM&, WTF::CodePtr<(WTF::PtrTag)1, (WTF::FunctionAttributes)0>, JSC::ARM64Registers::RegisterID, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::AbstractMacroAssembler<JSC::ARM64EAssembler>::TrustedImmPtr, JSC::ARM64Registers::RegisterID, JSC::ARM64Registers::RegisterID)::'lambda'(JSC::CCallHelpers&, JSC::FTL::LazySlowPath::GenerationParams&)>  C++     JavaScriptCore
+       1         64      64.0   WebCore::WebGLTransformFeedback                   C++     WebCore
+       1         64      64.0   WebKit::RemoteImageDecoderAVFManager              C++     WebKit
+       1         64      64.0   WebKit::RemoteLegacyCDMFactory                    C++     WebKit
+       1         64      64.0   WebKit::UserMediaPermissionRequestManager         C++     WebKit
+       1         64      64.0   WebKit::WebCookieCache                            C++     WebKit
+       1         64      64.0   WebKit::WebCookieJar                              C++     WebKit
+       1         64      64.0   WebKit::WebGeolocationManager                     C++     WebKit
+       1         64      64.0   WebKit::WebInspectorBackendClient                 C++     WebKit
+       1         64      64.0   WebKit::WebSpeechSynthesisClient                  C++     WebKit
+       1         64      64.0   WebKit::WebStorageNamespaceProvider               C++     WebKit
+       1         64      64.0   _CFPrefsClientContext                             ObjC    CoreFoundation
+       1         64      64.0   _CFXPreferencesHandle                             ObjC    CoreFoundation
+       1         64      64.0   _NSMainThread                                     ObjC    Foundation
+       1         64      64.0   __NSBundleTables                                  ObjC    Foundation
+       1         64      64.0   __NSCFURLSessionDelegateWrapper                   ObjC    CFNetwork
+       1         64      64.0   icu::UnifiedCache                                 C++     libicucore.A.dylib
+       1         64      64.0   xpc_pipe_t                                        ObjC    libxpc.dylib
+       3         48      16.0   WTF::Detail::CallableWrapper<WebCore::FetchBodyOwner::createReadableStream(JSC::JSGlobalObject&)::$_0, WTF::Ref<WebCore::DOMPromise, WTF::RawPtrTraits<WebCore::DOMPromise>, WTF::DefaultRefDerefTraits<WebCore::DOMPromise>>, WebCore::JSDOMGlobalObject&, WebCore::ReadableByteStreamController&>  C++     WebCore
+       3         48      16.0   WTF::Detail::CallableWrapper<WebCore::FetchBodyOwner::createReadableStream(JSC::JSGlobalObject&)::$_1, WTF::Ref<WebCore::DOMPromise, WTF::RawPtrTraits<WebCore::DOMPromise>, WTF::DefaultRefDerefTraits<WebCore::DOMPromise>>, WebCore::JSDOMGlobalObject&, WebCore::ReadableByteStreamController&, std::optional<JSC::JSValue>&&>  C++     WebCore
+       3         48      16.0   WTF::Detail::CallableWrapper<WebCore::ReadableByteStreamController::callPullIfNeeded(WebCore::JSDOMGlobalObject&)::$_0, void, WebCore::JSDOMGlobalObject&, std::optional<JSC::JSValue>&&>  C++     WebCore
+       3         48      16.0   WTF::Detail::CallableWrapper<WebCore::ReadableByteStreamController::handleSourcePromise(WebCore::JSDOMGlobalObject&, WebCore::DOMPromise&, WTF::Function<void (WebCore::JSDOMGlobalObject&, std::optional<JSC::JSValue>&&)>&&)::$_0, void, WebCore::JSDOMGlobalObject*, bool, JSC::JSValue>  C++     WebCore
+       1         48      48.0   CFBasicHash                                       CFType  CoreFoundation
+       1         48      48.0   CUINamedRenditionInfo._bitmap (malloc)            C       CoreUI
+       1         48      48.0   CUINamedRenditionInfo._keyFormat (struct _renditionkeyfmt)  C       CoreUI
+       1         48      48.0   JSC::FullGCActivityCallback                       C++     JavaScriptCore
+       1         48      48.0   NSAutoreleasePool                                 ObjC    Foundation
+       1         48      48.0   NSUserDefaults                                    ObjC    CoreFoundation
+       1         48      48.0   Swift._ContiguousArrayStorage<SwiftUI.Solarium.(EnablementEntry in $23c688b74)>  Swift   libswiftCore.dylib
+       1         48      48.0   TFileFragmentCache                                C++     libFontParser.dylib
+       1         48      48.0   WTF::Detail::CallableWrapper<WTF::RunLoop::Timer::Timer<WebCore::RealtimeMediaSourceCenter>(WTF::Ref<WTF::RunLoop, WTF::RawPtrTraits<WTF::RunLoop>, WTF::DefaultRefDerefTraits<WTF::RunLoop>>&&, WTF::ASCIILiteral, WebCore::RealtimeMediaSourceCenter*, void (WebCore::RealtimeMediaSourceCenter::*)())::'lambda'(), void>  C++     WebCore
+       1         48      48.0   WebCore::Chrome                                   C++     WebCore
+       1         48      48.0   WebCore::DocumentPrefetcher                       C++     WebCore
+       1         48      48.0   WebCore::JSMutationCallback                       C++     WebCore
+       1         48      48.0   WebCore::KeepaliveRequestTracker                  C++     WebCore
+       1         48      48.0   WebCore::PerformancePaintTiming                   C++     WebCore
+       1         48      48.0   WebCore::UserMediaController                      C++     WebCore
+       1         48      48.0   WebKit::FindIndicator                             C++     WebKit
+       1         48      48.0   WebKit::GPUProcessWebWorkerClient                 C++     WebKit
+       1         48      48.0   WebKit::RemoteCDMFactory                          C++     WebKit
+       1         48      48.0   WebKit::RemoteMediaPlayerManager                  C++     WebKit
+       1         48      48.0   WebKit::RemoteScrollbarsController                C++     WebKit
+       1         48      48.0   WebKit::RemoteWebLockRegistry                     C++     WebKit
+       1         48      48.0   WebKit::StorageAreaImpl                           C++     WebKit
+       1         48      48.0   WebKit::ViewGestureGeometryCollector              C++     WebKit
+       1         48      48.0   WebKit::WebBackForwardListProxy                   C++     WebKit
+       1         48      48.0   WebKit::WebEditorClient                           C++     WebKit
+       1         48      48.0   WebKit::WebIDBConnectionToServer                  C++     WebKit
+       1         48      48.0   WebKit::WebMessagePortChannelProvider             C++     WebKit
+       1         48      48.0   WebKit::WebNotificationManager                    C++     WebKit
+       1         48      48.0   WebKit::WebPageGroupProxy                         C++     WebKit
+       1         48      48.0   WebKit::WebPageTesting                            C++     WebKit
+       1         48      48.0   WebKit::WebPermissionController                   C++     WebKit
+       1         48      48.0   WebKit::WebPluginInfoProvider                     C++     WebKit
+       1         48      48.0   WebKit::WebSocketProvider                         C++     WebKit
+       1         48      48.0   WebKit::WebUserMessageHandlerDescriptorProxy      C++     WebKit
+       1         48      48.0   WebKit::WebValidationMessageClient                C++     WebKit
+       1         48      48.0   _NSXPCConnectionImportInfo                        ObjC    Foundation
+       1         48      48.0   _NSXPCConnectionRequestedReplies                  ObjC    Foundation
+       1         48      48.0   icu::Locale                                       C++     libicucore.A.dylib
+       1         48      48.0   std::__function::__func<bool caulk::cf_preferences::monitor::add_handler<long long>(__CFString const*, __CFString const*, std::optional<long long> (*)(void const*), std::function<void (long long)> const&)::'lambda'(void const*), bool (void const*)>  C++     AudioToolboxCore
+       1         48      48.0   xpc_array_t                                       ObjC    libxpc.dylib
+       2         32      16.0   JSC::ScriptFetchParameters                        C++     JavaScriptCore
+       2         32      16.0   JSC::WebAssemblyArrayMutI16TypeExpectation        C++     JavaScriptCore
+       2         32      16.0   NSCountedSet                                      ObjC    Foundation
+       2         32      16.0   WTF::Detail::CallableWrapper<IPC::FunctionDispatcherQueue::enqueueMessage(IPC::Connection&, WTF::UniqueRef<IPC::Decoder>&&)::'lambda'(), void>  C++     WebKit
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_10, void, JSC::AbstractSlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_11, void, JSC::SlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_12, void, JSC::AbstractSlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_13, void, JSC::SlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_14, void, JSC::AbstractSlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_15, void, JSC::SlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_16, void, JSC::AbstractSlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_17, void, JSC::SlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_2, void, JSC::AbstractSlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_3, void, JSC::SlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_4, void, JSC::AbstractSlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_5, void, JSC::SlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_6, void, JSC::AbstractSlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_7, void, JSC::SlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_8, void, JSC::AbstractSlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<JSC::Heap::addCoreConstraints()::$_9, void, JSC::SlotVisitor&>  C++     JavaScriptCore
+       2         32      16.0   WTF::Detail::CallableWrapper<PAL::HysteresisActivity::HysteresisActivity(WTF::Function<void (PAL::HysteresisState)>&&, WTF::Seconds)::'lambda'(), void>  C++     WebKit
+       2         32      16.0   WTF::Detail::CallableWrapper<WebCore::DOMTimer::DOMTimer(WebCore::ScriptExecutionContext&, WTF::Function<void (WebCore::ScriptExecutionContext&)>&&, WTF::Seconds, WebCore::DOMTimer::Type)::$_0, void>  C++     WebCore
+       2         32      16.0   WTF::Detail::CallableWrapper<WebCore::DOMTimer::install(WebCore::ScriptExecutionContext&, std::unique_ptr<WebCore::ScheduledAction>, WTF::Seconds, WebCore::DOMTimer::Type)::$_0, void, WebCore::ScriptExecutionContext&>  C++     WebCore
+       2         32      16.0   WTF::Detail::CallableWrapper<WebCore::Page::doAfterUpdateRendering()::$_3, void, WebCore::Document&>  C++     WebCore
+       2         32      16.0   WTF::Detail::CallableWrapper<WebCore::ThreadTimers::setSharedTimer(WebCore::SharedTimer*)::$_0, void>  C++     WebCore
+       2         32      16.0   WTF::Detail::CallableWrapper<WebCore::UserActivity::UserActivity(WTF::ASCIILiteral)::$_0, void, PAL::HysteresisState>  C++     WebCore
+       2         32      16.0   WTF::Detail::CallableWrapper<void (*)(bool), void, bool>  C++     WebCore
+       2         32      16.0   WTF::SharedTaskFunctor<void (JSC::CCallHelpers&, JSC::B3::StackmapGenerationParams const&), JSC::Wasm::OMGIRGenerator::addCallIndirect(unsigned int, unsigned int, JSC::Wasm::RTT const&, WTF::Vector<JSC::Wasm::FunctionParserTypes<JSC::Wasm::OMGIRGenerator::ControlData, JSC::Wasm::OMGExpression, JSC::CallLinkInfoBase::CallType>::TypedExpression, 8ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>&, WTF::Vector<JSC::Wasm::OMGExpression, 8ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>&, JSC::CallLinkInfoBase::CallType)::$_3>  C++     JavaScriptCore
+       1         32      32.0   CFURLCache                                        CFType  CFNetwork
+       1         32      32.0   CUINamedRenditionInfo                             ObjC    CoreUI
+       1         32      32.0   FSNode                                            ObjC    LaunchServices
+       1         32      32.0   IPC::WorkQueueMessageReceiverQueue                C++     WebKit
+       1         32      32.0   JSC::DFG::JITFinalizer                            C++     JavaScriptCore
+       1         32      32.0   JSC::JITToDFGDeferredCompilationCallback          C++     JavaScriptCore
+       1         32      32.0   LSASN                                             CFType  LaunchServices
+       1         32      32.0   NSFileManager                                     ObjC    Foundation
+       1         32      32.0   NSFocusStack                                      ObjC    AppKit
+       1         32      32.0   NSLifeguard                                       ObjC    AppKit
+       1         32      32.0   NSMutableOrderedSet                               ObjC    CoreFoundation
+       1         32      32.0   NSMutableSet (Storage)                            C       CoreFoundation
+       1         32      32.0   NSNotificationCenter                              ObjC    Foundation
+       1         32      32.0   NSSystemAppearanceProxy                           ObjC    AppKit
+       1         32      32.0   NSURLCacheInternal                                ObjC    CFNetwork
+       1         32      32.0   NSUUID                                            Swift   Foundation
+       1         32      32.0   TFontFamilyNameAliasesIndex                       C++     libFontRegistry.dylib
+       1         32      32.0   TFontFamilyNameIndex                              C++     libFontRegistry.dylib
+       1         32      32.0   TFontFullNameIndex                                C++     libFontRegistry.dylib
+       1         32      32.0   TFontPostScriptNameAliasesIndex                   C++     libFontRegistry.dylib
+       1         32      32.0   TFontPostScriptNameIndex                          C++     libFontRegistry.dylib
+       1         32      32.0   TStaticFontFamilyNameIndex                        C++     libFontRegistry.dylib
+       1         32      32.0   TStaticFontPostScriptNameIndex                    C++     libFontRegistry.dylib
+       1         32      32.0   WTF::Detail::CallableWrapper<JSC::WebAssemblyMemoryConstructor::createMemoryFromDescriptor(JSC::JSGlobalObject*, JSC::Structure*, JSC::JSObject*, std::optional<JSC::MemoryMode>)::$_0, void, JSC::Wasm::Memory::GrowSuccess, JSC::PageCount, JSC::PageCount>  C++     JavaScriptCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WTF::RunLoop::Timer::Timer<WTF::MemoryPressureHandler>(WTF::Ref<WTF::RunLoop, WTF::RawPtrTraits<WTF::RunLoop>, WTF::DefaultRefDerefTraits<WTF::RunLoop>>&&, WTF::ASCIILiteral, WTF::MemoryPressureHandler*, void (WTF::MemoryPressureHandler::*)())::'lambda'(), void>  C++     JavaScriptCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WTF::RunLoop::Timer::Timer<WebKit::WebLoaderStrategy>(WTF::Ref<WTF::RunLoop, WTF::RawPtrTraits<WTF::RunLoop>, WTF::DefaultRefDerefTraits<WTF::RunLoop>>&&, WTF::ASCIILiteral, WebKit::WebLoaderStrategy*, void (WebKit::WebLoaderStrategy::*)())::'lambda'(), void>  C++     WebKit
+       1         32      32.0   WTF::Detail::CallableWrapper<WTF::RunLoop::Timer::Timer<WebKit::WebPage>(WTF::Ref<WTF::RunLoop, WTF::RawPtrTraits<WTF::RunLoop>, WTF::DefaultRefDerefTraits<WTF::RunLoop>>&&, WTF::ASCIILiteral, WebKit::WebPage*, void (WebKit::WebPage::*)())::'lambda'(), void>  C++     WebKit
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::AutoscrollController, WebCore::AutoscrollController>(WebCore::AutoscrollController&, void (WebCore::AutoscrollController::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::CaretAnimator, WebCore::CaretAnimator>(WebCore::CaretAnimator&, void (WebCore::CaretAnimator::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::DocumentLoader, WebCore::DocumentLoader>(WebCore::DocumentLoader&, void (WebCore::DocumentLoader::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::Editor, WebCore::Editor>(WebCore::Editor&, void (WebCore::Editor::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::ElementTargetingController, WebCore::ElementTargetingController>(WebCore::ElementTargetingController&, void (WebCore::ElementTargetingController::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::EventSender<WebCore::HTMLLinkElement, WebCore::WeakPtrImplWithEventTargetData>, WebCore::EventSender<WebCore::HTMLLinkElement, WebCore::WeakPtrImplWithEventTargetData>>(WebCore::EventSender<WebCore::HTMLLinkElement, WebCore::WeakPtrImplWithEventTargetData>&, void (WebCore::EventSender<WebCore::HTMLLinkElement, WebCore::WeakPtrImplWithEventTargetData>::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::EventSender<WebCore::HTMLStyleElement, WebCore::WeakPtrImplWithEventTargetData>, WebCore::EventSender<WebCore::HTMLStyleElement, WebCore::WeakPtrImplWithEventTargetData>>(WebCore::EventSender<WebCore::HTMLStyleElement, WebCore::WeakPtrImplWithEventTargetData>&, void (WebCore::EventSender<WebCore::HTMLStyleElement, WebCore::WeakPtrImplWithEventTargetData>::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::EventSender<WebCore::ImageLoader, WTF::SingleThreadWeakPtrImpl>, WebCore::EventSender<WebCore::ImageLoader, WTF::SingleThreadWeakPtrImpl>>(WebCore::EventSender<WebCore::ImageLoader, WTF::SingleThreadWeakPtrImpl>&, void (WebCore::EventSender<WebCore::ImageLoader, WTF::SingleThreadWeakPtrImpl>::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::FontCache, WebCore::FontCache>(WebCore::FontCache&, void (WebCore::FontCache::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::GarbageCollectionController, WebCore::GarbageCollectionController>(WebCore::GarbageCollectionController&, void (WebCore::GarbageCollectionController::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::InspectorOverlay, WebCore::InspectorOverlay>(WebCore::InspectorOverlay&, void (WebCore::InspectorOverlay::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::LayerPool, WebCore::LayerPool>(WebCore::LayerPool&, void (WebCore::LayerPool::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::MemoryCache, WebCore::MemoryCache>(WebCore::MemoryCache&, void (WebCore::MemoryCache::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::NavigationScheduler, WebCore::NavigationScheduler>(WebCore::NavigationScheduler&, void (WebCore::NavigationScheduler::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::ProgressTracker, WebCore::ProgressTracker>(WebCore::ProgressTracker&, void (WebCore::ProgressTracker::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::SettingsBase, WebCore::SettingsBase>(WebCore::SettingsBase&, void (WebCore::SettingsBase::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::SpellChecker, WebCore::SpellChecker>(WebCore::SpellChecker&, void (WebCore::SpellChecker::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::TileController, WebCore::TileController>(WebCore::TileController&, void (WebCore::TileController::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebCore::TileGrid, WebCore::TileGrid>(WebCore::TileGrid&, void (WebCore::TileGrid::*)())::'lambda'(), void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebKit::RemoteLayerBackingStoreCollection, WebKit::RemoteLayerBackingStoreCollection>(WebKit::RemoteLayerBackingStoreCollection&, void (WebKit::RemoteLayerBackingStoreCollection::*)())::'lambda'(), void>  C++     WebKit
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebKit::RemoteRenderingBackendProxy, WebKit::RemoteRenderingBackendProxy>(WebKit::RemoteRenderingBackendProxy&, void (WebKit::RemoteRenderingBackendProxy::*)())::'lambda'(), void>  C++     WebKit
+       1         32      32.0   WTF::Detail::CallableWrapper<WebCore::Timer::Timer<WebKit::WebProcess, WebKit::WebProcess>(WebKit::WebProcess&, void (WebKit::WebProcess::*)())::'lambda'(), void>  C++     WebKit
+       1         32      32.0   WTF::Detail::CallableWrapper<WebKit::RemoteImageDecoderAVFManager::setUseGPUProcess(bool)::$_0, WTF::RefPtr<WebCore::ImageDecoder, WTF::RawPtrTraits<WebCore::ImageDecoder>, WTF::DefaultRefDerefTraits<WebCore::ImageDecoder>>, WebCore::FragmentedSharedBuffer&, WTF::String const&, WebCore::AlphaOption, WebCore::GammaAndColorProfileOption>  C++     WebKit
+       1         32      32.0   WTF::Detail::CallableWrapper<WebKit::RemoteMediaPlayerManager::setUseGPUProcess(bool)::$_0, void, void (*)(std::unique_ptr<WebCore::MediaPlayerFactory>&&), WebCore::MediaPlayerMediaEngineIdentifier, WebCore::PlatformMediaDecodingType>  C++     WebKit
+       1         32      32.0   WTF::Detail::CallableWrapper<WebKit::WebProcess::initializeWebProcess(WebKit::WebProcessCreationParameters&&, WTF::CompletionHandler<void (WebCore::ProcessIdentity)>&&)::$_0, void, WTF::Critical, WTF::Synchronous>  C++     WebKit
+       1         32      32.0   WTF::Detail::CallableWrapper<WebKit::WebProcess::initializeWebProcess(WebKit::WebProcessCreationParameters&&, WTF::CompletionHandler<void (WebCore::ProcessIdentity)>&&)::$_1, void>  C++     WebKit
+       1         32      32.0   WTF::Detail::CallableWrapper<WebKit::WebProcess::initializeWebProcess(WebKit::WebProcessCreationParameters&&, WTF::CompletionHandler<void (WebCore::ProcessIdentity)>&&)::$_3, void>  C++     WebKit
+       1         32      32.0   WTF::Detail::CallableWrapper<WebKit::WebProcess::initializeWebProcess(WebKit::WebProcessCreationParameters&&, WTF::CompletionHandler<void (WebCore::ProcessIdentity)>&&)::$_4, void, WTF::ProcessMemoryLimit>  C++     WebKit
+       1         32      32.0   WTF::Detail::CallableWrapper<WebKit::WebProcess::initializeWebProcess(WebKit::WebProcessCreationParameters&&, WTF::CompletionHandler<void (WebCore::ProcessIdentity)>&&)::$_6, void>  C++     WebKit
+       1         32      32.0   WTF::Detail::CallableWrapper<std::__bind<void (WebCore::Editor::*&)(), WebCore::Editor*>, void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<std::__bind<void (WebCore::ElementTargetingController::*&)(), WebCore::ElementTargetingController*>, void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<std::__bind<void (WebCore::EventHandler::*&)(), WebCore::EventHandler*>, void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<std::__bind<void (WebCore::ImageQualityController::*&)(), WebCore::ImageQualityController*>, void>  C++     WebCore
+       1         32      32.0   WTF::Detail::CallableWrapper<std::__bind<void (WebCore::TileController::*&)(), WebCore::TileController*>, void>  C++     WebCore
+       1         32      32.0   WTF::SharedTaskFunctor<void (), WebCore::WorkerDedicatedRunLoop::runInMode(WebCore::WorkerOrWorkletGlobalScope*, WebCore::ModePredicate const&)::$_0>  C++     WebCore
+       1         32      32.0   WebCore::EXTClipControl                           C++     WebCore
+       1         32      32.0   WebCore::EXTColorBufferFloat                      C++     WebCore
+       1         32      32.0   WebCore::EXTColorBufferHalfFloat                  C++     WebCore
+       1         32      32.0   WebCore::EXTConservativeDepth                     C++     WebCore
+       1         32      32.0   WebCore::EXTDepthClamp                            C++     WebCore
+       1         32      32.0   WebCore::EXTFloatBlend                            C++     WebCore
+       1         32      32.0   WebCore::EXTPolygonOffsetClamp                    C++     WebCore
+       1         32      32.0   WebCore::EXTTextureCompressionBPTC                C++     WebCore
+       1         32      32.0   WebCore::EXTTextureCompressionRGTC                C++     WebCore
+       1         32      32.0   WebCore::EXTTextureFilterAnisotropic              C++     WebCore
+       1         32      32.0   WebCore::EXTTextureNorm16                         C++     WebCore
+       1         32      32.0   WebCore::FrameConsoleClient                       C++     WebCore
+       1         32      32.0   WebCore::KHRParallelShaderCompile                 C++     WebCore
+       1         32      32.0   WebCore::ModuleFetchParameters                    C++     WebCore
+       1         32      32.0   WebCore::NVShaderNoperspectiveInterpolation       C++     WebCore
+       1         32      32.0   WebCore::NavigatorClipboard                       C++     WebCore
+       1         32      32.0   WebCore::OESTextureFloatLinear                    C++     WebCore
+       1         32      32.0   WebCore::WebGLBlendFuncExtended                   C++     WebCore
+       1         32      32.0   WebCore::WebGLClipCullDistance                    C++     WebCore
+       1         32      32.0   WebCore::WebGLCompressedTextureASTC               C++     WebCore
+       1         32      32.0   WebCore::WebGLCompressedTextureETC                C++     WebCore
+       1         32      32.0   WebCore::WebGLCompressedTextureETC1               C++     WebCore
+       1         32      32.0   WebCore::WebGLCompressedTextureS3TC               C++     WebCore
+       1         32      32.0   WebCore::WebGLCompressedTextureS3TCsRGB           C++     WebCore
+       1         32      32.0   WebCore::WebGLMultiDraw                           C++     WebCore
+       1         32      32.0   WebCore::WebGLPolygonMode                         C++     WebCore
+       1         32      32.0   WebCore::WorkerConsoleClient                      C++     WebCore
+       1         32      32.0   WebCore::WorkerGlobalScopeIndexedDatabase         C++     WebCore
+       1         32      32.0   WebCore::WorkerSharedTimer                        C++     WebCore
+       1         32      32.0   WebKit::(anonymous namespace)::DisplayBufferDisplayDelegate  C++     WebKit
+       1         32      32.0   WebKit::AudioSessionRoutingArbitrator             C++     WebKit
+       1         32      32.0   WebKit::LogClient                                 C++     WebKit
+       1         32      32.0   WebKit::MediaKeySystemPermissionRequestManager    C++     WebKit
+       1         32      32.0   WebKit::RemoteMediaEngineConfigurationFactory     C++     WebKit
+       1         32      32.0   WebKit::WebAlternativeTextClient                  C++     WebKit
+       1         32      32.0   WebKit::WebBroadcastChannelRegistry               C++     WebKit
+       1         32      32.0   WebKit::WebCacheStorageProvider                   C++     WebKit
+       1         32      32.0   WebKit::WebChromeClient                           C++     WebKit
+       1         32      32.0   WebKit::WebCryptoClient                           C++     WebKit
+       1         32      32.0   WebKit::WebDatabaseProvider                       C++     WebKit
+       1         32      32.0   WebKit::WebDiagnosticLoggingClient                C++     WebKit
+       1         32      32.0   WebKit::WebFrameNetworkingContext                 C++     WebKit
+       1         32      32.0   WebKit::WebGeolocationClient                      C++     WebKit
+       1         32      32.0   WebKit::WebHistoryItemClient                      C++     WebKit
+       1         32      32.0   WebKit::WebMediaKeySystemClient                   C++     WebKit
+       1         32      32.0   WebKit::WebModelPlayerProvider                    C++     WebKit
+       1         32      32.0   WebKit::WebNotificationClient                     C++     WebKit
+       1         32      32.0   WebKit::WebSpeechRecognitionProvider              C++     WebKit
+       1         32      32.0   WebKit::WebStorageProvider                        C++     WebKit
+       1         32      32.0   WebKit::WebUserMediaClient                        C++     WebKit
+       1         32      32.0   WebLowPowerModeObserver                           ObjC    WebCore
+       1         32      32.0   WebLowPowerModeObserver._notifier (struct)        C       WebCore
+       1         32      32.0   XTFontStaticRegistry                              ObjC    libFontRegistry.dylib
+       1         32      32.0   _CSStore2DataContainer                            ObjC    CoreServicesStore
+       1         32      32.0   _NSLocalNotificationCenter                        ObjC    Foundation
+       1         32      32.0   _NSScrollerStyleRecommender                       ObjC    AppKit
+       1         32      32.0   _NSXPCConnectionExpectedReplies                   ObjC    Foundation
+       1         32      32.0   __NSObserver                                      ObjC    Foundation
+       1         32      32.0   icu::SharedCalendar                               C++     libicucore.A.dylib
+       1         32      32.0   icu::SharedObject                                 C++     libicucore.A.dylib
+       1         32      32.0   std::__function::__func<WebKit::WebProcess::setUseGPUProcessForMedia(bool)::$_2, void (bool)>  C++     WebKit
+       1         32      32.0   std::__function::__func<WebKit::WebProcess::setUseGPUProcessForMedia(bool)::$_3, void (bool)>  C++     WebKit
+       1         32      32.0   std::__shared_ptr_pointer<NSObject<OS_nw_context>*, Deleter_NWRelease<NSObject<OS_nw_context>*>>  C++     CFNetwork
+       1         16      16.0   API::InjectedBundle::EditorClient                 C++     WebKit
+       1         16      16.0   API::InjectedBundle::FormClient                   C++     WebKit
+       1         16      16.0   API::InjectedBundle::PageContextMenuClient        C++     WebKit
+       1         16      16.0   API::InjectedBundle::PageLoaderClient             C++     WebKit
+       1         16      16.0   API::InjectedBundle::PageUIClient                 C++     WebKit
+       1         16      16.0   API::InjectedBundle::ResourceLoadClient           C++     WebKit
+       1         16      16.0   CFPrefsDaemon._listenerWorkloops (id[])           C       CoreFoundation
+       1         16      16.0   LSDatabaseContext                                 ObjC    LaunchServices
+       1         16      16.0   LockdownModeManager                               ObjC    LockdownMode
+       1         16      16.0   NSCFTimer                                         ObjC    Foundation
+       1         16      16.0   NSURLCache                                        ObjC    CFNetwork
+       1         16      16.0   NSWorkspace                                       ObjC    AppKit
+       1         16      16.0   WKAccessibilityWebPageObject.m_page (struct)      C       WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<IPC::TransferString::release(unsigned long) &&::$_0::operator()(IPC::TransferString::SharedSpan8) const::'lambda'(auto...), void, WTF::ExternalStringImpl*, void*, unsigned int>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<JSC::VMTraps::SignalSender::initializeSignals()::'lambda'()::operator()() const::'lambda'(WTF::Signal, WTF::SigInfo&, __darwin_arm_thread_state64&), WTF::SignalAction, WTF::Signal, WTF::SigInfo&, __darwin_arm_thread_state64&>  C++     JavaScriptCore
+       1         16      16.0   WTF::Detail::CallableWrapper<JSC::Wasm::prepareSignalingMemory()::$_0::operator()() const::'lambda'(WTF::Signal, WTF::SigInfo&, __darwin_arm_thread_state64&), WTF::SignalAction, WTF::Signal, WTF::SigInfo&, __darwin_arm_thread_state64&>  C++     JavaScriptCore
+       1         16      16.0   WTF::Detail::CallableWrapper<PAL::TextCodecLatin1::registerCodecs(void (*)(WTF::ASCIILiteral, WTF::Function<std::unique_ptr<PAL::TextCodec> ()>&&))::$_0, std::unique_ptr<PAL::TextCodec>>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<PAL::TextCodecUTF16::registerCodecs(void (*)(WTF::ASCIILiteral, WTF::Function<std::unique_ptr<PAL::TextCodec> ()>&&))::$_0, std::unique_ptr<PAL::TextCodec>>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<PAL::TextCodecUTF16::registerCodecs(void (*)(WTF::ASCIILiteral, WTF::Function<std::unique_ptr<PAL::TextCodec> ()>&&))::$_1, std::unique_ptr<PAL::TextCodec>>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<PAL::TextCodecUTF8::registerCodecs(void (*)(WTF::ASCIILiteral, WTF::Function<std::unique_ptr<PAL::TextCodec> ()>&&))::$_0, std::unique_ptr<PAL::TextCodec>>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<PAL::TextCodecUserDefined::registerCodecs(void (*)(WTF::ASCIILiteral, WTF::Function<std::unique_ptr<PAL::TextCodec> ()>&&))::$_0, std::unique_ptr<PAL::TextCodec>>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::AccessibilityObject::ariaRoleToWebCoreRole(WTF::String const&)::$_0, bool, WebCore::AccessibilityRole const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::AsyncScrollingCoordinator::AsyncScrollingCoordinator(WebCore::Page*)::$_0, void, PAL::HysteresisState>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::BackForwardCache::BackForwardCache()::$_0::operator()() const::'lambda'(), void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::CSSFontSelector::CSSFontSelector(WebCore::ScriptExecutionContext&)::$_0, void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::ContentChangeObserver::ContentChangeObserver(WebCore::Document&)::$_0, void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::Document::Document(WebCore::LocalFrame*, WebCore::Settings const&, WTF::URL const&, WTF::OptionSet<WebCore::DocumentClass, (WTF::ConcurrencyTag)0>, WTF::OptionSet<WebCore::Document::ConstructionFlag, (WTF::ConcurrencyTag)0>, std::optional<WebCore::ProcessQualified<WTF::UUID>>)::$_0, void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::FetchResponse::addAbortSteps(WTF::Ref<WebCore::AbortSignal, WTF::RawPtrTraits<WebCore::AbortSignal>, WTF::DefaultRefDerefTraits<WebCore::AbortSignal>>&&)::$_0, void, JSC::JSValue>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::GarbageCollectionController::GarbageCollectionController()::$_0::operator()() const::'lambda'(), void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::Layout::TextBreakingPositionCache::TextBreakingPositionCache()::$_0, void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::LayoutUnit (*)(WebCore::Layout::ElementBox const&, WebCore::LayoutIntegration::LogicalHeightType), WebCore::LayoutUnit, WebCore::Layout::ElementBox const&, WebCore::LayoutIntegration::LogicalHeightType>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::LayoutUnit (*)(WebCore::Layout::ElementBox const&, WebCore::LayoutIntegration::LogicalWidthType), WebCore::LayoutUnit, WebCore::Layout::ElementBox const&, WebCore::LayoutIntegration::LogicalWidthType>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::animationFeatureSchema()::$_0, bool, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::anyHoverFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::anyPointerFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::aspectRatioFeatureSchema()::$_0, WebCore::FloatSize, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::colorFeatureSchema()::$_0, int, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::colorGamutFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::colorIndexFeatureSchema()::$_0, int, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::deviceAspectRatioFeatureSchema()::$_0, WebCore::FloatSize, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::deviceHeightFeatureSchema()::$_0, WebCore::LayoutUnit, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::devicePixelRatioFeatureSchema()::$_0, double, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::deviceWidthFeatureSchema()::$_0, WebCore::LayoutUnit, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::displayModeFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::dynamicRangeFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::forcedColorsFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::gridFeatureSchema()::$_0, bool, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::heightFeatureSchema()::$_0, WebCore::LayoutUnit, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::hoverFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::invertedColorsFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::monochromeFeatureSchema()::$_0, int, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::orientationFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::overflowBlockFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::overflowInlineFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::pointerFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::prefersColorSchemeFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::prefersContrastFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::prefersDarkInterfaceFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::prefersReducedMotionFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::resolutionFeatureSchema()::$_0, float, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::scanFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::scriptingFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::transform2dFeatureSchema()::$_0, bool, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::transform3dFeatureSchema()::$_0, bool, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::transitionFeatureSchema()::$_0, bool, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::updateFeatureSchema()::$_0, WTF::Vector<WebCore::CSSValueID, 1ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::videoPlayableInlineFeatureSchema()::$_0, bool, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MQ::Features::widthFeatureSchema()::$_0, WebCore::LayoutUnit, WebCore::MQ::FeatureEvaluationContext const&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::MemoryCache::MemoryCache()::$_0::operator()() const::'lambda'(), void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::OpportunisticTaskScheduler::EdenGCActivityCallback::EdenGCActivityCallback(JSC::Heap&)::$_0, void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::OpportunisticTaskScheduler::FullGCActivityCallback::FullGCActivityCallback(JSC::Heap&)::$_0, void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::OpportunisticTaskScheduler::OpportunisticTaskScheduler(WebCore::Page&)::$_0, void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::Page::Page(WebCore::PageConfiguration&&)::$_1, void, bool>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::Page::firstTimeInitialization()::$_0, void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::Page::platformInitialize()::$_0::operator()() const::'lambda'(), void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::RenderLayerCompositor::RenderLayerCompositor(WebCore::RenderView&)::$_0, void, PAL::HysteresisState>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::ScriptController::linkAndEvaluateModuleScriptInWorld(WebCore::LoadableModuleScript&, WebCore::DOMWrapperWorld&)::$_0, long long, JSC::JSGlobalObject*, JSC::CallFrame*>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebCore::WorkerThread::createThread()::$_1, void>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::AudioSessionRoutingArbitrator::AudioSessionRoutingArbitrator(WebKit::WebProcess&)::$_0, void, WebCore::AudioSession&>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::RemoteLegacyCDMFactory::registerFactory()::$_0, std::unique_ptr<WebCore::CDMPrivateInterface> const, WebCore::LegacyCDM&>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::RemoteLegacyCDMFactory::registerFactory()::$_1, bool, WTF::String const&>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::RemoteLegacyCDMFactory::registerFactory()::$_2, bool, WTF::String const&, WTF::String const&>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::RemoteMediaEngineConfigurationFactory::registerFactory()::$_0, void, WebCore::PlatformMediaDecodingConfiguration&&, WTF::Function<void (WebCore::PlatformMediaCapabilitiesDecodingInfo&&)>&&>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::WebFrame::makeInvalidator()::$_0, void>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::WebPage::WebPage(WTF::ObjectIdentifierGeneric<WebCore::PageIdentifierType, WTF::ObjectIdentifierMainThreadAccessTraits<unsigned long long>, unsigned long long>, WebKit::WebPageCreationParameters&&)::$_0, void, PAL::HysteresisState>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::WebPage::WebPage(WTF::ObjectIdentifierGeneric<WebCore::PageIdentifierType, WTF::ObjectIdentifierMainThreadAccessTraits<unsigned long long>, unsigned long long>, WebKit::WebPageCreationParameters&&)::$_2, void, WebCore::AccessibilityMode>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::WebProcess::WebProcess()::$_0, void, PAL::HysteresisState>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::WebProcess::initializeWebProcess(WebKit::WebProcessCreationParameters&&, WTF::CompletionHandler<void (WebCore::ProcessIdentity)>&&)::$_5, void>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::WebProcess::setUseGPUProcessForMedia(bool)::$_0, WTF::Ref<WebCore::AudioHardwareListener, WTF::RawPtrTraits<WebCore::AudioHardwareListener>, WTF::DefaultRefDerefTraits<WebCore::AudioHardwareListener>>, WebCore::AudioHardwareListener::Client&>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::WebProcess::setUseGPUProcessForMedia(bool)::$_1, WTF::RefPtr<WebCore::RemoteCommandListener, WTF::RawPtrTraits<WebCore::RemoteCommandListener>, WTF::DefaultRefDerefTraits<WebCore::RemoteCommandListener>>, WebCore::RemoteCommandListenerClient&>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::WebResourceLoadObserver::WebResourceLoadObserver(WebCore::ResourceLoadStatistics::IsEphemeral)::$_0, void>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::WebSocketChannel::createMessageQueue(WebCore::Document&, WebKit::WebSocketChannel&)::$_0, void, WTF::CString const&>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::WebSocketChannel::createMessageQueue(WebCore::Document&, WebKit::WebSocketChannel&)::$_1, void, std::span<unsigned char const, 18446744073709551615ul>>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<WebKit::WebSocketChannel::createMessageQueue(WebCore::Document&, WebKit::WebSocketChannel&)::$_2, WebCore::NetworkSendQueue::Continue, WebCore::ExceptionCode>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<bool (*)(WTF::String const&), bool, WTF::String const&>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<bool (*)(WebCore::ImageDecoder::MediaType), bool, WebCore::ImageDecoder::MediaType>  C++     WebKit
+       1         16      16.0   WTF::Detail::CallableWrapper<void (*)(WebCore::Layout::ElementBox const&, WebCore::LayoutPoint, WebCore::Layout::InlineLayoutState&, WebCore::Layout::LayoutState&), void, WebCore::Layout::ElementBox const&, WebCore::LayoutPoint, WebCore::Layout::InlineLayoutState&, WebCore::Layout::LayoutState&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<void (*)(WebCore::Layout::ElementBox const&, std::optional<WebCore::LayoutUnit>, std::optional<WebCore::LayoutUnit>, WebCore::Layout::LayoutState&), void, WebCore::Layout::ElementBox const&, std::optional<WebCore::LayoutUnit>, std::optional<WebCore::LayoutUnit>, WebCore::Layout::LayoutState&>  C++     WebCore
+       1         16      16.0   WTF::Detail::CallableWrapper<void WebCore::ActiveDOMObject::queueTaskKeepingObjectAlive<WebCore::MessagePort, WebCore::MessagePort::dispatchMessages()::$_0::operator()(WTF::Vector<WebCore::MessageWithMessagePorts, 0ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>&&, WTF::CompletionHandler<void ()>&&)::'lambda'(auto&)>(auto&, WebCore::TaskSource, WebCore::MessagePort::dispatchMessages()::$_0::operator()(WTF::Vector<WebCore::MessageWithMessagePorts, 0ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc>&&, WTF::CompletionHandler<void ()>&&)::'lambda'(auto&)&&)::'lambda'(), void>  C++     WebCore
+       1         16      16.0   WTF::SharedTaskFunctor<void (JSC::CCallHelpers&, JSC::B3::StackmapGenerationParams const&), JSC::Wasm::OMGIRGenerator::reloadMemoryRegistersFromInstance(JSC::Wasm::MemoryInformation const&, JSC::B3::Value*, JSC::B3::BasicBlock*)::$_0>  C++     JavaScriptCore
+       1         16      16.0   WTF::SharedTaskFunctor<void (void*), JSC::ArrayBuffer::primitiveGigacageDestructor()::$_0::operator()() const::'lambda'(void*)>  C++     JavaScriptCore
+       1         16      16.0   WebCore::FragmentDirective                        C++     WebCore
+       1         16      16.0   WebCore::MediaKeySystemController                 C++     WebCore
+       1         16      16.0   WebCore::NotificationController                   C++     WebCore
+       1         16      16.0   WebCoreRenderThemeNotificationObserver            ObjC    WebCore
+       1         16      16.0   WebKit::RemoteSharedResourceCacheProxy            C++     WebKit
+       1         16      16.0   WebKit::WebAttachmentElementClient                C++     WebKit
+       1         16      16.0   WebKit::WebAuthenticatorCoordinator               C++     WebKit
+       1         16      16.0   WebKit::WebBadgeClient                            C++     WebKit
+       1         16      16.0   WebKit::WebCaptionPreferencesDelegate             C++     WebKit
+       1         16      16.0   WebKit::WebContextMenuClient                      C++     WebKit
+       1         16      16.0   WebKit::WebDocumentSyncClient                     C++     WebKit
+       1         16      16.0   WebKit::WebDragClient                             C++     WebKit
+       1         16      16.0   WebKit::WebMediaKeyStorageManager                 C++     WebKit
+       1         16      16.0   WebKit::WebMediaStrategy                          C++     WebKit
+       1         16      16.0   WebKit::WebPerformanceLoggingClient               C++     WebKit
+       1         16      16.0   WebKit::WebProgressTrackerClient                  C++     WebKit
+       1         16      16.0   WebKit::WebSleepDisablerClient                    C++     WebKit
+       1         16      16.0   WebKit::WebStorageSessionProvider                 C++     WebKit
+       1         16      16.0   WebKit::WebSystemSoundDelegate                    C++     WebKit
+       1         16      16.0   _NSAppearanceCustomizationProxy                   ObjC    AppKit
+       1         16      16.0   _NSFileManagerBridge                              Swift   Foundation
+       1         16      16.0   _NSSwiftImmortalCharacterSetBridge                Swift   Foundation
+       1         16      16.0   _NSZeroData                                       ObjC    Foundation
+       1         16      16.0   __CFN_ConnectionContextManager                    ObjC    CFNetwork
+       1         16      16.0   __NSOrderedSetArrayProxy                          ObjC    CoreFoundation
+       1         16      16.0   std::__function::__func<WebKit::WebProcess::platformInitializeWebProcess(WebKit::WebProcessCreationParameters&)::$_0, void (WTF::Vector<WTF::String, 0ul, WTF::CrashOnOverflow, 16ul, WTF::FastMalloc> const&)>  C++     WebKit
+       1         16      16.0   std::__function::__func<WebKit::WebProcess::platformInitializeWebProcess(WebKit::WebProcessCreationParameters&)::$_1, void (WTF::String const&, bool)>  C++     WebKit
+       1         16      16.0   xpc_array_t (Storage)                             C       libxpc.dylib

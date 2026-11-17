@@ -10,6 +10,9 @@ CREATE TABLE change_log (
 );
 
 CREATE INDEX idx_change_log_household_timestamp ON change_log(household_id, timestamp);
+CREATE INDEX idx_change_log_entity_latest ON change_log(
+  household_id, entity_type, entity_id, timestamp DESC, change_id DESC
+);
 
 insert:
 INSERT OR REPLACE INTO change_log (household_id, change_id, entity_type, entity_id, op, timestamp, payload_json)

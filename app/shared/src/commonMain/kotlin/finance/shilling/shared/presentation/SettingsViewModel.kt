@@ -11,6 +11,11 @@ import finance.shilling.shared.data.SETTINGS_KEY_HOSTED_HOUSEHOLD_ID
 import finance.shilling.shared.data.SETTINGS_KEY_LOCAL_HOUSEHOLD_ID
 import finance.shilling.shared.data.SETTINGS_KEY_SERVER_URL
 import finance.shilling.shared.data.ServerUrlCallback
+import finance.shilling.core.auth.HostedPlan
+import finance.shilling.shared.data.analytics.ProductAnalytics
+import finance.shilling.shared.data.auth.DeleteHostedAccountCallback
+import finance.shilling.shared.data.sync.secureServerUrl
+import finance.shilling.shared.data.sync.SECURE_SIGNALING_REQUIRED
 import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.shared.data.auth.AuthState
 import finance.shilling.shared.data.auth.DependencyReachability
@@ -121,6 +126,8 @@ data class DeveloperInfo(
 )
 
 data class SettingsUiState(
+    val analyticsConfigured: Boolean = false,
+    val analyticsConsent: Boolean = false,
     val prefs: DisplayPrefs = DisplayPrefs(),
     val account: SettingsAccount? = null,
     /** Null when self-hosted (no managed sync status). */
@@ -129,6 +136,7 @@ data class SettingsUiState(
     /** Unlocked by tapping About seven times (UIs also show them in debug builds). */
     val developerToolsUnlocked: Boolean = false
 ) {
+    val analyticsNotice: String get() = ANALYTICS_PRIVACY_NOTICE
     val currencyExample: String get() = "Example: ${formatCurrency(1234.5)}"
 }
 
@@ -145,8 +153,14 @@ class SettingsViewModel(
     private val accountRepository: AccountRepository,
     private val categoryRepository: CategoryRepository,
     private val scheduleRepository: ScheduleRepository,
-    private val windowUseCase: ComputeWindowUseCase
+    private val windowUseCase: ComputeWindowUseCase,
+    private val analytics: ProductAnalytics,
+    private val deleteAccountCallback: DeleteHostedAccountCallback
 ) : ViewModel() {
+    private val accountDeletion = AccountDeletionFlow(deleteAccountCallback)
+    val deletion: StateFlow<AccountDeletionStep> = accountDeletion.step
+
+    private val analyticsState = MutableStateFlow(analytics.consent to analytics.configured)
     private val aboutTaps = MutableStateFlow(0)
     private val ready = sessionState.phase.filterIsInstance<SessionPhase.Ready>()
     private var authService: AuthService? = null
@@ -158,17 +172,35 @@ class SettingsViewModel(
         ready.flatMapLatest { phase -> phase.authService.authState.map { phase to it } },
         hostedBootstrapState.status,
         DisplayPreferences.state,
-        aboutTaps
-    ) { (phase, authState), status, prefs, taps ->
+        aboutTaps,
+        analyticsState
+    ) { (phase, authState), status, prefs, taps, analyticsStatus ->
         authService = phase.authService
         SettingsUiState(
+            analyticsConfigured = analyticsStatus.second,
+            analyticsConsent = analyticsStatus.first,
             prefs = prefs,
             account = account(phase, authState, status),
             sync = if (phase.selfHosted) null else syncStatus(status),
             developer = developerInfo(phase.selfHosted, authState, status),
             developerToolsUnlocked = taps >= DEVELOPER_UNLOCK_TAPS
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState(prefs = DisplayPreferences.state.value))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState(prefs = DisplayPreferences.state.value, analyticsConfigured = analytics.configured, analyticsConsent = analytics.consent))
+
+    fun setAnalyticsConsent(value: Boolean) {
+        analytics.consent = value
+        analyticsState.value = value to analytics.configured
+    }
+
+    fun saveAnalyticsConfig(host: String, projectToken: String): Boolean {
+        analytics.host = host
+        analytics.projectToken = projectToken
+        analyticsState.value = analytics.consent to analytics.configured
+        return analytics.configured
+    }
+
+    val analyticsHost: String get() = analytics.host
+    val analyticsProjectToken: String get() = analytics.projectToken
 
     fun setThemeMode(mode: ThemeMode) = DisplayPreferences.updateThemeMode(mode)
 
@@ -218,11 +250,22 @@ class SettingsViewModel(
         }
     }
 
+    /** [accountPlan]: the plan Settings already shows, if loaded. The server re-checks it. */
+    fun startAccountDeletion(accountPlan: HostedPlan?) = accountDeletion.start(accountPlan)
+    fun continueAccountDeletion() = accountDeletion.continueAfterWarning()
+    fun cancelAccountDeletion() = accountDeletion.cancel()
+    suspend fun confirmAccountDeletion(acknowledgeActiveSubscription: Boolean): String? =
+        accountDeletion.confirm(acknowledgeActiveSubscription)
+
     fun retrySync() = retryCallback.onRetry()
 
     /** Returns the snackbar message. */
     fun saveServerUrl(url: String): String {
-        val trimmed = url.trim()
+        val trimmed = try {
+            secureServerUrl(url).toString().trimEnd('/')
+        } catch (_: IllegalArgumentException) {
+            return SECURE_SIGNALING_REQUIRED
+        }
         settings.putString(SETTINGS_KEY_SERVER_URL, trimmed)
         serverUrlCallback.onChange(trimmed)
         return "Reconnecting to $trimmed"

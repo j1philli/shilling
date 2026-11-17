@@ -15,7 +15,10 @@ final class ReceiptsModel: ObservableObject {
     func observe() async {
         do {
             for try await value in asyncSequence(for: screen.stateFlow) {
-                state = value
+                // Keep the displayed snapshot through cache-expiry reloads.
+                // A genuine empty result carries empty-state copy and still applies.
+                guard !value.rows.isEmpty || value.empty != nil else { continue }
+                if state != value { state = value }
             }
         } catch {}
     }
@@ -29,10 +32,12 @@ final class ReceiptsModel: ObservableObject {
 struct ReceiptsScreen: View {
     @StateObject private var model = ReceiptsModel()
     @State private var path: [Editor] = []
+    @State private var selected: Editor?
+    @State private var twoPane = false
     @State private var toast: Toast?
     @ObservedObject private var cameraRequest = ReceiptCameraRequest.shared
 
-    /** Native editors pushed onto Receipts' navigation stack. */
+    /** Native editors pushed onto Receipts' navigation stack, or shown beside the list when wide. */
     enum Editor: Hashable {
         case receipt(String?)
         /// A new receipt with the camera up ("Scan Receipt").
@@ -40,93 +45,61 @@ struct ReceiptsScreen: View {
     }
 
     var body: some View {
-        let state = model.state
-        NavigationStack(path: $path) {
-            List {
-                Section {
-                    Picker("Filter", selection: Binding(
-                        get: { state.filter },
-                        set: { model.screen.setFilter(filter: $0) }
-                    )) {
-                        ForEach(state.filters, id: \.self) { filter in
-                            Text(filter.label).tag(filter)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
-                } footer: {
-                    if let subtitle = state.subtitle {
-                        Text(subtitle)
-                    }
-                }
+        ListDetailLayout(
+            selection: $selected,
+            path: $path,
+            emptyTitle: "No receipt selected",
+            emptyMessage: "Choose a receipt to view or attach it.",
+            list: { list(twoPane: $0) },
+            detail: { editor($0) }
+        )
+        .overlay(alignment: .bottom) { ToastView(toast: $toast) }
+        .task { await model.observe() }
+        .onReceive(cameraRequest.$pending) { pending in
+            guard pending else { return }
+            cameraRequest.pending = false
+            if twoPane { selected = .scan } else { path = [.scan] }
+        }
+    }
 
-                if let empty = state.empty {
-                    Section {
-                        ContentUnavailableView {
-                            Label(empty.title, systemImage: "doc.text")
-                        } description: {
-                            if let message = empty.message { Text(message) }
-                        } actions: {
-                            if empty.showAdd {
-                                Button("Add receipt") { path.append(.receipt(nil)) }
-                                    .buttonStyle(.borderedProminent)
-                            }
-                        }
-                    }
-                    .listRowBackground(Color.clear)
-                } else {
-                    Section {
-                        ForEach(state.rows, id: \.id) { row in
-                            NavigationLink(value: Editor.receipt(row.id)) {
-                                HStack(spacing: 12) {
-                                    Image(systemName: "doc.text")
-                                        .foregroundStyle(.secondary)
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(row.title).lineLimit(1)
-                                        Text(row.supporting)
-                                            .font(.footnote)
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(1)
-                                    }
-                                    Spacer(minLength: 8)
-                                    if let amount = row.amount {
-                                        Text(amount).lineLimit(1).fixedSize()
-                                    }
-                                }
-                                .contentShape(Rectangle())
-                                .accessibilityElement(children: .combine)
-                            }
-                        }
-                    }
-                }
-            }
-            .listStyle(.insetGrouped)
+    private func list(twoPane: Bool) -> some View {
+        let state = model.state
+        let open: (Editor) -> Void = { editor in if twoPane { selected = editor } else { path.append(editor) } }
+        return NavigationStack(path: $path) {
+            ReceiptTable(state: state,
+                selectFilter: { model.screen.setFilter(filter: $0) },
+                openReceipt: { open(.receipt($0)) })
+            // UITableView adjusts its own navigation/tab-bar insets.
+            .ignoresSafeArea(.container, edges: .vertical)
             .navigationTitle("Receipts")
-            .navigationDestination(for: Editor.self) { editor in
-                switch editor {
-                case .receipt(let id):
-                    ReceiptEditorScreen(receiptId: id) { result in toast = result }
-                case .scan:
-                    ReceiptEditorScreen(receiptId: nil, launchCamera: true) { result in toast = result }
-                }
-            }
+            .navigationBarTitleDisplayMode(.large)
+            .navigationDestination(for: Editor.self) { editor($0) }
             .toolbar {
                 if path.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button { path.append(.receipt(nil)) } label: {
+                        Button { open(.receipt(nil)) } label: {
                             Label("Add", systemImage: "plus")
                         }
                     }
                 }
             }
         }
-        .overlay(alignment: .bottom) { ToastView(toast: $toast) }
-        .task { await model.observe() }
-        .onReceive(cameraRequest.$pending) { pending in
-            guard pending else { return }
-            cameraRequest.pending = false
-            path = [.scan]
+        .onAppear { self.twoPane = twoPane }
+        .onChange(of: twoPane) { _, value in self.twoPane = value }
+    }
+
+    @ViewBuilder
+    private func editor(_ editor: Editor) -> some View {
+        switch editor {
+        case .receipt(let id):
+            ReceiptEditorScreen(receiptId: id) { result in done(result) }
+        case .scan:
+            ReceiptEditorScreen(receiptId: nil, launchCamera: true) { result in done(result) }
         }
+    }
+
+    private func done(_ result: Toast) {
+        toast = result
+        selected = nil
     }
 }

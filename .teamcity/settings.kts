@@ -2,6 +2,7 @@ import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
+import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 
 version = "2024.12"
 
@@ -19,6 +20,8 @@ project {
     buildType(FullRelease)
     buildType(SingleTargetRelease)
     buildType(IosBuild)
+    buildType(IosTestFlight)
+    buildType(IosSubmitReview)
     buildType(DesktopLinux)
     buildType(DesktopMacOS)
     buildType(DesktopWindows)
@@ -37,11 +40,12 @@ project {
     params {
         password("env.GITHUB_TOKEN", "credentialsJSON:github-token", display = ParameterDisplay.HIDDEN)
         password("env.PLAY_SERVICE_ACCOUNT_JSON", "credentialsJSON:play-service-account", display = ParameterDisplay.HIDDEN)
-        password("env.ASC_API_KEY", "credentialsJSON:asc-api-key", display = ParameterDisplay.HIDDEN)
         param("env.CLOUDFLARE_PAGES_PROJECT", "shilling-app")
         param("env.CLOUDFLARE_PAGES_DOMAIN", "app.shilling.finance")
         param("env.AMPER_SHARED_CACHES_ROOT", "/opt/shilling-ci/amper-cache")
         param("env.AMPER_BOOTSTRAP_CACHE_DIR", "/opt/shilling-ci/amper-bootstrap")
+        // Build jobs use the same maintained JDK as their agent process.
+        param("env.JAVA_HOME", "%teamcity.agent.jvm.java.home%")
         param("env.CI_RETRY_ATTEMPTS", "5")
         param("env.CI_RETRY_DELAY_SECONDS", "120")
     }
@@ -66,7 +70,19 @@ object CI : BuildType({
         }
         script {
             name = "Install npm dependencies"
-            scriptContent = "npm install"
+            scriptContent = "npm ci"
+        }
+        script {
+            name = "Node security regression checks"
+            scriptContent = "npm run test:security"
+        }
+        script {
+            name = "GLib safety regression checks"
+            scriptContent = "bash scripts/ci/test-glib-security.sh"
+        }
+        script {
+            name = "npm security advisories"
+            scriptContent = "npm audit --audit-level=low && npm audit --prefix scripts/ci/smoke --audit-level=low"
         }
         script {
             name = "Architecture guard"
@@ -159,6 +175,7 @@ object IosBuild : BuildType({
     artifactRules = "mobile-artifacts/ios/** => ios.zip"
     params {
         param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
+        param("env.TEAMCITY_BUILD_ID", "%teamcity.build.id%")
     }
 
     vcs {
@@ -181,6 +198,97 @@ object IosBuild : BuildType({
     requirements {
         contains("teamcity.agent.jvm.os.name", "Mac")
     }
+})
+
+// Every beta track gets its own last-successful publication baseline. Future
+// Android/desktop tracks can wrap their publisher with this same helper.
+object BetaPublication {
+    fun configure(build: BuildType, target: String, channel: String, command: String) = with(build) {
+        maxRunningBuilds = 1
+        artifactRules += "\nbeta-output/beta-state.json => .\nbeta-output/beta-decision.json => ."
+        params {
+            param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
+            param("env.BETA_TEAMCITY_URL", "%teamcity.serverUrl%")
+            param("env.BETA_TEAMCITY_BUILD_TYPE", "%system.teamcity.buildType.id%")
+            param("env.BETA_TEAMCITY_USER", "%system.teamcity.auth.userId%")
+            password("env.BETA_TEAMCITY_PASSWORD", "%system.teamcity.auth.password%", display = ParameterDisplay.HIDDEN)
+            checkbox("env.SHILLING_BETA_FORCE", "0", label = "Publish even if target inputs are unchanged",
+                display = ParameterDisplay.PROMPT, checked = "1", unchecked = "0")
+        }
+        steps {
+            script {
+                name = "Publish $target beta when target inputs changed"
+                scriptContent = "python3 scripts/ci/publish_beta.py --target $target --channel $channel -- $command"
+            }
+        }
+    }
+}
+
+// The finish trigger and snapshot dependency keep the upload on the exact
+// successful main chain. No recompilation, and no upload from release preview.
+object IosTestFlight : BuildType({
+    name = "iOS — TestFlight"
+    description = "Upload the tested main IPA only when iOS inputs changed since the last delivered beta"
+    artifactRules = "apple-output/** => testflight.zip"
+    vcs { root(DslContext.settingsRoot) }
+    triggers {
+        finishBuildTrigger {
+            buildType = "${AllTargets.id}"
+            successfulOnly = true
+            branchFilter = "+:<default>\n+:main"
+        }
+    }
+    dependencies {
+        snapshot(AllTargets) {
+            onDependencyFailure = FailureAction.FAIL_TO_START
+            onDependencyCancel = FailureAction.CANCEL
+            reuseBuilds = ReuseBuilds.SUCCESSFUL
+        }
+        artifacts(IosBuild) {
+            buildRule = sameChain()
+            artifactRules = "ios.zip!** => release-input/clients/ios"
+            cleanDestination = true
+        }
+    }
+    steps {
+        script {
+            name = "Clear previous TestFlight receipt"
+            scriptContent = "rm -f apple-output/testflight.json"
+        }
+    }
+    BetaPublication.configure(this, "ios", "testflight", "bash scripts/ci/apple-python.sh scripts/ci/apple_store.py upload")
+    requirements { contains("teamcity.agent.jvm.os.name", "Mac") }
+})
+
+object IosSubmitReview : BuildType({
+    name = "iOS — Submit for Review"
+    description = "Submit the selected tested TestFlight build; hold for manual release after Apple approval"
+    maxRunningBuilds = 1
+    params {
+        param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
+        password("env.ASC_API_PRIVATE_KEY", "%shilling.apple.api.private.key%", display = ParameterDisplay.HIDDEN)
+    }
+    vcs { root(DslContext.settingsRoot) }
+    features { sharedResources { writeLock("shilling-release") } }
+    dependencies {
+        snapshot(AllTargets) {
+            onDependencyFailure = FailureAction.FAIL_TO_START
+            onDependencyCancel = FailureAction.CANCEL
+            reuseBuilds = ReuseBuilds.SUCCESSFUL
+        }
+        artifacts(IosBuild) {
+            buildRule = sameChain()
+            artifactRules = "ios.zip!** => release-input/clients/ios"
+            cleanDestination = true
+        }
+    }
+    steps {
+        script {
+            name = "Submit candidate for App Review (manual release)"
+            scriptContent = "bash scripts/ci/apple-python.sh scripts/ci/apple_store.py submit-review"
+        }
+    }
+    requirements { equals("teamcity.agent.jvm.os.name", "Linux") }
 })
 
 // =============================================================================
@@ -319,7 +427,7 @@ object WebDeploy : BuildType({
         }
         script {
             name = "Prepare SQLDelight plugin"
-            scriptContent = "just ensure-plugin"
+            scriptContent = "bash scripts/ensure-plugin.sh"
         }
         script {
             name = "Build wasmJs artifacts"
@@ -396,16 +504,18 @@ object ServerBuild : BuildType({
 })
 
 // =============================================================================
-// Phase 2f: Two manual release entry points. Main only builds/tests.
+// Phase 2f: Release entry points. Main builds/tests and distributes internal betas.
 // =============================================================================
 
 open class ReleaseBuild(buildId: String, title: String, singleTarget: Boolean) : BuildType({
     id(buildId)
     name = title
-    description = "Publish tested packages/images and deploy the selected hosted web and server"
+    description = "Promote a tested chain; iOS requires Apple approval before any target publishes"
     artifactRules = "release-output/** => release-output.zip"
     maxRunningBuilds = 1
     params {
+        // This non-environment password is exposed only to release/review jobs.
+        password("env.ASC_API_PRIVATE_KEY", "%shilling.apple.api.private.key%", display = ParameterDisplay.HIDDEN)
         param("env.TEAMCITY_BUILD_ID", "%teamcity.build.id%")
         param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
         param("env.SHILLING_RELEASE_MODE", if (singleTarget) "single" else "full")
@@ -454,7 +564,7 @@ open class ReleaseBuild(buildId: String, title: String, singleTarget: Boolean) :
     steps {
         script {
             name = "Release selected targets"
-            scriptContent = "python3 scripts/ci/release.py"
+            scriptContent = "bash scripts/ci/apple-python.sh scripts/ci/release.py"
         }
     }
     requirements { equals("teamcity.agent.jvm.os.name", "Linux") }

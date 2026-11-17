@@ -21,6 +21,7 @@ class FinanceSpaceIsolationTest {
     }, ChangeNotifier(), object : ReceiptFileStore {
         override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {}
         override suspend fun read(receiptId: String): ByteArray? = null
+        override suspend fun openReader(receiptId: String): ReceiptFileReader? = null
         override suspend fun hasFile(receiptId: String) = false
         override suspend fun delete(receiptId: String) {}
         override suspend fun clearAll() {}
@@ -64,13 +65,30 @@ class FinanceSpaceIsolationTest {
         for (id in listOf("../other/receipt", "..", "/absolute", "folder\\file", "bad\u0000id")) assertFailsWith<IllegalArgumentException> { safeReceiptStorageId(id) }
     }
 
+    @Test fun importCandidatesOnlyReadTheirSpaceAccountAndDateWindow() = runBlocking {
+        val db = db()
+        val home = graph(db, "home")
+        val business = graph(db, "business")
+        val start = LocalDate(2026, 10, 1)
+        val end = LocalDate(2026, 10, 2)
+        for (g in listOf(home, business)) {
+            g.accounts.upsert(Account("checking", "Checking", 0.0))
+            g.accounts.upsert(Account("savings", "Savings", 0.0))
+            g.postings.record(Posting("same", null, ScheduleType.EXPENSE, "checking", start, 12.34, title = g.id))
+            g.postings.record(Posting("other", null, ScheduleType.EXPENSE, "savings", start, 90.0, title = "Other account"))
+            g.postings.record(Posting("later", null, ScheduleType.EXPENSE, "checking", end, 50.0, title = "Outside window"))
+        }
+        assertEquals(listOf(ImportCandidate(start.toEpochDays(), 12.34, "home")), home.postings.getImportCandidates("checking", start, end))
+        assertEquals(listOf(ImportCandidate(start.toEpochDays(), 12.34, "business")), business.postings.getImportCandidates("checking", start, end))
+    }
+
     @Test fun retiredEditorCannotWriteToEitherSpace() = runBlocking {
         val db = db()
         val old = graph(db, "old")
         val next = graph(db, "new")
         old.accounts.upsert(Account("account", "Saved", 1.0))
         old.scope.retire()
-        runCatching { old.accounts.upsert(Account("account", "Stale editor", 2.0)) }
+        assertFails { old.accounts.upsert(Account("account", "Stale editor", 2.0)) }
         assertEquals("Saved", old.accounts.getAll()["account"]?.name)
         assertTrue(next.accounts.getAll().isEmpty())
     }

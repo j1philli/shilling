@@ -18,13 +18,15 @@ class WebRtcConnectionManager(
     private val deviceId: String,
     private val peerConnectionStatus: PeerConnectionStatus,
     private val allowRelay: () -> Boolean = { false },
+    private val receiveMessageFn: suspend (WebRtcDataChannel) -> WebRtc.DataChannel.Message = { it.receive() },
+    private val onChannelOpen: (WebRtcDataChannel) -> Unit = {},
     private val delayFn: suspend (Long) -> Unit = { kotlinx.coroutines.delay(it) }
 ) : PeerSyncManager {
     private fun allowedRemoteSdp(sdp: String): String = if (allowRelay()) sdp else withoutRelayCandidates(sdp)
     private val _incomingChanges = MutableSharedFlow<ChangeMessage>(extraBufferCapacity = 256)
     override val incomingChanges: SharedFlow<ChangeMessage> = _incomingChanges
 
-    private val _incomingFileMessages = MutableSharedFlow<Pair<String, FileTransferMessage>>(extraBufferCapacity = 2048)
+    private val _incomingFileMessages = MutableSharedFlow<Pair<String, FileTransferMessage>>(extraBufferCapacity = 32)
     override val incomingFileMessages: SharedFlow<Pair<String, FileTransferMessage>> = _incomingFileMessages
 
     private val _peerConnected = MutableSharedFlow<String>(extraBufferCapacity = 16)
@@ -137,12 +139,14 @@ class WebRtcConnectionManager(
 
     override suspend fun broadcast(change: ChangeMessage) {
         val text = json.encodeToString(change)
-        val channelStates = peers.keys.map { pid ->
-            val ch = dataChannels[pid]
-            "$pid=${ch?.state ?: "NO_CHANNEL"}"
+        log.d {
+            val channelStates = peers.keys.map { pid ->
+                val ch = dataChannels[pid]
+                "$pid=${ch?.state ?: "NO_CHANNEL"}"
+            }
+            val outboundCount = peers.keys.count { outboundChannel(it) != null }
+            "[RTC] broadcast ${change.entityType}/${change.op} id=${change.entityId} — peers=${peers.size} open=$outboundCount channels=[$channelStates]"
         }
-        val outboundCount = peers.keys.count { outboundChannel(it) != null }
-        log.i { "[RTC] broadcast ${change.entityType}/${change.op} id=${change.entityId} — peers=${peers.size} open=$outboundCount channels=[$channelStates]" }
 
         var p2pSuccess = false
         val deadPeers = mutableListOf<String>()
@@ -151,7 +155,7 @@ class WebRtcConnectionManager(
             try {
                 channel.send(text)
                 p2pSuccess = true
-                log.i { "[RTC] >>> Sent ${change.entityType}/${change.op} to $peerId (${text.length} chars)" }
+                log.d { "[RTC] >>> Sent ${change.entityType}/${change.op} to $peerId (${text.length} chars)" }
             } catch (e: Throwable) {
                 log.w { "[RTC] Send failed to $peerId: ${e::class.simpleName}: ${e.message}" }
                 deadPeers.add(peerId)
@@ -164,7 +168,7 @@ class WebRtcConnectionManager(
             if (!alreadyQueued) {
                 pendingChanges.add(change)
             }
-            log.w { "[RTC] No P2P channels available — queued ${change.entityType}/${change.op} (pending=${pendingChanges.size})" }
+            log.d { "[RTC] No P2P channels available — queued ${change.entityType}/${change.op} (pending=${pendingChanges.size})" }
         }
     }
 
@@ -185,22 +189,58 @@ class WebRtcConnectionManager(
         }
     }
 
+    override suspend fun sendFileMessages(peerId: String, messages: Flow<FileTransferMessage>): Int {
+        var sent = 0
+        // Prepare lazy receipt chunks and encode their wire frames off the UI dispatcher.
+        // Four queued chunks bound read-ahead while encoding overlaps native sends.
+        encodeFileMessages(messages, json).collect { (message, encoded) ->
+            sendEncodedFileMessage(peerId, message, encoded)
+            sent++
+            if (sent % 5 == 0) yield()
+        }
+        return sent
+    }
+
     override suspend fun sendFileMessage(peerId: String, message: FileTransferMessage) {
-        val channel = outboundChannel(peerId)
+        sendEncodedFileMessage(peerId, message, encodeFileMessage(message, json))
+    }
+
+    private suspend fun sendEncodedFileMessage(peerId: String, message: FileTransferMessage, encoded: EncodedFileMessage) {
+        val isTransferData = message is FileTransferMessage.FileHeader ||
+            message is FileTransferMessage.FileChunk || message is FileTransferMessage.FileComplete
+        // The send operation checks channel state and throws on failure. Transfer
+        // data must fail for retry, so avoid a second native state query per chunk.
+        val channel = if (isTransferData) dataChannels[peerId] else outboundChannel(peerId)
         if (channel == null) {
-            queueDirectFileMessage(peerId, message, "no outbound channel (ch=${dataChannels[peerId]?.state})")
+            // Receiver retries the file request after reconnect. Never retain a whole
+            // encoded receipt in the disconnected-peer queue.
+            check(!isTransferData) { "Receipt channel closed for $peerId" }
+            queueDirectFileMessage(peerId, message, "no outbound channel")
             return
         }
         try {
-            channel.send(json.encodeToString(message))
+            val started = kotlin.time.TimeSource.Monotonic.markNow()
+            while (isTransferData && channel.bufferedAmount > 256 * 1024) {
+                currentCoroutineContext().ensureActive()
+                check(channel.state == WebRtc.DataChannel.State.OPEN) { "Receipt channel closed" }
+                check(started.elapsedNow().inWholeMilliseconds < 30_000) { "Receipt channel stalled" }
+                delayFn(10)
+            }
+            when (encoded) {
+                is EncodedFileMessage.Text -> channel.send(encoded.value)
+                is EncodedFileMessage.Binary -> channel.send(encoded.value)
+            }
             log.d { "[RTC] >>> ${describeFileMessage(message)} to $peerId" }
         } catch (e: Throwable) {
-            if (e is CancellationException) throw e
+            if (e is CancellationException || isTransferData) throw e
             queueDirectFileMessage(peerId, message, "send failed: ${e::class.simpleName}: ${e.message}")
         }
     }
 
     override suspend fun broadcastFileMessage(message: FileTransferMessage) {
+        require(message !is FileTransferMessage.FileChunk) {
+            "Receipt chunks must be sent only to the requesting peer"
+        }
         val desc = describeFileMessage(message)
         val hasAnyOutbound = peers.keys.any { outboundChannel(it) != null }
         if (!hasAnyOutbound) {
@@ -276,7 +316,7 @@ class WebRtcConnectionManager(
                 try {
                     channel.send(text)
                     delivered = true
-                    log.i { "[RTC] Drained ${change.entityType}/${change.op} to $peerId" }
+                    log.d { "[RTC] Drained ${change.entityType}/${change.op} to $peerId" }
                 } catch (e: Throwable) {
                     log.w { "[RTC] Drain send failed for $peerId: ${e::class.simpleName}" }
                 }
@@ -633,6 +673,7 @@ class WebRtcConnectionManager(
                         } else if (ch.label == "data") {
                             log.d { "[RTC] DataChannelEvent.Open for existing channel $peerId (offerer path)" }
                         }
+                        if (ch.label == "data") onChannelOpen(ch)
                         markPeerReady(peerId)
                     }
                     is DataChannelEvent.Closed -> {
@@ -726,7 +767,7 @@ class WebRtcConnectionManager(
             var messageCount = 0
             try {
                 while (isActive) {
-                    val text = channel.receiveText()
+                    val packet = receiveMessageFn(channel)
                     messageCount++
                     if (!openDrainDone) {
                         openDrainDone = true
@@ -741,6 +782,16 @@ class WebRtcConnectionManager(
                         drainPendingDirectFileMessages(peerId)
                         drainPendingFileMessages()
                     }
+                    if (packet is WebRtc.DataChannel.Message.Binary) {
+                        try {
+                            _incomingFileMessages.emit(peerId to BinaryFileChunkCodec.decode(packet.data))
+                        } catch (e: Exception) {
+                            if (e is CancellationException) throw e
+                            log.w { "[RTC] Invalid receipt frame from $peerId: ${e::class.simpleName}" }
+                        }
+                        continue
+                    }
+                    val text = packet.textOrThrow()
                     log.d { "[RTC] <<< Message #$messageCount from $peerId (${text.length} chars): ${text.take(120)}" }
                     try {
                         val change = json.decodeFromString<ChangeMessage>(text)

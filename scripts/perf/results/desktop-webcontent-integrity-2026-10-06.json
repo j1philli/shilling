@@ -1,0 +1,102 @@
+{
+  "regions-1": {
+    "integrity": "ok",
+    "postings": 20000,
+    "importedRows": 10000,
+    "importedUniqueIds": 10000,
+    "importedVersionRecords": 10000,
+    "snapshotBytes": 17338368,
+    "financialColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "financialValuesSha256": "3236e5e70f0494d3ad1a8dc30d04f83cc1b2a326d64e7212e4f6789c2bb5f424",
+    "importedRowsWithExpectedValues": 10000
+  },
+  "bootstrap-1": {
+    "integrity": "ok",
+    "postings": 10000,
+    "importedRows": 0,
+    "importedUniqueIds": 0,
+    "importedVersionRecords": 0,
+    "snapshotBytes": 9396224,
+    "financialColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "financialValuesSha256": "0a4445a44a9bb7995335b576caca8bac7575953fe7add8f95daf3f232d839007",
+    "importedRowsWithExpectedValues": 0
+  },
+  "bootstrap-2": {
+    "integrity": "ok",
+    "postings": 10000,
+    "importedRows": 0,
+    "importedUniqueIds": 0,
+    "importedVersionRecords": 0,
+    "snapshotBytes": 9314304,
+    "financialColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "financialValuesSha256": "0a4445a44a9bb7995335b576caca8bac7575953fe7add8f95daf3f232d839007",
+    "importedRowsWithExpectedValues": 0
+  },
+  "bootstrap-3": {
+    "integrity": "ok",
+    "postings": 10000,
+    "importedRows": 0,
+    "importedUniqueIds": 0,
+    "importedVersionRecords": 0,
+    "snapshotBytes": 9314304,
+    "financialColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "financialValuesSha256": "0a4445a44a9bb7995335b576caca8bac7575953fe7add8f95daf3f232d839007",
+    "importedRowsWithExpectedValues": 0
+  },
+  "bootstrap-type-1": {
+    "integrity": "ok",
+    "postings": 10000,
+    "importedRows": 0,
+    "importedUniqueIds": 0,
+    "importedVersionRecords": 0,
+    "snapshotBytes": 9314304,
+    "financialColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "financialValuesSha256": "0a4445a44a9bb7995335b576caca8bac7575953fe7add8f95daf3f232d839007",
+    "importedRowsWithExpectedValues": 0
+  }
+}

@@ -49,6 +49,18 @@ fun Postings.toDomain() = Posting(
     categoryId = category_id
 )
 
+/** Mapper shared by the bounded activity and single-posting joins. */
+internal fun postingWithDetails(
+    id: String, scheduleId: String?, type: String, accountId: String, date: Long,
+    amount: Double, pairId: String?, title: String?, categoryId: String?,
+    scheduleTitle: String?, accountName: String?, categoryName: String?, categoryColor: String?
+): PostingWithDetails = PostingWithDetails(
+    posting = Posting(id, scheduleId, ScheduleType.valueOf(type), accountId, LocalDate.fromEpochDays(date),
+        amount, pairId, title, categoryId),
+    title = title ?: scheduleTitle ?: "Transaction",
+    accountName = accountName, categoryName = categoryName, categoryColor = categoryColor
+)
+
 fun Receipts.toDomain() = Receipt(
     id = id,
     postingId = posting_id,

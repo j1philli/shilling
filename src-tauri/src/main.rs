@@ -3,7 +3,6 @@
 use tauri::menu::{MenuBuilder, PredefinedMenuItem, SubmenuBuilder};
 #[cfg(target_os = "macos")]
 use tauri::Manager;
-use tauri_plugin_log::{Target, TargetKind};
 
 /// Gives the window an empty unified toolbar so macOS lays out the traffic lights and
 /// window corners the way it does for native toolbar apps, instead of us positioning them.
@@ -33,7 +32,11 @@ fn main() {
         .plugin(tauri_plugin_shell::init())
         .plugin(
             tauri_plugin_log::Builder::new()
-                .target(Target::new(TargetKind::Stdout))
+                .level(if cfg!(debug_assertions) {
+                    log::LevelFilter::Debug
+                } else {
+                    log::LevelFilter::Info
+                })
                 .build(),
         )
         .setup(|app| {
