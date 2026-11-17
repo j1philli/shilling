@@ -1,0 +1,569 @@
+{
+  "date": "2026-09-29",
+  "publicMain": "2abf1db",
+  "runtime": "macOS arm64, Kotlin 2.4.20, OpenJDK 25.0.4.1",
+  "workload": "Synthetic ad-hoc transfer projection only; no database or UI frame timing",
+  "method": "5 warmups per variant and size, 15 alternating measured rounds; identical output checked; JIT compilation is included in early cohorts",
+  "summary": [
+    {
+      "postings": 1000,
+      "samplesPerVariant": 15,
+      "originalMedianMs": 0.633625,
+      "indexedMedianMs": 0.609292
+    },
+    {
+      "postings": 10000,
+      "samplesPerVariant": 15,
+      "originalMedianMs": 77.866875,
+      "indexedMedianMs": 0.771125
+    },
+    {
+      "postings": 20000,
+      "samplesPerVariant": 15,
+      "originalMedianMs": 266.065375,
+      "indexedMedianMs": 1.516167
+    }
+  ],
+  "samples": [
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 0,
+      "elapsedMs": 2.896875
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 0,
+      "elapsedMs": 0.740917
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 1,
+      "elapsedMs": 0.560375
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 1,
+      "elapsedMs": 2.762833
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 2,
+      "elapsedMs": 2.749334
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 2,
+      "elapsedMs": 0.609292
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 3,
+      "elapsedMs": 0.569542
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 3,
+      "elapsedMs": 2.710333
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 4,
+      "elapsedMs": 2.770875
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 4,
+      "elapsedMs": 0.644584
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 5,
+      "elapsedMs": 0.64925
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 5,
+      "elapsedMs": 2.956542
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 6,
+      "elapsedMs": 2.767667
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 6,
+      "elapsedMs": 0.627458
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 7,
+      "elapsedMs": 0.672917
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 7,
+      "elapsedMs": 0.633625
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 8,
+      "elapsedMs": 0.607375
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 8,
+      "elapsedMs": 0.66825
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 9,
+      "elapsedMs": 0.547833
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 9,
+      "elapsedMs": 0.494833
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 10,
+      "elapsedMs": 0.4995
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 10,
+      "elapsedMs": 0.52475
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 11,
+      "elapsedMs": 0.666709
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 11,
+      "elapsedMs": 0.596791
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 12,
+      "elapsedMs": 0.594625
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 12,
+      "elapsedMs": 0.297459
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 13,
+      "elapsedMs": 0.18875
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 13,
+      "elapsedMs": 0.57925
+    },
+    {
+      "postings": 1000,
+      "variant": "original",
+      "round": 14,
+      "elapsedMs": 0.574166
+    },
+    {
+      "postings": 1000,
+      "variant": "indexed",
+      "round": 14,
+      "elapsedMs": 0.212084
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 0,
+      "elapsedMs": 62.325375
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 0,
+      "elapsedMs": 0.6885
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 1,
+      "elapsedMs": 0.682584
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 1,
+      "elapsedMs": 62.383417
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 2,
+      "elapsedMs": 62.831667
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 2,
+      "elapsedMs": 0.775833
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 3,
+      "elapsedMs": 0.704916
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 3,
+      "elapsedMs": 61.23675
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 4,
+      "elapsedMs": 61.963125
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 4,
+      "elapsedMs": 0.785458
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 5,
+      "elapsedMs": 0.741875
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 5,
+      "elapsedMs": 62.747958
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 6,
+      "elapsedMs": 62.5825
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 6,
+      "elapsedMs": 0.771125
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 7,
+      "elapsedMs": 2.331375
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 7,
+      "elapsedMs": 78.725625
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 8,
+      "elapsedMs": 82.563334
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 8,
+      "elapsedMs": 0.894833
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 9,
+      "elapsedMs": 0.694209
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 9,
+      "elapsedMs": 77.866875
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 10,
+      "elapsedMs": 78.521125
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 10,
+      "elapsedMs": 0.759917
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 11,
+      "elapsedMs": 0.804333
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 11,
+      "elapsedMs": 79.010125
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 12,
+      "elapsedMs": 78.860667
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 12,
+      "elapsedMs": 0.836292
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 13,
+      "elapsedMs": 0.626208
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 13,
+      "elapsedMs": 78.623166
+    },
+    {
+      "postings": 10000,
+      "variant": "original",
+      "round": 14,
+      "elapsedMs": 78.340708
+    },
+    {
+      "postings": 10000,
+      "variant": "indexed",
+      "round": 14,
+      "elapsedMs": 0.806125
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 0,
+      "elapsedMs": 231.929083
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 0,
+      "elapsedMs": 1.478459
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 1,
+      "elapsedMs": 1.301917
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 1,
+      "elapsedMs": 253.124375
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 2,
+      "elapsedMs": 267.439916
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 2,
+      "elapsedMs": 1.686083
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 3,
+      "elapsedMs": 1.531541
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 3,
+      "elapsedMs": 266.065375
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 4,
+      "elapsedMs": 248.569417
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 4,
+      "elapsedMs": 1.337708
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 5,
+      "elapsedMs": 1.243209
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 5,
+      "elapsedMs": 262.499875
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 6,
+      "elapsedMs": 270.812291
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 6,
+      "elapsedMs": 1.6485
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 7,
+      "elapsedMs": 1.486458
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 7,
+      "elapsedMs": 267.549209
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 8,
+      "elapsedMs": 264.136458
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 8,
+      "elapsedMs": 1.508291
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 9,
+      "elapsedMs": 1.517083
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 9,
+      "elapsedMs": 272.171541
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 10,
+      "elapsedMs": 267.68975
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 10,
+      "elapsedMs": 1.623167
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 11,
+      "elapsedMs": 1.516167
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 11,
+      "elapsedMs": 258.102542
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 12,
+      "elapsedMs": 233.366125
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 12,
+      "elapsedMs": 1.633375
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 13,
+      "elapsedMs": 1.492208
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 13,
+      "elapsedMs": 272.612959
+    },
+    {
+      "postings": 20000,
+      "variant": "original",
+      "round": 14,
+      "elapsedMs": 266.595083
+    },
+    {
+      "postings": 20000,
+      "variant": "indexed",
+      "round": 14,
+      "elapsedMs": 1.691167
+    }
+  ]
+}

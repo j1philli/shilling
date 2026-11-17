@@ -63,14 +63,14 @@ class CloudSyncTest {
                         }
                     }
                     pull(b)
-                    assertEquals(setOf("shared", "only-b"), b.db.accountQueries.selectAll().awaitAsList().map { it.id }.toSet())
+                    assertEquals(setOf("shared", "only-b"), b.db.accountQueries.selectAll("__local__").awaitAsList().map { it.id }.toSet())
                     val bUpload = b.cloud.prepare("cloud", "house", "b", policy, key)!!
                     send(bUpload); b.cloud.uploaded("cloud", bUpload.id); pull(a)
-                    assertEquals(2, a.db.accountQueries.selectAll().awaitAsList().size)
+                    assertEquals(2, a.db.accountQueries.selectAll("__local__").awaitAsList().size)
                     a.accounts.delete("shared")
                     val deletion = a.cloud.prepare("cloud", "house", "a", policy, key)!!
                     send(deletion); a.cloud.uploaded("cloud", deletion.id); pull(b)
-                    assertEquals(listOf("only-b"), b.db.accountQueries.selectAll().awaitAsList().map { it.id })
+                    assertEquals(listOf("only-b"), b.db.accountQueries.selectAll("__local__").awaitAsList().map { it.id })
                     repeat(4) { version ->
                         a.accounts.upsert(Account("extra", "Version $version", version.toDouble()))
                         val next = a.cloud.prepare("cloud", "house", "a", policy, key)!!
@@ -93,7 +93,7 @@ class CloudSyncTest {
             val bytes = Json.encodeToString(CloudDelta(household = "house", changes = listOf(change), files = emptyList())).encodeToByteArray()
             assertFails { b.cloud.apply("cloud", "house", "b", 1, bytes) { byteArrayOf(1, 2, 3) } }
             assertEquals(0L, b.cloud.cursor("cloud"))
-            assertTrue(b.db.accountQueries.selectAll().awaitAsList().isEmpty())
+            assertTrue(b.db.accountQueries.selectAll("__local__").awaitAsList().isEmpty())
         } finally { b.close() }
     }
 
@@ -113,7 +113,7 @@ class CloudSyncTest {
             assertFails { b.cloud.apply("cloud", "house", "b", 2, bytes) }
             assertEquals(0L, b.cloud.cursor("cloud"))
             b.cloud.apply("cloud", "house", "b", 1, bytes) { byteArrayOf(1, 2, 3) }
-            assertEquals("Keep my newer edit", b.db.accountQueries.selectAll().awaitAsList().single().name)
+            assertEquals("Keep my newer edit", b.db.accountQueries.selectAll("__local__").awaitAsList().single().name)
             assertContentEquals(byteArrayOf(1, 2, 3), b.files.read(receipt.id))
             assertEquals(1L, b.cloud.cursor("cloud"))
         } finally { b.close() }
@@ -155,9 +155,9 @@ class CloudSyncTest {
             val bytes = Json.encodeToString(CloudDelta(household = "house", changes = listOf(change), files = emptyList())).encodeToByteArray()
             assertFails { repository.apply("cloud", "house", "b", 1, bytes) }
             assertEquals(0L, repository.cursor("cloud"))
-            assertTrue(b.db.accountQueries.selectAll().awaitAsList().isEmpty())
+            assertTrue(b.db.accountQueries.selectAll("__local__").awaitAsList().isEmpty())
             b.cloud.apply("cloud", "house", "b", 1, bytes) { byteArrayOf(1, 2, 3) }
-            assertEquals("Retry me", b.db.accountQueries.selectAll().awaitAsList().single().name)
+            assertEquals("Retry me", b.db.accountQueries.selectAll("__local__").awaitAsList().single().name)
             assertEquals(1L, b.cloud.cursor("cloud"))
         } finally { b.close() }
     }
@@ -173,7 +173,15 @@ class CloudSyncTest {
             val values = mutableMapOf<String, ByteArray>()
             override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) { values[receiptId] = bytes.copyOf() }
             override suspend fun read(receiptId: String) = values[receiptId]
-            override suspend fun hasFile(receiptId: String) = receiptId in values
+            override suspend fun openReader(receiptId: String): finance.shilling.shared.data.ReceiptFileReader? {
+            val bytes = read(receiptId)?.copyOf() ?: return null
+            return object : finance.shilling.shared.data.ReceiptFileReader {
+                override val size = bytes.size.toLong()
+                override suspend fun readRange(offset: Long, byteCount: Int) =
+                    finance.shilling.shared.data.ReceiptFileBlock(bytes.copyOfRange(offset.toInt(), minOf(bytes.size, offset.toInt() + byteCount)))
+            }
+        }
+        override suspend fun hasFile(receiptId: String) = receiptId in values
             override suspend fun delete(receiptId: String) { values.remove(receiptId) }
             override suspend fun clearAll() { values.clear() }
             override suspend fun openExternally(receiptId: String, originalName: String) = Unit

@@ -67,7 +67,7 @@ class BackupController(
             while (isActive) {
                 try {
                     refresh()
-                    val response = api.fetchIceServers()
+                    val response = api.fetchIceServers(allowRelay = true)
                     ice = response.webRtcServers()
                     if (currentPolicy.value?.enabled == true) require(response.iceServers.any { cfg ->
                         cfg.credential != null && cfg.urls.any { it.startsWith("turn:") || it.startsWith("turns:") }
@@ -95,7 +95,7 @@ class BackupController(
     }
     private suspend fun connectedCloudPeer(): BackupPeerClient {
         cloudPeer?.let { it.transport.reconnectIfIdle(); return it }
-        val config = api.fetchIceServers()
+        val config = api.fetchIceServers(allowRelay = true)
         require(config.iceServers.any { it.credential != null && it.urls.any { url -> url.startsWith("turn:") || url.startsWith("turns:") } }) { "TURN is unavailable. Cloud sync will retry." }
         ice = config.webRtcServers()
         val rtc = createRtc { ice }; cloudRtc = rtc
@@ -153,6 +153,8 @@ class BackupController(
             finally { busyState.value = false }
         }
     }
+    fun cancel() { scope.cancel() }
+
     suspend fun close() {
         scope.coroutineContext[Job]?.cancelAndJoin()
         withContext(NonCancellable) { closeCloudPeer(); keyTransport?.close(); keyRtc?.close() }

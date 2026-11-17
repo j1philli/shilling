@@ -16,79 +16,287 @@ targets stay at `0.1.0`. Previews use tags such as `v0.1.1-beta.1`; stable
 releases use `v0.1.1`. There is no fourth public version component.
 
 Android `versionCode` and iOS `CFBundleVersion` are separate, increasing store
-build numbers. Increase only the relevant build number for a store upload,
-including a rebuild at the same product version.
+build numbers. TeamCity sets the iOS build number to its globally increasing
+build ID in both the app and widget, without changing the checked-in defaults.
+Every main build can therefore upload at the same product version. Increase
+Android versionCode for each Play upload.
 
-Run `just set-version 0.1.1` to update all product manifests. Add `--android`
-for a Play upload and `--ios` for an App Store Connect upload. For example,
-`just set-version 0.1.1 --android --ios` prepares a full mobile release;
-`just set-version 0.1.2 --android` prepares an Android-only patch. The command
-checks the manifests before and after the update. `just check-version` runs in
+Run `mise run set-version 0.1.1` to update all product manifests. Add `--android`
+for a Play upload. `--ios` advances only the local Xcode default; CI assigns its own build number. For example,
+`mise run set-version 0.1.2 --android` prepares a full mobile release;
+`mise run set-version 0.1.2 --android` prepares an Android-only patch. The command
+checks the manifests before and after the update. `mise run check-version` runs in
 TeamCity CI and before self-hosted image publishing. The tag must match the
 version at that commit.
 
-## What TeamCity does
+## Everyday builds
 
 | Event | Result |
 | --- | --- |
-| Push to any branch | `Build Linux-agent targets` runs CI, web, server, Android, Linux desktop, and Windows desktop at the same revision. Package files become TeamCity artifacts. |
-| Merge to `main` | The branch chain also deploys the hosted web app to Cloudflare Pages after CI passes. Coolify tracks the hosted server's source separately. |
-| Push a `vX.Y.Z` or preview tag | Nothing publishes automatically. Queue a build matrix on the tag, review the artifacts, and explicitly publish the selected targets. |
+| Push to a feature branch | CI, runtime checks, Android, Linux desktop and Windows desktop build on Linux. |
+| Merge to `main` | All targets build and tests run. After the complete matrix passes, **iOS — TestFlight** uploads the exact signed IPA only if iOS inputs changed since the last delivered beta. No production deployment or GitHub release. |
+| Create a release tag | Identifies the tested release commit. No additional automatic build or deployment. |
 
-The single Linux runner works through the branch matrix in a queue. The
-`Build all targets` composite also includes iOS and macOS desktop and can be
-queued on any branch or tag after the Mac agent is connected. Snapshot
-dependencies pin the jobs in a chain to one source revision. Failed jobs fail
-the composite. The macOS desktop job consumes the same tested web bundle as
-the Linux and Windows desktop jobs.
+Packages remain in TeamCity; changed iOS main builds also become internal TestFlight betas. The two release jobs
+reuse successful builds at the same revision, or build missing dependencies.
+Both require the full matrix to pass, even for a single-target release.
 
-Android produces a debug APK and an unsigned release AAB. iOS produces an
-unsigned app ZIP by default; setting `env.SHILLING_IOS_SIGNED=1` with Apple
-signing credentials installed exports an IPA. Linux desktop produces x86_64
-AppImage, Debian, and RPM packages. Windows desktop cross-builds an x86_64
-NSIS installer on Linux; MSI needs a Windows runner. macOS desktop produces
-an unsigned universal DMG for Apple Silicon and Intel. These packages stay in
-TeamCity until explicitly published.
-The workflows do not yet sign or upload to Play, TestFlight, or desktop stores.
+### Target-aware beta publication
 
-The manual `Self-hosted Release` job consumes the tested server JAR and web
-bundle from the same tag. It pushes images to GHCR and creates a GitHub
-release. Set `env.SHILLING_RELEASE_TARGETS` on that run to `server,web`
-(default), `server`, or `web`. A two-image release includes Compose files. A
-one-image release omits Compose files because the other image remains on its
-previous version. `env.SHILLING_RELEASE_DRY_RUN=1` builds the selected images
-without publishing. The job needs a Linux agent with Docker Buildx and `gh`,
-TeamCity `env.GITHUB_TOKEN` for the GitHub release, and a separate
-`env.GHCR_TOKEN` classic PAT with `write:packages` for the image push. The VCS
-root must watch tags as well as branches. Existing GitHub releases are not
-overwritten.
+The publication gate compares committed build inputs with the last successfully
+delivered beta for that target and channel, rather than comparing only the latest
+two commits. Failed uploads leave those changes pending. A skipped job carries
+forward the previous delivered fingerprint, so repeated docs-only merges stay
+skipped. Git paths, object IDs and file modes detect edits, additions, deletions,
+renames and dependency/submodule updates. Generated build numbers, signing
+timestamps and the Git commit ID itself do not force another upload.
 
-## Full release
+`scripts/ci/target-inputs.json` is the shared dependency map for `ios`, `android`,
+`web`, `linux`, `windows`, `macos` and `server`. First matching rule wins; names
+in `targets` expand through `groups`. Unrecognized paths affect every target.
 
-1. Run `just set-version X.Y.Z --android --ios`, review the manifest changes,
-   and merge them to `main`. Wait for its branch matrix to pass.
-2. Tag that tested `main` commit `vX.Y.Z` (or `vX.Y.Z-beta.1`) and push the tag.
-3. Queue `Build all targets` on the tag and inspect the artifacts. Until the
-   Mac agent is connected, queue `Build Linux-agent targets` and treat the
-   release as partial.
-4. Complete signing and store upload checks. Queue `Self-hosted Release` on
-   the same tag with `env.SHILLING_RELEASE_TARGETS=server,web` to publish both
-   images and the Compose files. Attach only ready client packages to the
-   GitHub release and list exactly which targets were shipped.
+| Changes | Beta targets affected |
+| --- | --- |
+| Native iOS app, widget or iOS platform module | iOS |
+| Android app or shared Android-specific sources | Android |
+| Shared data/domain code | All clients (core models also affect server) |
+| Compose UI | Android, web and desktop; native iOS does not depend on it |
+| Web app or shared Wasm sources | Web and all desktop apps |
+| Tauri shell | All desktop apps |
+| Server or Supabase code | Server |
+| Docs, tests or performance harnesses | None |
+| Shared version, dependency catalog, toolchain or TeamCity configuration | All targets, conservatively |
 
-## One-target patch
+Update this map when module dependencies or source-set aliases change. This is
+a conservative source-input check, not proof that compiled binaries are identical.
+Agent/toolchain installations and CI parameter changes outside Git require the
+**Publish even if target inputs are unchanged** checkbox on a custom beta run.
+That checkbox can also upload a specific tested chain needed for App Review.
 
-Increase the shared patch number, passing only the store build-number flag
-for an affected mobile target. Merge, wait for the `main` matrix, and tag the
-tested commit. Queue the affected target job on that tag. For a server-only or
-web-only self-hosted image, run `Self-hosted Release` with the corresponding
-`env.SHILLING_RELEASE_TARGETS` value. For a client-only patch, publish the
-signed client package through its store or attach the installer to a GitHub
-release. Record the target shipped for that tag.
+Every beta job publishes `beta-decision.json` (publish/skip, reason, changed
+paths, previous delivered commit) and `beta-state.json` (the delivered input
+fingerprint). It reads the latter from its own latest successful main job using
+TeamCity's temporary build credentials. Authentication/API failures fail the job;
+a first run, legacy run without state, or cleaned-up state artifact publishes
+once to establish a new baseline. Keep these small artifacts under the project's
+artifact retention policy. Jobs are serialized to keep baseline updates ordered.
 
-The build matrix is coordinated, but delivery to every store is still manual.
-We need the Mac agent, Apple signing and notarization, Android upload signing,
-and store upload automation for one-click multi-target releases. Hosted Pages
-and Coolify deploy from `main` independently of release tags, so a tag does
-not move hosted web and server atomically. A GitHub release currently proves
-only the images it lists, not that every client shipped together.
+Future Android and desktop beta jobs can use the same `BetaPublication.configure(build,
+target, channel, command)` TeamCity helper around their publisher after a successful
+matrix. Each target/channel needs its own build configuration and credentials for
+its destination; the helper supplies the gate, report artifacts, serialization,
+and manual override. Only TestFlight is connected to a publisher today.
+
+The full build matrix still runs on main, and manual GA release behavior is
+unchanged. For iOS review/release, select the original chain that actually uploaded
+the tested IPA. A later skipped chain has its own unuploaded IPA and cannot stand
+in for that candidate; explicitly force its TestFlight upload and test it first
+if that later chain must be promoted.
+
+## Two release buttons
+
+Prepare the shared version in the normal code PR, then merge it. For example,
+`mise run set-version 0.1.2 --android` prepares a full release;
+`mise run set-version 0.1.2 --android` prepares an Android-only patch. Each public
+release needs a fresh shared version, including single-target releases.
+
+### Prepare the iOS candidate for Apple review
+
+1. Bump the shared version in a PR before testing the candidate. Once `vX.Y.Z`
+   is published on GitHub, use a fresh patch version even for an iOS-only release.
+2. Wait for **Build all targets** and **iOS — TestFlight** to pass, then test the
+   displayed iOS version/build on a device.
+3. Promote that successful TeamCity chain to **iOS — Submit for Review** using
+   its Actions / Promote controls (or Run Custom Build → Changes at that exact
+   revision). Use the same revision again for the eventual release button.
+4. The job selects that chain's exact Apple build and shared version, submits
+   for App Review, and sets **manual release after approval**. Complete the
+   App Store listing, screenshots, privacy declarations and review contact/login
+   details beforehand. Apple validation errors leave an editable draft; fix the
+   metadata and rerun on the same revision. The initial empty `1.0` draft can be
+   reused for the actual version in `VERSION`.
+5. Wait for **Pending Developer Release**, then run Full or Single Target/iOS
+   on the same tested chain. Later merges do not change the selected candidate.
+
+Each IPA has a `Shilling_X.Y.Z_ios-build.json` artifact containing its source
+commit, bundle ID, TeamCity build number and SHA-256. Promotion validates those
+against the actual IPA, then checks Apple's exact version/build association.
+It never picks an arbitrary latest Apple build, re-signs, or reuploads an IPA.
+If TeamCity artifacts have expired or an iOS rebuild produces a new build ID,
+the job fails the approval check; test and submit that new candidate explicitly.
+
+### Full release
+
+In TeamCity, run **Release — Full** on `main`.
+
+It waits for all builds and checks, verifies that Apple approved the exact iOS
+candidate for manual release, then creates `vX.Y.Z` at that exact commit,
+collects all client packages, publishes server and web images for Linux
+amd64/arm64, deploys the server image to Coolify by immutable digest, verifies its health and
+Supabase mode, deploys the tested hosted web bundle to Pages, and publishes the
+GitHub release with packages, Compose files and an artifact hash manifest.
+It requests release of the approved iOS build before publishing the GitHub
+release. App Store availability may lag Apple’s accepted release request.
+No manual tagging, image-target parameters or asset uploads are required.
+
+### Single-target release
+
+In TeamCity, run **Release — Single Target** on `main`, choose a target from
+the dropdown, and run it. The choices are Web, Server, Android, iOS, Linux,
+Windows and macOS.
+
+Only the selected target is published. Web publishes its self-hosted image and
+deploys hosted Pages. Server publishes its image and JAR and deploys the image to Coolify. A client publishes
+its package files to GitHub; **iOS also releases the already-approved App Store
+build**, with the same approval gate as Full. Other installed/published targets retain their
+previous version. A single-image release omits Compose files because the two
+image versions differ.
+
+### Preview, retries and current limits
+
+Both buttons offer **Preview only (publish nothing)**. This validates and
+collects real artifacts into `release-output.zip`, showing the target selection,
+release notes and hashes without creating tags, pushing images or deploying. If Server is included,
+preview also performs a read-only Coolify configuration/connectivity check.
+For iOS, preview validates provenance and reports Apple approval readiness without
+uploading, submitting for review, or releasing. Pending approval is reported as
+blocked; credential/API failures fail the preview.
+
+The release jobs share a lock so only one can publish at a time. The version
+is read from `VERSION`, and the tag must belong to the checked-out commit on
+`main`. The job refuses to reuse a tag for another commit or target selection.
+An already-completed release is a no-op. Publishing failures leave a GitHub
+draft that can be retried with the same revision and selection. Images, Coolify, Pages and the App Store cannot be published atomically; a failure can leave images uploaded or
+hosted targets deployed while the GitHub release is still a draft. Inspect the failed
+step and rerun that exact release to finish it.
+
+**iOS releases promote an approved App Store build.** Versions `0.x` remain
+marked as GitHub prereleases; that label is separate from Apple distribution. Android includes a
+debug APK and unsigned AAB; iOS exports an App Store-signed IPA when signing is
+enabled (an unsigned app ZIP otherwise); macOS is an unsigned universal DMG; Windows is an unsigned x86_64
+NSIS installer; Linux includes x86_64 AppImage, Debian and RPM packages.
+Android/desktop signing, macOS notarization, and Play upload still need setup.
+iOS TestFlight upload, App Review submission, and approved App Store promotion
+are automated by the separate jobs described above.
+Release notes state these limitations. An App Store-signed IPA is intended for
+App Store Connect upload; downloading it from GitHub does not install it on an
+iPhone. An unsigned iOS archive is also not an installable iPhone release.
+
+### Hosted server deployment
+
+Full and Server-only releases promote the exact multi-architecture image digest
+returned by Buildx into the Coolify Docker Image app. Coolify pulls it instead
+of compiling source. The job waits for that deployment to finish and for the
+container to be healthy, then checks the public `/health` and `/api/config`
+endpoints. The job explicitly sets Supabase mode before starting the public
+container, without reading the secret values. Web deployment follows
+server health checks in a full release; other target releases do not touch Coolify.
+
+The first server release switches from the legacy source app to the prepared
+image app. Both use `api.shilling.finance`; the legacy app stays running until
+the new image is healthy, then is stopped. Both apps have Git auto-deployment
+disabled. The legacy app is pinned to its last deployed source commit and
+retained for recovery after it is stopped. If public checks fail
+after cutover, the job restores the legacy app (first release) or previous image
+(later releases), and fails with the GitHub release still a draft. A failed or
+timed-out Coolify rollout fails the release before web deploy; inspect/cancel a
+timed-out deployment in Coolify before retrying. Rollback failures also require
+operator attention. Promotion across hosted targets is not atomic.
+
+`server-deployment.json` records the deployed digest, deployment UUID, health
+result and previous image. It is attached to the GitHub release and retained in
+TeamCity artifacts. Supabase and telemetry values remain in Coolify shared
+variables/application configuration, not in the build artifacts.
+
+The Linux release agent needs Docker Buildx, `gh`, Node/npm, curl and Python.
+TeamCity inherits `env.GITHUB_TOKEN`, `env.GHCR_TOKEN` (classic PAT with
+`write:packages`), the Cloudflare parameters, and `env.COOLIFY_URL`,
+`env.COOLIFY_APP_UUID`, `env.COOLIFY_TOKEN` (password), plus
+`env.COOLIFY_LEGACY_APP_UUID` for the first cutover. The Coolify token needs read,
+write and deploy access. Sensitive-read access is not required: the preflight
+checks environment metadata, and the deployed API verifies Supabase mode.
+
+### iOS signing setup
+
+The iOS archive must contain only the app under `Products/Applications` and
+include Xcode's `ApplicationProperties`. CI validates this and checks that the
+app and its extensions have matching versions/build numbers before exporting.
+Temporary framework linking copies live in Xcode's temporary directory.
+
+Signing is enabled on the hosted Mac runner. These environment parameters are
+configured on the parent **Shilling** TeamCity project (the versioned build
+configuration is read-only):
+
+- `SHILLING_IOS_SIGNED=1`
+- `IOS_TEAM_ID`: the Apple Developer Program team ID
+- `ASC_KEY_PATH`: absolute path to the App Store Connect team `.p8` key on the Mac
+- `ASC_KEY_ID` and `ASC_ISSUER_ID`: identifiers from App Store Connect
+- `IOS_KEYCHAIN_PATH` and `IOS_KEYCHAIN_PASSWORD_FILE`: dedicated signing keychain
+  and its runner-local password file, to unlock signing for unattended builds
+
+Store the key outside the checkout and artifact directories, readable only by
+`shillin-ci` (directory mode 700, file mode 600). Do not put its contents in an
+environment parameter: Xcode prints environment variables in build logs. The
+runner needs an unlocked signing keychain for locally created signing keys.
+
+Signed TeamCity builds are restricted to `main`. Xcode uses the API key with
+`-allowProvisioningUpdates` for automatic provisioning and App Store export.
+Export preserves the repository product version and the CI-assigned build number. The app and widget
+need their bundle IDs and `group.finance.shilling.app` App Group configured in
+the same Apple Developer team.
+
+### Apple workflow configuration
+
+The existing internal TestFlight group is used; these jobs never invite testers,
+create public links, or submit builds for external beta review. Uploads use normal
+App Store-eligible export, not the “TestFlight Internal Only” option.
+
+Parent TeamCity parameters:
+
+- `env.ASC_APP_ID`: the Shilling App Store Connect app ID.
+- `env.ASC_INTERNAL_GROUP_ID`: existing internal TestFlight group.
+- `env.ASC_ENCRYPTION_REFERENCE_BUILD_ID`: a build whose encryption questionnaire
+  the owner has already completed. New uploads reuse that saved answer. Reassess
+  it after changes to cryptography or distribution territory, including France.
+- `shilling.apple.api.private.key`: **password**, non-environment parameter holding
+  the API key. Only Linux release/review configurations map it to
+  `env.ASC_API_PRIVATE_KEY`. Never make the private key an inherited environment
+  parameter: Xcode logs its build environment. Mac upload jobs use `ASC_KEY_PATH`.
+
+The Apple API helper uses pinned Python dependencies in a runner-local virtual
+environment. Upload retries reuse Apple's existing version/build; they do not
+compile again. `testflight.zip` records the Apple build ID and IPA hash.
+`ios-deployment.json` records the exact App Store release request and is attached
+to GitHub. A successful promotion means Apple accepted the release request, not
+that storefront propagation has finished. The request cannot be undone by CI.
+
+**First GA checklist:** finish listing/screenshots, privacy and age-rating
+answers, review contact/login instructions and agreements in App Store Connect.
+Keep France excluded until its encryption requirements are resolved. Then bump
+to a fresh shared version, test that main build, submit it, and wait for approval.
+CI does not fill in legal declarations or publish an unreviewed app.
+
+### Runtime checks
+
+`Web and Server Smoke` starts disposable containers built from the exact JAR
+and web artifacts in its chain. Playwright checks self-hosted onboarding,
+the hosted welcome/sign-in UI, hosted authentication rejection and acceptance,
+and two authenticated browser peers exchanging data over WebRTC after closing
+their signaling connections. Authentication uses an isolated Supabase protocol
+fixture with temporary signing keys; this does not test the production Supabase
+service, account creation, or the app's Store5 synchronization end to end.
+
+The Mac build verifies the DMG checksum, mounts and extracts it, checks both
+Intel and Apple Silicon executable slices, and runs the packaged app for ten
+seconds. It does not verify Gatekeeper acceptance or app interactions.
+Android, iOS, Windows, and Linux desktop still need device/OS installation and
+runtime checks. A green matrix proves the checks listed here, not full device
+acceptance.
+
+Browser JUnit results, failure screenshots/traces, and container logs are saved
+in `runtime-smoke.zip`; the Mac startup result is saved in `macos-smoke.zip`.
+To run the image suite locally, place the server artifact at
+`release-input/server/server-jvm-executable.jar` and extract the web artifact to
+`web-app-dist/`, then run `bash scripts/ci/smoke-runtime.sh` with Docker running.
+The suite publishes no ports, uses no production secrets, and removes its
+containers and temporary image tags on exit.

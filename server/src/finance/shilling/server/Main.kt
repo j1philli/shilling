@@ -13,6 +13,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import kotlin.time.Duration.Companion.seconds
 
 private val log = Logger.withTag("Server")
@@ -49,8 +50,10 @@ fun Routing.configRoute(authConfig: AuthConfig) {
 }
 
 fun main() {
-    val port = (System.getenv("SHILLING_SERVER_PORT") ?: "8081").toInt().also { require(it in 1..65535) }
+    Logger.setMinSeverity(Severity.Info)
+    val port = (System.getenv("SHILLING_SERVER_PORT") ?: System.getenv("SHILLING_PORT"))?.toInt() ?: 8081
     val host = System.getenv("SHILLING_SERVER_HOST") ?: "0.0.0.0"
+    require(port in 1..65535) { "SHILLING_PORT must be between 1 and 65535" }
     val signalingHub = SignalingHub()
     val turnConfig = createTurnConfig()
     val authConfig = readAuthConfig()
@@ -63,8 +66,13 @@ fun main() {
         require(householdLookup != null) { "Hosted auth requires Supabase URL and server key" }
         require(!authConfig.supabaseAnonKey.isNullOrBlank()) { "Hosted auth requires a publishable key" }
     }
+    val entitlements = createHostedEntitlementLookup(authConfig)
+    val devices = createHostedDeviceRegistry(authConfig)
+    val accounts = createHostedAccountStore(authConfig)
+    val spaces = if (authConfig.supabaseUrl != null && authConfig.supabaseServiceKey != null)
+        SupabaseSpaceManagement(authConfig.supabaseUrl, authConfig.supabaseServiceKey) else null
 
-    log.i { "Shilling server starting on http://$host:$port" }
+    log.i { "Shilling server starting on http://localhost:$port" }
     log.i { "Auth mode: ${authConfig.authMode}" }
     log.i { "Mode: signaling + discovery only (no user data stored or relayed)" }
     if (turnConfig.turnSecret != null) {
@@ -100,13 +108,22 @@ fun main() {
         routing {
             get("/health") { call.respondText("ok") }
             configRoute(authConfig)
-            iceServerRoute(turnConfig, authEnabled = authEnabled, tokenVerifier = tokenVerifier, backupControl = backupControl, householdLookup = householdLookup)
-            backupRoutes(backupControl, tokenVerifier, householdLookup)
+            iceServerRoute(turnConfig, authEnabled = authEnabled, tokenVerifier = tokenVerifier,
+                householdLookup = householdLookup, entitlements = entitlements, backupControl = backupControl)
+            backupRoutes(backupControl, tokenVerifier, householdLookup, entitlements)
             if (authEnabled) {
                 householdRoute(householdLookup, tokenVerifier)
+                hostedEntitlementRoute(tokenVerifier, householdLookup, entitlements, devices,
+                    turnConfigured = turnConfig.turnSecret != null && turnConfig.turnUrls.isNotEmpty())
+                hostedDevicesRoute(tokenVerifier, householdLookup, devices, signalingHub)
+                billingConfigRoute(tokenVerifier)
+                accountDeletionRoute(tokenVerifier, entitlements, accounts, devices, signalingHub)
+                hostedSpacesRoute(tokenVerifier,
+                    spaces,
+                    entitlements, devices, signalingHub)
             }
-            signalingRoute(signalingHub, tokenVerifier, householdLookup)
-            signalingRoute(SignalingHub(), tokenVerifier, householdLookup, path = "/ws/recovery-keys")
+            signalingRoute(signalingHub, tokenVerifier, householdLookup, entitlements, devices, spaces)
+            signalingRoute(SignalingHub(), tokenVerifier, householdLookup, entitlements, devices, spaces, path = "/ws/recovery-keys")
         }
     }.start(wait = true)
 }

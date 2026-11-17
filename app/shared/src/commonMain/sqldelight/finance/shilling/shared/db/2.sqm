@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS cloud_state (
+    namespace TEXT NOT NULL PRIMARY KEY,
+    state_json TEXT NOT NULL
+);

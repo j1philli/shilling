@@ -5,9 +5,19 @@ import com.auth0.jwt.algorithms.Algorithm
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 class HostedMetadataTest {
+    @Test
+    fun onlyOwnersAndAdminsCanManageSpaceDevices() {
+        assertTrue(HostedSpaceRole.OWNER.canManageSpace())
+        assertTrue(HostedSpaceRole.ADMIN.canManageSpace())
+        assertFalse(HostedSpaceRole.MEMBER.canManageSpace())
+        assertFalse(null.canManageSpace())
+    }
+
     @Test
     fun authorizeHostedJoinRejectsMissingToken() = runBlocking {
         val result = authorizeHostedJoin(

@@ -1,6 +1,7 @@
 package finance.shilling.server
 
 import finance.shilling.core.backup.*
+import finance.shilling.core.auth.turnEnabled
 import finance.shilling.core.sync.SignalingMessage
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -39,6 +40,14 @@ fun createBackupControl(turn: TurnConfig): BackupControl {
             }
             parts[0] to parts[1]
         }
+    // An unconfigured optional worker must not prevent existing hosted servers starting.
+    if (workers.isEmpty()) return BackupControl(object : BackupPolicies {
+        override fun get(household: String, available: Boolean) = BackupPolicy()
+        override fun update(household: String, request: BackupPolicyUpdate, available: Boolean, actor: String?): BackupPolicy =
+            throw IllegalArgumentException("Cloud backup is not configured")
+        override fun assignments(workerId: String) = emptyList<BackupAssignment>()
+        override fun assigned(householdId: String, workerId: String) = false
+    }, emptyMap(), false)
     val trusted = System.getenv("SHILLING_BACKUP_TRUSTED_CLOUD_ENABLED") == "true"
     val capacity = System.getenv("SHILLING_BACKUP_WORKER_CAPACITY")?.toInt() ?: 256
     val policies: BackupPolicies = if (System.getenv("SHILLING_AUTH_MODE") == "supabase" || System.getenv("SHILLING_CLOUD_CONTROL_DATABASE_URL") != null) {
@@ -61,7 +70,7 @@ fun createBackupControl(turn: TurnConfig): BackupControl {
 
 }
 
-fun Routing.backupRoutes(control: BackupControl, verifier: SupabaseTokenVerifier?, lookup: HouseholdMembershipLookup?) {
+fun Routing.backupRoutes(control: BackupControl, verifier: SupabaseTokenVerifier?, lookup: HouseholdMembershipLookup?, entitlements: HostedEntitlementLookup? = null) {
     suspend fun ApplicationCall.household(): Triple<String, Boolean, String>? {
         if (verifier == null && lookup == null) {
             val household = request.headers["X-Shilling-Household"]
@@ -75,7 +84,7 @@ fun Routing.backupRoutes(control: BackupControl, verifier: SupabaseTokenVerifier
             respond(HttpStatusCode.Forbidden)
             return null
         }
-        return Triple(household, lookup.tierForUser(user.userId) == "paid", user.userId)
+        return Triple(household, entitlements?.householdPlan(household)?.turnEnabled() == true, user.userId)
     }
     get("/api/backup/policy") {
         val (household, paid) = call.household() ?: return@get

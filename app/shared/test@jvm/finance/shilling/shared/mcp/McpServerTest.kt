@@ -49,7 +49,7 @@ class McpServerTest {
             single { db }
             single { Settings() }
             single<IdGenerator> { object : IdGenerator { override fun newId() = "id-${++nextId}" } }
-            single<ReceiptFileStore> { NoReceiptFiles }
+            single<finance.shilling.shared.data.store.ReceiptFileStoreFactory> { finance.shilling.shared.data.store.ReceiptFileStoreFactory { _, _ -> NoReceiptFiles } }
         }
         app = koinApplication { modules(platformModule, dataModule) }
         server = McpServer(app.koin.get(), authorize = { McpPermissions(read = true, write = true) })
@@ -231,6 +231,14 @@ class McpServerTest {
     private object NoReceiptFiles : ReceiptFileStore {
         override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {}
         override suspend fun read(receiptId: String): ByteArray? = null
+        override suspend fun openReader(receiptId: String): finance.shilling.shared.data.ReceiptFileReader? {
+            val bytes = read(receiptId)?.copyOf() ?: return null
+            return object : finance.shilling.shared.data.ReceiptFileReader {
+                override val size = bytes.size.toLong()
+                override suspend fun readRange(offset: Long, byteCount: Int) =
+                    finance.shilling.shared.data.ReceiptFileBlock(bytes.copyOfRange(offset.toInt(), minOf(bytes.size, offset.toInt() + byteCount)))
+            }
+        }
         override suspend fun hasFile(receiptId: String): Boolean = false
         override suspend fun delete(receiptId: String) {}
         override suspend fun clearAll() {}

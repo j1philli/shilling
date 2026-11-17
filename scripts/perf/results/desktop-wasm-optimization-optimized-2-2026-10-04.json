@@ -1,0 +1,4727 @@
+{
+  "processIds": {
+    "host": 88982,
+    "webContent": 89196,
+    "gpu": 89191,
+    "network": 89214
+  },
+  "rssSamples": [
+    {
+      "seconds": 0.028,
+      "hostMiB": 145.265625,
+      "webContentMiB": 203.3125,
+      "gpuMiB": 26.734375,
+      "networkMiB": 15.078125
+    },
+    {
+      "seconds": 0.31,
+      "hostMiB": 145.8125,
+      "webContentMiB": 317.46875,
+      "gpuMiB": 30.796875,
+      "networkMiB": 41.921875
+    },
+    {
+      "seconds": 0.606,
+      "hostMiB": 133.71875,
+      "webContentMiB": 322.59375,
+      "gpuMiB": 32.28125,
+      "networkMiB": 41.9375
+    },
+    {
+      "seconds": 0.894,
+      "hostMiB": 133.734375,
+      "webContentMiB": 322.59375,
+      "gpuMiB": 32.296875,
+      "networkMiB": 41.953125
+    },
+    {
+      "seconds": 1.182,
+      "hostMiB": 133.734375,
+      "webContentMiB": 322.609375,
+      "gpuMiB": 32.296875,
+      "networkMiB": 41.9375
+    },
+    {
+      "seconds": 1.46,
+      "hostMiB": 133.734375,
+      "webContentMiB": 322.65625,
+      "gpuMiB": 32.296875,
+      "networkMiB": 41.9375
+    },
+    {
+      "seconds": 1.755,
+      "hostMiB": 133.734375,
+      "webContentMiB": 322.9375,
+      "gpuMiB": 32.296875,
+      "networkMiB": 41.9375
+    },
+    {
+      "seconds": 2.082,
+      "hostMiB": 133.734375,
+      "webContentMiB": 322.9375,
+      "gpuMiB": 32.296875,
+      "networkMiB": 41.9375
+    },
+    {
+      "seconds": 2.384,
+      "hostMiB": 133.734375,
+      "webContentMiB": 322.9375,
+      "gpuMiB": 32.296875,
+      "networkMiB": 41.9375
+    },
+    {
+      "seconds": 2.659,
+      "hostMiB": 133.734375,
+      "webContentMiB": 322.953125,
+      "gpuMiB": 32.203125,
+      "networkMiB": 41.796875
+    },
+    {
+      "seconds": 2.939,
+      "hostMiB": 133.734375,
+      "webContentMiB": 322.953125,
+      "gpuMiB": 31.5,
+      "networkMiB": 41.796875
+    },
+    {
+      "seconds": 3.239,
+      "hostMiB": 133.734375,
+      "webContentMiB": 322.953125,
+      "gpuMiB": 31.5,
+      "networkMiB": 41.796875
+    },
+    {
+      "seconds": 3.561,
+      "hostMiB": 133.734375,
+      "webContentMiB": 322.96875,
+      "gpuMiB": 31.5,
+      "networkMiB": 41.796875
+    },
+    {
+      "seconds": 3.879,
+      "hostMiB": 133.734375,
+      "webContentMiB": 329.484375,
+      "gpuMiB": 31.5,
+      "networkMiB": 41.796875
+    },
+    {
+      "seconds": 4.214,
+      "hostMiB": 133.734375,
+      "webContentMiB": 348.5625,
+      "gpuMiB": 31.25,
+      "networkMiB": 41.796875
+    },
+    {
+      "seconds": 4.508,
+      "hostMiB": 126.125,
+      "webContentMiB": 431.0625,
+      "gpuMiB": 31.40625,
+      "networkMiB": 77.546875
+    },
+    {
+      "seconds": 4.769,
+      "hostMiB": 126.09375,
+      "webContentMiB": 431.5625,
+      "gpuMiB": 31.890625,
+      "networkMiB": 77.640625
+    },
+    {
+      "seconds": 5.058,
+      "hostMiB": 125.984375,
+      "webContentMiB": 431.5625,
+      "gpuMiB": 31.828125,
+      "networkMiB": 69.21875
+    },
+    {
+      "seconds": 5.316,
+      "hostMiB": 125.984375,
+      "webContentMiB": 431.5625,
+      "gpuMiB": 31.75,
+      "networkMiB": 69.515625
+    },
+    {
+      "seconds": 5.585,
+      "hostMiB": 125.90625,
+      "webContentMiB": 431.515625,
+      "gpuMiB": 31.34375,
+      "networkMiB": 69.203125
+    },
+    {
+      "seconds": 5.864,
+      "hostMiB": 123.09375,
+      "webContentMiB": 431.40625,
+      "gpuMiB": 31.234375,
+      "networkMiB": 68.828125
+    },
+    {
+      "seconds": 6.147,
+      "hostMiB": 120.421875,
+      "webContentMiB": 430.96875,
+      "gpuMiB": 30.640625,
+      "networkMiB": 67.78125
+    },
+    {
+      "seconds": 6.417,
+      "hostMiB": 109.1875,
+      "webContentMiB": 428.734375,
+      "gpuMiB": 29.28125,
+      "networkMiB": 66.96875
+    },
+    {
+      "seconds": 6.698,
+      "hostMiB": 109.1875,
+      "webContentMiB": 428.734375,
+      "gpuMiB": 29.28125,
+      "networkMiB": 66.96875
+    },
+    {
+      "seconds": 6.978,
+      "hostMiB": 107.984375,
+      "webContentMiB": 427.625,
+      "gpuMiB": 27.703125,
+      "networkMiB": 66.96875
+    },
+    {
+      "seconds": 7.284,
+      "hostMiB": 107.96875,
+      "webContentMiB": 427.609375,
+      "gpuMiB": 27.65625,
+      "networkMiB": 66.96875
+    },
+    {
+      "seconds": 7.558,
+      "hostMiB": 104.90625,
+      "webContentMiB": 410.296875,
+      "gpuMiB": 27.53125,
+      "networkMiB": 66.734375
+    },
+    {
+      "seconds": 7.815,
+      "hostMiB": 104.578125,
+      "webContentMiB": 380.71875,
+      "gpuMiB": 25.796875,
+      "networkMiB": 44.984375
+    },
+    {
+      "seconds": 8.076,
+      "hostMiB": 104.40625,
+      "webContentMiB": 365.125,
+      "gpuMiB": 25.40625,
+      "networkMiB": 41.8125
+    },
+    {
+      "seconds": 8.352,
+      "hostMiB": 104.40625,
+      "webContentMiB": 363.671875,
+      "gpuMiB": 25.28125,
+      "networkMiB": 41.8125
+    },
+    {
+      "seconds": 8.63,
+      "hostMiB": 104.40625,
+      "webContentMiB": 363.34375,
+      "gpuMiB": 25.28125,
+      "networkMiB": 41.8125
+    },
+    {
+      "seconds": 8.914,
+      "hostMiB": 104.375,
+      "webContentMiB": 363.25,
+      "gpuMiB": 25.28125,
+      "networkMiB": 41.8125
+    },
+    {
+      "seconds": 9.184,
+      "hostMiB": 104.375,
+      "webContentMiB": 363.25,
+      "gpuMiB": 25.28125,
+      "networkMiB": 41.8125
+    },
+    {
+      "seconds": 9.448,
+      "hostMiB": 104.375,
+      "webContentMiB": 363.28125,
+      "gpuMiB": 25.28125,
+      "networkMiB": 41.8125
+    },
+    {
+      "seconds": 9.723,
+      "hostMiB": 99.3125,
+      "webContentMiB": 363.234375,
+      "gpuMiB": 25.28125,
+      "networkMiB": 41.8125
+    },
+    {
+      "seconds": 9.997,
+      "hostMiB": 99.3125,
+      "webContentMiB": 363.21875,
+      "gpuMiB": 25.28125,
+      "networkMiB": 41.8125
+    },
+    {
+      "seconds": 10.254,
+      "hostMiB": 99.265625,
+      "webContentMiB": 363.21875,
+      "gpuMiB": 25.28125,
+      "networkMiB": 41.8125
+    },
+    {
+      "seconds": 10.53,
+      "hostMiB": 99.296875,
+      "webContentMiB": 363.203125,
+      "gpuMiB": 25.28125,
+      "networkMiB": 41.8125
+    },
+    {
+      "seconds": 10.795,
+      "hostMiB": 99.296875,
+      "webContentMiB": 363.203125,
+      "gpuMiB": 25.28125,
+      "networkMiB": 41.78125
+    },
+    {
+      "seconds": 11.066,
+      "hostMiB": 99.296875,
+      "webContentMiB": 363.203125,
+      "gpuMiB": 25.28125,
+      "networkMiB": 41.78125
+    },
+    {
+      "seconds": 11.333,
+      "hostMiB": 99.296875,
+      "webContentMiB": 351.453125,
+      "gpuMiB": 25.28125,
+      "networkMiB": 41.78125
+    },
+    {
+      "seconds": 11.599,
+      "hostMiB": 99.25,
+      "webContentMiB": 296.046875,
+      "gpuMiB": 25.28125,
+      "networkMiB": 14.8125
+    },
+    {
+      "seconds": 11.865,
+      "hostMiB": 99.25,
+      "webContentMiB": 296.046875,
+      "gpuMiB": 25.28125,
+      "networkMiB": 14.8125
+    },
+    {
+      "seconds": 12.132,
+      "hostMiB": 99.25,
+      "webContentMiB": 292.265625,
+      "gpuMiB": 25.28125,
+      "networkMiB": 14.8125
+    },
+    {
+      "seconds": 12.402,
+      "hostMiB": 99.25,
+      "webContentMiB": 292.046875,
+      "gpuMiB": 25.21875,
+      "networkMiB": 14.78125
+    },
+    {
+      "seconds": 12.669,
+      "hostMiB": 99.25,
+      "webContentMiB": 292.046875,
+      "gpuMiB": 25.21875,
+      "networkMiB": 14.78125
+    },
+    {
+      "seconds": 12.935,
+      "hostMiB": 99.25,
+      "webContentMiB": 289.046875,
+      "gpuMiB": 25.09375,
+      "networkMiB": 14.78125
+    },
+    {
+      "seconds": 13.2,
+      "hostMiB": 99.25,
+      "webContentMiB": 282.875,
+      "gpuMiB": 25.09375,
+      "networkMiB": 14.75
+    },
+    {
+      "seconds": 13.467,
+      "hostMiB": 99.25,
+      "webContentMiB": 279.296875,
+      "gpuMiB": 25.09375,
+      "networkMiB": 14.75
+    },
+    {
+      "seconds": 13.741,
+      "hostMiB": 99.234375,
+      "webContentMiB": 263.109375,
+      "gpuMiB": 23.921875,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 14.024,
+      "hostMiB": 99.234375,
+      "webContentMiB": 263.109375,
+      "gpuMiB": 23.921875,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 14.299,
+      "hostMiB": 99.234375,
+      "webContentMiB": 263.109375,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 14.581,
+      "hostMiB": 99.234375,
+      "webContentMiB": 262.703125,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.4375
+    },
+    {
+      "seconds": 14.858,
+      "hostMiB": 99.234375,
+      "webContentMiB": 262.625,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.4375
+    },
+    {
+      "seconds": 15.127,
+      "hostMiB": 99.234375,
+      "webContentMiB": 262.625,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.4375
+    },
+    {
+      "seconds": 15.4,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.59375,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.4375
+    },
+    {
+      "seconds": 15.664,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.4375
+    },
+    {
+      "seconds": 15.941,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.4375
+    },
+    {
+      "seconds": 16.268,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.4375
+    },
+    {
+      "seconds": 16.569,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.4375
+    },
+    {
+      "seconds": 16.837,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.4375
+    },
+    {
+      "seconds": 17.106,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.4375
+    },
+    {
+      "seconds": 17.405,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.4375
+    },
+    {
+      "seconds": 17.672,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.875,
+      "networkMiB": 14.4375
+    },
+    {
+      "seconds": 17.98,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 18.241,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 18.508,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 18.783,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 19.056,
+      "hostMiB": 99.1875,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 19.355,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 19.652,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 19.964,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 20.269,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 20.547,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 20.822,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 21.091,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 21.361,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 21.638,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 21.957,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 22.244,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 22.514,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 22.834,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 23.128,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 23.412,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 23.678,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 23.99,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 24.261,
+      "hostMiB": 99.140625,
+      "webContentMiB": 262.578125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.40625
+    },
+    {
+      "seconds": 24.533,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 24.831,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 25.137,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 25.454,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 25.752,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 26.066,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 26.345,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 26.632,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 26.908,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 27.192,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 27.46,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 27.755,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 28.034,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 28.345,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 28.637,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 28.956,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 29.223,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 29.491,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 29.762,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 30.034,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 30.298,
+      "hostMiB": 99.171875,
+      "webContentMiB": 264.875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 30.596,
+      "hostMiB": 99.171875,
+      "webContentMiB": 265.359375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 30.865,
+      "hostMiB": 99.171875,
+      "webContentMiB": 265.359375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 31.138,
+      "hostMiB": 99.171875,
+      "webContentMiB": 265.375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 31.436,
+      "hostMiB": 99.171875,
+      "webContentMiB": 265.375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 31.709,
+      "hostMiB": 99.171875,
+      "webContentMiB": 265.375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 31.978,
+      "hostMiB": 99.171875,
+      "webContentMiB": 265.375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 32.254,
+      "hostMiB": 99.171875,
+      "webContentMiB": 265.375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 32.53,
+      "hostMiB": 99.171875,
+      "webContentMiB": 265.375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 32.818,
+      "hostMiB": 99.171875,
+      "webContentMiB": 265.375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 33.092,
+      "hostMiB": 99.171875,
+      "webContentMiB": 265.375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 33.363,
+      "hostMiB": 99.171875,
+      "webContentMiB": 265.375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 33.635,
+      "hostMiB": 99.171875,
+      "webContentMiB": 265.375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 33.912,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.640625,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 34.208,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.640625,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 34.488,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.5,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 34.793,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.5,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 35.072,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.5,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 35.347,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.5,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 35.612,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.5,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 35.881,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.5,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 36.151,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.5,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 36.45,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.5,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 36.717,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.21875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 36.985,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.109375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 37.253,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.109375,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 37.521,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.046875,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 37.79,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.03125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 38.059,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.03125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 38.324,
+      "hostMiB": 99.171875,
+      "webContentMiB": 263.03125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 38.586,
+      "hostMiB": 98.765625,
+      "webContentMiB": 263.03125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 38.876,
+      "hostMiB": 98.765625,
+      "webContentMiB": 263.03125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 39.156,
+      "hostMiB": 98.765625,
+      "webContentMiB": 263.03125,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 39.414,
+      "hostMiB": 98.765625,
+      "webContentMiB": 263.515625,
+      "gpuMiB": 23.859375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 39.692,
+      "hostMiB": 99.328125,
+      "webContentMiB": 430.6875,
+      "gpuMiB": 25.921875,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 39.962,
+      "hostMiB": 99.359375,
+      "webContentMiB": 431.53125,
+      "gpuMiB": 26.546875,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 40.248,
+      "hostMiB": 99.5,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 28.109375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 40.524,
+      "hostMiB": 99.5,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 28.109375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 40.809,
+      "hostMiB": 99.5,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 28.109375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 41.096,
+      "hostMiB": 99.5,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 28.109375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 41.372,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 28.109375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 41.644,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 28.109375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 41.922,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 27.65625,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 42.203,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 27.65625,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 42.5,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 27.65625,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 42.829,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 27.65625,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 43.112,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 27.65625,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 43.385,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 27.65625,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 43.697,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 27.640625,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 43.982,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 27.640625,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 44.265,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 27.640625,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 44.532,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 27.640625,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 44.792,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.796875,
+      "gpuMiB": 27.609375,
+      "networkMiB": 14.390625
+    },
+    {
+      "seconds": 45.072,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.84375,
+      "gpuMiB": 27.609375,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 45.34,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.78125,
+      "gpuMiB": 27.546875,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 45.608,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.78125,
+      "gpuMiB": 27.546875,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 45.874,
+      "hostMiB": 99.484375,
+      "webContentMiB": 431.78125,
+      "gpuMiB": 27.546875,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 46.138,
+      "hostMiB": 99.484375,
+      "webContentMiB": 429.515625,
+      "gpuMiB": 27.546875,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 46.404,
+      "hostMiB": 99.484375,
+      "webContentMiB": 428.71875,
+      "gpuMiB": 27.546875,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 46.699,
+      "hostMiB": 99.484375,
+      "webContentMiB": 428.71875,
+      "gpuMiB": 27.546875,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 46.968,
+      "hostMiB": 99.484375,
+      "webContentMiB": 428.71875,
+      "gpuMiB": 27.546875,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 47.23,
+      "hostMiB": 99.484375,
+      "webContentMiB": 428.71875,
+      "gpuMiB": 27.546875,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 47.5,
+      "hostMiB": 99.484375,
+      "webContentMiB": 428.71875,
+      "gpuMiB": 27.546875,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 47.834,
+      "hostMiB": 99.40625,
+      "webContentMiB": 396.125,
+      "gpuMiB": 27.390625,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 48.106,
+      "hostMiB": 99.40625,
+      "webContentMiB": 384.671875,
+      "gpuMiB": 26.8125,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 48.363,
+      "hostMiB": 99.15625,
+      "webContentMiB": 373.46875,
+      "gpuMiB": 24.625,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 48.63,
+      "hostMiB": 99.15625,
+      "webContentMiB": 373.46875,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 48.895,
+      "hostMiB": 99.15625,
+      "webContentMiB": 373.46875,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 49.163,
+      "hostMiB": 99.15625,
+      "webContentMiB": 373.46875,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 49.423,
+      "hostMiB": 99.15625,
+      "webContentMiB": 373.46875,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 49.693,
+      "hostMiB": 99.15625,
+      "webContentMiB": 373.453125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 49.952,
+      "hostMiB": 99.15625,
+      "webContentMiB": 373.203125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 50.218,
+      "hostMiB": 99.15625,
+      "webContentMiB": 373.078125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 50.484,
+      "hostMiB": 99.15625,
+      "webContentMiB": 373.078125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 50.752,
+      "hostMiB": 99.15625,
+      "webContentMiB": 373.078125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.421875
+    },
+    {
+      "seconds": 51.02,
+      "hostMiB": 99.140625,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 51.303,
+      "hostMiB": 99.140625,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 51.573,
+      "hostMiB": 99.140625,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 51.84,
+      "hostMiB": 99.140625,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 52.098,
+      "hostMiB": 99.140625,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 52.356,
+      "hostMiB": 99.125,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 52.625,
+      "hostMiB": 99.125,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 52.892,
+      "hostMiB": 99.125,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 53.17,
+      "hostMiB": 99.125,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.578125,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 53.467,
+      "hostMiB": 99.125,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.59375,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 53.734,
+      "hostMiB": 99.125,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.59375,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 54.001,
+      "hostMiB": 99.125,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.59375,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 54.267,
+      "hostMiB": 99.125,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.59375,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 54.534,
+      "hostMiB": 99.125,
+      "webContentMiB": 373.03125,
+      "gpuMiB": 24.59375,
+      "networkMiB": 14.28125
+    },
+    {
+      "seconds": 54.809,
+      "hostMiB": 99.21875,
+      "webContentMiB": 434.515625,
+      "gpuMiB": 24.59375,
+      "networkMiB": 50.625
+    },
+    {
+      "seconds": 55.117,
+      "hostMiB": 99.21875,
+      "webContentMiB": 511.984375,
+      "gpuMiB": 24.59375,
+      "networkMiB": 61.671875
+    },
+    {
+      "seconds": 55.392,
+      "hostMiB": 99.21875,
+      "webContentMiB": 533.3125,
+      "gpuMiB": 24.59375,
+      "networkMiB": 56.8125
+    },
+    {
+      "seconds": 55.693,
+      "hostMiB": 99.21875,
+      "webContentMiB": 555.984375,
+      "gpuMiB": 24.59375,
+      "networkMiB": 59.078125
+    },
+    {
+      "seconds": 56.011,
+      "hostMiB": 99.21875,
+      "webContentMiB": 570.90625,
+      "gpuMiB": 24.59375,
+      "networkMiB": 52.9375
+    },
+    {
+      "seconds": 56.303,
+      "hostMiB": 99.21875,
+      "webContentMiB": 573.9375,
+      "gpuMiB": 24.59375,
+      "networkMiB": 76.765625
+    },
+    {
+      "seconds": 56.587,
+      "hostMiB": 99.21875,
+      "webContentMiB": 587.5,
+      "gpuMiB": 24.59375,
+      "networkMiB": 78.25
+    },
+    {
+      "seconds": 56.886,
+      "hostMiB": 87.5,
+      "webContentMiB": 589.625,
+      "gpuMiB": 22.3125,
+      "networkMiB": 79.8125
+    },
+    {
+      "seconds": 57.18,
+      "hostMiB": 86.609375,
+      "webContentMiB": 589.609375,
+      "gpuMiB": 22.15625,
+      "networkMiB": 80.171875
+    },
+    {
+      "seconds": 57.449,
+      "hostMiB": 86.609375,
+      "webContentMiB": 592.1875,
+      "gpuMiB": 22.15625,
+      "networkMiB": 96.90625
+    },
+    {
+      "seconds": 57.72,
+      "hostMiB": 87.359375,
+      "webContentMiB": 595.390625,
+      "gpuMiB": 25.0,
+      "networkMiB": 95.59375
+    },
+    {
+      "seconds": 57.985,
+      "hostMiB": 87.375,
+      "webContentMiB": 595.390625,
+      "gpuMiB": 25.0,
+      "networkMiB": 87.21875
+    },
+    {
+      "seconds": 58.29,
+      "hostMiB": 87.375,
+      "webContentMiB": 595.390625,
+      "gpuMiB": 25.0,
+      "networkMiB": 87.21875
+    },
+    {
+      "seconds": 58.562,
+      "hostMiB": 87.375,
+      "webContentMiB": 595.390625,
+      "gpuMiB": 25.0,
+      "networkMiB": 87.234375
+    },
+    {
+      "seconds": 58.832,
+      "hostMiB": 87.375,
+      "webContentMiB": 595.390625,
+      "gpuMiB": 25.015625,
+      "networkMiB": 87.234375
+    },
+    {
+      "seconds": 59.11,
+      "hostMiB": 87.796875,
+      "webContentMiB": 557.234375,
+      "gpuMiB": 25.015625,
+      "networkMiB": 58.21875
+    },
+    {
+      "seconds": 59.397,
+      "hostMiB": 87.796875,
+      "webContentMiB": 553.921875,
+      "gpuMiB": 25.015625,
+      "networkMiB": 58.21875
+    },
+    {
+      "seconds": 59.701,
+      "hostMiB": 87.90625,
+      "webContentMiB": 523.140625,
+      "gpuMiB": 25.015625,
+      "networkMiB": 54.625
+    },
+    {
+      "seconds": 59.966,
+      "hostMiB": 87.453125,
+      "webContentMiB": 520.90625,
+      "gpuMiB": 24.265625,
+      "networkMiB": 52.5625
+    },
+    {
+      "seconds": 60.235,
+      "hostMiB": 87.46875,
+      "webContentMiB": 520.90625,
+      "gpuMiB": 24.265625,
+      "networkMiB": 52.5625
+    },
+    {
+      "seconds": 60.514,
+      "hostMiB": 87.46875,
+      "webContentMiB": 520.90625,
+      "gpuMiB": 24.28125,
+      "networkMiB": 52.5625
+    },
+    {
+      "seconds": 60.807,
+      "hostMiB": 86.71875,
+      "webContentMiB": 505.203125,
+      "gpuMiB": 23.8125,
+      "networkMiB": 50.5625
+    },
+    {
+      "seconds": 61.119,
+      "hostMiB": 86.71875,
+      "webContentMiB": 501.578125,
+      "gpuMiB": 23.8125,
+      "networkMiB": 47.796875
+    },
+    {
+      "seconds": 61.416,
+      "hostMiB": 86.71875,
+      "webContentMiB": 475.78125,
+      "gpuMiB": 23.8125,
+      "networkMiB": 31.65625
+    },
+    {
+      "seconds": 61.729,
+      "hostMiB": 86.71875,
+      "webContentMiB": 475.78125,
+      "gpuMiB": 23.8125,
+      "networkMiB": 31.671875
+    },
+    {
+      "seconds": 62.079,
+      "hostMiB": 86.71875,
+      "webContentMiB": 471.859375,
+      "gpuMiB": 23.8125,
+      "networkMiB": 30.828125
+    },
+    {
+      "seconds": 62.342,
+      "hostMiB": 86.71875,
+      "webContentMiB": 471.859375,
+      "gpuMiB": 23.8125,
+      "networkMiB": 30.1875
+    },
+    {
+      "seconds": 62.626,
+      "hostMiB": 86.03125,
+      "webContentMiB": 391.40625,
+      "gpuMiB": 23.765625,
+      "networkMiB": 11.125
+    },
+    {
+      "seconds": 62.885,
+      "hostMiB": 85.953125,
+      "webContentMiB": 297.640625,
+      "gpuMiB": 21.90625,
+      "networkMiB": 10.671875
+    },
+    {
+      "seconds": 63.151,
+      "hostMiB": 85.8125,
+      "webContentMiB": 291.890625,
+      "gpuMiB": 20.953125,
+      "networkMiB": 10.65625
+    },
+    {
+      "seconds": 63.422,
+      "hostMiB": 85.390625,
+      "webContentMiB": 291.484375,
+      "gpuMiB": 20.84375,
+      "networkMiB": 10.65625
+    },
+    {
+      "seconds": 63.692,
+      "hostMiB": 85.390625,
+      "webContentMiB": 291.484375,
+      "gpuMiB": 20.84375,
+      "networkMiB": 10.65625
+    },
+    {
+      "seconds": 63.959,
+      "hostMiB": 85.359375,
+      "webContentMiB": 291.46875,
+      "gpuMiB": 20.796875,
+      "networkMiB": 10.65625
+    },
+    {
+      "seconds": 64.221,
+      "hostMiB": 85.359375,
+      "webContentMiB": 291.46875,
+      "gpuMiB": 20.796875,
+      "networkMiB": 10.65625
+    },
+    {
+      "seconds": 64.487,
+      "hostMiB": 85.359375,
+      "webContentMiB": 291.46875,
+      "gpuMiB": 20.796875,
+      "networkMiB": 10.65625
+    },
+    {
+      "seconds": 64.758,
+      "hostMiB": 85.359375,
+      "webContentMiB": 289.453125,
+      "gpuMiB": 20.59375,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 65.025,
+      "hostMiB": 85.3125,
+      "webContentMiB": 289.421875,
+      "gpuMiB": 20.59375,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 65.294,
+      "hostMiB": 85.3125,
+      "webContentMiB": 289.359375,
+      "gpuMiB": 20.59375,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 65.575,
+      "hostMiB": 85.3125,
+      "webContentMiB": 288.65625,
+      "gpuMiB": 20.5,
+      "networkMiB": 10.59375
+    },
+    {
+      "seconds": 65.839,
+      "hostMiB": 85.3125,
+      "webContentMiB": 288.65625,
+      "gpuMiB": 20.5,
+      "networkMiB": 10.59375
+    },
+    {
+      "seconds": 66.103,
+      "hostMiB": 85.3125,
+      "webContentMiB": 288.65625,
+      "gpuMiB": 20.5,
+      "networkMiB": 10.59375
+    },
+    {
+      "seconds": 66.368,
+      "hostMiB": 85.1875,
+      "webContentMiB": 288.65625,
+      "gpuMiB": 20.5,
+      "networkMiB": 10.59375
+    },
+    {
+      "seconds": 66.637,
+      "hostMiB": 85.015625,
+      "webContentMiB": 288.578125,
+      "gpuMiB": 20.5,
+      "networkMiB": 10.59375
+    },
+    {
+      "seconds": 66.903,
+      "hostMiB": 85.015625,
+      "webContentMiB": 287.75,
+      "gpuMiB": 20.484375,
+      "networkMiB": 10.59375
+    },
+    {
+      "seconds": 67.183,
+      "hostMiB": 85.015625,
+      "webContentMiB": 287.75,
+      "gpuMiB": 20.484375,
+      "networkMiB": 10.59375
+    },
+    {
+      "seconds": 67.447,
+      "hostMiB": 85.015625,
+      "webContentMiB": 287.75,
+      "gpuMiB": 20.484375,
+      "networkMiB": 10.59375
+    },
+    {
+      "seconds": 67.713,
+      "hostMiB": 85.59375,
+      "webContentMiB": 364.484375,
+      "gpuMiB": 22.0625,
+      "networkMiB": 10.59375
+    },
+    {
+      "seconds": 67.984,
+      "hostMiB": 85.609375,
+      "webContentMiB": 425.015625,
+      "gpuMiB": 23.515625,
+      "networkMiB": 68.78125
+    },
+    {
+      "seconds": 68.251,
+      "hostMiB": 86.328125,
+      "webContentMiB": 426.265625,
+      "gpuMiB": 24.921875,
+      "networkMiB": 60.40625
+    },
+    {
+      "seconds": 68.507,
+      "hostMiB": 86.3125,
+      "webContentMiB": 426.265625,
+      "gpuMiB": 24.921875,
+      "networkMiB": 60.40625
+    },
+    {
+      "seconds": 68.779,
+      "hostMiB": 86.3125,
+      "webContentMiB": 426.3125,
+      "gpuMiB": 24.921875,
+      "networkMiB": 60.40625
+    },
+    {
+      "seconds": 69.037,
+      "hostMiB": 86.3125,
+      "webContentMiB": 426.3125,
+      "gpuMiB": 24.921875,
+      "networkMiB": 60.40625
+    },
+    {
+      "seconds": 69.315,
+      "hostMiB": 86.3125,
+      "webContentMiB": 426.3125,
+      "gpuMiB": 24.921875,
+      "networkMiB": 60.40625
+    },
+    {
+      "seconds": 69.583,
+      "hostMiB": 86.3125,
+      "webContentMiB": 426.359375,
+      "gpuMiB": 24.921875,
+      "networkMiB": 60.40625
+    },
+    {
+      "seconds": 69.841,
+      "hostMiB": 86.3125,
+      "webContentMiB": 426.359375,
+      "gpuMiB": 24.921875,
+      "networkMiB": 60.40625
+    },
+    {
+      "seconds": 70.101,
+      "hostMiB": 86.3125,
+      "webContentMiB": 426.328125,
+      "gpuMiB": 24.5,
+      "networkMiB": 60.40625
+    },
+    {
+      "seconds": 70.364,
+      "hostMiB": 86.3125,
+      "webContentMiB": 426.328125,
+      "gpuMiB": 24.5,
+      "networkMiB": 60.40625
+    },
+    {
+      "seconds": 70.63,
+      "hostMiB": 86.3125,
+      "webContentMiB": 426.328125,
+      "gpuMiB": 24.5,
+      "networkMiB": 60.40625
+    },
+    {
+      "seconds": 70.9,
+      "hostMiB": 86.296875,
+      "webContentMiB": 426.0,
+      "gpuMiB": 24.484375,
+      "networkMiB": 60.40625
+    },
+    {
+      "seconds": 71.157,
+      "hostMiB": 86.296875,
+      "webContentMiB": 426.0,
+      "gpuMiB": 24.484375,
+      "networkMiB": 60.40625
+    },
+    {
+      "seconds": 71.439,
+      "hostMiB": 85.953125,
+      "webContentMiB": 353.09375,
+      "gpuMiB": 24.0625,
+      "networkMiB": 46.828125
+    },
+    {
+      "seconds": 71.703,
+      "hostMiB": 85.359375,
+      "webContentMiB": 335.25,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 71.992,
+      "hostMiB": 85.359375,
+      "webContentMiB": 335.25,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 72.265,
+      "hostMiB": 85.359375,
+      "webContentMiB": 335.25,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 72.525,
+      "hostMiB": 85.359375,
+      "webContentMiB": 335.25,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 72.789,
+      "hostMiB": 85.359375,
+      "webContentMiB": 335.25,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 73.058,
+      "hostMiB": 85.359375,
+      "webContentMiB": 335.25,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 73.32,
+      "hostMiB": 85.359375,
+      "webContentMiB": 335.21875,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 73.621,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.765625,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 73.891,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.765625,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 74.154,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.765625,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 74.418,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.765625,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 74.697,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.765625,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.625
+    },
+    {
+      "seconds": 74.988,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.765625,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.984375
+    },
+    {
+      "seconds": 75.253,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.765625,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.984375
+    },
+    {
+      "seconds": 75.546,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.578125,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.984375
+    },
+    {
+      "seconds": 75.832,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.578125,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.984375
+    },
+    {
+      "seconds": 76.133,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.578125,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.984375
+    },
+    {
+      "seconds": 76.412,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.578125,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.984375
+    },
+    {
+      "seconds": 76.699,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.578125,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.984375
+    },
+    {
+      "seconds": 76.977,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.578125,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.984375
+    },
+    {
+      "seconds": 77.261,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.578125,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.984375
+    },
+    {
+      "seconds": 77.555,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.578125,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.984375
+    },
+    {
+      "seconds": 77.842,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.578125,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.984375
+    },
+    {
+      "seconds": 78.126,
+      "hostMiB": 85.828125,
+      "webContentMiB": 335.3125,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.984375
+    },
+    {
+      "seconds": 78.415,
+      "hostMiB": 85.640625,
+      "webContentMiB": 334.875,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.96875
+    },
+    {
+      "seconds": 78.69,
+      "hostMiB": 85.640625,
+      "webContentMiB": 334.875,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.96875
+    },
+    {
+      "seconds": 78.946,
+      "hostMiB": 85.515625,
+      "webContentMiB": 334.71875,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.96875
+    },
+    {
+      "seconds": 79.214,
+      "hostMiB": 85.46875,
+      "webContentMiB": 334.71875,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 79.482,
+      "hostMiB": 85.46875,
+      "webContentMiB": 334.71875,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 79.749,
+      "hostMiB": 85.46875,
+      "webContentMiB": 334.71875,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 80.016,
+      "hostMiB": 85.46875,
+      "webContentMiB": 334.71875,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 80.282,
+      "hostMiB": 85.46875,
+      "webContentMiB": 334.71875,
+      "gpuMiB": 21.390625,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 80.559,
+      "hostMiB": 85.453125,
+      "webContentMiB": 334.71875,
+      "gpuMiB": 21.375,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 80.83,
+      "hostMiB": 85.453125,
+      "webContentMiB": 334.71875,
+      "gpuMiB": 21.375,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 81.096,
+      "hostMiB": 85.453125,
+      "webContentMiB": 334.71875,
+      "gpuMiB": 21.375,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 81.355,
+      "hostMiB": 85.453125,
+      "webContentMiB": 349.765625,
+      "gpuMiB": 21.375,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 81.633,
+      "hostMiB": 85.453125,
+      "webContentMiB": 350.625,
+      "gpuMiB": 21.375,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 81.894,
+      "hostMiB": 85.453125,
+      "webContentMiB": 351.171875,
+      "gpuMiB": 21.375,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 82.163,
+      "hostMiB": 85.453125,
+      "webContentMiB": 351.171875,
+      "gpuMiB": 21.375,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 82.425,
+      "hostMiB": 85.453125,
+      "webContentMiB": 351.171875,
+      "gpuMiB": 21.375,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 82.707,
+      "hostMiB": 85.90625,
+      "webContentMiB": 386.59375,
+      "gpuMiB": 23.484375,
+      "networkMiB": 10.796875
+    },
+    {
+      "seconds": 83.027,
+      "hostMiB": 86.546875,
+      "webContentMiB": 389.9375,
+      "gpuMiB": 28.140625,
+      "networkMiB": 10.78125
+    },
+    {
+      "seconds": 83.285,
+      "hostMiB": 86.546875,
+      "webContentMiB": 375.375,
+      "gpuMiB": 28.140625,
+      "networkMiB": 10.78125
+    },
+    {
+      "seconds": 83.543,
+      "hostMiB": 86.53125,
+      "webContentMiB": 372.75,
+      "gpuMiB": 28.140625,
+      "networkMiB": 10.78125
+    },
+    {
+      "seconds": 83.827,
+      "hostMiB": 86.546875,
+      "webContentMiB": 349.125,
+      "gpuMiB": 28.15625,
+      "networkMiB": 10.78125
+    },
+    {
+      "seconds": 84.11,
+      "hostMiB": 86.34375,
+      "webContentMiB": 280.046875,
+      "gpuMiB": 27.609375,
+      "networkMiB": 10.78125
+    },
+    {
+      "seconds": 84.376,
+      "hostMiB": 86.34375,
+      "webContentMiB": 280.046875,
+      "gpuMiB": 27.609375,
+      "networkMiB": 10.78125
+    },
+    {
+      "seconds": 84.644,
+      "hostMiB": 86.34375,
+      "webContentMiB": 280.046875,
+      "gpuMiB": 27.609375,
+      "networkMiB": 10.78125
+    },
+    {
+      "seconds": 84.913,
+      "hostMiB": 86.34375,
+      "webContentMiB": 280.046875,
+      "gpuMiB": 27.609375,
+      "networkMiB": 10.78125
+    },
+    {
+      "seconds": 85.182,
+      "hostMiB": 86.34375,
+      "webContentMiB": 280.046875,
+      "gpuMiB": 27.609375,
+      "networkMiB": 10.78125
+    },
+    {
+      "seconds": 85.448,
+      "hostMiB": 86.34375,
+      "webContentMiB": 280.046875,
+      "gpuMiB": 27.125,
+      "networkMiB": 10.78125
+    },
+    {
+      "seconds": 85.737,
+      "hostMiB": 86.328125,
+      "webContentMiB": 277.40625,
+      "gpuMiB": 26.890625,
+      "networkMiB": 10.78125
+    },
+    {
+      "seconds": 86.009,
+      "hostMiB": 86.3125,
+      "webContentMiB": 272.4375,
+      "gpuMiB": 26.140625,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 86.276,
+      "hostMiB": 86.3125,
+      "webContentMiB": 272.4375,
+      "gpuMiB": 26.140625,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 86.537,
+      "hostMiB": 86.3125,
+      "webContentMiB": 272.4375,
+      "gpuMiB": 26.140625,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 86.807,
+      "hostMiB": 86.3125,
+      "webContentMiB": 272.421875,
+      "gpuMiB": 26.125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 87.068,
+      "hostMiB": 86.3125,
+      "webContentMiB": 272.421875,
+      "gpuMiB": 26.125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 87.333,
+      "hostMiB": 86.3125,
+      "webContentMiB": 272.421875,
+      "gpuMiB": 26.125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 87.6,
+      "hostMiB": 86.3125,
+      "webContentMiB": 272.40625,
+      "gpuMiB": 26.125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 87.868,
+      "hostMiB": 86.3125,
+      "webContentMiB": 272.40625,
+      "gpuMiB": 26.125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 88.136,
+      "hostMiB": 86.3125,
+      "webContentMiB": 273.09375,
+      "gpuMiB": 26.125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 88.424,
+      "hostMiB": 86.3125,
+      "webContentMiB": 273.15625,
+      "gpuMiB": 26.125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 88.69,
+      "hostMiB": 86.5625,
+      "webContentMiB": 273.734375,
+      "gpuMiB": 26.125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 88.973,
+      "hostMiB": 86.5625,
+      "webContentMiB": 273.734375,
+      "gpuMiB": 26.125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 89.253,
+      "hostMiB": 86.5625,
+      "webContentMiB": 273.734375,
+      "gpuMiB": 26.125,
+      "networkMiB": 10.75
+    },
+    {
+      "seconds": 89.538,
+      "hostMiB": 86.5625,
+      "webContentMiB": 273.609375,
+      "gpuMiB": 26.0625,
+      "networkMiB": 10.75
+    },
+    {
+      "seconds": 89.81,
+      "hostMiB": 86.5625,
+      "webContentMiB": 273.59375,
+      "gpuMiB": 26.046875,
+      "networkMiB": 10.75
+    },
+    {
+      "seconds": 90.119,
+      "hostMiB": 86.578125,
+      "webContentMiB": 273.59375,
+      "gpuMiB": 26.046875,
+      "networkMiB": 10.75
+    },
+    {
+      "seconds": 90.393,
+      "hostMiB": 86.578125,
+      "webContentMiB": 273.59375,
+      "gpuMiB": 26.046875,
+      "networkMiB": 10.75
+    },
+    {
+      "seconds": 90.676,
+      "hostMiB": 86.578125,
+      "webContentMiB": 273.59375,
+      "gpuMiB": 26.046875,
+      "networkMiB": 10.75
+    },
+    {
+      "seconds": 90.948,
+      "hostMiB": 86.578125,
+      "webContentMiB": 273.59375,
+      "gpuMiB": 26.046875,
+      "networkMiB": 10.75
+    },
+    {
+      "seconds": 91.224,
+      "hostMiB": 86.578125,
+      "webContentMiB": 273.59375,
+      "gpuMiB": 26.046875,
+      "networkMiB": 10.75
+    },
+    {
+      "seconds": 91.525,
+      "hostMiB": 86.578125,
+      "webContentMiB": 273.578125,
+      "gpuMiB": 26.046875,
+      "networkMiB": 10.75
+    },
+    {
+      "seconds": 91.8,
+      "hostMiB": 86.578125,
+      "webContentMiB": 273.578125,
+      "gpuMiB": 26.046875,
+      "networkMiB": 10.75
+    },
+    {
+      "seconds": 92.074,
+      "hostMiB": 86.578125,
+      "webContentMiB": 273.609375,
+      "gpuMiB": 26.046875,
+      "networkMiB": 10.75
+    },
+    {
+      "seconds": 92.375,
+      "hostMiB": 86.578125,
+      "webContentMiB": 272.9375,
+      "gpuMiB": 25.25,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 92.681,
+      "hostMiB": 86.578125,
+      "webContentMiB": 272.9375,
+      "gpuMiB": 25.25,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 92.951,
+      "hostMiB": 86.3125,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 24.875,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 93.233,
+      "hostMiB": 86.265625,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 24.875,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 93.51,
+      "hostMiB": 86.265625,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 24.875,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 93.777,
+      "hostMiB": 86.265625,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 24.875,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 94.046,
+      "hostMiB": 86.265625,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 24.875,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 94.315,
+      "hostMiB": 86.265625,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 24.875,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 94.58,
+      "hostMiB": 86.265625,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 24.875,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 94.851,
+      "hostMiB": 86.125,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 24.640625,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 95.112,
+      "hostMiB": 86.125,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 24.640625,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 95.378,
+      "hostMiB": 86.125,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 24.640625,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 95.684,
+      "hostMiB": 86.125,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 24.625,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 95.951,
+      "hostMiB": 86.09375,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 24.625,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 96.227,
+      "hostMiB": 86.0,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 23.78125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 96.497,
+      "hostMiB": 85.890625,
+      "webContentMiB": 272.765625,
+      "gpuMiB": 23.78125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 96.765,
+      "hostMiB": 85.890625,
+      "webContentMiB": 274.09375,
+      "gpuMiB": 23.78125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 97.033,
+      "hostMiB": 85.890625,
+      "webContentMiB": 274.09375,
+      "gpuMiB": 23.78125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 97.303,
+      "hostMiB": 85.890625,
+      "webContentMiB": 274.09375,
+      "gpuMiB": 23.78125,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 97.688,
+      "hostMiB": 86.078125,
+      "webContentMiB": 290.0625,
+      "gpuMiB": 24.671875,
+      "networkMiB": 10.765625
+    },
+    {
+      "seconds": 97.988,
+      "hostMiB": 86.09375,
+      "webContentMiB": 343.046875,
+      "gpuMiB": 25.34375,
+      "networkMiB": 60.71875
+    },
+    {
+      "seconds": 98.248,
+      "hostMiB": 86.578125,
+      "webContentMiB": 343.84375,
+      "gpuMiB": 26.46875,
+      "networkMiB": 60.609375
+    },
+    {
+      "seconds": 98.524,
+      "hostMiB": 86.5625,
+      "webContentMiB": 343.59375,
+      "gpuMiB": 26.5,
+      "networkMiB": 60.609375
+    },
+    {
+      "seconds": 98.784,
+      "hostMiB": 86.5625,
+      "webContentMiB": 343.59375,
+      "gpuMiB": 26.5,
+      "networkMiB": 60.609375
+    },
+    {
+      "seconds": 99.044,
+      "hostMiB": 86.5625,
+      "webContentMiB": 343.59375,
+      "gpuMiB": 26.5,
+      "networkMiB": 60.625
+    },
+    {
+      "seconds": 99.305,
+      "hostMiB": 86.5625,
+      "webContentMiB": 343.59375,
+      "gpuMiB": 26.5,
+      "networkMiB": 60.625
+    },
+    {
+      "seconds": 99.572,
+      "hostMiB": 86.5625,
+      "webContentMiB": 343.640625,
+      "gpuMiB": 26.5,
+      "networkMiB": 60.625
+    },
+    {
+      "seconds": 99.841,
+      "hostMiB": 86.5625,
+      "webContentMiB": 343.640625,
+      "gpuMiB": 26.5,
+      "networkMiB": 60.625
+    },
+    {
+      "seconds": 100.103,
+      "hostMiB": 86.6875,
+      "webContentMiB": 343.640625,
+      "gpuMiB": 26.078125,
+      "networkMiB": 60.625
+    },
+    {
+      "seconds": 100.371,
+      "hostMiB": 86.6875,
+      "webContentMiB": 343.640625,
+      "gpuMiB": 26.078125,
+      "networkMiB": 60.625
+    },
+    {
+      "seconds": 100.641,
+      "hostMiB": 86.6875,
+      "webContentMiB": 343.640625,
+      "gpuMiB": 26.078125,
+      "networkMiB": 60.625
+    },
+    {
+      "seconds": 100.936,
+      "hostMiB": 86.65625,
+      "webContentMiB": 343.515625,
+      "gpuMiB": 26.0625,
+      "networkMiB": 60.625
+    },
+    {
+      "seconds": 101.194,
+      "hostMiB": 86.640625,
+      "webContentMiB": 333.078125,
+      "gpuMiB": 26.0625,
+      "networkMiB": 60.609375
+    },
+    {
+      "seconds": 101.458,
+      "hostMiB": 86.640625,
+      "webContentMiB": 332.96875,
+      "gpuMiB": 26.0625,
+      "networkMiB": 60.59375
+    },
+    {
+      "seconds": 101.733,
+      "hostMiB": 86.328125,
+      "webContentMiB": 330.9375,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.515625
+    },
+    {
+      "seconds": 101.995,
+      "hostMiB": 86.328125,
+      "webContentMiB": 330.765625,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.515625
+    },
+    {
+      "seconds": 102.253,
+      "hostMiB": 86.328125,
+      "webContentMiB": 330.671875,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.515625
+    },
+    {
+      "seconds": 102.519,
+      "hostMiB": 86.328125,
+      "webContentMiB": 330.671875,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.515625
+    },
+    {
+      "seconds": 102.779,
+      "hostMiB": 86.328125,
+      "webContentMiB": 330.53125,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.515625
+    },
+    {
+      "seconds": 103.047,
+      "hostMiB": 86.328125,
+      "webContentMiB": 330.53125,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.515625
+    },
+    {
+      "seconds": 103.315,
+      "hostMiB": 86.328125,
+      "webContentMiB": 330.5,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.5
+    },
+    {
+      "seconds": 103.588,
+      "hostMiB": 86.46875,
+      "webContentMiB": 330.953125,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.5
+    },
+    {
+      "seconds": 103.855,
+      "hostMiB": 86.46875,
+      "webContentMiB": 330.9375,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.5
+    },
+    {
+      "seconds": 104.118,
+      "hostMiB": 86.46875,
+      "webContentMiB": 330.890625,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.5
+    },
+    {
+      "seconds": 104.39,
+      "hostMiB": 86.46875,
+      "webContentMiB": 330.890625,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.5
+    },
+    {
+      "seconds": 104.651,
+      "hostMiB": 86.46875,
+      "webContentMiB": 330.890625,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.5
+    },
+    {
+      "seconds": 104.925,
+      "hostMiB": 86.46875,
+      "webContentMiB": 330.890625,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.5
+    },
+    {
+      "seconds": 105.202,
+      "hostMiB": 86.46875,
+      "webContentMiB": 330.890625,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.671875
+    },
+    {
+      "seconds": 105.489,
+      "hostMiB": 86.46875,
+      "webContentMiB": 330.890625,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.671875
+    },
+    {
+      "seconds": 105.76,
+      "hostMiB": 86.46875,
+      "webContentMiB": 330.890625,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.671875
+    },
+    {
+      "seconds": 106.066,
+      "hostMiB": 86.46875,
+      "webContentMiB": 330.890625,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.671875
+    },
+    {
+      "seconds": 106.332,
+      "hostMiB": 86.46875,
+      "webContentMiB": 330.890625,
+      "gpuMiB": 25.9375,
+      "networkMiB": 60.671875
+    },
+    {
+      "seconds": 106.623,
+      "hostMiB": 85.890625,
+      "webContentMiB": 236.78125,
+      "gpuMiB": 23.4375,
+      "networkMiB": 10.015625
+    },
+    {
+      "seconds": 106.903,
+      "hostMiB": 85.828125,
+      "webContentMiB": 272.1875,
+      "gpuMiB": 23.125,
+      "networkMiB": 9.9375
+    },
+    {
+      "seconds": 107.238,
+      "hostMiB": 85.765625,
+      "webContentMiB": 272.40625,
+      "gpuMiB": 23.125,
+      "networkMiB": 9.9375
+    },
+    {
+      "seconds": 107.531,
+      "hostMiB": 85.765625,
+      "webContentMiB": 272.40625,
+      "gpuMiB": 23.125,
+      "networkMiB": 9.9375
+    },
+    {
+      "seconds": 107.863,
+      "hostMiB": 85.359375,
+      "webContentMiB": 272.140625,
+      "gpuMiB": 23.125,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 108.143,
+      "hostMiB": 85.34375,
+      "webContentMiB": 271.953125,
+      "gpuMiB": 23.125,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 108.446,
+      "hostMiB": 85.234375,
+      "webContentMiB": 271.953125,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 108.708,
+      "hostMiB": 85.234375,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 108.977,
+      "hostMiB": 85.234375,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.09375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 109.241,
+      "hostMiB": 85.5625,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 109.508,
+      "hostMiB": 85.5625,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 109.768,
+      "hostMiB": 85.5625,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 110.034,
+      "hostMiB": 85.5625,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 110.297,
+      "hostMiB": 85.5625,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 110.569,
+      "hostMiB": 85.5625,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 110.833,
+      "hostMiB": 85.5625,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 111.099,
+      "hostMiB": 85.5625,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 111.368,
+      "hostMiB": 85.5625,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 111.629,
+      "hostMiB": 85.5625,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 111.892,
+      "hostMiB": 85.5625,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 112.158,
+      "hostMiB": 85.5625,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 112.454,
+      "hostMiB": 85.71875,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 112.751,
+      "hostMiB": 85.71875,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 113.034,
+      "hostMiB": 85.71875,
+      "webContentMiB": 258.296875,
+      "gpuMiB": 23.109375,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 113.293,
+      "hostMiB": 85.421875,
+      "webContentMiB": 202.96875,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 113.598,
+      "hostMiB": 85.46875,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 113.861,
+      "hostMiB": 85.46875,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 114.12,
+      "hostMiB": 85.46875,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 114.386,
+      "hostMiB": 85.46875,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 114.645,
+      "hostMiB": 85.46875,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 114.919,
+      "hostMiB": 85.46875,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 115.189,
+      "hostMiB": 85.46875,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 115.453,
+      "hostMiB": 85.46875,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 115.721,
+      "hostMiB": 85.46875,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 115.988,
+      "hostMiB": 85.5,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 116.266,
+      "hostMiB": 85.5,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 116.563,
+      "hostMiB": 85.5,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 116.822,
+      "hostMiB": 85.5,
+      "webContentMiB": 202.84375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 117.094,
+      "hostMiB": 85.5,
+      "webContentMiB": 202.75,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 117.369,
+      "hostMiB": 85.5,
+      "webContentMiB": 202.75,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 117.641,
+      "hostMiB": 85.5,
+      "webContentMiB": 202.75,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 117.938,
+      "hostMiB": 85.5,
+      "webContentMiB": 202.75,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 118.208,
+      "hostMiB": 85.5,
+      "webContentMiB": 202.75,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 118.473,
+      "hostMiB": 85.5,
+      "webContentMiB": 202.75,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 118.738,
+      "hostMiB": 85.5,
+      "webContentMiB": 202.75,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 118.998,
+      "hostMiB": 85.453125,
+      "webContentMiB": 202.75,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 119.264,
+      "hostMiB": 85.453125,
+      "webContentMiB": 202.75,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 119.535,
+      "hostMiB": 85.453125,
+      "webContentMiB": 202.75,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 119.822,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 120.092,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 120.358,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 120.637,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 120.906,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 121.168,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 121.437,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 121.719,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 121.985,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 122.251,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 122.516,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 122.786,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 123.092,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 123.363,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 123.634,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 123.916,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 124.182,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 124.476,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 124.744,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 125.01,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 125.279,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 125.549,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 125.809,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 126.077,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 126.349,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 126.618,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 126.88,
+      "hostMiB": 85.703125,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 127.192,
+      "hostMiB": 85.5625,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 127.472,
+      "hostMiB": 85.5625,
+      "webContentMiB": 202.8125,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 127.748,
+      "hostMiB": 85.5625,
+      "webContentMiB": 202.796875,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 128.014,
+      "hostMiB": 85.5625,
+      "webContentMiB": 202.796875,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 128.322,
+      "hostMiB": 85.5625,
+      "webContentMiB": 202.796875,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 128.591,
+      "hostMiB": 85.5625,
+      "webContentMiB": 202.796875,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 128.872,
+      "hostMiB": 85.53125,
+      "webContentMiB": 202.796875,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 129.134,
+      "hostMiB": 85.53125,
+      "webContentMiB": 202.796875,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 129.394,
+      "hostMiB": 85.53125,
+      "webContentMiB": 202.796875,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 129.665,
+      "hostMiB": 85.53125,
+      "webContentMiB": 203.9375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 129.926,
+      "hostMiB": 85.53125,
+      "webContentMiB": 203.9375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 130.229,
+      "hostMiB": 85.53125,
+      "webContentMiB": 203.9375,
+      "gpuMiB": 22.21875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 130.485,
+      "hostMiB": 85.515625,
+      "webContentMiB": 203.9375,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 130.751,
+      "hostMiB": 85.515625,
+      "webContentMiB": 203.9375,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 131.056,
+      "hostMiB": 85.515625,
+      "webContentMiB": 203.9375,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 131.319,
+      "hostMiB": 85.515625,
+      "webContentMiB": 203.921875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 131.585,
+      "hostMiB": 85.515625,
+      "webContentMiB": 203.921875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 131.851,
+      "hostMiB": 85.515625,
+      "webContentMiB": 203.90625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 132.124,
+      "hostMiB": 85.515625,
+      "webContentMiB": 203.90625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 132.39,
+      "hostMiB": 85.515625,
+      "webContentMiB": 203.90625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 132.65,
+      "hostMiB": 85.515625,
+      "webContentMiB": 203.90625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 132.916,
+      "hostMiB": 85.515625,
+      "webContentMiB": 203.90625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 133.184,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.90625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 133.442,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.90625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 133.712,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.890625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 133.976,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.890625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 134.244,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.890625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 134.504,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.890625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 134.793,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.890625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 135.059,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.890625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 135.325,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.890625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 135.583,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.890625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 135.85,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.890625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 136.117,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.890625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 136.385,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.890625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 136.655,
+      "hostMiB": 85.5,
+      "webContentMiB": 203.890625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 136.944,
+      "hostMiB": 85.3125,
+      "webContentMiB": 203.828125,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 137.219,
+      "hostMiB": 85.3125,
+      "webContentMiB": 203.234375,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 137.482,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.71875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 137.787,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.71875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 138.061,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.71875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 138.33,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.71875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 138.597,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.71875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 138.866,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.71875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 139.132,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.71875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 139.407,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.71875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 139.697,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.703125,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 139.965,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.703125,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 140.228,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.703125,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 140.494,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.703125,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 140.76,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.703125,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 141.027,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.6875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 141.292,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.6875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 141.575,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.6875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.921875
+    },
+    {
+      "seconds": 141.84,
+      "hostMiB": 85.3125,
+      "webContentMiB": 202.6875,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.75
+    },
+    {
+      "seconds": 142.101,
+      "hostMiB": 85.734375,
+      "webContentMiB": 202.765625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 142.366,
+      "hostMiB": 85.734375,
+      "webContentMiB": 202.765625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 142.631,
+      "hostMiB": 85.734375,
+      "webContentMiB": 202.765625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 142.897,
+      "hostMiB": 85.734375,
+      "webContentMiB": 202.765625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 143.16,
+      "hostMiB": 85.734375,
+      "webContentMiB": 202.765625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 143.42,
+      "hostMiB": 85.734375,
+      "webContentMiB": 202.765625,
+      "gpuMiB": 22.1875,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 143.693,
+      "hostMiB": 85.5,
+      "webContentMiB": 202.375,
+      "gpuMiB": 22.171875,
+      "networkMiB": 9.5625
+    },
+    {
+      "seconds": 143.965,
+      "hostMiB": 85.328125,
+      "webContentMiB": 196.984375,
+      "gpuMiB": 22.09375,
+      "networkMiB": 9.5625
+    },
+    {
+      "seconds": 144.24,
+      "hostMiB": 84.9375,
+      "webContentMiB": 166.765625,
+      "gpuMiB": 21.5,
+      "networkMiB": 9.5625
+    },
+    {
+      "seconds": 144.507,
+      "hostMiB": 84.921875,
+      "webContentMiB": 166.734375,
+      "gpuMiB": 21.3125,
+      "networkMiB": 9.5625
+    },
+    {
+      "seconds": 144.781,
+      "hostMiB": 84.921875,
+      "webContentMiB": 166.734375,
+      "gpuMiB": 21.3125,
+      "networkMiB": 9.5625
+    },
+    {
+      "seconds": 145.067,
+      "hostMiB": 84.921875,
+      "webContentMiB": 166.734375,
+      "gpuMiB": 21.3125,
+      "networkMiB": 9.5625
+    },
+    {
+      "seconds": 145.353,
+      "hostMiB": 84.921875,
+      "webContentMiB": 166.734375,
+      "gpuMiB": 21.359375,
+      "networkMiB": 9.5625
+    },
+    {
+      "seconds": 145.622,
+      "hostMiB": 84.765625,
+      "webContentMiB": 153.96875,
+      "gpuMiB": 19.640625,
+      "networkMiB": 9.5625
+    },
+    {
+      "seconds": 145.889,
+      "hostMiB": 84.640625,
+      "webContentMiB": 153.8125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.5625
+    },
+    {
+      "seconds": 146.154,
+      "hostMiB": 84.640625,
+      "webContentMiB": 153.8125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.5625
+    },
+    {
+      "seconds": 146.414,
+      "hostMiB": 84.640625,
+      "webContentMiB": 153.8125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.5625
+    },
+    {
+      "seconds": 146.678,
+      "hostMiB": 84.640625,
+      "webContentMiB": 153.8125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.5625
+    },
+    {
+      "seconds": 146.962,
+      "hostMiB": 84.640625,
+      "webContentMiB": 153.8125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 147.23,
+      "hostMiB": 81.890625,
+      "webContentMiB": 153.8125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 147.497,
+      "hostMiB": 81.890625,
+      "webContentMiB": 153.8125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 147.755,
+      "hostMiB": 81.890625,
+      "webContentMiB": 153.8125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 148.024,
+      "hostMiB": 81.890625,
+      "webContentMiB": 153.8125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 148.287,
+      "hostMiB": 81.890625,
+      "webContentMiB": 153.8125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 148.589,
+      "hostMiB": 81.890625,
+      "webContentMiB": 153.8125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 148.85,
+      "hostMiB": 81.890625,
+      "webContentMiB": 153.8125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 149.117,
+      "hostMiB": 81.890625,
+      "webContentMiB": 153.53125,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 149.385,
+      "hostMiB": 81.78125,
+      "webContentMiB": 153.390625,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 149.657,
+      "hostMiB": 82.0,
+      "webContentMiB": 153.515625,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 149.923,
+      "hostMiB": 82.0,
+      "webContentMiB": 153.515625,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 150.19,
+      "hostMiB": 83.203125,
+      "webContentMiB": 153.515625,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 150.471,
+      "hostMiB": 83.15625,
+      "webContentMiB": 153.515625,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 150.747,
+      "hostMiB": 83.15625,
+      "webContentMiB": 153.515625,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 151.018,
+      "hostMiB": 83.140625,
+      "webContentMiB": 153.5,
+      "gpuMiB": 19.375,
+      "networkMiB": 9.765625
+    },
+    {
+      "seconds": 151.306,
+      "hostMiB": 81.078125,
+      "webContentMiB": 61.328125,
+      "gpuMiB": 15.9375,
+      "networkMiB": 8.125
+    },
+    {
+      "seconds": 151.573,
+      "hostMiB": 80.875,
+      "webContentMiB": 54.34375,
+      "gpuMiB": 15.515625,
+      "networkMiB": 8.109375
+    },
+    {
+      "seconds": 151.848,
+      "hostMiB": 80.875,
+      "webContentMiB": 54.34375,
+      "gpuMiB": 15.515625,
+      "networkMiB": 8.109375
+    },
+    {
+      "seconds": 152.116,
+      "hostMiB": 80.78125,
+      "webContentMiB": 43.75,
+      "gpuMiB": 15.1875,
+      "networkMiB": 8.046875
+    },
+    {
+      "seconds": 152.383,
+      "hostMiB": 79.765625,
+      "webContentMiB": 38.796875,
+      "gpuMiB": 14.109375,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 152.65,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 152.934,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 153.228,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 153.494,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 153.753,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 154.018,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 154.285,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 154.553,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 154.822,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.59375,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 155.106,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.59375,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 155.376,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.59375,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 155.645,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.59375,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 155.913,
+      "hostMiB": 79.71875,
+      "webContentMiB": 38.59375,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 156.208,
+      "hostMiB": 79.71875,
+      "webContentMiB": 37.609375,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 156.477,
+      "hostMiB": 79.6875,
+      "webContentMiB": 37.4375,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.03125
+    },
+    {
+      "seconds": 156.744,
+      "hostMiB": 79.6875,
+      "webContentMiB": 37.4375,
+      "gpuMiB": 14.0625,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 157.012,
+      "hostMiB": 79.6875,
+      "webContentMiB": 37.4375,
+      "gpuMiB": 14.0625,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 157.297,
+      "hostMiB": 79.6875,
+      "webContentMiB": 37.328125,
+      "gpuMiB": 14.046875,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 157.564,
+      "hostMiB": 79.6875,
+      "webContentMiB": 37.328125,
+      "gpuMiB": 14.046875,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 157.831,
+      "hostMiB": 82.78125,
+      "webContentMiB": 61.484375,
+      "gpuMiB": 14.046875,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 158.099,
+      "hostMiB": 82.765625,
+      "webContentMiB": 61.484375,
+      "gpuMiB": 14.046875,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 158.408,
+      "hostMiB": 82.78125,
+      "webContentMiB": 61.5,
+      "gpuMiB": 14.046875,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 158.692,
+      "hostMiB": 82.78125,
+      "webContentMiB": 61.5,
+      "gpuMiB": 14.046875,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 158.976,
+      "hostMiB": 82.78125,
+      "webContentMiB": 60.4375,
+      "gpuMiB": 14.046875,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 159.273,
+      "hostMiB": 82.78125,
+      "webContentMiB": 41.1875,
+      "gpuMiB": 14.046875,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 159.545,
+      "hostMiB": 82.78125,
+      "webContentMiB": 43.0625,
+      "gpuMiB": 14.046875,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 159.859,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.046875,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 160.122,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.046875,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 160.468,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.046875,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 160.739,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 161.016,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 161.282,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.8125
+    },
+    {
+      "seconds": 161.568,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 161.874,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 162.143,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 162.41,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 162.676,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 162.944,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 163.21,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 163.476,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 163.74,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 164.007,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 164.275,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 164.554,
+      "hostMiB": 82.78125,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.078125,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 164.825,
+      "hostMiB": 82.75,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 7.828125
+    },
+    {
+      "seconds": 165.092,
+      "hostMiB": 82.75,
+      "webContentMiB": 42.15625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.28125
+    },
+    {
+      "seconds": 165.359,
+      "hostMiB": 82.734375,
+      "webContentMiB": 42.078125,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.28125
+    },
+    {
+      "seconds": 165.622,
+      "hostMiB": 82.734375,
+      "webContentMiB": 42.078125,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.28125
+    },
+    {
+      "seconds": 165.886,
+      "hostMiB": 82.734375,
+      "webContentMiB": 42.078125,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.28125
+    },
+    {
+      "seconds": 166.154,
+      "hostMiB": 82.734375,
+      "webContentMiB": 42.078125,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.28125
+    },
+    {
+      "seconds": 166.427,
+      "hostMiB": 82.734375,
+      "webContentMiB": 42.078125,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.28125
+    },
+    {
+      "seconds": 166.693,
+      "hostMiB": 82.734375,
+      "webContentMiB": 41.90625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.28125
+    },
+    {
+      "seconds": 166.96,
+      "hostMiB": 82.734375,
+      "webContentMiB": 41.90625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.28125
+    },
+    {
+      "seconds": 167.229,
+      "hostMiB": 82.734375,
+      "webContentMiB": 41.90625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.28125
+    },
+    {
+      "seconds": 167.495,
+      "hostMiB": 82.734375,
+      "webContentMiB": 41.90625,
+      "gpuMiB": 14.0625,
+      "networkMiB": 8.28125
+    }
+  ],
+  "phases": [
+    {
+      "name": "BEGIN home_before_csv",
+      "seconds": 24.511
+    },
+    {
+      "name": "READY home_before_csv",
+      "seconds": 30.543,
+      "host": {
+        "footprintMiB": 32.3,
+        "lifetimePeakFootprintMiB": 74.2,
+        "WebKit Malloc": {
+          "virtualMiB": 64.0,
+          "residentMiB": 2.40625,
+          "dirtyMiB": 2.25,
+          "swappedMiB": 0.09375
+        }
+      },
+      "webContent": {
+        "footprintMiB": 317.8,
+        "lifetimePeakFootprintMiB": 395.4,
+        "JS VM Reservations": {
+          "virtualMiB": 2150.4,
+          "residentMiB": 2.125,
+          "dirtyMiB": 2.09375,
+          "swappedMiB": 13.0
+        },
+        "WebKit Malloc": {
+          "virtualMiB": 12697.6,
+          "residentMiB": 228.3,
+          "dirtyMiB": 214.6,
+          "swappedMiB": 36.5
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 39.8,
+          "residentMiB": 0.015625,
+          "dirtyMiB": 0.015625,
+          "swappedMiB": 25.5
+        }
+      },
+      "gpu": {
+        "footprintMiB": 19.3,
+        "lifetimePeakFootprintMiB": 121.0,
+        "WebKit Malloc": {
+          "virtualMiB": 96.1,
+          "residentMiB": 1.5,
+          "dirtyMiB": 1.4375,
+          "swappedMiB": 0.0625
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 6.1875,
+          "residentMiB": 0.140625,
+          "dirtyMiB": 0.140625,
+          "swappedMiB": 3.046875
+        }
+      },
+      "network": {
+        "footprintMiB": 8.9541015625,
+        "lifetimePeakFootprintMiB": 53.7,
+        "WebKit Malloc": {
+          "virtualMiB": 129.1,
+          "residentMiB": 3.34375,
+          "dirtyMiB": 3.171875,
+          "swappedMiB": 0.125
+        }
+      }
+    },
+    {
+      "name": "BEGIN csv_load_10000",
+      "seconds": 39.527
+    },
+    {
+      "name": "READY csv_review_10000",
+      "seconds": 39.731,
+      "host": {
+        "footprintMiB": 32.8,
+        "lifetimePeakFootprintMiB": 74.2,
+        "WebKit Malloc": {
+          "virtualMiB": 64.0,
+          "residentMiB": 2.625,
+          "dirtyMiB": 2.515625,
+          "swappedMiB": 0.078125
+        }
+      },
+      "webContent": {
+        "footprintMiB": 424.1,
+        "lifetimePeakFootprintMiB": 473.0,
+        "JS VM Reservations": {
+          "virtualMiB": 2150.4,
+          "residentMiB": 2.125,
+          "dirtyMiB": 2.03125,
+          "swappedMiB": 13.0
+        },
+        "WebKit Malloc": {
+          "virtualMiB": 12902.4,
+          "residentMiB": 385.8,
+          "dirtyMiB": 343.0,
+          "swappedMiB": 14.4
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 41.7,
+          "residentMiB": 24.9,
+          "dirtyMiB": 24.9,
+          "swappedMiB": 0.0
+        }
+      },
+      "gpu": {
+        "footprintMiB": 20.0,
+        "lifetimePeakFootprintMiB": 121.0,
+        "WebKit Malloc": {
+          "virtualMiB": 96.1,
+          "residentMiB": 2.171875,
+          "dirtyMiB": 1.46875,
+          "swappedMiB": 0.0625
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 66.2,
+          "residentMiB": 3.1875,
+          "dirtyMiB": 3.1875,
+          "swappedMiB": 0.0
+        }
+      },
+      "network": {
+        "footprintMiB": 8.9541015625,
+        "lifetimePeakFootprintMiB": 53.7,
+        "WebKit Malloc": {
+          "virtualMiB": 129.1,
+          "residentMiB": 3.34375,
+          "dirtyMiB": 3.171875,
+          "swappedMiB": 0.125
+        }
+      }
+    },
+    {
+      "name": "BEGIN csv_import_10000",
+      "seconds": 54.818
+    },
+    {
+      "name": "READY csv_imported_10000",
+      "seconds": 57.743,
+      "host": {
+        "footprintMiB": 32.7,
+        "lifetimePeakFootprintMiB": 74.2,
+        "WebKit Malloc": {
+          "virtualMiB": 64.0,
+          "residentMiB": 1.984375,
+          "dirtyMiB": 1.890625,
+          "swappedMiB": 0.65625
+        }
+      },
+      "webContent": {
+        "footprintMiB": 415.8,
+        "lifetimePeakFootprintMiB": 597.3,
+        "JS VM Reservations": {
+          "virtualMiB": 2048.0,
+          "residentMiB": 1.921875,
+          "dirtyMiB": 1.78125,
+          "swappedMiB": 0.0
+        },
+        "WebKit Malloc": {
+          "virtualMiB": 13004.8,
+          "residentMiB": 462.2,
+          "dirtyMiB": 349.8,
+          "swappedMiB": 18.9
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 41.9,
+          "residentMiB": 23.2,
+          "dirtyMiB": 23.2,
+          "swappedMiB": 0.0625
+        }
+      },
+      "gpu": {
+        "footprintMiB": 19.8,
+        "lifetimePeakFootprintMiB": 121.0,
+        "WebKit Malloc": {
+          "virtualMiB": 96.1,
+          "residentMiB": 1.59375,
+          "dirtyMiB": 1.015625,
+          "swappedMiB": 0.390625
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 66.2,
+          "residentMiB": 3.1875,
+          "dirtyMiB": 3.1875,
+          "swappedMiB": 0.0
+        }
+      },
+      "network": {
+        "footprintMiB": 9.1103515625,
+        "lifetimePeakFootprintMiB": 106.8,
+        "WebKit Malloc": {
+          "virtualMiB": 177.0,
+          "residentMiB": 21.3,
+          "dirtyMiB": 2.109375,
+          "swappedMiB": 1.28125
+        }
+      }
+    },
+    {
+      "name": "BEGIN home_after_import",
+      "seconds": 67.797
+    },
+    {
+      "name": "READY home_after_import",
+      "seconds": 73.594,
+      "host": {
+        "footprintMiB": 32.5,
+        "lifetimePeakFootprintMiB": 74.2,
+        "WebKit Malloc": {
+          "virtualMiB": 64.0,
+          "residentMiB": 1.71875,
+          "dirtyMiB": 1.671875,
+          "swappedMiB": 0.6875
+        }
+      },
+      "webContent": {
+        "footprintMiB": 432.0,
+        "lifetimePeakFootprintMiB": 597.3,
+        "JS VM Reservations": {
+          "virtualMiB": 2048.0,
+          "residentMiB": 1.390625,
+          "dirtyMiB": 1.390625,
+          "swappedMiB": 0.390625
+        },
+        "WebKit Malloc": {
+          "virtualMiB": 13004.8,
+          "residentMiB": 298.7,
+          "dirtyMiB": 294.6,
+          "swappedMiB": 75.9
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 42.0,
+          "residentMiB": 0.0,
+          "dirtyMiB": 0.0,
+          "swappedMiB": 25.5
+        }
+      },
+      "gpu": {
+        "footprintMiB": 20.0,
+        "lifetimePeakFootprintMiB": 121.0,
+        "WebKit Malloc": {
+          "virtualMiB": 96.1,
+          "residentMiB": 1.078125,
+          "dirtyMiB": 0.953125,
+          "swappedMiB": 0.453125
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 22.3,
+          "residentMiB": 0.09375,
+          "dirtyMiB": 0.09375,
+          "swappedMiB": 3.171875
+        }
+      },
+      "network": {
+        "footprintMiB": 9.0009765625,
+        "lifetimePeakFootprintMiB": 106.8,
+        "WebKit Malloc": {
+          "virtualMiB": 177.0,
+          "residentMiB": 2.0625,
+          "dirtyMiB": 1.890625,
+          "swappedMiB": 1.390625
+        }
+      }
+    },
+    {
+      "name": "BEGIN activity_after_import",
+      "seconds": 82.638
+    },
+    {
+      "name": "READY activity_after_import",
+      "seconds": 88.694,
+      "host": {
+        "footprintMiB": 32.6,
+        "lifetimePeakFootprintMiB": 74.2,
+        "WebKit Malloc": {
+          "virtualMiB": 64.0,
+          "residentMiB": 1.875,
+          "dirtyMiB": 1.703125,
+          "swappedMiB": 0.671875
+        }
+      },
+      "webContent": {
+        "footprintMiB": 369.9,
+        "lifetimePeakFootprintMiB": 597.3,
+        "JS VM Reservations": {
+          "virtualMiB": 2048.0,
+          "residentMiB": 1.78125,
+          "dirtyMiB": 1.78125,
+          "swappedMiB": 0.0
+        },
+        "WebKit Malloc": {
+          "virtualMiB": 13004.8,
+          "residentMiB": 234.3,
+          "dirtyMiB": 223.7,
+          "swappedMiB": 76.0
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 49.7,
+          "residentMiB": 34.9,
+          "dirtyMiB": 30.7,
+          "swappedMiB": 0.0
+        }
+      },
+      "gpu": {
+        "footprintMiB": 22.4,
+        "lifetimePeakFootprintMiB": 125.4,
+        "WebKit Malloc": {
+          "virtualMiB": 96.1,
+          "residentMiB": 1.71875,
+          "dirtyMiB": 1.140625,
+          "swappedMiB": 0.265625
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 24.5,
+          "residentMiB": 4.515625,
+          "dirtyMiB": 4.515625,
+          "swappedMiB": 0.0
+        }
+      },
+      "network": {
+        "footprintMiB": 9.0009765625,
+        "lifetimePeakFootprintMiB": 106.8,
+        "WebKit Malloc": {
+          "virtualMiB": 177.0,
+          "residentMiB": 2.0625,
+          "dirtyMiB": 1.890625,
+          "swappedMiB": 1.390625
+        }
+      }
+    },
+    {
+      "name": "BEGIN home_settle",
+      "seconds": 97.802
+    },
+    {
+      "name": "READY home_settle",
+      "seconds": 103.643,
+      "host": {
+        "footprintMiB": 32.6,
+        "lifetimePeakFootprintMiB": 74.2,
+        "WebKit Malloc": {
+          "virtualMiB": 64.0,
+          "residentMiB": 1.796875,
+          "dirtyMiB": 1.5,
+          "swappedMiB": 0.828125
+        }
+      },
+      "webContent": {
+        "footprintMiB": 365.9,
+        "lifetimePeakFootprintMiB": 597.3,
+        "JS VM Reservations": {
+          "virtualMiB": 2048.0,
+          "residentMiB": 1.765625,
+          "dirtyMiB": 1.765625,
+          "swappedMiB": 0.015625
+        },
+        "WebKit Malloc": {
+          "virtualMiB": 13004.8,
+          "residentMiB": 273.8,
+          "dirtyMiB": 217.9,
+          "swappedMiB": 74.9
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 49.8,
+          "residentMiB": 36.1,
+          "dirtyMiB": 31.8,
+          "swappedMiB": 0.0
+        }
+      },
+      "gpu": {
+        "footprintMiB": 22.5,
+        "lifetimePeakFootprintMiB": 125.4,
+        "WebKit Malloc": {
+          "virtualMiB": 96.1,
+          "residentMiB": 1.203125,
+          "dirtyMiB": 1.109375,
+          "swappedMiB": 0.34375
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 24.5,
+          "residentMiB": 1.671875,
+          "dirtyMiB": 1.671875,
+          "swappedMiB": 2.84375
+        }
+      },
+      "network": {
+        "footprintMiB": 9.0478515625,
+        "lifetimePeakFootprintMiB": 106.8,
+        "WebKit Malloc": {
+          "virtualMiB": 177.0,
+          "residentMiB": 1.40625,
+          "dirtyMiB": 1.359375,
+          "swappedMiB": 1.96875
+        }
+      }
+    },
+    {
+      "name": "READY final_idle",
+      "seconds": 157.736,
+      "host": {
+        "footprintMiB": 32.6,
+        "lifetimePeakFootprintMiB": 74.2,
+        "WebKit Malloc": {
+          "virtualMiB": 64.0,
+          "residentMiB": 1.203125,
+          "dirtyMiB": 1.140625,
+          "swappedMiB": 1.1875
+        }
+      },
+      "webContent": {
+        "footprintMiB": 351.1,
+        "lifetimePeakFootprintMiB": 597.3,
+        "JS VM Reservations": {
+          "virtualMiB": 2048.0,
+          "residentMiB": 0.609375,
+          "dirtyMiB": 0.609375,
+          "swappedMiB": 1.171875
+        },
+        "WebKit Malloc": {
+          "virtualMiB": 13004.8,
+          "residentMiB": 21.1,
+          "dirtyMiB": 21.0,
+          "swappedMiB": 254.8
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 49.8,
+          "residentMiB": 0.0,
+          "dirtyMiB": 0.0,
+          "swappedMiB": 31.8
+        }
+      },
+      "gpu": {
+        "footprintMiB": 22.5,
+        "lifetimePeakFootprintMiB": 125.4,
+        "WebKit Malloc": {
+          "virtualMiB": 96.1,
+          "residentMiB": 0.0,
+          "dirtyMiB": 0.0,
+          "swappedMiB": 1.421875
+        },
+        "owned unmapped (graphics)": {
+          "virtualMiB": 8.515625,
+          "residentMiB": 0.1875,
+          "dirtyMiB": 0.1875,
+          "swappedMiB": 4.328125
+        }
+      },
+      "network": {
+        "footprintMiB": 9.0009765625,
+        "lifetimePeakFootprintMiB": 106.8,
+        "WebKit Malloc": {
+          "virtualMiB": 177.0,
+          "residentMiB": 0.109375,
+          "dirtyMiB": 0.109375,
+          "swappedMiB": 3.1875
+        }
+      }
+    }
+  ],
+  "complete": true
+}

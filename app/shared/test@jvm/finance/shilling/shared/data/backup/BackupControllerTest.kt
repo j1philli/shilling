@@ -29,7 +29,7 @@ class BackupControllerTest {
             override suspend fun write(namespace: String, value: String) { secret = value }
             override suspend fun delete(namespace: String) { secret = null }
         }
-        RecoveryKeyRepository(vault, "http://test|house").importKey(BackupCrypto().newKey(), saved = true)
+        RecoveryKeyRepository(vault, "https://test|house").importKey(BackupCrypto().newKey(), saved = true)
         gate = true
         val http = HttpClient(MockEngine { respond(Json.encodeToString(BackupPolicy(enabled = true, available = true)),
             headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())) }) {
@@ -37,7 +37,7 @@ class BackupControllerTest {
         }
         val budget = CloudSyncTest.Budget("device")
         budget.init()
-        val controller = BackupController(http, "http://test", "house", "device", NoOpAuthService("device"), vault,
+        val controller = BackupController(http, "https://test", "house", "device", NoOpAuthService("device"), vault,
             { error("Refreshing policy must not create WebRTC") }, this, budget.cloud)
         try {
             val refresh = async { controller.refresh() }

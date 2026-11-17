@@ -16,22 +16,22 @@ private val log = Logger.withTag("Signaling")
 
 class SignalingClient(
     private val httpClient: HttpClient,
-    serverUrl: String,
+    private val serverUrl: String,
     private val deviceId: String,
     private val householdId: String,
     private val authService: finance.shilling.shared.data.auth.AuthService? = null,
     private val path: String = "/ws/signal",
     private val accessToken: (suspend () -> String?)? = null
 ) {
-    private val wsUrl = serverUrl
-        .replace("http://", "ws://")
-        .replace("https://", "wss://")
-
     private val _incomingMessages = MutableSharedFlow<SignalingMessage>(extraBufferCapacity = 64)
     val incomingMessages: SharedFlow<SignalingMessage> = _incomingMessages
 
+    private val _policyRejected = MutableStateFlow(false)
+    val policyRejected: StateFlow<Boolean> = _policyRejected.asStateFlow()
+
     private var session: WebSocketSession? = null
     private var connectionJob: Job? = null
+    private val backoff = ReconnectBackoff()
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -39,78 +39,100 @@ class SignalingClient(
     }
 
     fun connect(scope: CoroutineScope) {
-        log.i { "[SIG] connect() called — wsUrl=$wsUrl device=$deviceId household=$householdId" }
         connectionJob?.let {
             log.w { "[SIG] Cancelling previous connection job before reconnecting" }
             it.cancel()
         }
         session = null
+        connectionJob = null
+        _policyRejected.value = false
+        val wsUrl = try {
+            secureSignalingUrl(serverUrl, path)
+        } catch (_: IllegalArgumentException) {
+            // Old saved HTTP settings must disable sync without crashing local budgeting.
+            log.e { "[SIG] $SECURE_SIGNALING_REQUIRED" }
+            return
+        }
         connectionJob = scope.launch {
-            var backoffMs = 1000L
-            while (isActive) {
-                try {
-                    log.i { "[SIG] Opening WebSocket to $wsUrl/ws/signal ..." }
-                    httpClient.webSocket("$wsUrl$path", request = {
-                        // Bootstrap HTTP requests have a short timeout. Signaling is a long-lived
-                        // control channel; WebSocket ping/pong detects dead connections instead.
-                        timeout {
-                            requestTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
-                            socketTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
-                        }
-                    }) {
-                        session = this
-                        backoffMs = 1000L
-                        log.i { "[SIG] WebSocket CONNECTED to $wsUrl/ws/signal" }
-                        val token = accessToken?.invoke() ?: authService?.refreshTokenIfNeeded()
-                        log.i { "[SIG] Sending Join(device=$deviceId, household=$householdId, hasToken=${token != null})" }
-                        send(json.encodeToString<SignalingMessage>(
-                            SignalingMessage.Join(deviceId, householdId, token)
-                        ))
-                        log.i { "[SIG] Join sent — listening for frames..." }
-                        try {
-                            for (frame in incoming) {
-                                if (frame is Frame.Text) {
-                                    val text = frame.readText()
-                                    val msg = json.decodeFromString<SignalingMessage>(text)
-                                    log.i { "[SIG] <<< ${messageSummary(msg)}" }
-                                    _incomingMessages.emit(msg)
-                                } else {
-                                    log.d { "[SIG] Non-text frame: ${frame.frameType}" }
+            val transport = httpClient.signalingTransport()
+            try {
+                backoff.reset()
+                while (isActive) {
+                    try {
+                        log.i { "[SIG] Opening encrypted signaling connection ..." }
+                        transport.webSocket(wsUrl) {
+                            session = this
+                            backoff.reset()
+                            log.i { "[SIG] Encrypted signaling connected" }
+                            val token = accessToken?.invoke() ?: authService?.refreshTokenIfNeeded()
+                            log.i { "[SIG] Sending Join(device=$deviceId, household=$householdId, hasToken=${token != null})" }
+                            send(json.encodeToString<SignalingMessage>(
+                                SignalingMessage.Join(deviceId, householdId, token)
+                            ))
+                            log.i { "[SIG] Join sent — listening for frames..." }
+                            try {
+                                for (frame in incoming) {
+                                    if (frame is Frame.Text) {
+                                        val text = frame.readText()
+                                        val msg = json.decodeFromString<SignalingMessage>(text)
+                                        log.i { "[SIG] <<< ${messageSummary(msg)}" }
+                                        _incomingMessages.emit(msg)
+                                    } else {
+                                        log.d { "[SIG] Non-text frame: ${frame.frameType}" }
+                                    }
+                                }
+                                log.w { "[SIG] Incoming frame loop ended (server closed connection)" }
+                                if (closeReason.await()?.code == CloseReason.Codes.VIOLATED_POLICY.code) {
+                                    _policyRejected.value = true
+                                }
+                            } finally {
+                                log.i { "[SIG] Frame loop exited — sending Close frame" }
+                                withContext(NonCancellable) {
+                                    try {
+                                        close(CloseReason(CloseReason.Codes.NORMAL, ""))
+                                    } catch (_: Exception) {}
                                 }
                             }
-                            log.w { "[SIG] Incoming frame loop ended (close code=${closeReason.await()?.code})" }
-                        } finally {
-                            log.i { "[SIG] Frame loop exited — sending Close frame" }
-                            withContext(NonCancellable) {
-                                try {
-                                    close(CloseReason(CloseReason.Codes.NORMAL, ""))
-                                } catch (_: Exception) {}
-                            }
+                        }
+                    } catch (e: CancellationException) {
+                        log.i { "[SIG] Cancelled" }
+                        throw e
+                    } catch (e: Exception) {
+                        log.e { "[SIG] Connection FAILED: ${e::class.simpleName}: ${e.message}" }
+                        var cause = e.cause
+                        var depth = 1
+                        while (cause != null && depth <= 3) {
+                            log.e { "[SIG]   cause[$depth]: ${cause!!::class.simpleName}: ${cause!!.message}" }
+                            cause = cause!!.cause
+                            depth++
                         }
                     }
-                } catch (e: CancellationException) {
-                    log.i { "[SIG] Cancelled" }
-                    throw e
-                } catch (e: Exception) {
-                    log.e { "[SIG] Connection FAILED: ${e::class.simpleName}: ${e.message}" }
-                    var cause = e.cause
-                    var depth = 1
-                    while (cause != null && depth <= 3) {
-                        log.e { "[SIG]   cause[$depth]: ${cause!!::class.simpleName}: ${cause!!.message}" }
-                        cause = cause!!.cause
-                        depth++
-                    }
+                    session = null
+                    // Do not silently re-register a removed device or retry a rejected join.
+                    // An explicit sync restart may attempt registration again.
+                    if (_policyRejected.value) break
+                    if (!isActive) break
+                    log.i { "[SIG] Reconnecting in ${backoff.currentMs}ms..." }
+                    if (backoff.await()) log.i { "[SIG] Woken early — reconnecting now" }
                 }
-                session = null
-                if (!isActive) break
-                log.i { "[SIG] Reconnecting in ${backoffMs}ms..." }
-                delay(backoffMs)
-                backoffMs = (backoffMs * 2).coerceAtMost(30_000L)
+            } finally {
+                transport.close()
             }
         }
     }
 
     val isConnected: Boolean get() = session != null
+
+    /**
+     * The app came back to the foreground: if a reconnect is waiting out its backoff, retry now.
+     * A live session is left alone; a session the server already dropped ends on its own and
+     * reconnects from the start of the schedule.
+     */
+    fun reconnectNow() {
+        if (connectionJob == null) return
+        if (session == null) log.i { "[SIG] reconnectNow() — cutting reconnect backoff short" }
+        backoff.wake()
+    }
 
     suspend fun send(message: SignalingMessage): Boolean {
         val s = session

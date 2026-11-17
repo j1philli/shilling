@@ -69,7 +69,7 @@ class CloudObjectTest {
             try {
                 val receipt = Receipt("receipt", filePath = "receipts/receipt", originalName = "receipt.bin", addedAt = 1)
                 val receiptBytes = ByteArray(70_000) { (it % 251).toByte() }
-                val receipts = ReceiptRepository(source.notifier, createReceiptStore(source.db, source.deps), createPostingStore(source.db), createScheduleStore(source.db), source.deps)
+                val receipts = ReceiptRepository(source.notifier, createReceiptStore(source.db, source.deps), source.deps)
                 receipts.save(receipt); source.files.store(receipt.id, receipt.originalName, receiptBytes)
                 source.accounts.upsert(Account("removed", "Delete me", 5.0)); flush()
                 assertEquals(1, objects.values.size)
@@ -102,7 +102,7 @@ class CloudObjectTest {
                 assertFails { target.cloud.apply("cloud", "house", target.device, latest + 1, download(published), true) { download(it.objectInfo) } }
                 assertEquals(0L, target.cloud.cursor("cloud"))
                 pull(target)
-                assertEquals(setOf("new", "offline"), target.db.accountQueries.selectAll().awaitAsList().map { it.id }.toSet())
+                assertEquals(setOf("new", "offline"), target.db.accountQueries.selectAll("__local__").awaitAsList().map { it.id }.toSet())
                 assertContentEquals(receiptBytes, target.files.read("receipt"))
                 assertEquals(latest, target.cloud.cursor("cloud"))
                 // A lagging device's old entity must not resurrect a checkpoint tombstone.

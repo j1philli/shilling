@@ -13,6 +13,14 @@ These rules are mandatory for any change in this repo.
 - Hosted cloud peers may persist encrypted sync logs, receipt chunks, checkpoints, and backup manifests to Supabase Postgres and private Supabase Storage over TLS inside the Store5 repository boundary. Cloud catch-up is allowed only over WebRTC. Trusted-cloud processing uses service-held keys and the same Store5 validation/merge path; external integrations require separate explicit authorization. This exception does not permit device database access, REST entity sync, or payloads through signaling.
 - If a platform cannot support WebRTC P2P for user data, disable sync on that platform. Do not add a fallback transport.
 
+## Bank Provider Exception
+
+- Clients may fetch bank-provider data over HTTPS with the user’s consent (authorized October 1, 2026).
+- This exception applies only to bank-provider ingestion. Device sync remains WebRTC P2P only.
+- Imported records must enter through Store5/repositories. Do not put provider secrets in client apps.
+- This exception does not authorize a hosted bank-data proxy, server transaction ledger, or REST entity sync.
+- Bank data must stay off Shilling servers, including transient forwarding, logging, and storage (confirmed October 1, 2026). Live bank connections are deferred; do not implement the proposed Plaid proxy.
+
 ## Data Rules
 
 - Keep entity data flows inside the Store5/repository layer under `app/shared/.../data/store/`.
@@ -21,4 +29,4 @@ These rules are mandatory for any change in this repo.
 
 ## Regression Check
 
-Run `just guard-architecture` before finishing changes that touch sync, server, or data flow code.
+Run `mise run guard-architecture` before finishing changes that touch sync, server, or data flow code.

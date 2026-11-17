@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+#MISE description="Build and deploy the Android app to a connected device"
+#MISE depends=["ensure-plugin"]
+set -euo pipefail
+
+ADB="${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb"
+
+# Find real devices (not emulators)
+DEVICE_LINES=$("$ADB" devices | grep -v "emulator-" | grep "device$" | awk '{print $1}' || true)
+if [ -z "$DEVICE_LINES" ]; then
+    echo "Error: No real Android device connected."
+    echo "  - Connect via USB and enable USB debugging"
+    echo "  - Or connect via WiFi: adb pair <ip>:<port>"
+    exit 1
+fi
+
+DEVICE_COUNT=$(echo "$DEVICE_LINES" | wc -l | tr -d ' ')
+if [ "$DEVICE_COUNT" -eq 1 ]; then
+    SERIAL="$DEVICE_LINES"
+else
+    echo "==> Multiple Android devices found:"
+    echo ""
+    i=1
+    while IFS= read -r line; do
+        # Try to get a friendly model name
+        MODEL=$("$ADB" -s "$line" shell getprop ro.product.model 2>/dev/null || echo "unknown")
+        echo "  $i) $line ($MODEL)"
+        i=$((i + 1))
+    done <<< "$DEVICE_LINES"
+    echo ""
+    printf "Select device [1-%d]: " "$DEVICE_COUNT"
+    read -r CHOICE
+    if ! [[ "$CHOICE" =~ ^[0-9]+$ ]] || [ "$CHOICE" -lt 1 ] || [ "$CHOICE" -gt "$DEVICE_COUNT" ]; then
+        echo "Error: Invalid selection."
+        exit 1
+    fi
+    SERIAL=$(echo "$DEVICE_LINES" | sed -n "${CHOICE}p")
+fi
+
+DEVICE_MODEL=$("$ADB" -s "$SERIAL" shell getprop ro.product.model 2>/dev/null || echo "$SERIAL")
+echo "==> Selected device: $DEVICE_MODEL ($SERIAL)"
+
+LAN_IP=$(ipconfig getifaddr en0 2>/dev/null || echo "unknown")
+echo "==> Host LAN IP: $LAN_IP"
+echo "    Run 'mise run sync-proxy', then use https://$LAN_IP:8443 as the self-hosted server URL"
+echo ""
+
+
+echo "==> Building android-app..."
+./kotlin build -m android-app
+
+echo "==> Installing APK..."
+APK=$(find build/tasks -name "*.apk" -path "*android-app*" | head -1)
+if [ -z "$APK" ]; then
+    echo "Error: No APK found in build/tasks"
+    exit 1
+fi
+"$ADB" -s "$SERIAL" install -r "$APK"
+
+echo "==> Launching app..."
+"$ADB" -s "$SERIAL" shell am start -n finance.shilling.android/.MainActivity
+
+echo "==> Attaching to logs (Ctrl-C to stop)..."
+sleep 1
+PID=$("$ADB" -s "$SERIAL" shell pidof finance.shilling.android 2>/dev/null || true)
+if [ -n "$PID" ]; then
+    "$ADB" -s "$SERIAL" logcat --pid="$PID"
+else
+    "$ADB" -s "$SERIAL" logcat -s "Android:*" "Shilling:*" "AndroidRuntime:E"
+fi

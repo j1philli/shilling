@@ -8,6 +8,13 @@ import finance.shilling.shared.data.sync.SignalingClient
 import finance.shilling.shared.data.sync.createSyncHttpClient
 import io.ktor.client.webrtc.*
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.engine.sslConnector
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.websocket.WebSockets as ClientWebSockets
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
+import java.security.KeyStore
 import io.ktor.server.netty.Netty
 import io.ktor.server.application.install
 import io.ktor.server.routing.routing
@@ -35,12 +42,26 @@ class BackupWebRtcTest {
         policy.update(households[0], BackupPolicyUpdate(true, true, 0), true)
         policy.update(households[1], BackupPolicyUpdate(true, true, 0, BackupEncryption.TRUSTED_CLOUD, TRUSTED_CLOUD_CONSENT), true)
         val control = BackupControl(policy, mapOf("worker" to secret), true)
-        val server = embeddedServer(Netty, host = "127.0.0.1", port = 0) {
+        val keyStorePath = root.resolve("test-tls.p12")
+        val password = "test-fixture-only".toCharArray()
+        val keytool = ProcessBuilder("keytool", "-genkeypair", "-alias", "test", "-keyalg", "RSA",
+            "-keystore", keyStorePath.toString(), "-storetype", "PKCS12", "-storepass", String(password),
+            "-keypass", String(password), "-dname", "CN=localhost", "-ext", "SAN=ip:127.0.0.1,dns:localhost", "-validity", "1")
+            .redirectErrorStream(true).redirectOutput(root.resolve("keytool.log").toFile()).start()
+        check(keytool.waitFor() == 0) { "Could not create test TLS certificate" }
+        val keyStore = KeyStore.getInstance("PKCS12").apply { Files.newInputStream(keyStorePath).use { load(it, password) } }
+        val trust = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()).apply { init(keyStore) }
+        val server = embeddedServer(Netty, configure = {
+            sslConnector(keyStore, "test", { password }, { password }) { host = "127.0.0.1"; port = 0 }
+        }) {
             install(WebSockets)
             routing { backupRoutes(control, null, null); signalingRoute(SignalingHub(), path = "/ws/recovery-keys") }
         }.start()
-        val url = "http://127.0.0.1:${server.engine.resolvedConnectors().first().port}"
-        val http = createSyncHttpClient()
+        val url = "https://127.0.0.1:${server.engine.resolvedConnectors().first().port}"
+        val http = HttpClient(CIO) {
+            install(ClientWebSockets)
+            engine { https { trustManager = trust.trustManagers.filterIsInstance<X509TrustManager>().single() } }
+        }
         val rtc = WebRtcClient(JvmWebRtc) {
             if (forceRelay) defaultConnectionConfig = {
                 iceServers = listOf(WebRtc.IceServer(System.getenv("SHILLING_TEST_TURN_URL"), "backup-test", "backup-test-password"))

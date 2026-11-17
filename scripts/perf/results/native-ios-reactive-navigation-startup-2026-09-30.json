@@ -1,0 +1,666 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-30",
+  "device": "iPhone SE (2nd generation), iOS 18.7.8",
+  "build": "Release arm64",
+  "dataset": {
+    "accounts": 10,
+    "categories": 40,
+    "schedules": 1000,
+    "postings": 10000,
+    "receipts": 250,
+    "additionalFixedProbePosting": 1
+  },
+  "home": {
+    "before": {
+      "load": {
+        "medianElapsedMs": 176.4,
+        "medianCpuMs": 158.4
+      },
+      "updates": {
+        "medianCpuMs": 916.6,
+        "returnedRows": {
+          "accounts": 100,
+          "bookkeeping": 0,
+          "categories": 800,
+          "postings": 60,
+          "receipts": 2500,
+          "schedule_exceptions": 0,
+          "schedules": 20000
+        },
+        "queries": 260
+      }
+    },
+    "after": {
+      "load": {
+        "samples": 3,
+        "medianElapsedMs": 179.2,
+        "medianCpuMs": 141.6,
+        "medianMaxCallbackGapMs": 58.5,
+        "totalGapsOver25Ms": 2,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          137.1,
+          151.3,
+          141.6
+        ]
+      },
+      "updates": {
+        "samples": 3,
+        "medianElapsedMs": 4212.0,
+        "medianCpuMs": 378.5,
+        "medianMaxCallbackGapMs": 16.7,
+        "totalGapsOver25Ms": 0,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          378.5,
+          379.8,
+          367.6
+        ]
+      },
+      "scroll": {
+        "samples": 3,
+        "medianElapsedMs": 3195.6,
+        "medianCpuMs": 156.7,
+        "medianMaxCallbackGapMs": 16.7,
+        "totalGapsOver25Ms": 0,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          155.0,
+          158.1,
+          156.7
+        ]
+      },
+      "updateDatabaseSnapshots": [
+        {
+          "activeListeners": 21,
+          "mainThreadQueries": 0,
+          "queries": 30,
+          "rows": {
+            "postings": 60,
+            "receipts": 10
+          },
+          "tables": {
+            "postings": 20,
+            "receipts": 10
+          }
+        },
+        {
+          "activeListeners": 21,
+          "mainThreadQueries": 0,
+          "queries": 30,
+          "rows": {
+            "postings": 60,
+            "receipts": 10
+          },
+          "tables": {
+            "postings": 20,
+            "receipts": 10
+          }
+        },
+        {
+          "activeListeners": 21,
+          "mainThreadQueries": 0,
+          "queries": 30,
+          "rows": {
+            "postings": 60,
+            "receipts": 10
+          },
+          "tables": {
+            "postings": 20,
+            "receipts": 10
+          }
+        }
+      ]
+    }
+  },
+  "editorNavigation": {
+    "before": {
+      "push-account": {
+        "samples": 6,
+        "medianElapsedMs": 171.6,
+        "medianCpuMs": 130.7,
+        "medianMaxCallbackGapMs": 41.7,
+        "totalGapsOver25Ms": 9,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          188.6,
+          111.8,
+          148.5,
+          112.9,
+          150.5,
+          110.7
+        ]
+      },
+      "focus-account": {
+        "samples": 6,
+        "medianElapsedMs": 466.4,
+        "medianCpuMs": 140.8,
+        "medianMaxCallbackGapMs": 53.9,
+        "totalGapsOver25Ms": 7,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          213.1,
+          102.4,
+          173.3,
+          115.2,
+          166.3,
+          104.8
+        ]
+      },
+      "typing-account": {
+        "samples": 6,
+        "medianElapsedMs": 582.9,
+        "medianCpuMs": 226.4,
+        "medianMaxCallbackGapMs": 19.4,
+        "totalGapsOver25Ms": 2,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          217.1,
+          228.0,
+          230.5,
+          214.5,
+          228.1,
+          224.8
+        ]
+      },
+      "pop-account": {
+        "samples": 6,
+        "medianElapsedMs": 1018.3,
+        "medianCpuMs": 166.4,
+        "medianMaxCallbackGapMs": 63.5,
+        "totalGapsOver25Ms": 6,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          122.8,
+          164.7,
+          174.1,
+          168.2,
+          175.9,
+          164.4
+        ]
+      },
+      "push-category": {
+        "samples": 6,
+        "medianElapsedMs": 169.7,
+        "medianCpuMs": 120.6,
+        "medianMaxCallbackGapMs": 38.6,
+        "totalGapsOver25Ms": 12,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          104.0,
+          119.9,
+          131.6,
+          119.7,
+          131.8,
+          121.3
+        ]
+      },
+      "focus-category": {
+        "samples": 6,
+        "medianElapsedMs": 437.6,
+        "medianCpuMs": 108.6,
+        "medianMaxCallbackGapMs": 41.1,
+        "totalGapsOver25Ms": 8,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          112.0,
+          106.4,
+          110.7,
+          116.8,
+          104.9,
+          100.4
+        ]
+      },
+      "typing-category": {
+        "samples": 6,
+        "medianElapsedMs": 564.7,
+        "medianCpuMs": 230.1,
+        "medianMaxCallbackGapMs": 16.9,
+        "totalGapsOver25Ms": 1,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          233.8,
+          228.0,
+          240.0,
+          224.7,
+          231.5,
+          228.6
+        ]
+      },
+      "pop-category": {
+        "samples": 6,
+        "medianElapsedMs": 1026.4,
+        "medianCpuMs": 172.2,
+        "medianMaxCallbackGapMs": 62.1,
+        "totalGapsOver25Ms": 8,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          172.7,
+          170.8,
+          172.3,
+          174.0,
+          170.2,
+          172.1
+        ]
+      },
+      "push-schedule": {
+        "samples": 6,
+        "medianElapsedMs": 280.8,
+        "medianCpuMs": 240.0,
+        "medianMaxCallbackGapMs": 145.6,
+        "totalGapsOver25Ms": 11,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          267.2,
+          225.7,
+          254.8,
+          224.9,
+          254.3,
+          224.4
+        ]
+      },
+      "focus-schedule": {
+        "samples": 6,
+        "medianElapsedMs": 442.3,
+        "medianCpuMs": 107.9,
+        "medianMaxCallbackGapMs": 42.9,
+        "totalGapsOver25Ms": 8,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          108.0,
+          108.3,
+          107.8,
+          110.0,
+          107.8,
+          104.7
+        ]
+      },
+      "typing-schedule": {
+        "samples": 6,
+        "medianElapsedMs": 561.8,
+        "medianCpuMs": 445.0,
+        "medianMaxCallbackGapMs": 56.3,
+        "totalGapsOver25Ms": 49,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          452.9,
+          443.7,
+          446.3,
+          440.4,
+          448.4,
+          438.0
+        ]
+      },
+      "pop-schedule": {
+        "samples": 6,
+        "medianElapsedMs": 1018.2,
+        "medianCpuMs": 217.7,
+        "medianMaxCallbackGapMs": 82.3,
+        "totalGapsOver25Ms": 13,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          216.9,
+          217.4,
+          217.7,
+          223.1,
+          220.0,
+          217.8
+        ]
+      },
+      "push-transaction": {
+        "samples": 6,
+        "medianElapsedMs": 258.4,
+        "medianCpuMs": 234.1,
+        "medianMaxCallbackGapMs": 120.1,
+        "totalGapsOver25Ms": 8,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          259.4,
+          235.0,
+          250.9,
+          233.3,
+          228.5,
+          210.5
+        ]
+      },
+      "focus-transaction": {
+        "samples": 6,
+        "medianElapsedMs": 440.3,
+        "medianCpuMs": 107.8,
+        "medianMaxCallbackGapMs": 45.9,
+        "totalGapsOver25Ms": 7,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          114.5,
+          106.8,
+          111.4,
+          108.1,
+          106.8,
+          107.6
+        ]
+      },
+      "typing-transaction": {
+        "samples": 6,
+        "medianElapsedMs": 561.3,
+        "medianCpuMs": 439.7,
+        "medianMaxCallbackGapMs": 56.7,
+        "totalGapsOver25Ms": 41,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          439.1,
+          452.0,
+          437.3,
+          447.2,
+          439.5,
+          439.9
+        ]
+      },
+      "pop-transaction": {
+        "samples": 6,
+        "medianElapsedMs": 1018.2,
+        "medianCpuMs": 221.6,
+        "medianMaxCallbackGapMs": 76.9,
+        "totalGapsOver25Ms": 19,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          212.2,
+          212.2,
+          228.0,
+          222.0,
+          221.3,
+          225.9
+        ]
+      }
+    },
+    "after": {
+      "push-account": {
+        "samples": 6,
+        "medianElapsedMs": 171.6,
+        "medianCpuMs": 130.2,
+        "medianMaxCallbackGapMs": 39.3,
+        "totalGapsOver25Ms": 8,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          160.7,
+          115.1,
+          151.4,
+          115.1,
+          145.4,
+          114.0
+        ]
+      },
+      "focus-account": {
+        "samples": 6,
+        "medianElapsedMs": 462.2,
+        "medianCpuMs": 142.7,
+        "medianMaxCallbackGapMs": 44.0,
+        "totalGapsOver25Ms": 7,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          179.6,
+          105.7,
+          167.3,
+          104.2,
+          172.5,
+          118.0
+        ]
+      },
+      "typing-account": {
+        "samples": 6,
+        "medianElapsedMs": 581.4,
+        "medianCpuMs": 224.8,
+        "medianMaxCallbackGapMs": 18.7,
+        "totalGapsOver25Ms": 0,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          225.3,
+          224.1,
+          230.7,
+          224.3,
+          226.3,
+          222.5
+        ]
+      },
+      "pop-account": {
+        "samples": 6,
+        "medianElapsedMs": 1017.3,
+        "medianCpuMs": 167.6,
+        "medianMaxCallbackGapMs": 56.8,
+        "totalGapsOver25Ms": 8,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          174.9,
+          162.1,
+          175.8,
+          159.8,
+          173.2,
+          160.0
+        ]
+      },
+      "push-category": {
+        "samples": 6,
+        "medianElapsedMs": 172.5,
+        "medianCpuMs": 123.9,
+        "medianMaxCallbackGapMs": 38.2,
+        "totalGapsOver25Ms": 13,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          128.1,
+          120.1,
+          129.0,
+          120.6,
+          126.1,
+          121.7
+        ]
+      },
+      "focus-category": {
+        "samples": 6,
+        "medianElapsedMs": 441.7,
+        "medianCpuMs": 109.2,
+        "medianMaxCallbackGapMs": 42.6,
+        "totalGapsOver25Ms": 6,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          105.6,
+          112.0,
+          109.5,
+          108.0,
+          108.8,
+          113.7
+        ]
+      },
+      "typing-category": {
+        "samples": 6,
+        "medianElapsedMs": 568.8,
+        "medianCpuMs": 234.6,
+        "medianMaxCallbackGapMs": 20.8,
+        "totalGapsOver25Ms": 2,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          236.2,
+          228.1,
+          234.5,
+          234.6,
+          235.0,
+          225.7
+        ]
+      },
+      "pop-category": {
+        "samples": 6,
+        "medianElapsedMs": 1017.9,
+        "medianCpuMs": 171.9,
+        "medianMaxCallbackGapMs": 65.5,
+        "totalGapsOver25Ms": 6,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          174.0,
+          171.9,
+          171.5,
+          166.6,
+          173.2,
+          171.9
+        ]
+      },
+      "push-schedule": {
+        "samples": 6,
+        "medianElapsedMs": 280.6,
+        "medianCpuMs": 238.1,
+        "medianMaxCallbackGapMs": 147.8,
+        "totalGapsOver25Ms": 9,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          253.9,
+          224.9,
+          251.3,
+          221.9,
+          254.4,
+          224.8
+        ]
+      },
+      "focus-schedule": {
+        "samples": 6,
+        "medianElapsedMs": 438.4,
+        "medianCpuMs": 107.1,
+        "medianMaxCallbackGapMs": 41.8,
+        "totalGapsOver25Ms": 7,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          107.9,
+          107.3,
+          106.8,
+          105.6,
+          103.4,
+          109.1
+        ]
+      },
+      "typing-schedule": {
+        "samples": 6,
+        "medianElapsedMs": 624.7,
+        "medianCpuMs": 214.9,
+        "medianMaxCallbackGapMs": 16.7,
+        "totalGapsOver25Ms": 0,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          214.9,
+          213.8,
+          214.9,
+          216.4,
+          209.7,
+          217.1
+        ]
+      },
+      "pop-schedule": {
+        "samples": 6,
+        "medianElapsedMs": 1016.8,
+        "medianCpuMs": 217.5,
+        "medianMaxCallbackGapMs": 76.0,
+        "totalGapsOver25Ms": 17,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          213.1,
+          220.9,
+          217.5,
+          219.7,
+          211.8,
+          217.6
+        ]
+      },
+      "push-transaction": {
+        "samples": 6,
+        "medianElapsedMs": 261.6,
+        "medianCpuMs": 242.6,
+        "medianMaxCallbackGapMs": 122.6,
+        "totalGapsOver25Ms": 11,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          255.7,
+          233.5,
+          252.2,
+          215.8,
+          250.8,
+          234.3
+        ]
+      },
+      "focus-transaction": {
+        "samples": 6,
+        "medianElapsedMs": 433.5,
+        "medianCpuMs": 107.6,
+        "medianMaxCallbackGapMs": 43.4,
+        "totalGapsOver25Ms": 7,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          110.3,
+          105.7,
+          107.3,
+          107.8,
+          106.3,
+          110.5
+        ]
+      },
+      "typing-transaction": {
+        "samples": 6,
+        "medianElapsedMs": 619.2,
+        "medianCpuMs": 212.4,
+        "medianMaxCallbackGapMs": 16.7,
+        "totalGapsOver25Ms": 0,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          204.8,
+          211.8,
+          205.2,
+          213.1,
+          216.3,
+          212.9
+        ]
+      },
+      "pop-transaction": {
+        "samples": 6,
+        "medianElapsedMs": 1017.9,
+        "medianCpuMs": 212.7,
+        "medianMaxCallbackGapMs": 73.4,
+        "totalGapsOver25Ms": 19,
+        "mainThreadQueries": 0,
+        "cpuMs": [
+          209.9,
+          217.8,
+          212.9,
+          211.4,
+          217.6,
+          212.5
+        ]
+      }
+    },
+    "closedChecksBefore": 24,
+    "closedChecksAfter": 24,
+    "allListenersZeroAfterPop": true,
+    "allAfterCloseQueriesZero": true
+  },
+  "coldLaunch": {
+    "target": "isolated normal iOS app binary with a separate bundle ID and empty first-launch sandbox",
+    "trace": "App Launch and Time Profiler on physical SE",
+    "firstLifecycleStartSeconds": 0.422,
+    "initialFrameEndSeconds": 1.881,
+    "foregroundActiveSeconds": 1.912,
+    "systemInterfaceInitializationMs": 93.91,
+    "staticRuntimeInitializationMs": 19.07,
+    "uikitInitializationMs": 1009.15,
+    "initialFrameRenderingMs": 113.62,
+    "firstFiveSecondsSampledCpuMs": 950,
+    "firstFiveSecondsMainCpuSamples": 561,
+    "firstFiveSecondsSynchronousKoinInclusiveSamples": 20,
+    "samplePeriodMs": 1,
+    "boundary": "Clean onboarding; populated Home measured separately in finance.shilling.perf."
+  },
+  "validation": {
+    "sharedJvmTests": "113 passed",
+    "androidBuild": "passed",
+    "nativeBuild": "passed; signed Release arm64 fixture installed on physical SE",
+    "architectureGuard": "passed",
+    "diffCheck": "passed",
+    "finalInstalledNavigationClosedChecks": 8,
+    "finalInstalledNavigationAllListenersZero": true,
+    "finalInstalledHomeUpdateCpuMs": 371.3,
+    "finalInstalledHomeUpdateSqlReads": 30
+  }
+}

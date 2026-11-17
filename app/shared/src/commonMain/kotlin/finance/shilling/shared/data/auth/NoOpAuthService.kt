@@ -26,6 +26,18 @@ class NoOpAuthService(deviceId: String) : AuthService {
     override suspend fun signIn(email: String, password: String): Result<Unit> =
         Result.failure(UnsupportedOperationException("Auth not available"))
 
+    override suspend fun sendSignInLink(email: String): Result<Unit> =
+        Result.failure(UnsupportedOperationException("Auth not available"))
+
+    override suspend fun handleAuthCallback(url: String): Result<Unit> =
+        Result.failure(UnsupportedOperationException("Auth not available"))
+
+    override suspend fun refreshAccountStatus(): Result<Unit> =
+        Result.failure(UnsupportedOperationException("Auth not available"))
+
+    override suspend fun setPassword(password: String): Result<Unit> =
+        Result.failure(UnsupportedOperationException("Auth not available"))
+
     override suspend fun signOut() {}
 
     override suspend fun deleteAccount(): Result<Unit> =

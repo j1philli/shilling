@@ -1,0 +1,1244 @@
+{
+  "bootstrap-1": {
+    "READY_bootstrap_empty": {
+      "Physical footprint": 16.6,
+      "Physical footprint (peak)": 21.0,
+      "WebKit Malloc": {
+        "virtualMiB": 96.0,
+        "residentMiB": 9.34375,
+        "dirtyMiB": 7.15625,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.3125,
+        "dirtyMiB": 0.3125,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1638.4,
+        "residentMiB": 0.15625,
+        "dirtyMiB": 0.15625,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_bootstrap_kotlin_compiled": {
+      "Physical footprint": 86.4,
+      "Physical footprint (peak)": 113.9,
+      "WebKit Malloc": {
+        "virtualMiB": 192.0,
+        "residentMiB": 103.5,
+        "dirtyMiB": 77.8,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.5,
+        "dirtyMiB": 0.46875,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1638.4,
+        "residentMiB": 0.15625,
+        "dirtyMiB": 0.15625,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_bootstrap_imports_skia": {
+      "Physical footprint": 107.3,
+      "Physical footprint (peak)": 114.7,
+      "WebKit Malloc": {
+        "virtualMiB": 8396.8,
+        "residentMiB": 127.2,
+        "dirtyMiB": 106.4,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.6875,
+        "dirtyMiB": 0.65625,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1536.0,
+        "residentMiB": 0.53125,
+        "dirtyMiB": 0.484375,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_bootstrap_kotlin_instantiated": {
+      "Physical footprint": 122.0,
+      "Physical footprint (peak)": 125.7,
+      "WebKit Malloc": {
+        "virtualMiB": 8396.8,
+        "residentMiB": 141.7,
+        "dirtyMiB": 124.6,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.8125,
+        "dirtyMiB": 0.8125,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1536.0,
+        "residentMiB": 1.65625,
+        "dirtyMiB": 1.640625,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_home_cold": {
+      "Physical footprint": 277.3,
+      "Physical footprint (peak)": 349.0,
+      "WebKit Malloc": {
+        "virtualMiB": 12800.0,
+        "residentMiB": 354.4,
+        "dirtyMiB": 242.5,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 15.1,
+        "dirtyMiB": 14.8,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1740.8,
+        "residentMiB": 38.7,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 37.6,
+        "residentMiB": 33.4,
+        "dirtyMiB": 25.5,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_final_idle": {
+      "Physical footprint": 252.6,
+      "Physical footprint (peak)": 349.0,
+      "WebKit Malloc": {
+        "virtualMiB": 12800.0,
+        "residentMiB": 354.4,
+        "dirtyMiB": 210.4,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 15.1,
+        "dirtyMiB": 14.8,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1740.8,
+        "residentMiB": 38.7,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 37.6,
+        "residentMiB": 33.4,
+        "dirtyMiB": 25.5,
+        "swappedMiB": 0.0
+      }
+    }
+  },
+  "bootstrap-2": {
+    "READY_bootstrap_empty": {
+      "Physical footprint": 16.3,
+      "Physical footprint (peak)": 20.8,
+      "WebKit Malloc": {
+        "virtualMiB": 96.0,
+        "residentMiB": 9.375,
+        "dirtyMiB": 7.140625,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.3125,
+        "dirtyMiB": 0.3125,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 254.3,
+        "residentMiB": 0.15625,
+        "dirtyMiB": 0.15625,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_bootstrap_kotlin_compiled": {
+      "Physical footprint": 85.8,
+      "Physical footprint (peak)": 113.4,
+      "WebKit Malloc": {
+        "virtualMiB": 192.0,
+        "residentMiB": 103.3,
+        "dirtyMiB": 77.5,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.5,
+        "dirtyMiB": 0.46875,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 254.3,
+        "residentMiB": 0.15625,
+        "dirtyMiB": 0.15625,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_bootstrap_imports_skia": {
+      "Physical footprint": 107.4,
+      "Physical footprint (peak)": 121.8,
+      "WebKit Malloc": {
+        "virtualMiB": 8396.8,
+        "residentMiB": 134.6,
+        "dirtyMiB": 106.3,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.734375,
+        "dirtyMiB": 0.71875,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 238.3,
+        "residentMiB": 0.53125,
+        "dirtyMiB": 0.484375,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_bootstrap_kotlin_instantiated": {
+      "Physical footprint": 129.0,
+      "Physical footprint (peak)": 132.7,
+      "WebKit Malloc": {
+        "virtualMiB": 8499.2,
+        "residentMiB": 148.9,
+        "dirtyMiB": 126.2,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.90625,
+        "dirtyMiB": 0.90625,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 238.3,
+        "residentMiB": 1.65625,
+        "dirtyMiB": 1.640625,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_home_cold": {
+      "Physical footprint": 274.6,
+      "Physical footprint (peak)": 385.3,
+      "WebKit Malloc": {
+        "virtualMiB": 12800.0,
+        "residentMiB": 366.2,
+        "dirtyMiB": 229.2,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 15.3,
+        "dirtyMiB": 14.9,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 327.4,
+        "residentMiB": 38.9,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 37.6,
+        "residentMiB": 33.4,
+        "dirtyMiB": 25.5,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_final_idle": {
+      "Physical footprint": 274.4,
+      "Physical footprint (peak)": 385.3,
+      "WebKit Malloc": {
+        "virtualMiB": 12800.0,
+        "residentMiB": 366.2,
+        "dirtyMiB": 229.1,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 15.3,
+        "dirtyMiB": 14.9,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 327.4,
+        "residentMiB": 38.9,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 37.6,
+        "residentMiB": 33.4,
+        "dirtyMiB": 25.5,
+        "swappedMiB": 0.0
+      }
+    }
+  },
+  "bootstrap-3": {
+    "READY_bootstrap_empty": {
+      "Physical footprint": 16.6,
+      "Physical footprint (peak)": 21.2,
+      "WebKit Malloc": {
+        "virtualMiB": 96.0,
+        "residentMiB": 9.453125,
+        "dirtyMiB": 7.09375,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.3125,
+        "dirtyMiB": 0.3125,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 816.1,
+        "residentMiB": 0.15625,
+        "dirtyMiB": 0.15625,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_bootstrap_kotlin_compiled": {
+      "Physical footprint": 86.6,
+      "Physical footprint (peak)": 113.3,
+      "WebKit Malloc": {
+        "virtualMiB": 192.0,
+        "residentMiB": 103.0,
+        "dirtyMiB": 78.0,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.5,
+        "dirtyMiB": 0.46875,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 816.1,
+        "residentMiB": 0.15625,
+        "dirtyMiB": 0.15625,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_bootstrap_imports_skia": {
+      "Physical footprint": 108.0,
+      "Physical footprint (peak)": 115.1,
+      "WebKit Malloc": {
+        "virtualMiB": 8396.8,
+        "residentMiB": 127.2,
+        "dirtyMiB": 106.7,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.6875,
+        "dirtyMiB": 0.65625,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 768.1,
+        "residentMiB": 0.578125,
+        "dirtyMiB": 0.578125,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_bootstrap_kotlin_instantiated": {
+      "Physical footprint": 123.1,
+      "Physical footprint (peak)": 126.9,
+      "WebKit Malloc": {
+        "virtualMiB": 8396.8,
+        "residentMiB": 142.1,
+        "dirtyMiB": 125.6,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.84375,
+        "dirtyMiB": 0.84375,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 768.1,
+        "residentMiB": 1.75,
+        "dirtyMiB": 1.75,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_home_cold": {
+      "Physical footprint": 257.3,
+      "Physical footprint (peak)": 382.4,
+      "WebKit Malloc": {
+        "virtualMiB": 12800.0,
+        "residentMiB": 374.0,
+        "dirtyMiB": 213.1,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 15.3,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 889.2,
+        "residentMiB": 39.1,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 37.6,
+        "residentMiB": 33.4,
+        "dirtyMiB": 25.5,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_final_idle": {
+      "Physical footprint": 257.2,
+      "Physical footprint (peak)": 382.4,
+      "WebKit Malloc": {
+        "virtualMiB": 12800.0,
+        "residentMiB": 374.0,
+        "dirtyMiB": 212.5,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 15.3,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 889.2,
+        "residentMiB": 39.1,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 37.6,
+        "residentMiB": 33.4,
+        "dirtyMiB": 25.5,
+        "swappedMiB": 0.0
+      }
+    }
+  },
+  "bootstrap-type-1": {
+    "READY_bootstrap_empty": {
+      "Physical footprint": 16.5,
+      "Physical footprint (peak)": 20.9,
+      "WebKit Malloc": {
+        "virtualMiB": 96.0,
+        "residentMiB": 9.3125,
+        "dirtyMiB": 7.09375,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.3125,
+        "dirtyMiB": 0.3125,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 660.5,
+        "residentMiB": 0.15625,
+        "dirtyMiB": 0.15625,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_bootstrap_kotlin_compiled": {
+      "Physical footprint": 82.3,
+      "Physical footprint (peak)": 109.0,
+      "WebKit Malloc": {
+        "virtualMiB": 192.0,
+        "residentMiB": 98.7,
+        "dirtyMiB": 73.8,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.5,
+        "dirtyMiB": 0.46875,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 660.5,
+        "residentMiB": 0.15625,
+        "dirtyMiB": 0.15625,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_bootstrap_imports_skia": {
+      "Physical footprint": 104.5,
+      "Physical footprint (peak)": 111.8,
+      "WebKit Malloc": {
+        "virtualMiB": 8396.8,
+        "residentMiB": 123.7,
+        "dirtyMiB": 102.8,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.6875,
+        "dirtyMiB": 0.65625,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 596.5,
+        "residentMiB": 0.53125,
+        "dirtyMiB": 0.5,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_bootstrap_kotlin_instantiated": {
+      "Physical footprint": 119.0,
+      "Physical footprint (peak)": 122.8,
+      "WebKit Malloc": {
+        "virtualMiB": 8499.2,
+        "residentMiB": 138.3,
+        "dirtyMiB": 120.5,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 0.796875,
+        "dirtyMiB": 0.796875,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 596.5,
+        "residentMiB": 1.390625,
+        "dirtyMiB": 1.375,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 6.65625,
+        "residentMiB": 6.65625,
+        "dirtyMiB": 4.265625,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_home_cold": {
+      "Physical footprint": 266.4,
+      "Physical footprint (peak)": 358.4,
+      "WebKit Malloc": {
+        "virtualMiB": 12800.0,
+        "residentMiB": 356.1,
+        "dirtyMiB": 222.9,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 15.0,
+        "dirtyMiB": 14.7,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 733.6,
+        "residentMiB": 38.7,
+        "dirtyMiB": 14.7,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 37.6,
+        "residentMiB": 33.4,
+        "dirtyMiB": 25.5,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_final_idle": {
+      "Physical footprint": 254.5,
+      "Physical footprint (peak)": 358.4,
+      "WebKit Malloc": {
+        "virtualMiB": 12800.0,
+        "residentMiB": 356.1,
+        "dirtyMiB": 207.6,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 15.0,
+        "dirtyMiB": 14.7,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 733.6,
+        "residentMiB": 38.7,
+        "dirtyMiB": 14.7,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 37.6,
+        "residentMiB": 33.4,
+        "dirtyMiB": 25.5,
+        "swappedMiB": 0.0
+      }
+    }
+  },
+  "regions-1": {
+    "READY_session_home": {
+      "Physical footprint": 288.8,
+      "Physical footprint (peak)": 401.6,
+      "WebKit Malloc": {
+        "virtualMiB": 12800.0,
+        "residentMiB": 371.5,
+        "dirtyMiB": 227.8,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 15.2,
+        "dirtyMiB": 14.8,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.1,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 37.6,
+        "residentMiB": 33.4,
+        "dirtyMiB": 25.5,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_review_1": {
+      "Physical footprint": 406.5,
+      "Physical footprint (peak)": 425.6,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 473.5,
+        "dirtyMiB": 379.4,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 20.9,
+        "dirtyMiB": 20.4,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.1,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 47.2,
+        "residentMiB": 43.0,
+        "dirtyMiB": 37.1,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_hidden_1": {
+      "Physical footprint": 301.4,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 489.2,
+        "dirtyMiB": 231.9,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 20.9,
+        "dirtyMiB": 20.5,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 47.4,
+        "residentMiB": 43.2,
+        "dirtyMiB": 31.9,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_restored_1": {
+      "Physical footprint": 314.9,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 489.4,
+        "dirtyMiB": 297.7,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 21.7,
+        "dirtyMiB": 21.5,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 47.6,
+        "residentMiB": 47.6,
+        "dirtyMiB": 42.4,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_closed_1": {
+      "Physical footprint": 305.5,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 490.3,
+        "dirtyMiB": 300.0,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 22.3,
+        "dirtyMiB": 22.0,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.1,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 47.7,
+        "residentMiB": 43.5,
+        "dirtyMiB": 31.9,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_review_2": {
+      "Physical footprint": 321.9,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 492.7,
+        "dirtyMiB": 362.6,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 22.5,
+        "dirtyMiB": 22.3,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 49.2,
+        "residentMiB": 45.0,
+        "dirtyMiB": 38.3,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_hidden_2": {
+      "Physical footprint": 309.0,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 493.0,
+        "dirtyMiB": 355.9,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 22.6,
+        "dirtyMiB": 22.3,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 51.2,
+        "residentMiB": 47.0,
+        "dirtyMiB": 31.9,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_restored_2": {
+      "Physical footprint": 316.0,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 493.9,
+        "dirtyMiB": 356.8,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 22.7,
+        "dirtyMiB": 22.5,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 51.4,
+        "residentMiB": 47.2,
+        "dirtyMiB": 38.2,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_closed_2": {
+      "Physical footprint": 305.0,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 494.5,
+        "dirtyMiB": 243.1,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 22.9,
+        "dirtyMiB": 22.6,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 51.5,
+        "residentMiB": 47.3,
+        "dirtyMiB": 31.9,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_review_3": {
+      "Physical footprint": 321.0,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 496.8,
+        "dirtyMiB": 371.1,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 23.1,
+        "dirtyMiB": 22.8,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 53.4,
+        "residentMiB": 49.2,
+        "dirtyMiB": 41.0,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_hidden_3": {
+      "Physical footprint": 305.5,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 497.5,
+        "dirtyMiB": 292.2,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 23.2,
+        "dirtyMiB": 22.9,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 53.5,
+        "residentMiB": 49.3,
+        "dirtyMiB": 31.9,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_restored_3": {
+      "Physical footprint": 319.1,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 497.5,
+        "dirtyMiB": 318.7,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 23.2,
+        "dirtyMiB": 23.0,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 54.6,
+        "residentMiB": 54.6,
+        "dirtyMiB": 44.3,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_closed_3": {
+      "Physical footprint": 310.2,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 497.9,
+        "dirtyMiB": 248.0,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 23.4,
+        "dirtyMiB": 23.1,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 55.0,
+        "residentMiB": 55.0,
+        "dirtyMiB": 36.1,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_review_4": {
+      "Physical footprint": 315.5,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 499.6,
+        "dirtyMiB": 375.5,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 23.5,
+        "dirtyMiB": 23.3,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 55.3,
+        "residentMiB": 51.1,
+        "dirtyMiB": 37.1,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_hidden_4": {
+      "Physical footprint": 306.8,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 500.2,
+        "dirtyMiB": 300.6,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 23.5,
+        "dirtyMiB": 23.3,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 55.4,
+        "residentMiB": 51.2,
+        "dirtyMiB": 31.9,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_restored_4": {
+      "Physical footprint": 314.3,
+      "Physical footprint (peak)": 444.5,
+      "WebKit Malloc": {
+        "virtualMiB": 12902.4,
+        "residentMiB": 500.2,
+        "dirtyMiB": 327.0,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 23.5,
+        "dirtyMiB": 23.3,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 39.0,
+        "dirtyMiB": 15.0,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 55.6,
+        "residentMiB": 51.4,
+        "dirtyMiB": 38.2,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_closed_4": {
+      "Physical footprint": 423.2,
+      "Physical footprint (peak)": 532.7,
+      "WebKit Malloc": {
+        "virtualMiB": 13107.2,
+        "residentMiB": 680.3,
+        "dirtyMiB": 442.4,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 24.6,
+        "dirtyMiB": 24.4,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 18.2,
+        "dirtyMiB": 15.9,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 55.9,
+        "residentMiB": 55.9,
+        "dirtyMiB": 36.1,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_idle_1": {
+      "Physical footprint": 422.4,
+      "Physical footprint (peak)": 532.7,
+      "WebKit Malloc": {
+        "virtualMiB": 13107.2,
+        "residentMiB": 680.3,
+        "dirtyMiB": 440.7,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 24.6,
+        "dirtyMiB": 24.4,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 18.2,
+        "dirtyMiB": 15.9,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 55.9,
+        "residentMiB": 55.9,
+        "dirtyMiB": 36.1,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_idle_2": {
+      "Physical footprint": 421.6,
+      "Physical footprint (peak)": 532.7,
+      "WebKit Malloc": {
+        "virtualMiB": 13107.2,
+        "residentMiB": 680.3,
+        "dirtyMiB": 387.6,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 24.6,
+        "dirtyMiB": 24.4,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 18.2,
+        "dirtyMiB": 15.9,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 55.9,
+        "residentMiB": 55.9,
+        "dirtyMiB": 36.1,
+        "swappedMiB": 0.0
+      }
+    },
+    "READY_session_idle_3": {
+      "Physical footprint": 421.5,
+      "Physical footprint (peak)": 532.7,
+      "WebKit Malloc": {
+        "virtualMiB": 13107.2,
+        "residentMiB": 680.3,
+        "dirtyMiB": 387.5,
+        "swappedMiB": 0.0
+      },
+      "JS JIT Generated Code": {
+        "virtualMiB": 512.0,
+        "residentMiB": 24.6,
+        "dirtyMiB": 24.4,
+        "swappedMiB": 0.0
+      },
+      "JS VM Reservations": {
+        "virtualMiB": 1843.2,
+        "residentMiB": 18.2,
+        "dirtyMiB": 15.9,
+        "swappedMiB": 0.0
+      },
+      "owned unmapped (graphics)": {
+        "virtualMiB": 55.9,
+        "residentMiB": 55.9,
+        "dirtyMiB": 36.1,
+        "swappedMiB": 0.0
+      }
+    }
+  }
+}

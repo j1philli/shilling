@@ -57,8 +57,8 @@ class CloudMcpRepository(private val household: String, private val storage: Enc
             val postings = PostingRepository(ids, notifier, postingStore, accountStore, categoryStore, scheduleStore, deps)
             val facade = SyncStoreFacade(db)
             val toolbox = McpToolbox(accounts, categories, schedules, postings,
-                ComputeWindowUseCase(notifier, accounts, categories, schedules, postings),
-                ComputeBudgetUseCase(notifier, categories, schedules), OccurrenceActions(postings, schedules), ids)
+                ComputeWindowUseCase(accounts, categories, schedules, postings),
+                ComputeBudgetUseCase(categories, schedules), OccurrenceActions(postings, schedules), ids)
             val server = McpServer(toolbox, authorize = {
                 authorize()?.takeIf { it.clientId == grant.clientId && it.tokenSha256 == grant.tokenSha256 }
                     ?.let { McpPermissions(it.read, it.write) }

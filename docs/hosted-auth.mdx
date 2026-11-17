@@ -33,7 +33,7 @@ That order matters. Hosted clients no longer treat the Supabase user ID as the s
 - hosted signaling join validation checks server-owned household membership
 - Supabase access-token verification uses JWKS for modern Supabase projects
 - legacy HS256 verification remains supported only for older Supabase setups that still expose a shared JWT secret
-- desktop and web dev flows use `just desktop`; server startup uses `just server` and loads repo-root `.env`
+- desktop and web dev flows use `mise run desktop`; server startup uses `mise run server` and loads repo-root `.env`
 
 ## Supabase Requirements
 
@@ -57,7 +57,39 @@ Cloud-peer preferences are managed through `/api/backup/policy` and `/api/backup
 
 Each new `auth.users` row should also create a `public.user_profiles` row. Hosted bootstrap will fail by design if the authenticated user has no hosted household metadata.
 
-The auth metadata schema is managed by `supabase/migrations/`; initialize cloud-peer storage separately with `supabase/cloud-peer.sql` and `supabase/cloud-storage.sql`. Its metadata policy grants authenticated clients read access to only their own `user_id` and `tier`. No client can update `user_profiles`, and `waitlist` is inaccessible through the public Data API. The server's secret key performs the household lookup. The Auth trigger updates a profile's tier when an anonymous account gains an email address.
+The production schema is managed by `supabase/migrations/`. Its metadata policy grants authenticated clients read access to only their own `user_id`, `tier`, and `has_password`. No client can update `user_profiles`, and `waitlist` is inaccessible through the public Data API. The server's secret key performs the household lookup. The Auth trigger in `supabase/migrations/20260928184917_secure_profile_tier_after_email_confirmation.sql` updates a profile's tier only after its email is confirmed. It preserves the user's ID and household during a guest upgrade. Legacy profile tiers do not grant paid access; paid capabilities come from server-verified RevenueCat entitlements. The hosted space migration backfills memberships and assigns an owner to each existing space.
+
+Guest upgrades request an email change on the anonymous session. The account remains Guest until Supabase reports the email as confirmed. After confirmation, the app refreshes the same session and prompts for a password; it never collects or caches that password while confirmation is pending. The profile trigger in `supabase/migrations/20260930173234_track_profile_password_setup.sql` tracks whether a password has been set so the prompt survives an app restart. Manual identity linking and email confirmation must be enabled in Supabase Auth.
+
+Auth startup must finish loading the saved Supabase session before `ensureAuthenticated` can create a guest. A restore timeout or refresh failure leaves the saved identity intact and disables hosted startup until it can retry; it must never replace that identity with a new anonymous user. Welcome and Guest Account settings use one email-first **Continue** action. A new email starts an in-place guest upgrade. If Auth reports an existing email, the capped `existing_account_has_password` RPC chooses the next step: a password field for password accounts, or a sign-in email for passwordless accounts. The sign-in email uses `createUser=false`, opens the mobile app, and restores that account. The RPC is available only to authenticated sessions, and returns the password path after ten lookups per session per hour. Signing out and starting over also clear Supabase's persisted SDK session so a reset cannot restore the old account.
+
+Set Supabase Auth **Site URL** to `https://app.shilling.finance` for web and desktop confirmations. Add `shilling.finance://auth-callback` to **Additional Redirect URLs** for iOS and Android. The mobile apps pass that callback when requesting an email change, register it with the OS, and refresh their existing session when opened. They do not import callback tokens into a different account. A localhost Site URL lets verification succeed but sends the browser to a dead local page afterward.
+
+## Auth errors and email delivery
+
+Auth UI uses `AuthErrors` to translate provider codes into user-facing messages. Diagnostics record the operation, exception type, provider code, and HTTP status; they omit raw response bodies, credentials, and email addresses. Email delivery failures propagate to the form rather than being treated as successful submissions.
+
+### Resend email delivery
+
+The hosted project uses Resend SMTP, with sender name `Shilling`. For another deployment, create a Resend account, verify the sending domain using its DNS records, and create a sending API key. Configure Supabase Auth custom SMTP with `smtp.resend.com`, port `465`, username `resend`, and the API key as the password. Set the sender name to `Shilling` and choose a From address on the verified domain. Keep the key in server-side configuration, never in app code or committed files. Start with 30 auth emails per hour and retain the per-address resend cooldown; adjust against the Resend plan and observed usage. Verify delivery and mobile callbacks before treating this setup as complete.
+
+References: [Resend Supabase SMTP setup](https://resend.com/docs/send-with-supabase-smtp), [Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp).
+
+## Account deletion
+
+Signed-in accounts can delete themselves from **Settings → Account → Delete account** on every client. The public instructions for app-store listings are in [Delete your account](delete-account.mdx). The client calls `POST /api/account/delete`, and the server:
+
+1. Checks RevenueCat for an active Silver or Gold entitlement. If one exists and the request lacks `acknowledgeActiveSubscription`, it returns `409` with the plan. The client then reminds the user that deleting the account does not cancel a store or web subscription and offers **Manage subscription** before asking for confirmation again. Deletion is never blocked by a subscription.
+2. Runs `delete_hosted_account` (`supabase/migrations/20261009120000_hosted_account_deletion.sql`). It closes spaces where the account is the only member. In shared spaces it removes the membership and the account's registered devices, and promotes a successor if the account was the last owner. It also deletes invitations to the account's email, the space selection, and the profile.
+3. Closes the account's signaling sessions, deletes the Auth user through the Auth admin API, then deletes the RevenueCat customer (best effort, logged on failure).
+
+Each step is idempotent, so a failed request can be retried. After success the client signs out, wipes local data, and shows Welcome with "Your account was deleted." Other devices keep their local copies. PostHog events use a random installation identifier unrelated to the account, so they need no deletion step.
+
+## Guest signup abuse controls
+
+The `shilling.finance` project is configured for 10 anonymous sign-ins per IP per hour. Monitor Auth 429 responses and anonymous account creation to tune the limit. This rate limit reduces bulk creation but does not prove a request is human. If abuse warrants a CAPTCHA, Supabase can accept a Turnstile token for anonymous sign-in, but native clients still need a browser engine for the challenge.
+
+Anonymous users are not cleaned up automatically. Review activity and retained household data before deleting any guest; age alone does not show whether their budget is still in use.
 
 ## Environment
 
@@ -75,9 +107,10 @@ For modern Supabase projects using asymmetric signing keys such as `ECC P-256`, 
 
 ## What Is Not Implemented Yet
 
-- dedicated sign-in and account-management screens outside the developer settings surface
-- tier/device metadata endpoints such as `/api/tier` or `/api/devices`
-- automatic cloud worker migration and production capacity benchmarking (the initial [cloud peer and recovery flow](server/backups.mdx) is implemented)
+- dedicated sign-in and account-management screens outside the settings surface
+- finance-space invitations and multiple-space management
+- configured RevenueCat products and hosted purchase deployment
+- production cloud worker provisioning and capacity benchmarking (see [cloud sync and recovery](server/backups.mdx))
 - hosted abuse controls beyond the current join authorization path
 - full Store5 boundary cleanup in sync and projection code
 
@@ -86,8 +119,8 @@ For modern Supabase projects using asymmetric signing keys such as `ECC P-256`, 
 Single-client hosted bootstrap is testable now:
 
 ```sh
-just server
-just desktop
+mise run server
+mise run desktop
 ```
 
 On first hosted launch you should see:
@@ -99,3 +132,13 @@ On first hosted launch you should see:
 - signaling join after auth and household lookup
 
 Two fresh anonymous users will get different households. To test shared hosted sync before account UI is finished, manually assign the same `household_id` to both users in Supabase and restart both clients.
+
+## Confirmation email branding
+
+`supabase/templates/confirm-email.html` is the source for both hosted signup and email-change confirmation templates. Both use the subject **Confirm your email address — Shilling**. Guest upgrades use Supabase's email-change operation internally, but the email asks users to confirm their address. The template uses the website's actual coin asset, dark palette, bright gold (`#eab308`), and Inter/system font stack with inline styles and a mobile-friendly table layout, and `{{ .ConfirmationURL }}` for the button and fallback link. It does not reconstruct verification tokens or change mobile redirect behavior.
+
+Deploy through the Auth Management API using `mailer_subjects_confirmation`, `mailer_subjects_email_change`, `mailer_templates_confirmation_content`, and `mailer_templates_email_change_content`. The production settings were updated and read back on 2026-10-01.
+
+Brand source: `j1philli/shilling.finance` commit `4179e4a974f774724fbde5db3d453b2f7a52bed7`, `src/index.css` and `src/assets/logo.png`. An unchanged logo copy is versioned at `supabase/templates/assets/shilling-logo.png` and served publicly from the Supabase `brand-assets` bucket, so email images do not depend on the website's access checks. Custom fonts fall back to system fonts in clients that block web fonts.
+
+Cloud peer storage is initialized separately using `supabase/cloud-peer.sql` and `supabase/cloud-storage.sql`.

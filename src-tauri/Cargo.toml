@@ -1,6 +1,6 @@
 [package]
 name = "shilling"
-version = "0.1.0"
+version = "0.1.3"
 edition = "2021"
 
 [dependencies]
@@ -10,5 +10,13 @@ tauri-plugin-log = "2"
 tauri-plugin-mcp = { git = "https://github.com/P3GLEG/tauri-plugin-mcp", branch = "main" }
 log = "0.4"
 
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"
+objc2-app-kit = { version = "0.3", features = ["NSResponder", "NSToolbar", "NSWindow"] }
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
+
+# Backport of gtk-rs/gtk-rs-core#1343 until Tauri supports GLib >=0.20.
+[patch.crates-io]
+glib = { path = "../third_party/glib" }

@@ -1,0 +1,165 @@
+{
+  "date": "2026-09-29",
+  "scope": "Private-based worktree at 73ace52 with local audit changes. Not public-main performance measurements.",
+  "purpose": "Correctness regression after removing older-peer compatibility. No additional speedup is inferred from these single runs.",
+  "protocol": "Required SHF v1 binary receipt chunks, JSON controls, no capability field or legacy text chunk path.",
+  "sender": "Physical Pixel 6, release benchmark APK with Ktor 3.6.0 and production shared transport/Store5 code.",
+  "receiver": "Fresh headless Chrome, direct host/host UDP LAN. No media-buffer probe, field trials or OS tuning.",
+  "commands": [
+    "node scripts/perf/bench_live_webrtc.cjs",
+    "UPLOAD_ONLY=50 node scripts/perf/bench_live_webrtc.cjs"
+  ],
+  "timingNotes": "Upload/readback elapsed time measures readback only. Emulated slow link uses 100 ms latency, 128 KiB/s throughput and 1% packet loss. All completed receives verify every synthetic byte.",
+  "fullRegression": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.01
+      }
+    },
+    {
+      "workload": "receive_1MiB_run1",
+      "result": {
+        "status": "complete",
+        "bytes": 1048576,
+        "chunks": 64,
+        "binaryFrames": 64,
+        "receiverProcessingMs": 3.2000001072883606,
+        "milliseconds": 167.19999998807907
+      }
+    },
+    {
+      "workload": "receive_10MiB_run1",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "binaryFrames": 640,
+        "receiverProcessingMs": 19.799999713897705,
+        "milliseconds": 1457.3999999761581
+      }
+    },
+    {
+      "workload": "receive_50MiB_run1",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 71.50000071525574,
+        "milliseconds": 5985.400000035763
+      }
+    },
+    {
+      "workload": "reconnect_with_emulation",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.224
+      }
+    },
+    {
+      "workload": "receive_1MiB_emulated_slow_link",
+      "result": {
+        "status": "complete",
+        "bytes": 1048576,
+        "chunks": 64,
+        "binaryFrames": 64,
+        "receiverProcessingMs": 2.3000001311302185,
+        "milliseconds": 14254.100000023842
+      }
+    },
+    {
+      "workload": "reconnect_without_emulation",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.006
+      }
+    },
+    {
+      "workload": "interrupt_50MiB",
+      "result": {
+        "status": "interrupted",
+        "bytes": 1048576,
+        "milliseconds": 305.9000000357628
+      }
+    },
+    {
+      "workload": "reconnect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.008
+      }
+    },
+    {
+      "workload": "retry_50MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 69.20000064373016,
+        "milliseconds": 6935.300000011921
+      }
+    },
+    {
+      "workload": "upload_and_readback_1MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 1048576,
+        "chunks": 64,
+        "binaryFrames": 64,
+        "receiverProcessingMs": 1.0999999046325684,
+        "milliseconds": 283.30000001192093
+      }
+    },
+    {
+      "workload": "browser_errors",
+      "result": []
+    }
+  ],
+  "largeUploadReadback": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.005
+      }
+    },
+    {
+      "workload": "upload_and_readback_50MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "binaryFrames": 3200,
+        "receiverProcessingMs": 101.1999996304512,
+        "milliseconds": 7591.399999976158
+      }
+    }
+  ],
+  "checks": {
+    "jvmServerTests": 102,
+    "androidReleaseBenchmarkBuild": true,
+    "androidAppCompile": true,
+    "iosArm64Compile": true,
+    "wasmDebugBuild": true,
+    "architectureGuard": true,
+    "physicalIphoneTransferTest": false
+  }
+}

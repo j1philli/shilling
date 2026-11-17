@@ -1,0 +1,16 @@
+{
+  "profile": "cte-session",
+  "timing": "After COMPLETE was recorded and clean profiling stopped",
+  "nativeHomeVisible": true,
+  "visibleFixtureCounts": {
+    "accounts": 20,
+    "schedules": 1000,
+    "receipts": 250,
+    "categories": 40
+  },
+  "actions": [
+    "Command+Option+I",
+    "Right-click canvas blank area"
+  ],
+  "result": "Neither exposed a Web Inspector window or inspection menu in the unsigned release fixture. No heap snapshot or forced collection obtained. No system settings changed."
+}

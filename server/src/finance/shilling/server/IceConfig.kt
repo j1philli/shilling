@@ -1,5 +1,6 @@
 package finance.shilling.server
 
+import finance.shilling.core.auth.turnEnabled
 import finance.shilling.core.sync.IceServerConfig
 import finance.shilling.core.sync.IceServersResponse
 import io.ktor.server.application.call
@@ -45,8 +46,9 @@ fun Routing.iceServerRoute(
     turnConfig: TurnConfig,
     authEnabled: Boolean = false,
     tokenVerifier: SupabaseTokenVerifier? = null,
-    backupControl: BackupControl? = null,
-    householdLookup: HouseholdMembershipLookup? = null
+    householdLookup: HouseholdMembershipLookup? = null,
+    entitlements: HostedEntitlementLookup? = null,
+    backupControl: BackupControl? = null
 ) {
     get("/api/ice-servers") {
         val servers = mutableListOf<IceServerConfig>()
@@ -56,19 +58,24 @@ fun Routing.iceServerRoute(
             servers.add(IceServerConfig(urls = turnConfig.stunUrls))
         }
 
-        // TURN only for authenticated users (when auth enabled) or always (self-hosted)
-        val token = call.request.headers[io.ktor.http.HttpHeaders.Authorization]
-            ?.removePrefix("Bearer ")?.trim().orEmpty()
-        val worker = backupControl?.workerForToken(token)
-        val user = if (authEnabled && worker == null) tokenVerifier?.verifyUserToken(token) else null
-        val household = if (!authEnabled) call.request.headers["X-Shilling-Household"]
-            else user?.let { householdLookup?.householdIdForUser(it.userId) }
-        val includeTurn = when {
-            worker != null -> true
-            !authEnabled -> household?.let { backupControl?.query { get(it, false).turnEnabled } } ?: true
-            user == null -> false
-            household == null -> false
-            else -> backupControl?.query { get(household, false).turnEnabled } ?: true
+        // Hosted TURN is a household entitlement; authentication alone does not grant it.
+        val relayRequested = call.request.queryParameters["allowRelay"] == "true"
+        val worker = backupControl?.workerForToken(call.request.headers[io.ktor.http.HttpHeaders.Authorization]?.removePrefix("Bearer "))
+        val includeTurn = if (worker != null) true else if (!relayRequested) {
+            false
+        } else if (!authEnabled) {
+            true
+        } else {
+            val user = tokenVerifier?.verifyUserToken(
+                call.request.headers[io.ktor.http.HttpHeaders.Authorization]
+                    ?.removePrefix("Bearer ")
+                    ?.trim()
+                    .orEmpty()
+            )
+            val householdId = user?.userId?.let { householdLookup?.householdIdForUser(it) }
+            if (householdId == null) false else runCatching {
+                entitlements?.householdPlan(householdId)?.turnEnabled() == true
+            }.getOrDefault(false)
         }
 
         if (includeTurn && turnConfig.turnUrls.isNotEmpty() && turnConfig.turnSecret != null) {

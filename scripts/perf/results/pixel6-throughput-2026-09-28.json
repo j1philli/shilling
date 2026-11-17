@@ -1,0 +1,410 @@
+{
+  "device": "Pixel 6",
+  "payloadBytes": 52428800,
+  "controlText": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.007
+      }
+    },
+    {
+      "workload": "receive_50MiB_run1",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 349.6999996304512,
+        "milliseconds": 8929.400000035763
+      }
+    },
+    {
+      "workload": "receive_50MiB_run2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 328.6999981403351,
+        "milliseconds": 9518.699999988079
+      }
+    },
+    {
+      "workload": "receive_50MiB_run3",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 330.50000047683716,
+        "milliseconds": 9104.699999988079
+      }
+    }
+  ],
+  "rejectedAlternativeTextSender": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.012
+      }
+    },
+    {
+      "workload": "receive_50MiB_run1",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 316.69999772310257,
+        "milliseconds": 10360.399999976158
+      }
+    },
+    {
+      "workload": "receive_50MiB_run2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 272.6999996304512,
+        "milliseconds": 10010.900000035763
+      }
+    },
+    {
+      "workload": "receive_50MiB_run3",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 389.8999997973442,
+        "milliseconds": 11477.699999988079
+      }
+    }
+  ],
+  "diagnosticBinary": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.006
+      }
+    },
+    {
+      "workload": "receive_50MiB_run1",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 79.10000067949295,
+        "milliseconds": 6237.300000011921
+      }
+    },
+    {
+      "workload": "receive_50MiB_run2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 122.49999988079071,
+        "milliseconds": 6629.599999964237
+      }
+    },
+    {
+      "workload": "receive_50MiB_run3",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 88.10000056028366,
+        "milliseconds": 5982.599999964237
+      }
+    }
+  ],
+  "detailedProfile": {
+    "endToEndMs": 9995,
+    "channelLookupMs": 515.806,
+    "bufferQueriesMs": 580.67,
+    "jsonMs": 1002.9,
+    "textSendMs": 3755.064,
+    "backpressureWaitMs": 2851.612
+  },
+  "notes": [
+    "Detailed timers were temporary and removed from production code",
+    "Binary probe changes only benchmark chunk frames; it is not a production-compatible protocol and still generates then decodes Base64 before sending bytes",
+    "Do not add backpressure time to wall clock: it overlaps network transmission",
+    "Alternative Android direct text sender rejected because end-to-end median regressed"
+  ],
+  "boundedPipeline": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.011
+      }
+    },
+    {
+      "workload": "receive_50MiB_run1",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 315.1000008583069,
+        "milliseconds": 8339.899999976158
+      }
+    },
+    {
+      "workload": "receive_50MiB_run2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 278.20000076293945,
+        "milliseconds": 8327.099999964237
+      }
+    },
+    {
+      "workload": "receive_50MiB_run3",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 362.9000023007393,
+        "milliseconds": 9506.900000035763
+      }
+    }
+  ],
+  "sameBuildSequentialControl": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.01
+      }
+    },
+    {
+      "workload": "receive_50MiB_run1",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 322.5000014901161,
+        "milliseconds": 9193
+      }
+    },
+    {
+      "workload": "receive_50MiB_run2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 365.40000092983246,
+        "milliseconds": 9879.100000023842
+      }
+    },
+    {
+      "workload": "receive_50MiB_run3",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 364.2000002861023,
+        "milliseconds": 9267.099999964237
+      }
+    }
+  ],
+  "pipelineWithReducedStateQueriesFullSuite": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.007
+      }
+    },
+    {
+      "workload": "receive_50MiB_run1",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 405.799999833107,
+        "milliseconds": 10983.699999988079
+      }
+    },
+    {
+      "workload": "receive_50MiB_run2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 290.0999994277954,
+        "milliseconds": 9489.800000011921
+      }
+    },
+    {
+      "workload": "receive_50MiB_run3",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 353.49999994039536,
+        "milliseconds": 9565.5
+      }
+    },
+    {
+      "workload": "reconnect_with_emulation",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.31
+      }
+    },
+    {
+      "workload": "receive_1MiB_emulated_slow_link",
+      "result": {
+        "status": "complete",
+        "bytes": 1048576,
+        "chunks": 64,
+        "receiverProcessingMs": 27.300000309944153,
+        "milliseconds": 22859.099999964237
+      }
+    },
+    {
+      "workload": "reconnect_without_emulation",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.006
+      }
+    },
+    {
+      "workload": "interrupt_50MiB",
+      "result": {
+        "status": "interrupted",
+        "bytes": 1048576,
+        "milliseconds": 358.60000002384186
+      }
+    },
+    {
+      "workload": "reconnect",
+      "result": {
+        "connected": true
+      }
+    },
+    {
+      "workload": "retry_50MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 135.9999989271164,
+        "milliseconds": 7735.899999976158
+      }
+    },
+    {
+      "workload": "upload_and_readback_1MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 1048576,
+        "chunks": 64,
+        "receiverProcessingMs": 6.600000083446503,
+        "milliseconds": 289.69999998807907
+      }
+    },
+    {
+      "workload": "browser_errors",
+      "result": []
+    }
+  ],
+  "alternatingSameConnection": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.006
+      }
+    },
+    {
+      "workload": "receive_50MiB_sequential_pair1",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 345.0999998450279,
+        "milliseconds": 17509.19999998808
+      }
+    },
+    {
+      "workload": "receive_50MiB_pipeline_pair1",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 150.1999992132187,
+        "milliseconds": 10606.800000011921
+      }
+    },
+    {
+      "workload": "receive_50MiB_pipeline_pair2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 146.59999972581863,
+        "milliseconds": 7816.599999964237
+      }
+    },
+    {
+      "workload": "receive_50MiB_sequential_pair2",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 258.5999994277954,
+        "milliseconds": 8939.800000011921
+      }
+    },
+    {
+      "workload": "receive_50MiB_sequential_pair3",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 399.1999981999397,
+        "milliseconds": 10121.5
+      }
+    },
+    {
+      "workload": "receive_50MiB_pipeline_pair3",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 305.20000118017197,
+        "milliseconds": 8732.699999988079
+      }
+    }
+  ]
+}

@@ -33,11 +33,8 @@ this does not provide OS background execution or notifications.
   Detailed recovery controls are under **Recovery and devices**.
 - **Trusted cloud** permits the service to read cloud data. Chunks remain encrypted
   at rest with a service-held key. Each uploading device must explicitly consent
-  to cloud access. This mode
-  provides data access for future cloud processing, but no MCP or external-service
-  connection is implemented or authorized by enabling it. Trusted batches can be
-  decrypted and replayed by the service; a materialized cloud entity view and
-  integration query/write APIs are deferred.
+  to cloud access. This mode permits the separately authorized cloud MCP endpoint described below;
+  enabling trusted cloud alone does not grant any external client access.
 
 Changing mode or the active recovery key re-uploads the current device state in
 the new mode. Existing stream entries keep their original mode. Catch-up across
@@ -136,7 +133,7 @@ SHILLING_BACKUP_SERVER_URL=https://api.shilling.finance
 SHILLING_BACKUP_WORKER_SECRET=<matching-worker-secret>
 SHILLING_BACKUP_DATA_DIR=/data/backups
 SHILLING_BACKUP_STORAGE=auto
-just backup-peer
+mise run backup-peer
 ```
 
 Export those variables before running the command. For a container, build

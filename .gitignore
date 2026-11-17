@@ -20,6 +20,7 @@
 .kotlinc/
 .kotlin/
 .amper/
+.teamcity/target/
 **/build/
 **/out/
 **/dist/
@@ -50,16 +51,17 @@ src-tauri/gen/
 
 # wasmJs build output
 web-app-dist/
+perf-web-dist/
 desktop-artifacts/
 mobile-artifacts/
+smoke-results/
+release-input/
 
 # Tool caches
 node_modules/
 .packager/
 supabase/.temp/
 
-# direnv
-.direnv/
 
 # SQLite database files (local dev data, never commit)
 *.db
@@ -76,3 +78,10 @@ supabase/.temp/
 *.sqlite-journal
 *.sqlite-wal
 *.sqlite-shm
+release-output/
+apple-output/
+beta-output/
+__pycache__/
+
+# Standalone tests for the vendored GLib dependency
+third_party/glib/Cargo.lock

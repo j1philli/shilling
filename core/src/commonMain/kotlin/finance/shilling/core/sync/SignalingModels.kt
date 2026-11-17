@@ -19,7 +19,10 @@ sealed class SignalingMessage {
     @Serializable
     data class Join(val deviceId: String, val householdId: String, val accessToken: String? = null) : SignalingMessage()
     @Serializable
-    data class PeerList(val deviceIds: List<String>) : SignalingMessage()
+    data class PeerList(
+        val deviceIds: List<String>,
+        val removedDeviceIds: List<String> = emptyList()
+    ) : SignalingMessage()
 }
 
 @Serializable

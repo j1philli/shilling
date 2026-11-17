@@ -104,14 +104,14 @@ class BackupLiveProcessTest {
                     assertFails { api.updateBackupPolicy(BackupPolicyUpdate(true, false, enabled.revision, mode)) }
                 }
                 passed("Real HTTP policy enforces explicit trusted consent and mandatory TURN")
-                var ice = apis[0].fetchIceServers().webRtcServers()
+                var ice = apis[0].fetchIceServers(allowRelay = true).webRtcServers()
                 rtc = WebRtcClient(JvmWebRtc) { defaultConnectionConfig = { iceServers = ice; iceTransportPolicy = WebRtc.IceTransportPolicy.RELAY } }
                 worker = launch(workerJar!!, workerEnv, root.resolve("worker.log"))
                 waitReady("http://127.0.0.1:$healthPort/health", worker!!)
                 suspend fun connect(household: String): BackupPeerClient {
                     // Refresh expiring TURN credentials just as foreground clients do; the full
                     // multi-restart/MCP suite can exceed one credential lifetime.
-                    ice = apis[0].fetchIceServers().webRtcServers()
+                    ice = apis[0].fetchIceServers(allowRelay = true).webRtcServers()
                     val id = Uuid.random().toString()
                     val peer = BackupPeerClient()
                     val transport = BackupRtcTransport(rtc!!, SignalingClient(http, url, id, household, path = "/ws/backup"), id, scope,
@@ -132,12 +132,12 @@ class BackupLiveProcessTest {
                         val marker = "LIVE-BUDGET-PRIVATE-$household"
                         val receipt = ByteArray(2 * 1024 * 1024) { (it % 251).toByte() }
                         AccountRepository(source.notifier, createAccountStore(source.db)).upsert(Account("checking", marker, 1234.56))
-                        ReceiptRepository(source.notifier, createReceiptStore(source.db), createPostingStore(source.db), createScheduleStore(source.db))
+                        ReceiptRepository(source.notifier, createReceiptStore(source.db))
                             .save(Receipt("receipt-live", null, "receipts/receipt-live.bin", "receipt.bin", 123))
                         source.files.store("receipt-live", "receipt.bin", receipt)
                         // A receiving device already has its own data and receipt metadata from direct P2P.
                         AccountRepository(target.notifier, createAccountStore(target.db)).upsert(Account("target-local", "Keep local data", 99.0))
-                        ReceiptRepository(target.notifier, createReceiptStore(target.db), createPostingStore(target.db), createScheduleStore(target.db))
+                        ReceiptRepository(target.notifier, createReceiptStore(target.db))
                             .save(Receipt("receipt-live", null, "receipts/receipt-live.bin", "receipt.bin", 123))
                         val dbPath = objectPath(root, household)
                         val policy = apis[i].backupPolicy()
@@ -203,15 +203,15 @@ class BackupLiveProcessTest {
                         target.files.delete("receipt-live")
                         peer = connect(household)
                         targetSync.sync(policy, peer)
-                        assertTrue(target.db.accountQueries.selectAll().awaitAsList().any { it.id == "cloud-only" && it.balance == 777.0 })
+                        assertTrue(target.db.accountQueries.selectAll("__local__").awaitAsList().any { it.id == "cloud-only" && it.balance == 777.0 })
                         assertContentEquals(receipt, target.files.read("receipt-live"))
-                        assertTrue(target.db.accountQueries.selectAll().awaitAsList().any { it.id == "target-local" && it.balance == 99.0 })
-                        assertTrue(target.db.accountQueries.selectAll().awaitAsList().any { it.id == "checking" && it.name == marker && it.balance == 1234.56 })
+                        assertTrue(target.db.accountQueries.selectAll("__local__").awaitAsList().any { it.id == "target-local" && it.balance == 99.0 })
+                        assertTrue(target.db.accountQueries.selectAll("__local__").awaitAsList().any { it.id == "checking" && it.name == marker && it.balance == 1234.56 })
                         peer.transport.close()
                         sourceAccounts.delete("cloud-only")
                         peer = connect(household); sourceSync.sync(policy, peer); peer.transport.close()
                         peer = connect(household); targetSync.sync(policy, peer)
-                        assertTrue(target.db.accountQueries.selectAll().awaitAsList().none { it.id == "cloud-only" })
+                        assertTrue(target.db.accountQueries.selectAll("__local__").awaitAsList().none { it.id == "cloud-only" })
                         passed("$mode CLOUD PEER: nonempty device catches up with source offline after hard worker restart; receipt bytes recovered; deletion propagated")
                         peer.transport.close()
                         peer = connect(household)
@@ -227,8 +227,8 @@ class BackupLiveProcessTest {
                         target.files.delete("receipt-live")
                         peer = connect(household)
                         targetSync.sync(policy, peer)
-                        assertTrue(target.db.accountQueries.selectAll().awaitAsList().any { it.id == "checkpoint-tail" && it.balance == 63.0 })
-                        assertTrue(target.db.accountQueries.selectAll().awaitAsList().none { it.id == "cloud-only" })
+                        assertTrue(target.db.accountQueries.selectAll("__local__").awaitAsList().any { it.id == "checkpoint-tail" && it.balance == 63.0 })
+                        assertTrue(target.db.accountQueries.selectAll("__local__").awaitAsList().none { it.id == "cloud-only" })
                         assertContentEquals(receipt, target.files.read("receipt-live"))
                         passed("$mode CHECKPOINT: automatic compaction and WebRTC checkpoint/tail catch-up survived restart with receipts and tombstones")
                         peer.transport.close()
@@ -269,7 +269,7 @@ class BackupLiveProcessTest {
                             coroutineScope {
                                 devices.mapIndexed { index, device -> async {
                                     accounts[index].upsert(Account("concurrent-own-$index", "Device $index", index.toDouble()))
-                                    ReceiptRepository(device.notifier, createReceiptStore(device.db), createPostingStore(device.db), createScheduleStore(device.db))
+                                    ReceiptRepository(device.notifier, createReceiptStore(device.db))
                                         .save(Receipt("concurrent-receipt-$index", null, "receipts/concurrent-$index.bin", "concurrent-$index.bin", 123))
                                     device.files.store("concurrent-receipt-$index", "concurrent-$index.bin", receipts[index])
                                     repeat(5) { version ->
@@ -280,7 +280,7 @@ class BackupLiveProcessTest {
                             }
                             repeat(3) { syncTogether() }
                             suspend fun assertConverged() {
-                                val rows = devices.map { it.db.accountQueries.selectAll().awaitAsList().sortedBy { it.id } }
+                                val rows = devices.map { it.db.accountQueries.selectAll("__local__").awaitAsList().sortedBy { it.id } }
                                 assertEquals(rows[0], rows[1]); assertEquals(rows[0], rows[2])
                                 repeat(3) { index ->
                                     assertTrue(rows[0].any { it.id == "concurrent-own-$index" })
@@ -313,7 +313,7 @@ class BackupLiveProcessTest {
                             repeat(4) { syncTogether() }
                             assertConverged()
                             devices.forEach { device ->
-                                val rows = device.db.accountQueries.selectAll().awaitAsList()
+                                val rows = device.db.accountQueries.selectAll("__local__").awaitAsList()
                                 assertTrue(rows.none { it.id == "concurrent-conflict" }, "Older offline edit must not resurrect deletion")
                                 assertTrue(rows.any { it.id == "offline-survivor" && it.balance == 42.0 })
                             }
@@ -328,7 +328,7 @@ class BackupLiveProcessTest {
                                 }, assertCatchUp = {
                                     repeat(3) { syncTogether() }
                                     devices.forEach { device ->
-                                        assertEquals(1, device.db.postingQueries.selectAll().awaitAsList().count { it.title == "Remote MCP transaction" })
+                                        assertEquals(1, device.db.postingQueries.selectAll("__local__").awaitAsList().count { it.title == "Remote MCP transaction" })
                                     }
                                 })
                                 passed("CLOUD MCP: reader/write grants, consent, origin/session isolation, concurrent idempotent write, restart retry, immediate revocation and WebRTC catch-up on three clients passed")
@@ -455,6 +455,14 @@ class BackupLiveProcessTest {
         private val data = mutableMapOf<String, ByteArray>()
         override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) { data[receiptId] = bytes.copyOf() }
         override suspend fun read(receiptId: String) = data[receiptId]
+        override suspend fun openReader(receiptId: String): finance.shilling.shared.data.ReceiptFileReader? {
+            val bytes = read(receiptId)?.copyOf() ?: return null
+            return object : finance.shilling.shared.data.ReceiptFileReader {
+                override val size = bytes.size.toLong()
+                override suspend fun readRange(offset: Long, byteCount: Int) =
+                    finance.shilling.shared.data.ReceiptFileBlock(bytes.copyOfRange(offset.toInt(), minOf(bytes.size, offset.toInt() + byteCount)))
+            }
+        }
         override suspend fun hasFile(receiptId: String) = receiptId in data
         override suspend fun delete(receiptId: String) { data.remove(receiptId) }
         override suspend fun clearAll() { data.clear() }

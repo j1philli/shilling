@@ -33,8 +33,13 @@ const val MAX_CLOUD_BATCH_BYTES = 32 * 1024 * 1024
 
 /** Local durable upload queue/checkpoint, with entity reads and merges through Store5. */
 class CloudSyncRepository(private val db: ShillingDatabase, private val stores: SyncStoreFacade,
-    private val files: ReceiptFileStore, private val notifier: ChangeNotifier) {
+    private val files: ReceiptFileStore, private val notifier: ChangeNotifier,
+    private val spaceScope: FinanceSpaceScope = FinanceSpaceScope(stores.spaceId)) {
     private val mutex = Mutex()
+    private suspend fun <T> locked(block: suspend () -> T): T = mutex.withLock {
+        check(spaceScope.active) { "This finance space was closed." }
+        block()
+    }
     private val crypto = BackupCrypto()
     private val scannedVersions = mutableMapOf<String, Int>()
     private val stateStore = MutableStoreBuilder.from<String, List<String>, List<String>, List<String>>(
@@ -45,12 +50,12 @@ class CloudSyncRepository(private val db: ShillingDatabase, private val stores: 
         ), converter = Converter.Builder<List<String>, List<String>, List<String>>().fromNetworkToLocal { it }.fromOutputToLocal { it }.build()
     ).disableCache().build(updater = Updater.by<String, List<String>, Unit>(post = { _, _ -> UpdaterResult.Success.Typed(Unit) }))
     private suspend fun state(namespace: String) = stateStore.readLocalSourceOfTruth(namespace).firstOrNull()?.let { Json.decodeFromString<CloudState>(it) } ?: CloudState()
-    private suspend fun save(namespace: String, value: CloudState) {
+    private suspend fun save(namespace: String, value: CloudState) = spaceScope.write {
         val encoded = Json.encodeToString(value)
         stateStore.write(StoreWriteRequest.of<String, List<String>, Unit>(namespace, listOf(encoded)))
         check(stateStore.readLocalSourceOfTruth(namespace).single() == encoded)
     }
-    suspend fun cursor(namespace: String): Long = mutex.withLock { state(namespace).cursor }
+    suspend fun cursor(namespace: String): Long = locked { state(namespace).cursor }
     private fun entityKey(change: ChangeMessage) = "${change.entityType}:${change.entityId}"
     private suspend fun mark(change: ChangeMessage, digest: String?) = crypto.digest(
         (Json.encodeToString(change.copy(deviceId = "")) + (digest ?: "")).encodeToByteArray())
@@ -66,7 +71,7 @@ class CloudSyncRepository(private val db: ShillingDatabase, private val stores: 
         }
         return CloudObjectUpload(BackupInfo(id, count, 0, mode, key?.let { crypto.fingerprint(it) } ?: "", kind = kind), chunks)
     }
-    suspend fun prepare(namespace: String, household: String, deviceId: String, policy: BackupPolicy, key: String?): CloudUpload? = mutex.withLock {
+    suspend fun prepare(namespace: String, household: String, deviceId: String, policy: BackupPolicy, key: String?): CloudUpload? = locked {
         require(policy.enabled)
         val keyId = if (policy.encryption == BackupEncryption.END_TO_END) crypto.fingerprint(requireNotNull(key)) else ""
         var state = state(namespace)
@@ -74,9 +79,9 @@ class CloudSyncRepository(private val db: ShillingDatabase, private val stores: 
             state = state.copy(marks = emptyMap(), pending = null, revision = policy.encryptionRevision, keyId = keyId)
             save(namespace, state); scannedVersions.remove(namespace)
         }
-        state.pending?.let { return@withLock it }
+        state.pending?.let { return@locked it }
         val version = notifier.version.value
-        if (scannedVersions[namespace] == version) return@withLock null
+        if (scannedVersions[namespace] == version) return@locked null
         val selected = mutableListOf<ChangeMessage>()
         val attachments = mutableListOf<CloudFile>()
         val objects = mutableListOf<CloudObjectUpload>()
@@ -112,7 +117,7 @@ class CloudSyncRepository(private val db: ShillingDatabase, private val stores: 
                 }
             } finally { bytes?.fill(0) }
         }
-        if (selected.isEmpty()) { scannedVersions[namespace] = version; return@withLock null }
+        if (selected.isEmpty()) { scannedVersions[namespace] = version; return@locked null }
         check(version == notifier.version.value) { "Budget changed during cloud preparation; retrying." }
         val bytes = Json.encodeToString(CloudDelta(household = household, changes = selected, files = attachments)).encodeToByteArray()
         try {
@@ -122,44 +127,44 @@ class CloudSyncRepository(private val db: ShillingDatabase, private val stores: 
             }
         } finally { bytes.fill(0) }
     }
-    suspend fun uploaded(namespace: String, id: String) = mutex.withLock {
+    suspend fun uploaded(namespace: String, id: String) = locked {
         val state = state(namespace); val pending = requireNotNull(state.pending); require(pending.id == id)
         val blobs = state.blobs + pending.files.associateBy { blobKey(it.objectInfo.encryption, it.objectInfo.keyId, it.digest) }
         save(namespace, state.copy(marks = state.marks + pending.marks, pending = null, blobs = blobs))
     }
-    suspend fun prepareCheckpoint(namespace: String, household: String, deviceId: String, policy: BackupPolicy, key: String?, head: Long): CloudUpload? = mutex.withLock {
+    suspend fun prepareCheckpoint(namespace: String, household: String, deviceId: String, policy: BackupPolicy, key: String?, head: Long): CloudUpload? = locked {
         val state = state(namespace)
-        state.checkpoint?.let { return@withLock it }
-        if (state.cursor != head || state.pending != null || head == 0L) return@withLock null
+        state.checkpoint?.let { return@locked it }
+        if (state.cursor != head || state.pending != null || head == 0L) return@locked null
         val version = notifier.version.value
         val changes = stores.cloudState(deviceId)
-        if (changes.size > 50_000) return@withLock null
+        if (changes.size > 50_000) return@locked null
         val attachments = mutableListOf<CloudFile>()
         for (change in changes) {
             val receipt = (change.payload as? ChangePayload.ReceiptPayload)?.receipt
             val bytes = receipt?.let { files.read(it.id)?.copyOf() }
             try {
-                if (receipt != null && bytes == null) return@withLock null
+                if (receipt != null && bytes == null) return@locked null
                 val digest = bytes?.let { crypto.digest(it) }
-                if (state.marks[entityKey(change)] != mark(change, digest)) return@withLock null
+                if (state.marks[entityKey(change)] != mark(change, digest)) return@locked null
                 if (receipt != null && digest != null) {
-                    val known = state.blobs[blobKey(policy.encryption, state.keyId, digest)] ?: return@withLock null
+                    val known = state.blobs[blobKey(policy.encryption, state.keyId, digest)] ?: return@locked null
                     attachments += known.copy(id = receipt.id, name = receipt.originalName)
                 }
             } finally { bytes?.fill(0) }
         }
-        if (attachments.size > 512 || notifier.version.value != version) return@withLock null
+        if (attachments.size > 512 || notifier.version.value != version) return@locked null
         val bytes = Json.encodeToString(CloudDelta(household = household, changes = changes, files = attachments, checkpoint = true, baseSequence = head)).encodeToByteArray()
-        if (bytes.size > MAX_CLOUD_BATCH_BYTES) { bytes.fill(0); return@withLock null }
+        if (bytes.size > MAX_CLOUD_BATCH_BYTES) { bytes.fill(0); return@locked null }
         try {
             val encoded = encode(household, bytes, policy.encryption, key, CloudObjectKind.CHECKPOINT)
             CloudUpload(encoded.info.id, policy.encryption, encoded.info.keyId, policy.encryptionRevision, encoded.chunks, emptyMap(), files = attachments,
                 kind = CloudObjectKind.CHECKPOINT, baseSequence = head).also { save(namespace, state.copy(checkpoint = it)) }
         } finally { bytes.fill(0) }
     }
-    suspend fun clearCheckpoint(namespace: String) = mutex.withLock { save(namespace, state(namespace).copy(checkpoint = null)) }
+    suspend fun clearCheckpoint(namespace: String) = locked { save(namespace, state(namespace).copy(checkpoint = null)) }
     suspend fun apply(namespace: String, household: String, deviceId: String, sequence: Long, bytes: ByteArray,
-        checkpoint: Boolean = false, resolve: suspend (CloudFile) -> ByteArray = { error("Receipt resolver required") }) = mutex.withLock {
+        checkpoint: Boolean = false, resolve: suspend (CloudFile) -> ByteArray = { error("Receipt resolver required") }) = locked {
         val state = state(namespace)
         require(if (checkpoint) sequence > state.cursor else sequence == state.cursor + 1) { "Cloud history has a gap; cursor was not advanced." }
         val delta = decodeCloudDelta(household, bytes)
