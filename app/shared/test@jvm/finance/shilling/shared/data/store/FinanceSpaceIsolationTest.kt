@@ -40,7 +40,8 @@ class FinanceSpaceIsolationTest {
         home.accounts.delete("same")
         assertTrue(home.accounts.getAll().isEmpty())
         assertEquals(20.0, business.accounts.getAll()["same"]?.balance)
-        assertNotEquals(db.latestEntityVersion(EntityType.ACCOUNT, "same", "home"), db.latestEntityVersion(EntityType.ACCOUNT, "same", "business"))
+        assertEquals(false, SyncVersions(db, "home", "test").load(EntityType.ACCOUNT, "same")?.alive)
+        assertEquals(true, SyncVersions(db, "business", "test").load(EntityType.ACCOUNT, "same")?.alive)
     }
 
     @Test fun accountCascadesAndReceiptDetachmentStayInsideTheirSpace() = runBlocking {
