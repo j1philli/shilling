@@ -4,6 +4,7 @@ import finance.shilling.shared.data.auth.AuthErrors
 
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutines
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutinesState
+import finance.shilling.shared.presentation.AccountDeletionStep
 import finance.shilling.shared.presentation.CredentialsCopy
 import finance.shilling.shared.presentation.CredentialsOutcome
 import finance.shilling.shared.presentation.SettingsUiState
@@ -141,6 +142,21 @@ class SettingsScreenModel : IosViewModelHost() {
 
     @NativeCoroutines
     suspend fun confirmAccountAction(): Unit = viewModel.confirmAccountAction()
+
+    @NativeCoroutinesState
+    val deletion: StateFlow<AccountDeletionStep> = viewModel.deletion
+    val deleteAccountLabel: String = AccountDeletionStep.ACTION_LABEL
+    val deleteAccountFootnote: String = AccountDeletionStep.FOOTNOTE
+    val deletingAccountLabel: String = AccountDeletionStep.DELETING_LABEL
+
+    fun startAccountDeletion() = viewModel.startAccountDeletion(devicesViewModel.state.value.accountPlan)
+    fun continueAccountDeletion() = viewModel.continueAccountDeletion()
+    fun cancelAccountDeletion() = viewModel.cancelAccountDeletion()
+
+    /** Null on success (the app returns to Welcome) or when a subscription reminder is shown. */
+    @NativeCoroutines
+    suspend fun confirmAccountDeletion(acknowledgeActiveSubscription: Boolean): String? =
+        viewModel.confirmAccountDeletion(acknowledgeActiveSubscription)
 
     @NativeCoroutines
     suspend fun addSampleData(): String = viewModel.addSampleData()

@@ -130,8 +130,8 @@ fun clearHostedAuthSessionState(settings: Settings) {
  * Wipes all local app state. All entity deletes go through Store5 repositories so that
  * in-memory caches stay coherent with the SQLDelight source of truth. The sync-metadata
  * tables (change_log, bookkeeping) are cleared through the store-layer helper that owns
- * them. The binary receipt file store (a platform service, not a Store5 entity) is
- * cleared directly via its interface.
+ * them. Binary receipt files are cleared through the platform-facing interface backed
+ * by Store5ReceiptFileStore.
  */
 suspend fun wipeLocalAppState(
     db: ShillingDatabase,

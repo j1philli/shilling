@@ -1,0 +1,257 @@
+{
+  "browserVersion": "154.0.8037.95",
+  "url": "https://demo.actualbudget.org",
+  "viewport": {
+    "width": 1200,
+    "height": 900
+  },
+  "deviceScaleFactor": 1,
+  "metric": "macOS proc_pid_rusage physical footprint MiB; tracing service excluded from headline totals",
+  "phases": [
+    {
+      "name": "blank_browser_15s",
+      "elapsedMs": 15126,
+      "totalFootprintMiB": 297.52466583251953,
+      "browserFootprintExcludingProfilerMiB": 297.52466583251953,
+      "processes": [
+        {
+          "pid": 79307,
+          "type": "browser",
+          "footprintMiB": 66.53289794921875,
+          "lifetimePeakFootprintMiB": 67.82977294921875
+        },
+        {
+          "pid": 79319,
+          "type": "renderer",
+          "footprintMiB": 24.970008850097656,
+          "lifetimePeakFootprintMiB": 25.579383850097656
+        },
+        {
+          "pid": 79320,
+          "type": "renderer",
+          "footprintMiB": 27.89197540283203,
+          "lifetimePeakFootprintMiB": 27.97010040283203
+        },
+        {
+          "pid": 79317,
+          "type": "renderer",
+          "footprintMiB": 60.97021484375,
+          "lifetimePeakFootprintMiB": 61.06396484375
+        },
+        {
+          "pid": 79313,
+          "type": "GPU",
+          "footprintMiB": 75.50125885009766,
+          "lifetimePeakFootprintMiB": 283.28250885009766
+        },
+        {
+          "pid": 79314,
+          "type": "network.mojom.NetworkService",
+          "footprintMiB": 22.454177856445312,
+          "lifetimePeakFootprintMiB": 24.735427856445312
+        },
+        {
+          "pid": 79315,
+          "type": "storage.mojom.StorageService",
+          "footprintMiB": 19.204132080078125,
+          "lifetimePeakFootprintMiB": 19.235382080078125
+        }
+      ]
+    },
+    {
+      "name": "demo_budget_idle_30s",
+      "elapsedMs": 119497,
+      "totalFootprintMiB": 616.2316818237305,
+      "browserFootprintExcludingProfilerMiB": 616.2316818237305,
+      "processes": [
+        {
+          "pid": 79307,
+          "type": "browser",
+          "footprintMiB": 73.79856872558594,
+          "lifetimePeakFootprintMiB": 84.23606872558594
+        },
+        {
+          "pid": 79345,
+          "type": "renderer",
+          "footprintMiB": 72.64220428466797,
+          "lifetimePeakFootprintMiB": 135.32970428466797
+        },
+        {
+          "pid": 79346,
+          "type": "renderer",
+          "footprintMiB": 24.923133850097656,
+          "lifetimePeakFootprintMiB": 25.485633850097656
+        },
+        {
+          "pid": 79319,
+          "type": "renderer",
+          "footprintMiB": 228.81460571289062,
+          "lifetimePeakFootprintMiB": 266.5489807128906
+        },
+        {
+          "pid": 79344,
+          "type": "renderer",
+          "footprintMiB": 31.235794067382812,
+          "lifetimePeakFootprintMiB": 31.892044067382812
+        },
+        {
+          "pid": 79317,
+          "type": "renderer",
+          "footprintMiB": 50.04833984375,
+          "lifetimePeakFootprintMiB": 61.64208984375
+        },
+        {
+          "pid": 79313,
+          "type": "GPU",
+          "footprintMiB": 90.26692962646484,
+          "lifetimePeakFootprintMiB": 308.40755462646484
+        },
+        {
+          "pid": 79314,
+          "type": "network.mojom.NetworkService",
+          "footprintMiB": 25.3292236328125,
+          "lifetimePeakFootprintMiB": 29.282371520996094
+        },
+        {
+          "pid": 79315,
+          "type": "storage.mojom.StorageService",
+          "footprintMiB": 19.172882080078125,
+          "lifetimePeakFootprintMiB": 19.266632080078125
+        }
+      ]
+    },
+    {
+      "name": "csv_review_20000",
+      "elapsedMs": 161647,
+      "totalFootprintMiB": 1176.825912475586,
+      "browserFootprintExcludingProfilerMiB": 1176.825912475586,
+      "processes": [
+        {
+          "pid": 79307,
+          "type": "browser",
+          "footprintMiB": 185.1737060546875,
+          "lifetimePeakFootprintMiB": 219.45502471923828
+        },
+        {
+          "pid": 79345,
+          "type": "renderer",
+          "footprintMiB": 72.59532928466797,
+          "lifetimePeakFootprintMiB": 135.32970428466797
+        },
+        {
+          "pid": 79346,
+          "type": "renderer",
+          "footprintMiB": 24.876258850097656,
+          "lifetimePeakFootprintMiB": 25.485633850097656
+        },
+        {
+          "pid": 79319,
+          "type": "renderer",
+          "footprintMiB": 382.95548248291016,
+          "lifetimePeakFootprintMiB": 448.67420959472656
+        },
+        {
+          "pid": 79344,
+          "type": "renderer",
+          "footprintMiB": 37.438987731933594,
+          "lifetimePeakFootprintMiB": 61.42340850830078
+        },
+        {
+          "pid": 79317,
+          "type": "renderer",
+          "footprintMiB": 50.04833984375,
+          "lifetimePeakFootprintMiB": 61.64208984375
+        },
+        {
+          "pid": 79313,
+          "type": "GPU",
+          "footprintMiB": 379.25132751464844,
+          "lifetimePeakFootprintMiB": 379.47007751464844
+        },
+        {
+          "pid": 79314,
+          "type": "network.mojom.NetworkService",
+          "footprintMiB": 25.3135986328125,
+          "lifetimePeakFootprintMiB": 29.282371520996094
+        },
+        {
+          "pid": 79315,
+          "type": "storage.mojom.StorageService",
+          "footprintMiB": 19.172882080078125,
+          "lifetimePeakFootprintMiB": 19.266632080078125
+        }
+      ]
+    },
+    {
+      "name": "budget_after_import_idle45",
+      "elapsedMs": 285077,
+      "totalFootprintMiB": 2033.5612487792969,
+      "browserFootprintExcludingProfilerMiB": 2033.5612487792969,
+      "processes": [
+        {
+          "pid": 79307,
+          "type": "browser",
+          "footprintMiB": 129.3768768310547,
+          "lifetimePeakFootprintMiB": 257.65826416015625
+        },
+        {
+          "pid": 79345,
+          "type": "renderer",
+          "footprintMiB": 72.59532928466797,
+          "lifetimePeakFootprintMiB": 135.32970428466797
+        },
+        {
+          "pid": 79346,
+          "type": "renderer",
+          "footprintMiB": 24.876258850097656,
+          "lifetimePeakFootprintMiB": 25.485633850097656
+        },
+        {
+          "pid": 79319,
+          "type": "renderer",
+          "footprintMiB": 1592.503273010254,
+          "lifetimePeakFootprintMiB": 1592.503273010254
+        },
+        {
+          "pid": 79344,
+          "type": "renderer",
+          "footprintMiB": 33.126487731933594,
+          "lifetimePeakFootprintMiB": 74.50160217285156
+        },
+        {
+          "pid": 79317,
+          "type": "renderer",
+          "footprintMiB": 50.09521484375,
+          "lifetimePeakFootprintMiB": 61.64208984375
+        },
+        {
+          "pid": 79313,
+          "type": "GPU",
+          "footprintMiB": 86.48570251464844,
+          "lifetimePeakFootprintMiB": 381.93882751464844
+        },
+        {
+          "pid": 79314,
+          "type": "network.mojom.NetworkService",
+          "footprintMiB": 25.3292236328125,
+          "lifetimePeakFootprintMiB": 29.282371520996094
+        },
+        {
+          "pid": 79315,
+          "type": "storage.mojom.StorageService",
+          "footprintMiB": 19.172882080078125,
+          "lifetimePeakFootprintMiB": 19.266632080078125
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "version": "26.10.0",
+  "notes": "Fresh local demo; 20,000 synthetic rows imported with merge disabled. The phase named budget_after_import_idle45 had a blank main Budget pane, so it is an unsettled stress observation, EXCLUDED from normal idle comparisons. App renderer not individually attributed; all owned processes counted. No tracing service was used in this successful setup.",
+  "validIdlePhases": [
+    "demo_budget_idle_30s"
+  ],
+  "excludedIdlePhases": [
+    "budget_after_import_idle45"
+  ]
+}

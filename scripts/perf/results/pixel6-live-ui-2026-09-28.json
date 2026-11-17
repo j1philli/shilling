@@ -1,0 +1,237 @@
+{
+  "device": "Pixel 6",
+  "date": "2026-09-28",
+  "scope": "Release benchmark sandbox; production Store5, WebRTC sender/router and shared Compose screens",
+  "liveInitial": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp"
+      }
+    },
+    {
+      "workload": "receive_1MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 1048576,
+        "chunks": 64,
+        "milliseconds": 222.5
+      }
+    },
+    {
+      "workload": "receive_10MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "milliseconds": 1729.8999999761581
+      }
+    },
+    {
+      "workload": "receive_50MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "milliseconds": 9255.100000023842
+      }
+    },
+    {
+      "workload": "interrupt_50MiB",
+      "result": {
+        "status": "interrupted",
+        "bytes": 1048576,
+        "milliseconds": 343.39999997615814
+      }
+    },
+    {
+      "workload": "reconnect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp"
+      }
+    },
+    {
+      "workload": "retry_50MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "milliseconds": 7828.800000011921
+      }
+    },
+    {
+      "workload": "upload_and_readback_1MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 1048576,
+        "chunks": 64,
+        "milliseconds": 333.69999998807907
+      }
+    },
+    {
+      "workload": "browser_errors",
+      "result": []
+    }
+  ],
+  "slowLinkVerified": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp"
+      }
+    },
+    {
+      "workload": "receive_1MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 1048576,
+        "chunks": 64,
+        "milliseconds": 270.7000000476837
+      }
+    },
+    {
+      "workload": "reconnect_with_emulation",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp"
+      }
+    },
+    {
+      "workload": "receive_1MiB_emulated_slow_link",
+      "result": {
+        "status": "complete",
+        "bytes": 1048576,
+        "chunks": 64,
+        "milliseconds": 19999.299999952316
+      }
+    }
+  ],
+  "instrumentedBaseline": [
+    {
+      "workload": "connect",
+      "result": {
+        "connected": true,
+        "localCandidate": "host",
+        "remoteCandidate": "host",
+        "protocol": "udp",
+        "currentRoundTripTime": 0.007
+      }
+    },
+    {
+      "workload": "receive_1MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 1048576,
+        "chunks": 64,
+        "receiverProcessingMs": 6.800000071525574,
+        "milliseconds": 180.20000004768372
+      }
+    },
+    {
+      "workload": "receive_10MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 10485760,
+        "chunks": 640,
+        "receiverProcessingMs": 47.99999958276749,
+        "milliseconds": 1675
+      }
+    },
+    {
+      "workload": "receive_50MiB",
+      "result": {
+        "status": "complete",
+        "bytes": 52428800,
+        "chunks": 3200,
+        "receiverProcessingMs": 309.09999817609787,
+        "milliseconds": 8692.099999964237
+      }
+    }
+  ],
+  "scrolling": {
+    "history": {
+      "postings": 10000,
+      "frames": 315,
+      "jankyFrames": 1,
+      "p95ms": 6,
+      "p99ms": 7
+    },
+    "weekly": {
+      "schedules": 1000,
+      "frames": 336,
+      "jankyFrames": 0,
+      "p95ms": 7,
+      "p99ms": 9
+    }
+  },
+  "coldScreenMaxFrameMs": {
+    "history": 302.733,
+    "weekly": 130.724
+  },
+  "limits": [
+    "Single ten-swipe sequence per screen, cold composition excluded from scrolling",
+    "Browser protocol fixture does not measure native receiving/previewing a 50 MiB file",
+    "Throttling only worked after reconnecting; initial ineffective attempt omitted"
+  ],
+  "rejected1MiBBufferExperiment": {
+    "runs": [
+      {
+        "workload": "connect",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.012
+        }
+      },
+      {
+        "workload": "receive_1MiB",
+        "result": {
+          "status": "complete",
+          "bytes": 1048576,
+          "chunks": 64,
+          "receiverProcessingMs": 3.600000023841858,
+          "milliseconds": 213.89999997615814
+        }
+      },
+      {
+        "workload": "receive_10MiB",
+        "result": {
+          "status": "complete",
+          "bytes": 10485760,
+          "chunks": 640,
+          "receiverProcessingMs": 31.799999833106995,
+          "milliseconds": 1567.199999988079
+        }
+      },
+      {
+        "workload": "receive_50MiB",
+        "result": {
+          "status": "complete",
+          "bytes": 52428800,
+          "chunks": 3200,
+          "receiverProcessingMs": 268.4999983906746,
+          "milliseconds": 8524.800000011921
+        }
+      }
+    ],
+    "native50MiB": {
+      "totalEnqueueMs": 8199.123,
+      "sendMethodMs": 7270.982,
+      "backpressureWaitMs": 2471.398
+    },
+    "decision": "Reverted: 8.52s versus 8.69s is insufficient evidence of improvement"
+  }
+}

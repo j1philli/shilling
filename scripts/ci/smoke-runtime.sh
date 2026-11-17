@@ -27,12 +27,21 @@ trap cleanup EXIT
 cp -R web-app-dist "$context/web"
 cp -R web-app-dist "$context/hosted-web"
 node scripts/ci/prepare-self-host-web.mjs "$context/web"
+# Clients require HTTPS signaling, so serve the self-hosted image over TLS with Caddy's internal CA.
+awk 'NR == 1 { print "{\n\tskip_install_trust\n}\n" } $0 == ":80 {" { print "web {\n\ttls internal"; next } { print }' \
+    deploy/self-host/Caddyfile > "$context/web/Caddyfile"
 sed 's/server:8081/hosted-server:8081/g' deploy/self-host/Caddyfile > "$context/hosted-web/Caddyfile"
 docker build --build-arg "VERSION=$(cat VERSION)" -t "shilling-smoke-server:$SHILLING_SMOKE_TAG" \
     -f deploy/self-host/server.Dockerfile release-input/server
 docker build --build-arg "VERSION=$(cat VERSION)" -t "shilling-smoke-web:$SHILLING_SMOKE_TAG" "$context/web"
 docker build --build-arg "VERSION=$(cat VERSION)" -t "shilling-smoke-hosted-web:$SHILLING_SMOKE_TAG" \
     -f deploy/self-host/web.Dockerfile "$context/hosted-web"
-docker build -t "shilling-smoke-tests:$SHILLING_SMOKE_TAG" scripts/ci/smoke
+# Resolve the locked test packages on the CI host, then install from that cache
+# inside the image. Registry credentials never enter the Docker build context.
+mkdir -p "$context/npm-prefetch"
+cp scripts/ci/smoke/package.json scripts/ci/smoke/package-lock.json "$context/npm-prefetch/"
+npm ci --prefix "$context/npm-prefetch" --cache "$context/npm-cache" --ignore-scripts --no-audit --fetch-timeout=30000 --fetch-retries=2
+rm -rf "$context/npm-cache/_logs"
+docker build --build-context "npm-cache=$context/npm-cache" -t "shilling-smoke-tests:$SHILLING_SMOKE_TAG" scripts/ci/smoke
 "${compose[@]}" up -d server auth-fixture hosted-server web hosted-web
 "${compose[@]}" up --no-deps --abort-on-container-exit --exit-code-from tests tests

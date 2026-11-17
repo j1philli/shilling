@@ -7,6 +7,8 @@ import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.MutableStore
 import org.mobilenativefoundation.store.store5.StoreReadRequest
 import org.mobilenativefoundation.store.store5.StoreReadResponse
+import org.mobilenativefoundation.store.store5.StoreWriteRequest
+import org.mobilenativefoundation.store.store5.StoreWriteResponse
 import org.mobilenativefoundation.store.store5.StoreReadResponseOrigin
 
 @OptIn(ExperimentalStoreApi::class)
@@ -37,3 +39,25 @@ internal fun <Key : Any, Output : Any> MutableStore<Key, Output>.watchLocalSourc
 @OptIn(ExperimentalStoreApi::class)
 internal suspend fun <Key : Any, Output : Any> MutableStore<Key, Output>.readLocalSourceOfTruth(key: Key): Output =
     watchLocalSourceOfTruth(key).first()
+
+/** A committed local edit remains successful while its failed P2P broadcast is queued. */
+internal class PeerBroadcastFailure(cause: Exception) : Exception("Peer broadcast deferred", cause)
+
+/** Store5 returns failures as values. Surface local failures without breaking offline edits. */
+@OptIn(ExperimentalStoreApi::class)
+internal fun StoreWriteResponse.requireSuccess() {
+    when (this) {
+        is StoreWriteResponse.Error.Exception -> {
+            if (error !is PeerBroadcastFailure) throw error
+        }
+        is StoreWriteResponse.Error.Message -> error(message)
+        else -> Unit
+    }
+}
+
+@OptIn(ExperimentalStoreApi::class)
+internal suspend fun <Key : Any, Output : Any, Response : Any> MutableStore<Key, Output>.writeLocally(
+    request: StoreWriteRequest<Key, Output, Response>
+) {
+    write(request).requireSuccess()
+}

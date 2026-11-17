@@ -1,0 +1,133 @@
+{
+  "note": "Section 1 entries counts recursive groups, not individual GC types. Function section entries count defined functions. These are binary sizes, not RAM measurements.",
+  "artifacts": {
+    "control": {
+      "bytes": 15625004,
+      "sections": [
+        {
+          "section": 1,
+          "bytes": 1025981,
+          "entries": 36063
+        },
+        {
+          "section": 2,
+          "bytes": 1385624,
+          "entries": 28611
+        },
+        {
+          "section": 3,
+          "bytes": 109300,
+          "entries": 48690
+        },
+        {
+          "section": 4,
+          "bytes": 1
+        },
+        {
+          "section": 5,
+          "bytes": 1
+        },
+        {
+          "section": 6,
+          "bytes": 1171209
+        },
+        {
+          "section": 7,
+          "bytes": 12,
+          "entries": 1
+        },
+        {
+          "section": 8,
+          "bytes": 3
+        },
+        {
+          "section": 9,
+          "bytes": 37734
+        },
+        {
+          "section": 12,
+          "bytes": 1
+        },
+        {
+          "section": 10,
+          "bytes": 8740560,
+          "entries": 48690
+        },
+        {
+          "section": 0,
+          "bytes": 95,
+          "name": "binaryen.js.called"
+        },
+        {
+          "section": 11,
+          "bytes": 59020
+        },
+        {
+          "section": 0,
+          "bytes": 3095372,
+          "name": "name"
+        }
+      ]
+    },
+    "candidate": {
+      "bytes": 9390251,
+      "sections": [
+        {
+          "section": 1,
+          "bytes": 419278,
+          "entries": 2883
+        },
+        {
+          "section": 2,
+          "bytes": 1315999,
+          "entries": 26672
+        },
+        {
+          "section": 3,
+          "bytes": 55273,
+          "entries": 26447
+        },
+        {
+          "section": 6,
+          "bytes": 717313
+        },
+        {
+          "section": 7,
+          "bytes": 12,
+          "entries": 1
+        },
+        {
+          "section": 8,
+          "bytes": 3
+        },
+        {
+          "section": 9,
+          "bytes": 13181
+        },
+        {
+          "section": 12,
+          "bytes": 1
+        },
+        {
+          "section": 0,
+          "bytes": 57,
+          "name": "binaryen.js.called"
+        },
+        {
+          "section": 10,
+          "bytes": 5090500,
+          "entries": 26447
+        },
+        {
+          "section": 11,
+          "bytes": 59018
+        },
+        {
+          "section": 0,
+          "bytes": 1719568,
+          "name": "name"
+        }
+      ]
+    }
+  }
+}

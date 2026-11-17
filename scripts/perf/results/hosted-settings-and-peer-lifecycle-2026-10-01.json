@@ -1,0 +1,372 @@
+{
+  "date": "2026-10-01",
+  "basePublicMain": "332845a",
+  "data": "Synthetic only; isolated finance.shilling.perf sandbox",
+  "hostedSettings": {
+    "jvmVirtualTime": {
+      "endpointLatencyMs": 100,
+      "visibleSeconds": 45,
+      "hiddenSeconds": 45,
+      "before": {
+        "readyMs": 300,
+        "visibleRequests": 9,
+        "hiddenRequests": 9
+      },
+      "after": {
+        "readyMs": 100,
+        "visibleRequests": 7,
+        "hiddenRequests": 0
+      },
+      "note": "Deterministic virtual-time MockEngine measurements, not native UI or production network timings."
+    },
+    "physicalDevice": "iPhone SE (iPhone12,8), iOS 18.7.8",
+    "build": "Release",
+    "serverAddedLatencyMs": 100,
+    "runs": [
+      {
+        "run": "first",
+        "phases": [
+          {
+            "phase": "visible",
+            "requestCount": 5,
+            "requests": [
+              {
+                "path": "/api/tier",
+                "secondsAfterPhaseStart": 0.364
+              },
+              {
+                "path": "/api/devices/details",
+                "secondsAfterPhaseStart": 0.371
+              },
+              {
+                "path": "/api/billing/config",
+                "secondsAfterPhaseStart": 0.381
+              },
+              {
+                "path": "/api/devices/details",
+                "secondsAfterPhaseStart": 17.677
+              },
+              {
+                "path": "/api/tier",
+                "secondsAfterPhaseStart": 17.751
+              }
+            ],
+            "measurement": {
+              "cpuMs": 1125.413,
+              "database": {
+                "activeListeners": 0,
+                "mainThreadQueries": 0,
+                "queries": 0,
+                "rows": {},
+                "tables": {}
+              },
+              "displayCallbacks": 2085,
+              "elapsedMs": 35084.3439999735,
+              "gapsOver25ms": 1,
+              "maxCallbackGapMs": 56.94583331933245,
+              "p95CallbackGapMs": 16.667541698552668,
+              "residentMiB": 102.421875,
+              "thermalState": 0
+            }
+          },
+          {
+            "phase": "hidden",
+            "requestCount": 2,
+            "requests": [
+              {
+                "path": "/api/devices/details",
+                "secondsAfterPhaseStart": 2.993
+              },
+              {
+                "path": "/api/tier",
+                "secondsAfterPhaseStart": 7.08
+              }
+            ],
+            "measurement": {
+              "cpuMs": 525.1960000000003,
+              "database": {
+                "activeListeners": 21,
+                "mainThreadQueries": 0,
+                "queries": 0,
+                "rows": {},
+                "tables": {}
+              },
+              "displayCallbacks": 2225,
+              "elapsedMs": 37102.1120416699,
+              "gapsOver25ms": 0,
+              "maxCallbackGapMs": 16.667500021867454,
+              "p95CallbackGapMs": 16.667500021867454,
+              "residentMiB": 110.1875,
+              "thermalState": 0
+            }
+          },
+          {
+            "phase": "reopened",
+            "requestCount": 3,
+            "requests": [
+              {
+                "path": "/api/devices/details",
+                "secondsAfterPhaseStart": 0.173
+              },
+              {
+                "path": "/api/billing/config",
+                "secondsAfterPhaseStart": 0.197
+              },
+              {
+                "path": "/api/tier",
+                "secondsAfterPhaseStart": 0.208
+              }
+            ],
+            "measurement": {
+              "cpuMs": 269.908,
+              "database": {
+                "activeListeners": 21,
+                "mainThreadQueries": 0,
+                "queries": 0,
+                "rows": {},
+                "tables": {}
+              },
+              "displayCallbacks": 311,
+              "elapsedMs": 5245.510833337903,
+              "gapsOver25ms": 1,
+              "maxCallbackGapMs": 64.31154161691666,
+              "p95CallbackGapMs": 16.667541698552668,
+              "residentMiB": 110.828125,
+              "thermalState": 0
+            }
+          }
+        ]
+      },
+      {
+        "run": "second",
+        "phases": [
+          {
+            "phase": "visible",
+            "requestCount": 7,
+            "requests": [
+              {
+                "path": "/api/billing/config",
+                "secondsAfterPhaseStart": 0.32
+              },
+              {
+                "path": "/api/tier",
+                "secondsAfterPhaseStart": 0.413
+              },
+              {
+                "path": "/api/devices/details",
+                "secondsAfterPhaseStart": 0.421
+              },
+              {
+                "path": "/api/tier",
+                "secondsAfterPhaseStart": 15.598
+              },
+              {
+                "path": "/api/devices/details",
+                "secondsAfterPhaseStart": 15.785
+              },
+              {
+                "path": "/api/tier",
+                "secondsAfterPhaseStart": 31.052
+              },
+              {
+                "path": "/api/devices/details",
+                "secondsAfterPhaseStart": 31.062
+              }
+            ],
+            "measurement": {
+              "cpuMs": 1075.6870000000001,
+              "database": {
+                "activeListeners": 0,
+                "mainThreadQueries": 0,
+                "queries": 0,
+                "rows": {},
+                "tables": {}
+              },
+              "displayCallbacks": 2104,
+              "elapsedMs": 35314.238916675095,
+              "gapsOver25ms": 1,
+              "maxCallbackGapMs": 33.601125003769994,
+              "p95CallbackGapMs": 16.667833318933845,
+              "residentMiB": 101.828125,
+              "thermalState": 0
+            }
+          },
+          {
+            "phase": "hidden",
+            "requestCount": 0,
+            "requests": [],
+            "measurement": {
+              "cpuMs": 511.3749999999999,
+              "database": {
+                "activeListeners": 21,
+                "mainThreadQueries": 0,
+                "queries": 0,
+                "rows": {},
+                "tables": {}
+              },
+              "displayCallbacks": 2202,
+              "elapsedMs": 36720.166083367076,
+              "gapsOver25ms": 0,
+              "maxCallbackGapMs": 16.667500021867454,
+              "p95CallbackGapMs": 16.667500021867454,
+              "residentMiB": 109.625,
+              "thermalState": 0
+            }
+          },
+          {
+            "phase": "reopened",
+            "requestCount": 3,
+            "requests": [
+              {
+                "path": "/api/billing/config",
+                "secondsAfterPhaseStart": 0.168
+              },
+              {
+                "path": "/api/tier",
+                "secondsAfterPhaseStart": 0.197
+              },
+              {
+                "path": "/api/devices/details",
+                "secondsAfterPhaseStart": 0.206
+              }
+            ],
+            "measurement": {
+              "cpuMs": 230.38800000000003,
+              "database": {
+                "activeListeners": 21,
+                "mainThreadQueries": 0,
+                "queries": 0,
+                "rows": {},
+                "tables": {}
+              },
+              "displayCallbacks": 311,
+              "elapsedMs": 5264.141624968033,
+              "gapsOver25ms": 1,
+              "maxCallbackGapMs": 75.95804164884612,
+              "p95CallbackGapMs": 16.667541698552668,
+              "residentMiB": 110.15625,
+              "thermalState": 0
+            }
+          }
+        ]
+      }
+    ],
+    "backgroundResume": {
+      "backgroundSeconds": 50.748,
+      "sameProcess": true,
+      "backgroundRequests": 0,
+      "resumeRequestsWithin5Seconds": 3
+    },
+    "notes": [
+      "First run had two late server arrivals in the first 7.1 seconds of the hidden phase; no continuing polls afterward. Second run had zero hidden requests.",
+      "The hidden phase displays Home, whose database listeners remain active. No database queries occurred during measured Settings phases.",
+      "CPU is aggregate process CPU time; frame callback sampling adds overhead. These are not battery measurements or Instruments rendering-hitch measurements."
+    ]
+  },
+  "nativePeerRemoval": {
+    "baselineFinding": "iPhone data channel was OPEN and receiving data while connected-peer set remained empty. Native receive delegate did not forward Ktor lifecycle callbacks.",
+    "fix": "Retain and forward the Ktor state/buffer callbacks while keeping message delivery in the bounded native receive queue. Restore onChannelOpen invocation in the manager.",
+    "devices": [
+      "iPhone SE, Release perf fixture",
+      "Pixel 6, debug perf fixture (correctness only)"
+    ],
+    "transport": "Production native WebRTC manager/adapters with synthetic control-plane notifications; no payload relay.",
+    "cases": [
+      {
+        "removedDevice": "z-pixel",
+        "signalingInterruptedFirst": true,
+        "startedAt": 1790888918.790713,
+        "before": {
+          "iphone": "z-pixel",
+          "pixel": "z-iphone"
+        },
+        "afterSignalingDisconnect": {
+          "iphone": "z-pixel",
+          "pixel": "z-iphone"
+        },
+        "channelStatusUnchangedAfterSignalingDisconnect": true,
+        "removeRequestedAt": 1790888926.839812,
+        "afterRemoval": {
+          "iphone": "",
+          "pixel": ""
+        },
+        "afterQuietPeriod": {
+          "iphone": "",
+          "pixel": ""
+        },
+        "quietSeconds": 20,
+        "offersAfterRemoval": 0,
+        "completedAt": 1790888947.367583
+      },
+      {
+        "removedDevice": "z-iphone",
+        "signalingInterruptedFirst": false,
+        "startedAt": 1790888974.480005,
+        "before": {
+          "iphone": "z-pixel",
+          "pixel": "z-iphone"
+        },
+        "removeRequestedAt": 1790888974.481505,
+        "afterRemoval": {
+          "iphone": "",
+          "pixel": ""
+        },
+        "afterQuietPeriod": {
+          "iphone": "",
+          "pixel": ""
+        },
+        "quietSeconds": 20,
+        "offersAfterRemoval": 0,
+        "completedAt": 1790888995.018673
+      }
+    ],
+    "readmittedPixelRejoined": true,
+    "iosOffererConnectedAfterFix": true,
+    "iosAnswererConnectedAfterFix": true,
+    "receiptUploadReadback": [
+      {
+        "workload": "connect",
+        "result": {
+          "connected": true,
+          "localCandidate": "host",
+          "remoteCandidate": "host",
+          "protocol": "udp",
+          "currentRoundTripTime": 0.17
+        }
+      },
+      {
+        "workload": "upload_and_readback_1MiB",
+        "result": {
+          "status": "complete",
+          "bytes": 1048576,
+          "chunks": 64,
+          "binaryFrames": 64,
+          "receiverProcessingMs": 3.299999952316284,
+          "milliseconds": 81.69999992847443
+        }
+      },
+      {
+        "workload": "browser_errors",
+        "result": []
+      }
+    ],
+    "notes": [
+      "Receipt result timing is the harness readback timer, not complete upload-plus-readback latency or a comparative throughput result.",
+      "Physical removal cases inject protocol events using the synthetic fixture. Production signaling eviction and queue behavior passed 14 JVM tests; hosted-account authorization/UI removal was not exercised on physical devices."
+    ]
+  },
+  "plan16Pro": {
+    "status": "Skipped at user request; device unavailable. No new Plan performance claim."
+  },
+  "verification": {
+    "hostedDevicesJvmTests": 5,
+    "databaseBootstrapJvmTests": 6,
+    "architectureGuard": "passed",
+    "androidFixtureBuild": "passed, final callback fix included",
+    "iosFixtureReleaseBuild": "passed, signed and installed, final callback fix included",
+    "signalingServerJvmTests": 14,
+    "pythonAndNodeSyntax": "passed",
+    "diffCheck": "passed",
+    "deviceCleanup": "Stopped benchmark apps and local fixture; removed owned ADB reverse; foregrounded normal Shilling."
+  }
+}

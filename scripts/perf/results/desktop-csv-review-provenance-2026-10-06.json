@@ -1,0 +1,179 @@
+{
+  "date": "2026-10-06",
+  "baseCommit": "8a55b34c21e944b893db1a3853fe89743f95280a",
+  "hardware": {
+    "model": "Mac15,6",
+    "ramGiB": 36,
+    "macOS": "27.0.1",
+    "build": "26A434"
+  },
+  "viewport": [
+    1200,
+    900
+  ],
+  "dpr": 1,
+  "runOrder": [
+    "control-1",
+    "candidate-1",
+    "control-2",
+    "candidate-2"
+  ],
+  "workload": "csv-review",
+  "seed": {
+    "postings": 10000,
+    "schedules": 1000,
+    "accounts": 20,
+    "categories": 40,
+    "receiptMetadata": 250
+  },
+  "csvRows": 10000,
+  "edits": {
+    "checkbox": 30,
+    "category": 30
+  },
+  "forcedGc": false,
+  "compilationDuringMeasuredRuns": false,
+  "controlProvenance": "Pre-edit production ImportViewModel from base commit, same new csv-review benchmark. Preserved optimized Wasm built October 5; native bundle rebuilt October 6. Candidate built October 6. Both measured October 6 from identical restored seed.",
+  "memorySemantics": "Physical footprint MiB from vmmap. Phase totals sum sequential four-process snapshots; peak is WebContent-only lifetime physical footprint.",
+  "timingSemantics": "Load includes synthetic CSV generation through published importable state. Edits run from ViewModel action through expected published state, excluding 50 ms pacing. No native event or frame latency.",
+  "manualInspection": "Control 1 Home screenshot/accessibility inspection only; no manual workload edits. Later ui-check runs excluded.",
+  "controlArtifacts": {
+    "perf-web.import-object.mjs": {
+      "bytes": 76184,
+      "sha256": "7b84a5b41b40d623d1b067e2b3fcf16092abe5f2a31fd4820bbe0a49f3df4106"
+    },
+    "index.html": {
+      "bytes": 4774,
+      "sha256": "183206fb105437e67c1d8676821fef536a0d9f7074d85a40cb2a58134be49c17"
+    },
+    "allocation-profile.js": {
+      "bytes": 1769,
+      "sha256": "24bc50c62d25dbd11c9a37b2be3878f515d51464e7cc0a9582da51949f8bd71a"
+    },
+    "import-map-loader.js": {
+      "bytes": 288,
+      "sha256": "a66d5d181914ed2118a3704d176857005c086521102b39d4fef499e48b4707eb"
+    },
+    "perf-web.mjs": {
+      "bytes": 3165,
+      "sha256": "54ba5234ba5da29a6243f6242cc9f51791e966edbc68551e30038980c6e2362f"
+    },
+    "js-joda.esm.js": {
+      "bytes": 396916,
+      "sha256": "da8bc3071911f307525044765bf36ef53d1e77d1b241125cfb434127eb8dfd6d"
+    },
+    "perf-web.js-builtins.mjs": {
+      "bytes": 2095,
+      "sha256": "a370c66f8031ae3a8d5718123a7fb1aeed4f43caca681181ef69b512321d5b94"
+    },
+    "skiko.mjs": {
+      "bytes": 503913,
+      "sha256": "93d422c209952d9134432c426ce002555aff94ba5a812cee5984c782833108d9"
+    },
+    "sql-wasm.js": {
+      "bytes": 46535,
+      "sha256": "f1c84000dbc856c9d87f4f3aabc4d3654bd436165db4be3da13751db3a9c20d7"
+    },
+    "skiko.wasm": {
+      "bytes": 8640316,
+      "sha256": "089052ba37e2a6e8345117bf6fe0f5730cfc8de1eb4c2bbc8921cf8e457ae3cb"
+    },
+    "runtime-profile.js": {
+      "bytes": 2087,
+      "sha256": "6a262897410b357da0bd168533a2df0ecc00261b223ca0359b03e7f2129c163e"
+    },
+    "sqldelight.worker.js": {
+      "bytes": 7236,
+      "sha256": "0a6f057d359ca0f007dba7af36e756f1b5982db084588c4d91824369fe063ee4"
+    },
+    "perf-web.wasm": {
+      "bytes": 9393991,
+      "sha256": "2ba1ebc1d1bcfe77f22eafd06e8eca342a271f2dc976c708314cabb41e326227"
+    },
+    "sql-profile.js": {
+      "bytes": 2284,
+      "sha256": "84f8a5f393ab6007eb3ea9315ed12bf18345122eaccef478030729b1ad62c171"
+    },
+    "allocation-worker-profile.js": {
+      "bytes": 1522,
+      "sha256": "17ac9d3878353f61c66a8d737dba926be0850a5123d442399f9157a17f0854c0"
+    },
+    "sql-wasm.wasm": {
+      "bytes": 658410,
+      "sha256": "38c14f6e379210bc942bdc4ebca44e7bfdb4318ecc1c72ca666a28fdce96670a"
+    }
+  },
+  "candidateArtifacts": {
+    "perf-web.import-object.mjs": {
+      "bytes": 76184,
+      "sha256": "7b84a5b41b40d623d1b067e2b3fcf16092abe5f2a31fd4820bbe0a49f3df4106"
+    },
+    "index.html": {
+      "bytes": 4774,
+      "sha256": "183206fb105437e67c1d8676821fef536a0d9f7074d85a40cb2a58134be49c17"
+    },
+    "allocation-profile.js": {
+      "bytes": 1769,
+      "sha256": "24bc50c62d25dbd11c9a37b2be3878f515d51464e7cc0a9582da51949f8bd71a"
+    },
+    "import-map-loader.js": {
+      "bytes": 288,
+      "sha256": "a66d5d181914ed2118a3704d176857005c086521102b39d4fef499e48b4707eb"
+    },
+    "perf-web.mjs": {
+      "bytes": 3165,
+      "sha256": "54ba5234ba5da29a6243f6242cc9f51791e966edbc68551e30038980c6e2362f"
+    },
+    "js-joda.esm.js": {
+      "bytes": 396916,
+      "sha256": "da8bc3071911f307525044765bf36ef53d1e77d1b241125cfb434127eb8dfd6d"
+    },
+    "perf-web.js-builtins.mjs": {
+      "bytes": 2095,
+      "sha256": "a370c66f8031ae3a8d5718123a7fb1aeed4f43caca681181ef69b512321d5b94"
+    },
+    "skiko.mjs": {
+      "bytes": 503913,
+      "sha256": "93d422c209952d9134432c426ce002555aff94ba5a812cee5984c782833108d9"
+    },
+    "sql-wasm.js": {
+      "bytes": 46535,
+      "sha256": "f1c84000dbc856c9d87f4f3aabc4d3654bd436165db4be3da13751db3a9c20d7"
+    },
+    "skiko.wasm": {
+      "bytes": 8640316,
+      "sha256": "089052ba37e2a6e8345117bf6fe0f5730cfc8de1eb4c2bbc8921cf8e457ae3cb"
+    },
+    "runtime-profile.js": {
+      "bytes": 2087,
+      "sha256": "6a262897410b357da0bd168533a2df0ecc00261b223ca0359b03e7f2129c163e"
+    },
+    "sqldelight.worker.js": {
+      "bytes": 7236,
+      "sha256": "0a6f057d359ca0f007dba7af36e756f1b5982db084588c4d91824369fe063ee4"
+    },
+    "perf-web.wasm": {
+      "bytes": 9397520,
+      "sha256": "e0642086a34fea85409c41dfa549117a11ae11f75b34bd8dc7695bb9a9a57464"
+    },
+    "sql-profile.js": {
+      "bytes": 2284,
+      "sha256": "84f8a5f393ab6007eb3ea9315ed12bf18345122eaccef478030729b1ad62c171"
+    },
+    "allocation-worker-profile.js": {
+      "bytes": 1522,
+      "sha256": "17ac9d3878353f61c66a8d737dba926be0850a5123d442399f9157a17f0854c0"
+    },
+    "sql-wasm.wasm": {
+      "bytes": 658410,
+      "sha256": "38c14f6e379210bc942bdc4ebca44e7bfdb4318ecc1c72ca666a28fdce96670a"
+    }
+  },
+  "candidateSourceSha256": {
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/presentation/ImportViewModel.kt": "9e6e4e1142f791f1670fcee3ecb64985854ef1e457e781661452d80f9f9492e8",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/presentation/ImportReviewRows.kt": "aa82e83aca222a4df7012b0351cb4930d63da208f5b3dc41d475013dc1be0b1d",
+    "app/perf-web/src/wasmJsMain/kotlin/finance/shilling/perf/Main.kt": "4d6c3c29eb4fa95604666f3e75d2dc3e27e77291dcc66757cdca22832f175e97",
+    "scripts/perf/build_desktop_memory.sh": "2ee0d8d5df22e3e9bcb57ea1ccb3407d12de507aa2a801a4d85316f999eaf674",
+    "scripts/perf/profile_desktop_memory.py": "48317eba956f7e1795fbbaa5b4fb50b2afe8be8fded9256a26d91a3a2e101695"
+  }
+}

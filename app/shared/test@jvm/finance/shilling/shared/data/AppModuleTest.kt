@@ -45,7 +45,6 @@ class AppModuleTest {
             single { db }
             single { settings }
             single<IdGenerator> { idGenerator }
-            single<ReceiptFileStore> { InMemoryReceiptFileStore() }
             single<finance.shilling.shared.data.store.ReceiptFileStoreFactory> { finance.shilling.shared.data.store.ReceiptFileStoreFactory { _, _ -> InMemoryReceiptFileStore() } }
         }
         val app = koinApplication { modules(platformModule, dataModule) }
@@ -89,6 +88,7 @@ class AppModuleTest {
         override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {}
 
         override suspend fun read(receiptId: String): ByteArray? = null
+        override suspend fun openReader(receiptId: String) = read(receiptId)?.asReceiptReader()
 
         override suspend fun hasFile(receiptId: String): Boolean = false
 

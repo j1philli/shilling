@@ -135,35 +135,24 @@ class SyncStoreFacade(
         entityType: EntityType,
         entityId: String,
         payload: ChangePayload
-    ): ChangeMessage =
-        ChangeMessage(
-            id = snapshotChangeId(entityType, entityId, deviceId),
+    ): ChangeMessage {
+        val version = db.latestEntityVersion(entityType, entityId, spaceId)
+        return ChangeMessage(
+            id = version?.changeId ?: "snapshot:$deviceId:${entityType.name}:$entityId",
             entityType = entityType,
             op = ChangeOp.UPSERT,
             entityId = entityId,
-            timestamp = snapshotTimestamp(entityType, entityId),
+            timestamp = version?.timestamp ?: 0L,
             deviceId = deviceId,
             payload = payload
         )
-
-    private suspend fun snapshotChangeId(
-        entityType: EntityType,
-        entityId: String,
-        deviceId: String
-    ): String =
-        db.latestEntityVersion(entityType, entityId, spaceId)?.changeId
-            ?: "snapshot:$deviceId:${entityType.name}:$entityId"
-
-    private suspend fun snapshotTimestamp(
-        entityType: EntityType,
-        entityId: String
-    ): Long = db.latestEntityVersion(entityType, entityId, spaceId)?.timestamp ?: 0L
+    }
 
     private suspend fun applyAccountChange(change: ChangeMessage) {
         when (change.op) {
             ChangeOp.UPSERT -> {
                 val account = (change.payload as? ChangePayload.AccountPayload)?.account ?: return
-                accountStore.write(
+                accountStore.writeLocally(
                     StoreWriteRequest.of<AccountKey, List<Account>, Unit>(
                         AccountKey.ById(account.id),
                         listOf(account)
@@ -178,7 +167,7 @@ class SyncStoreFacade(
         when (change.op) {
             ChangeOp.UPSERT -> {
                 val category = (change.payload as? ChangePayload.CategoryPayload)?.category ?: return
-                categoryStore.write(
+                categoryStore.writeLocally(
                     StoreWriteRequest.of<CategoryKey, List<Category>, Unit>(
                         CategoryKey.ById(category.id),
                         listOf(category)
@@ -193,7 +182,7 @@ class SyncStoreFacade(
         when (change.op) {
             ChangeOp.UPSERT -> {
                 val schedule = (change.payload as? ChangePayload.SchedulePayload)?.schedule ?: return
-                scheduleStore.write(
+                scheduleStore.writeLocally(
                     StoreWriteRequest.of<ScheduleKey, List<Schedule>, Unit>(
                         ScheduleKey.ById(schedule.id),
                         listOf(schedule)
@@ -208,7 +197,7 @@ class SyncStoreFacade(
         when (change.op) {
             ChangeOp.UPSERT -> {
                 val exception = (change.payload as? ChangePayload.ScheduleExceptionPayload)?.exception ?: return
-                scheduleExceptionStore.write(
+                scheduleExceptionStore.writeLocally(
                     StoreWriteRequest.of<ScheduleExceptionKey, List<ScheduleException>, Unit>(
                         ScheduleExceptionKey.ByKey(exception.scheduleId, exception.date),
                         listOf(exception)
@@ -233,7 +222,7 @@ class SyncStoreFacade(
         when (change.op) {
             ChangeOp.UPSERT -> {
                 val posting = (change.payload as? ChangePayload.PostingPayload)?.posting ?: return
-                postingStore.write(
+                postingStore.writeLocally(
                     StoreWriteRequest.of<PostingKey, List<Posting>, Unit>(
                         PostingKey.ById(posting.id),
                         listOf(posting)
@@ -248,7 +237,7 @@ class SyncStoreFacade(
         when (change.op) {
             ChangeOp.UPSERT -> {
                 val receipt = (change.payload as? ChangePayload.ReceiptPayload)?.receipt ?: return
-                receiptStore.write(
+                receiptStore.writeLocally(
                     StoreWriteRequest.of<ReceiptKey, List<Receipt>, Unit>(
                         ReceiptKey.ById(receipt.id),
                         listOf(receipt)

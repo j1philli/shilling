@@ -56,9 +56,10 @@ class TransactionEditorScreenModel(postingId: String?) : IosViewModelHost() {
     suspend fun detachReceipt(receiptId: String): UndoHandle? = viewModel.detachReceipt(receiptId)?.let(::UndoHandle)
 
     /** A temporary copy of the receipt's file, named after the original, for Quick Look. */
-    fun previewPath(receiptId: String): String? {
+    @NativeCoroutines
+    suspend fun previewPath(receiptId: String): String? {
         val receipt = state.value.receipts.firstOrNull { it.id == receiptId } ?: return null
-        return (fileStore as? IosReceiptFileStore)?.previewPath(receiptId, receipt.name)
+        return fileStore.prepareIosReceiptPreview(receiptId, receipt.name)
     }
 }
 

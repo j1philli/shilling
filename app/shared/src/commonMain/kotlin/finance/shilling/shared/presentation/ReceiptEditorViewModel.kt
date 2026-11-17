@@ -209,9 +209,8 @@ class ReceiptEditorViewModel(
         }
         val picked = file.value ?: return null
         val id = idGenerator.newId()
-        val storedName = f.name.trim()
-        fileStore.store(id, storedName, picked.bytes)
-        receiptRepository.save(
+        val storedName = withExtensionOf(picked.name, f.name.trim())
+        receiptRepository.saveWithFile(
             Receipt(
                 id = id,
                 postingId = pendingAttach.value?.posting?.id,
@@ -221,7 +220,7 @@ class ReceiptEditorViewModel(
                 notes = notes,
                 receiptDate = f.receiptDateEpochDay,
                 amount = amount
-            )
+            ), fileStore, picked.bytes
         )
         if (pendingAttach.value != null) analytics.captureAsync(ProductEvent.RECEIPT_ATTACHED)
         return "Receipt saved"
@@ -280,3 +279,10 @@ class ReceiptEditorViewModel(
 private fun PostingWithDetails.isTransferCredit(): Boolean =
     posting.id.endsWith("_cr") ||
         (posting.scheduleId == null && posting.pairId != null && posting.type == ScheduleType.INCOME)
+
+/** Viewers pick the file type from the name, so a renamed receipt keeps the picked file's extension. */
+internal fun withExtensionOf(pickedName: String, typedName: String): String {
+    val extension = pickedName.substringAfterLast('.', "").takeIf { it.isNotBlank() && '/' !in it }
+        ?: return typedName
+    return if (typedName.endsWith(".$extension", ignoreCase = true)) typedName else "$typedName.$extension"
+}

@@ -34,7 +34,7 @@ class FinanceSpaceGraph(
     val categories = CategoryRepository(notifier, categoriesStore, sync)
     val schedules = ScheduleRepository(notifier, schedulesStore, exceptionsStore, sync)
     val postings = PostingRepository(idGenerator, notifier, postingsStore, accountsStore, categoriesStore, schedulesStore, sync)
-    val receipts = ReceiptRepository(notifier, receiptsStore, postingsStore, schedulesStore, sync)
+    val receipts = ReceiptRepository(notifier, receiptsStore, sync)
     val facade = SyncStoreFacade(db, id, accountsStore, categoriesStore, schedulesStore, exceptionsStore, postingsStore, receiptsStore)
 }
 

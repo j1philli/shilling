@@ -27,8 +27,9 @@ struct OnboardingScreen: View {
     @StateObject private var model: FlowModel<OnboardingUiState, OnboardingScreenModel>
 
     init() {
-        let screen = OnboardingScreenModel()
-        _model = StateObject(wrappedValue: FlowModel(screen: screen, initial: screen.state, flow: screen.stateFlow))
+        _model = StateObject(wrappedValue: FlowModel(
+            create: { OnboardingScreenModel() }, state: { $0.state }, flow: { $0.stateFlow }
+        ))
     }
 
     private var screen: OnboardingScreenModel { model.screen }
@@ -123,6 +124,7 @@ struct OnboardingScreen: View {
                 Text(state.loginSubtitle).textCase(nil)
             }
         }
+        .readableWidth(640)
         .navigationTitle(state.signIn.title)
     }
 }
@@ -194,6 +196,7 @@ private struct SelfHostedForm: View {
                 .disabled(!state.canContinueSelfHosted)
             }
         }
+        .readableWidth(640)
         .navigationTitle(state.selfHostedLabel)
         .onAppear {
             guard !loaded else { return }

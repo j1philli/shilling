@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#MISE description="Clear Android app state on a connected emulator or device"
+#USAGE arg "[serial]" help="adb device serial (defaults to the first connected device)"
+set -euo pipefail
+
+ADB="${ANDROID_HOME:-$HOME/Library/Android/sdk}/platform-tools/adb"
+SERIAL="${usage_serial:-}"
+if [ -z "$SERIAL" ]; then
+    SERIAL=$("$ADB" devices | awk '/device$/{print $1}' | head -1)
+fi
+
+if [ -z "$SERIAL" ]; then
+    echo "Error: no Android emulator or device found" >&2
+    exit 1
+fi
+
+"$ADB" -s "$SERIAL" shell pm clear finance.shilling.android
+echo "Cleared Android state on $SERIAL"

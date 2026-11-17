@@ -18,6 +18,8 @@ import app.cash.sqldelight.async.coroutines.await
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.driver.worker.WebWorkerDriver
 import com.russhwolf.settings.Settings
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import finance.shilling.shared.data.DEFAULT_SELF_HOSTED_SERVER_URL
 import finance.shilling.shared.data.IdGenerator
 import finance.shilling.shared.data.initKoin
@@ -35,7 +37,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import org.koin.dsl.module
-import org.w3c.dom.Worker
+import finance.shilling.shared.data.store.createDatabaseWorker
 import org.w3c.dom.events.Event
 import finance.shilling.shared.data.sync.WebRtcPlatform
 import finance.shilling.shared.session.AppSession
@@ -78,6 +80,8 @@ private fun installTauriDragHandler(stripHeight: Int): JsAny? = js("(function(){
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
+    Logger.setMinSeverity(if (document.querySelector("meta[name=shilling-development-build]")
+            ?.getAttribute("content") == "true") Severity.Debug else Severity.Info)
     val tauriMac = isTauriEnvironment() && isMacOs()
     val titleStripHeight = when {
         tauriMac -> MAC_TITLE_STRIP_HEIGHT
@@ -88,7 +92,7 @@ fun main() {
     // The web database opens asynchronously, so Koin starts once it's ready; UI waits on this.
     var koinReady by mutableStateOf(false)
     MainScope().launch {
-        val driver = WebWorkerDriver(Worker("sqldelight.worker.js"))
+        val driver = WebWorkerDriver(createDatabaseWorker("sqldelight.worker.js"))
         finance.shilling.shared.data.ensureLocalSchemaReady(driver, logTag = "Web")
         initKoin(webPlatformModule(ShillingDatabase(driver)), sessionModule).get<AppSession>().start()
         koinReady = true
@@ -137,7 +141,6 @@ private fun webPlatformModule(db: ShillingDatabase) = module {
     }
     single { Settings() }
     single<IdGenerator> { WasmIdGenerator() }
-    single<ReceiptFileStore> { WasmReceiptFileStore(get()) }
     single<finance.shilling.shared.data.store.ReceiptFileStoreFactory> {
         finance.shilling.shared.data.store.ReceiptFileStoreFactory { id, legacy -> WasmReceiptFileStore(get(), id) }
     }

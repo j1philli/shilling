@@ -1,0 +1,341 @@
+{
+  "limitation": "Only final log rotation retained; snapshot bytes are cumulative copying work.",
+  "phases": [
+    {
+      "phase": "BEGIN home_settle",
+      "calls": 32707,
+      "rows": 20306,
+      "commits": 21,
+      "snapshots": {
+        "count": 25,
+        "bytes": 330346496
+      },
+      "queries": [
+        {
+          "sql": "SELECT postings.space_id, postings.id, postings.schedule_id, postings.type, postings.account_id, postings.date, postings.amount, postings.pair_id, postings.titl",
+          "calls": 5,
+          "rows": 7171,
+          "largestReply": 7171
+        },
+        {
+          "sql": "SELECT schedules.space_id, schedules.id, schedules.title, schedules.amount, schedules.type, schedules.account_id, schedules.counter_account_id, schedules.catego",
+          "calls": 8,
+          "rows": 6000,
+          "largestReply": 1000
+        },
+        {
+          "sql": "SELECT schedules.space_id, schedules.id, schedules.title, schedules.amount, schedules.type, schedules.account_id, schedules.counter_account_id, schedules.catego",
+          "calls": 5,
+          "rows": 4000,
+          "largestReply": 1000
+        },
+        {
+          "sql": "SELECT COUNT(*) FROM receipt_files WHERE receipt_id = ? AND space_id = ?",
+          "calls": 1000,
+          "rows": 1000,
+          "largestReply": 1
+        },
+        {
+          "sql": "SELECT receipts.space_id, receipts.id, receipts.posting_id, receipts.file_path, receipts.original_name, receipts.added_at, receipts.receipt_date, receipts.amoun",
+          "calls": 750,
+          "rows": 750,
+          "largestReply": 1
+        },
+        {
+          "sql": "SELECT date, amount, title FROM postings WHERE space_id = ? AND account_id = ? AND date >= ? AND date < ?",
+          "calls": 1,
+          "rows": 500,
+          "largestReply": 500
+        },
+        {
+          "sql": "SELECT categories.space_id, categories.id, categories.name, categories.color FROM categories WHERE space_id = ? ORDER BY name ASC",
+          "calls": 14,
+          "rows": 440,
+          "largestReply": 40
+        },
+        {
+          "sql": "SELECT receipts.space_id, receipts.id, receipts.posting_id, receipts.file_path, receipts.original_name, receipts.added_at, receipts.receipt_date, receipts.amoun",
+          "calls": 1,
+          "rows": 250,
+          "largestReply": 250
+        },
+        {
+          "sql": "SELECT accounts.space_id, accounts.id, accounts.name, accounts.balance FROM accounts WHERE space_id = ?",
+          "calls": 10,
+          "rows": 160,
+          "largestReply": 20
+        },
+        {
+          "sql": "WITH recent AS ( SELECT postings.space_id, postings.id, postings.schedule_id, postings.type, postings.account_id, postings.date, postings.amount, postings.pair_",
+          "calls": 4,
+          "rows": 18,
+          "largestReply": 6
+        },
+        {
+          "sql": "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = ?;",
+          "calls": 9,
+          "rows": 9,
+          "largestReply": 1
+        },
+        {
+          "sql": "SELECT COUNT(*) AS receipt_count, COALESCE(SUM(CASE WHEN r.posting_id IS NULL THEN 1 ELSE 0 END), 0) AS unattached_count FROM receipts r LEFT JOIN postings p ON",
+          "calls": 4,
+          "rows": 4,
+          "largestReply": 1
+        }
+      ]
+    },
+    {
+      "phase": "READY home_settle",
+      "calls": 33489,
+      "rows": 23973,
+      "commits": 21,
+      "snapshots": {
+        "count": 26,
+        "bytes": 347709440
+      },
+      "queries": [
+        {
+          "sql": "SELECT schedules.space_id, schedules.id, schedules.title, schedules.amount, schedules.type, schedules.account_id, schedules.counter_account_id, schedules.catego",
+          "calls": 10,
+          "rows": 8000,
+          "largestReply": 1000
+        },
+        {
+          "sql": "SELECT postings.space_id, postings.id, postings.schedule_id, postings.type, postings.account_id, postings.date, postings.amount, postings.pair_id, postings.titl",
+          "calls": 6,
+          "rows": 7171,
+          "largestReply": 7171
+        },
+        {
+          "sql": "SELECT schedules.space_id, schedules.id, schedules.title, schedules.amount, schedules.type, schedules.account_id, schedules.counter_account_id, schedules.catego",
+          "calls": 6,
+          "rows": 5000,
+          "largestReply": 1000
+        },
+        {
+          "sql": "SELECT COUNT(*) FROM receipt_files WHERE receipt_id = ? AND space_id = ?",
+          "calls": 1250,
+          "rows": 1250,
+          "largestReply": 1
+        },
+        {
+          "sql": "SELECT receipts.space_id, receipts.id, receipts.posting_id, receipts.file_path, receipts.original_name, receipts.added_at, receipts.receipt_date, receipts.amoun",
+          "calls": 1000,
+          "rows": 1000,
+          "largestReply": 1
+        },
+        {
+          "sql": "SELECT categories.space_id, categories.id, categories.name, categories.color FROM categories WHERE space_id = ? ORDER BY name ASC",
+          "calls": 17,
+          "rows": 560,
+          "largestReply": 40
+        },
+        {
+          "sql": "SELECT date, amount, title FROM postings WHERE space_id = ? AND account_id = ? AND date >= ? AND date < ?",
+          "calls": 1,
+          "rows": 500,
+          "largestReply": 500
+        },
+        {
+          "sql": "SELECT receipts.space_id, receipts.id, receipts.posting_id, receipts.file_path, receipts.original_name, receipts.added_at, receipts.receipt_date, receipts.amoun",
+          "calls": 1,
+          "rows": 250,
+          "largestReply": 250
+        },
+        {
+          "sql": "SELECT accounts.space_id, accounts.id, accounts.name, accounts.balance FROM accounts WHERE space_id = ?",
+          "calls": 12,
+          "rows": 200,
+          "largestReply": 20
+        },
+        {
+          "sql": "WITH recent AS ( SELECT postings.space_id, postings.id, postings.schedule_id, postings.type, postings.account_id, postings.date, postings.amount, postings.pair_",
+          "calls": 5,
+          "rows": 24,
+          "largestReply": 6
+        },
+        {
+          "sql": "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = ?;",
+          "calls": 9,
+          "rows": 9,
+          "largestReply": 1
+        },
+        {
+          "sql": "SELECT COUNT(*) AS receipt_count, COALESCE(SUM(CASE WHEN r.posting_id IS NULL THEN 1 ELSE 0 END), 0) AS unattached_count FROM receipts r LEFT JOIN postings p ON",
+          "calls": 5,
+          "rows": 5,
+          "largestReply": 1
+        }
+      ]
+    },
+    {
+      "phase": "READY final_idle",
+      "calls": 34239,
+      "rows": 24473,
+      "commits": 21,
+      "snapshots": {
+        "count": 26,
+        "bytes": 347709440
+      },
+      "queries": [
+        {
+          "sql": "SELECT schedules.space_id, schedules.id, schedules.title, schedules.amount, schedules.type, schedules.account_id, schedules.counter_account_id, schedules.catego",
+          "calls": 10,
+          "rows": 8000,
+          "largestReply": 1000
+        },
+        {
+          "sql": "SELECT postings.space_id, postings.id, postings.schedule_id, postings.type, postings.account_id, postings.date, postings.amount, postings.pair_id, postings.titl",
+          "calls": 6,
+          "rows": 7171,
+          "largestReply": 7171
+        },
+        {
+          "sql": "SELECT schedules.space_id, schedules.id, schedules.title, schedules.amount, schedules.type, schedules.account_id, schedules.counter_account_id, schedules.catego",
+          "calls": 6,
+          "rows": 5000,
+          "largestReply": 1000
+        },
+        {
+          "sql": "SELECT COUNT(*) FROM receipt_files WHERE receipt_id = ? AND space_id = ?",
+          "calls": 1500,
+          "rows": 1500,
+          "largestReply": 1
+        },
+        {
+          "sql": "SELECT receipts.space_id, receipts.id, receipts.posting_id, receipts.file_path, receipts.original_name, receipts.added_at, receipts.receipt_date, receipts.amoun",
+          "calls": 1250,
+          "rows": 1250,
+          "largestReply": 1
+        },
+        {
+          "sql": "SELECT categories.space_id, categories.id, categories.name, categories.color FROM categories WHERE space_id = ? ORDER BY name ASC",
+          "calls": 17,
+          "rows": 560,
+          "largestReply": 40
+        },
+        {
+          "sql": "SELECT date, amount, title FROM postings WHERE space_id = ? AND account_id = ? AND date >= ? AND date < ?",
+          "calls": 1,
+          "rows": 500,
+          "largestReply": 500
+        },
+        {
+          "sql": "SELECT receipts.space_id, receipts.id, receipts.posting_id, receipts.file_path, receipts.original_name, receipts.added_at, receipts.receipt_date, receipts.amoun",
+          "calls": 1,
+          "rows": 250,
+          "largestReply": 250
+        },
+        {
+          "sql": "SELECT accounts.space_id, accounts.id, accounts.name, accounts.balance FROM accounts WHERE space_id = ?",
+          "calls": 12,
+          "rows": 200,
+          "largestReply": 20
+        },
+        {
+          "sql": "WITH recent AS ( SELECT postings.space_id, postings.id, postings.schedule_id, postings.type, postings.account_id, postings.date, postings.amount, postings.pair_",
+          "calls": 5,
+          "rows": 24,
+          "largestReply": 6
+        },
+        {
+          "sql": "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = ?;",
+          "calls": 9,
+          "rows": 9,
+          "largestReply": 1
+        },
+        {
+          "sql": "SELECT COUNT(*) AS receipt_count, COALESCE(SUM(CASE WHEN r.posting_id IS NULL THEN 1 ELSE 0 END), 0) AS unattached_count FROM receipts r LEFT JOIN postings p ON",
+          "calls": 5,
+          "rows": 5,
+          "largestReply": 1
+        }
+      ]
+    },
+    {
+      "phase": "COMPLETE",
+      "calls": 34989,
+      "rows": 24973,
+      "commits": 21,
+      "snapshots": {
+        "count": 26,
+        "bytes": 347709440
+      },
+      "queries": [
+        {
+          "sql": "SELECT schedules.space_id, schedules.id, schedules.title, schedules.amount, schedules.type, schedules.account_id, schedules.counter_account_id, schedules.catego",
+          "calls": 10,
+          "rows": 8000,
+          "largestReply": 1000
+        },
+        {
+          "sql": "SELECT postings.space_id, postings.id, postings.schedule_id, postings.type, postings.account_id, postings.date, postings.amount, postings.pair_id, postings.titl",
+          "calls": 6,
+          "rows": 7171,
+          "largestReply": 7171
+        },
+        {
+          "sql": "SELECT schedules.space_id, schedules.id, schedules.title, schedules.amount, schedules.type, schedules.account_id, schedules.counter_account_id, schedules.catego",
+          "calls": 6,
+          "rows": 5000,
+          "largestReply": 1000
+        },
+        {
+          "sql": "SELECT COUNT(*) FROM receipt_files WHERE receipt_id = ? AND space_id = ?",
+          "calls": 1750,
+          "rows": 1750,
+          "largestReply": 1
+        },
+        {
+          "sql": "SELECT receipts.space_id, receipts.id, receipts.posting_id, receipts.file_path, receipts.original_name, receipts.added_at, receipts.receipt_date, receipts.amoun",
+          "calls": 1500,
+          "rows": 1500,
+          "largestReply": 1
+        },
+        {
+          "sql": "SELECT categories.space_id, categories.id, categories.name, categories.color FROM categories WHERE space_id = ? ORDER BY name ASC",
+          "calls": 17,
+          "rows": 560,
+          "largestReply": 40
+        },
+        {
+          "sql": "SELECT date, amount, title FROM postings WHERE space_id = ? AND account_id = ? AND date >= ? AND date < ?",
+          "calls": 1,
+          "rows": 500,
+          "largestReply": 500
+        },
+        {
+          "sql": "SELECT receipts.space_id, receipts.id, receipts.posting_id, receipts.file_path, receipts.original_name, receipts.added_at, receipts.receipt_date, receipts.amoun",
+          "calls": 1,
+          "rows": 250,
+          "largestReply": 250
+        },
+        {
+          "sql": "SELECT accounts.space_id, accounts.id, accounts.name, accounts.balance FROM accounts WHERE space_id = ?",
+          "calls": 12,
+          "rows": 200,
+          "largestReply": 20
+        },
+        {
+          "sql": "WITH recent AS ( SELECT postings.space_id, postings.id, postings.schedule_id, postings.type, postings.account_id, postings.date, postings.amount, postings.pair_",
+          "calls": 5,
+          "rows": 24,
+          "largestReply": 6
+        },
+        {
+          "sql": "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = ?;",
+          "calls": 9,
+          "rows": 9,
+          "largestReply": 1
+        },
+        {
+          "sql": "SELECT COUNT(*) AS receipt_count, COALESCE(SUM(CASE WHEN r.posting_id IS NULL THEN 1 ELSE 0 END), 0) AS unattached_count FROM receipts r LEFT JOIN postings p ON",
+          "calls": 5,
+          "rows": 5,
+          "largestReply": 1
+        }
+      ]
+    }
+  ]
+}

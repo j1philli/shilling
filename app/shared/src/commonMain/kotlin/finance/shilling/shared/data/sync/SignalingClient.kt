@@ -14,15 +14,11 @@ private val log = Logger.withTag("Signaling")
 
 class SignalingClient(
     private val httpClient: HttpClient,
-    serverUrl: String,
+    private val serverUrl: String,
     private val deviceId: String,
     private val householdId: String,
     private val authService: finance.shilling.shared.data.auth.AuthService? = null
 ) {
-    private val wsUrl = serverUrl
-        .replace("http://", "ws://")
-        .replace("https://", "wss://")
-
     private val _incomingMessages = MutableSharedFlow<SignalingMessage>(extraBufferCapacity = 64)
     val incomingMessages: SharedFlow<SignalingMessage> = _incomingMessages
 
@@ -39,72 +35,84 @@ class SignalingClient(
     }
 
     fun connect(scope: CoroutineScope) {
-        log.i { "[SIG] connect() called — wsUrl=$wsUrl device=$deviceId household=$householdId" }
         connectionJob?.let {
             log.w { "[SIG] Cancelling previous connection job before reconnecting" }
             it.cancel()
         }
         session = null
+        connectionJob = null
         _policyRejected.value = false
+        val wsUrl = try {
+            secureSignalingUrl(serverUrl)
+        } catch (_: IllegalArgumentException) {
+            // Old saved HTTP settings must disable sync without crashing local budgeting.
+            log.e { "[SIG] $SECURE_SIGNALING_REQUIRED" }
+            return
+        }
         connectionJob = scope.launch {
-            backoff.reset()
-            while (isActive) {
-                try {
-                    log.i { "[SIG] Opening WebSocket to $wsUrl/ws/signal ..." }
-                    httpClient.webSocket("$wsUrl/ws/signal") {
-                        session = this
-                        backoff.reset()
-                        log.i { "[SIG] WebSocket CONNECTED to $wsUrl/ws/signal" }
-                        val token = authService?.refreshTokenIfNeeded()
-                        log.i { "[SIG] Sending Join(device=$deviceId, household=$householdId, hasToken=${token != null})" }
-                        send(json.encodeToString<SignalingMessage>(
-                            SignalingMessage.Join(deviceId, householdId, token)
-                        ))
-                        log.i { "[SIG] Join sent — listening for frames..." }
-                        try {
-                            for (frame in incoming) {
-                                if (frame is Frame.Text) {
-                                    val text = frame.readText()
-                                    val msg = json.decodeFromString<SignalingMessage>(text)
-                                    log.i { "[SIG] <<< ${messageSummary(msg)}" }
-                                    _incomingMessages.emit(msg)
-                                } else {
-                                    log.d { "[SIG] Non-text frame: ${frame.frameType}" }
+            val transport = httpClient.signalingTransport()
+            try {
+                backoff.reset()
+                while (isActive) {
+                    try {
+                        log.i { "[SIG] Opening encrypted signaling connection ..." }
+                        transport.webSocket(wsUrl) {
+                            session = this
+                            backoff.reset()
+                            log.i { "[SIG] Encrypted signaling connected" }
+                            val token = authService?.refreshTokenIfNeeded()
+                            log.i { "[SIG] Sending Join(device=$deviceId, household=$householdId, hasToken=${token != null})" }
+                            send(json.encodeToString<SignalingMessage>(
+                                SignalingMessage.Join(deviceId, householdId, token)
+                            ))
+                            log.i { "[SIG] Join sent — listening for frames..." }
+                            try {
+                                for (frame in incoming) {
+                                    if (frame is Frame.Text) {
+                                        val text = frame.readText()
+                                        val msg = json.decodeFromString<SignalingMessage>(text)
+                                        log.i { "[SIG] <<< ${messageSummary(msg)}" }
+                                        _incomingMessages.emit(msg)
+                                    } else {
+                                        log.d { "[SIG] Non-text frame: ${frame.frameType}" }
+                                    }
+                                }
+                                log.w { "[SIG] Incoming frame loop ended (server closed connection)" }
+                                if (closeReason.await()?.code == CloseReason.Codes.VIOLATED_POLICY.code) {
+                                    _policyRejected.value = true
+                                }
+                            } finally {
+                                log.i { "[SIG] Frame loop exited — sending Close frame" }
+                                withContext(NonCancellable) {
+                                    try {
+                                        close(CloseReason(CloseReason.Codes.NORMAL, ""))
+                                    } catch (_: Exception) {}
                                 }
                             }
-                            log.w { "[SIG] Incoming frame loop ended (server closed connection)" }
-                            if (closeReason.await()?.code == CloseReason.Codes.VIOLATED_POLICY.code) {
-                                _policyRejected.value = true
-                            }
-                        } finally {
-                            log.i { "[SIG] Frame loop exited — sending Close frame" }
-                            withContext(NonCancellable) {
-                                try {
-                                    close(CloseReason(CloseReason.Codes.NORMAL, ""))
-                                } catch (_: Exception) {}
-                            }
+                        }
+                    } catch (e: CancellationException) {
+                        log.i { "[SIG] Cancelled" }
+                        throw e
+                    } catch (e: Exception) {
+                        log.e { "[SIG] Connection FAILED: ${e::class.simpleName}: ${e.message}" }
+                        var cause = e.cause
+                        var depth = 1
+                        while (cause != null && depth <= 3) {
+                            log.e { "[SIG]   cause[$depth]: ${cause!!::class.simpleName}: ${cause!!.message}" }
+                            cause = cause!!.cause
+                            depth++
                         }
                     }
-                } catch (e: CancellationException) {
-                    log.i { "[SIG] Cancelled" }
-                    throw e
-                } catch (e: Exception) {
-                    log.e { "[SIG] Connection FAILED: ${e::class.simpleName}: ${e.message}" }
-                    var cause = e.cause
-                    var depth = 1
-                    while (cause != null && depth <= 3) {
-                        log.e { "[SIG]   cause[$depth]: ${cause!!::class.simpleName}: ${cause!!.message}" }
-                        cause = cause!!.cause
-                        depth++
-                    }
+                    session = null
+                    // Do not silently re-register a removed device or retry a rejected join.
+                    // An explicit sync restart may attempt registration again.
+                    if (_policyRejected.value) break
+                    if (!isActive) break
+                    log.i { "[SIG] Reconnecting in ${backoff.currentMs}ms..." }
+                    if (backoff.await()) log.i { "[SIG] Woken early — reconnecting now" }
                 }
-                session = null
-                // Do not silently re-register a removed device or retry a rejected join.
-                // An explicit sync restart may attempt registration again.
-                if (_policyRejected.value) break
-                if (!isActive) break
-                log.i { "[SIG] Reconnecting in ${backoff.currentMs}ms..." }
-                if (backoff.await()) log.i { "[SIG] Woken early — reconnecting now" }
+            } finally {
+                transport.close()
             }
         }
     }

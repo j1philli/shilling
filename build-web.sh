@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+node "$(dirname "$0")/scripts/ci/check-node-version.cjs"
+node "$(dirname "$0")/scripts/ci/check-java-version.cjs"
+
 SHILLING_DB_NAME="${SHILLING_DB_NAME:-shilling}"
 SHILLING_WASM_VARIANT="${SHILLING_WASM_VARIANT:-Release}"
 
@@ -45,6 +48,11 @@ sed -e "s/<meta name=\"shilling-dev-tools\" content=\"false\">/<meta name=\"shil
 echo "Copying Wasm package artifacts to $DIST/..."
 cp "$PKG_DIR/web-app.mjs" "$DIST/"
 cp "$PKG_DIR/web-app.wasm" "$DIST/"
+if [ "$SHILLING_WASM_VARIANT" = Release ]; then
+    # Optimize the Kotlin app's code/GC types and retain stack-trace names.
+    # The unmodified compiler package remains in PKG_DIR for debugging.
+    node scripts/optimize-wasm.cjs "$DIST/web-app.wasm"
+fi
 cp "$PKG_DIR/web-app.import-object.mjs" "$DIST/"
 cp "$PKG_DIR/web-app.js-builtins.mjs" "$DIST/"
 cp "$PKG_DIR/skiko.mjs" "$DIST/"
@@ -85,4 +93,4 @@ echo "Copying $SHILLING_ICON_VARIANT favicons..."
 cp "app/web-app/icons/$SHILLING_ICON_VARIANT/favicon.ico" "$DIST/"
 cp "app/web-app/icons/$SHILLING_ICON_VARIANT/apple-touch-icon.png" "$DIST/"
 
-echo "Done. Run 'cargo tauri dev' from the project root to launch, or 'just web' to serve."
+echo "Done. Run 'cargo tauri dev' from the project root to launch, or 'mise run web' to serve."

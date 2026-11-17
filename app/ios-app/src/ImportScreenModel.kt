@@ -7,6 +7,10 @@ import finance.shilling.shared.presentation.ImportUiState
 import finance.shilling.shared.presentation.ImportViewModel
 import kotlinx.coroutines.flow.StateFlow
 import platform.Foundation.NSData
+import platform.Foundation.dataWithContentsOfFile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 
 /** Swift-facing CSV import. */
 class ImportScreenModel : IosViewModelHost() {
@@ -15,7 +19,13 @@ class ImportScreenModel : IosViewModelHost() {
     @NativeCoroutinesState
     val state: StateFlow<ImportUiState> = viewModel.state
 
-    fun loadFile(fileName: String, data: NSData) = viewModel.loadFile(fileName, data.toByteArray())
+    @NativeCoroutines
+    suspend fun loadFile(fileName: String, path: String) {
+        val bytes = withContext(Dispatchers.IO) {
+            (NSData.dataWithContentsOfFile(path) ?: error("Unable to read CSV")).toByteArray()
+        }
+        viewModel.loadFile(fileName, bytes)
+    }
     fun setHasHeader(value: Boolean) = viewModel.setHasHeader(value)
     fun setDateColumn(index: Int) = viewModel.setDateColumn(index)
     fun setDescriptionColumn(index: Int) = viewModel.setDescriptionColumn(index)

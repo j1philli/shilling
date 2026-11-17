@@ -8,6 +8,10 @@ import app.cash.sqldelight.coroutines.asFlow
 import finance.shilling.shared.data.*
 import finance.shilling.shared.data.sync.*
 import finance.shilling.shared.db.ShillingDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
@@ -80,18 +84,30 @@ class LinkedTransferStore(
         val credit = db.postingQueries.selectById("${key.linkId}:credit", key.toSpace).awaitAsOneOrNull()?.toDomain()
         return if (debit?.pairId == key.linkId && credit?.pairId == key.linkId) LinkedTransfer(key, debit, credit) else null
     }
+    private val listStore = StoreBuilder.from<Set<String>, List<LinkedTransfer>, List<LinkedTransfer>>(
+        fetcher = Fetcher.of { _: Set<String> -> error("Linked transfers are local-only") },
+        sourceOfTruth = SourceOfTruth.of(
+            reader = { spaces -> db.postingQueries.selectLinkedInSpaces(spaces).asFlow().map { query ->
+                query.awaitAsList().groupBy { it.pair_id!! }.mapNotNull { (link, legs) ->
+                    val debit = legs.singleOrNull { it.id == "$link:debit" }
+                    val credit = legs.singleOrNull { it.id == "$link:credit" }
+                    if (debit != null && credit != null && debit.space_id != credit.space_id)
+                        LinkedTransfer(LinkedTransferKey(link, debit.space_id, credit.space_id), debit.toDomain(), credit.toDomain())
+                    else null
+                }
+            }.flowOn(Dispatchers.Default) },
+            writer = { _, _ -> error("Linked transfer lists are read-only") }
+        )
+    ).disableCache().build()
+
     suspend fun list(spaceIds: Set<String>): List<LinkedTransfer> {
-        val entries = spaceIds.flatMap { space -> createPostingStore(db, spaceId = space).readLocalSourceOfTruth(PostingKey.All).map { space to it } }
-        return entries.filter { it.second.pairId?.startsWith(SPACE_TRANSFER_PREFIX) == true }
-            .groupBy { it.second.pairId!! }.mapNotNull { (link, legs) ->
-                val debit = legs.singleOrNull { it.second.id == "$link:debit" }
-                val credit = legs.singleOrNull { it.second.id == "$link:credit" }
-                if (debit != null && credit != null) LinkedTransfer(LinkedTransferKey(link, debit.first, credit.first), debit.second, credit.second) else null
-            }
+        if (spaceIds.isEmpty()) return emptyList()
+        return listStore.stream(StoreReadRequest.localOnly(spaceIds.toSet()))
+            .filterIsInstance<StoreReadResponse.Data<List<LinkedTransfer>>>().first().value
     }
     suspend fun get(key: LinkedTransferKey): LinkedTransfer? = store.readLocalSourceOfTruth(key).singleOrNull()
     suspend fun save(transfer: LinkedTransfer) {
-        store.write(StoreWriteRequest.of<LinkedTransferKey, List<LinkedTransfer>, Unit>(transfer.key, listOf(transfer)))
+        store.writeLocally(StoreWriteRequest.of<LinkedTransferKey, List<LinkedTransfer>, Unit>(transfer.key, listOf(transfer)))
         notifier.notifyChanged()
     }
     suspend fun delete(key: LinkedTransferKey) { store.clear(key); notifier.notifyChanged() }
