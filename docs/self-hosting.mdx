@@ -71,7 +71,7 @@ docker compose up -d
 To roll back the containers, set the previous version and repeat those two
 commands. Back up each browser's budget data before changing versions. A
 container rollback does not reverse a browser database migration, and the
-server container is not a backup of your budget.
+server container is not a backup of your budget. Optional [cloud peers](server/backups.mdx) run separately and require persistent encrypted storage and control-plane policy metadata.
 
 The release publishes matching `ghcr.io/j1philli/shilling-server` and
 `ghcr.io/j1philli/shilling-web` images for Linux amd64 and arm64. You can also

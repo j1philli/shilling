@@ -16,5 +16,8 @@
     "sql.js": "^1.14.2",
     "tauri-plugin-mcp": "^0.1.0",
     "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
   }
 }

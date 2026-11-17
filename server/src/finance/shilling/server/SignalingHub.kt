@@ -21,10 +21,13 @@ class SignalingHub {
 
     suspend fun register(householdId: String, deviceId: String, session: WebSocketSession) {
         val peers = households.getOrPut(householdId) { ConcurrentHashMap() }
-        peers[deviceId] = session
+        // Snapshot membership atomically: concurrent joins must not announce each other twice.
+        val existingPeerIds = synchronized(peers) {
+            peers[deviceId] = session
+            peers.keys.filter { it != deviceId }
+        }
         log.i { "[HUB] REGISTER (household peers=${peers.size})" }
 
-        val existingPeerIds = peers.keys.filter { it != deviceId }
         if (existingPeerIds.isNotEmpty()) {
             log.i { "[HUB] Sending PeerList (${existingPeerIds.size} existing peers)" }
             session.send(json.encodeToString<SignalingMessage>(
@@ -103,14 +106,15 @@ class SignalingHub {
 fun Routing.signalingRoute(
     hub: SignalingHub,
     tokenVerifier: SupabaseTokenVerifier? = null,
-    householdLookup: HouseholdMembershipLookup? = null
+    householdLookup: HouseholdMembershipLookup? = null,
+    path: String = "/ws/signal"
 ) {
     val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
 
-    webSocket("/ws/signal") {
+    webSocket(path) {
         var deviceId: String? = null
         var householdId: String? = null
         log.i { "[WS] New WebSocket connection" }

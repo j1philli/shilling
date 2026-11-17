@@ -49,6 +49,13 @@ class AppModuleTest {
             single { settings }
             single<IdGenerator> { idGenerator }
             single<ReceiptFileStore> { InMemoryReceiptFileStore() }
+            single<finance.shilling.shared.data.backup.BackupKeyVault> {
+                object : finance.shilling.shared.data.backup.BackupKeyVault {
+                    override suspend fun read(namespace: String): String? = null
+                    override suspend fun write(namespace: String, secret: String) = Unit
+                    override suspend fun delete(namespace: String) = Unit
+                }
+            }
         }
         var updatedServerUrl: String? = null
         var updatedHouseholdId: String? = null

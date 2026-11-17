@@ -108,6 +108,7 @@ fun MainViewController(): UIViewController {
         single { ShillingDatabase(driver) }
         single { Settings() }
         single<IdGenerator> { IosIdGenerator() }
+        single<finance.shilling.shared.data.backup.BackupKeyVault> { IosBackupKeyVault() }
         single<ReceiptFileStore> { IosReceiptFileStore() }
         single { createIosHttpClient() }
         single {

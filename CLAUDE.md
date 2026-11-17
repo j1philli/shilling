@@ -127,7 +127,8 @@ third_party/sqldelight-kotlin-toolchain/ # SQLDelight codegen plugin (git subtre
 ## Architecture
 
 **Hard invariants**:
-- User data traversal must use WebRTC P2P data channels only.
+- Device-to-device and device-to-cloud-peer user data traversal must use WebRTC P2P data channels only.
+- Hosted cloud peers persist encrypted sync logs, receipt chunks, checkpoints and backup manifests to Supabase Postgres and private Supabase Storage over TLS through Store5. Cloud catch-up uses WebRTC only. Trusted-cloud processing uses Store5; external integrations need separate explicit authorization. Device database access, REST entity sync and signaling payloads remain forbidden.
 - WebSocket signaling is control-plane only: `Join`, `PeerList`, `Offer`, `Answer`, `IceCandidate`.
 - Store5 is the required data-management boundary for entity data.
 - If a platform cannot support WebRTC P2P for user data, disable sync on that platform instead of adding a fallback transport.

@@ -156,16 +156,25 @@ class LocalDataWiper(
     private val categoryRepository: CategoryRepository,
     private val scheduleRepository: ScheduleRepository,
     private val postingRepository: PostingRepository,
-    private val receiptRepository: ReceiptRepository
+    private val receiptRepository: ReceiptRepository,
+    private val backupSession: finance.shilling.shared.data.backup.BackupSession? = null,
+    private val backupVault: finance.shilling.shared.data.backup.BackupKeyVault? = null
 ) {
-    suspend fun wipe() = wipeLocalAppState(
-        db = db,
-        settings = settings,
-        fileStore = fileStore,
-        accountRepository = accountRepository,
-        categoryRepository = categoryRepository,
-        scheduleRepository = scheduleRepository,
-        postingRepository = postingRepository,
-        receiptRepository = receiptRepository
-    )
+    suspend fun wipe() {
+        backupSession?.stop()
+        val server = settings.getStringOrNull(SETTINGS_KEY_SERVER_URL) ?: DEFAULT_SERVER_URL
+        listOfNotNull(settings.getStringOrNull(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID), settings.getStringOrNull(SETTINGS_KEY_LOCAL_HOUSEHOLD_ID)).distinct().forEach {
+            backupVault?.delete("$server|$it")
+        }
+        wipeLocalAppState(
+            db = db,
+            settings = settings,
+            fileStore = fileStore,
+            accountRepository = accountRepository,
+            categoryRepository = categoryRepository,
+            scheduleRepository = scheduleRepository,
+            postingRepository = postingRepository,
+            receiptRepository = receiptRepository
+        )
+    }
 }

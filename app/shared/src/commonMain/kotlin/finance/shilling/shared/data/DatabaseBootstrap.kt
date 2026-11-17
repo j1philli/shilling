@@ -15,10 +15,12 @@ private val requiredTables = listOf(
     "receipts",
     "receipt_files",
     "bookkeeping",
-    "change_log"
+    "change_log",
+    "cloud_state"
 )
 
 private val tablesToDropOnReset = listOf(
+    "cloud_state",
     "receipt_files",
     "receipts",
     "postings",

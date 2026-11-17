@@ -1,6 +1,9 @@
 package finance.shilling.shared.data.store
 
 import app.cash.sqldelight.async.coroutines.awaitAsOneOrNull
+import app.cash.sqldelight.async.coroutines.awaitAsList
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import finance.shilling.shared.data.Account
 import finance.shilling.shared.data.Category
 import finance.shilling.shared.data.Posting
@@ -9,12 +12,15 @@ import finance.shilling.shared.data.Schedule
 import finance.shilling.shared.data.ScheduleException
 import finance.shilling.shared.data.sync.ChangeMessage
 import finance.shilling.shared.data.sync.ChangeOp
-import finance.shilling.shared.data.sync.ChangePayload
 import finance.shilling.shared.data.sync.EntityType
+import finance.shilling.shared.data.sync.ChangePayload
 import finance.shilling.shared.db.ShillingDatabase
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.StoreWriteRequest
+import org.mobilenativefoundation.store.store5.StoreWriteResponse
 
 private const val LOCAL_CHANGE_LOG_HOUSEHOLD = "__local_sync__"
 
@@ -48,6 +54,8 @@ class SyncStoreFacade(
     private val postingStore: PostingStore = createPostingStore(db),
     private val receiptStore: ReceiptStore = createReceiptStore(db)
 ) {
+    private val mergeMutex = Mutex()
+
     internal suspend fun buildFullStateSnapshot(deviceId: String): SyncFullStateSnapshot {
         val accounts = accountStore.readLocalSourceOfTruth(AccountKey.All)
         val categories = categoryStore.readLocalSourceOfTruth(CategoryKey.All)
@@ -96,6 +104,18 @@ class SyncStoreFacade(
         )
     }
 
+    /** Current entities plus deletion tombstones; old payload-less logs remain compatible. */
+    internal suspend fun cloudState(deviceId: String): List<ChangeMessage> {
+        val live = buildFullStateSnapshot(deviceId).changes
+        val tombstones = db.changeLogQueries.selectSince(LOCAL_CHANGE_LOG_HOUSEHOLD, -1).awaitAsList()
+            .groupBy { it.entity_type to it.entity_id }.values.mapNotNull { rows ->
+                val row = rows.maxWith(compareBy({ it.timestamp }, { it.change_id }))
+                if (row.op != ChangeOp.DELETE.name) null else ChangeMessage(row.change_id,
+                    EntityType.valueOf(row.entity_type), ChangeOp.DELETE, row.entity_id, row.timestamp, deviceId)
+            }
+        return live + tombstones
+    }
+
     internal suspend fun findReceiptsMissingFiles(hasFile: suspend (String) -> Boolean): Map<String, String> =
         buildMap {
             receiptStore.readLocalSourceOfTruth(ReceiptKey.All).forEach { receipt ->
@@ -110,13 +130,19 @@ class SyncStoreFacade(
 
     internal suspend fun receiptExists(receiptId: String): Boolean = receiptById(receiptId) != null
 
-    internal suspend fun applyIncomingChange(change: ChangeMessage): ApplyIncomingChangeResult =
+    internal suspend fun applyIncomingChange(change: ChangeMessage, beforeApply: suspend (Boolean) -> Unit = {}): ApplyIncomingChangeResult = mergeMutex.withLock {
+        applyIncomingChangeLocked(change, beforeApply)
+    }
+
+    private suspend fun applyIncomingChangeLocked(change: ChangeMessage, beforeApply: suspend (Boolean) -> Unit): ApplyIncomingChangeResult =
         withContext(SuppressStoreBroadcast()) {
             val current = db.latestEntityVersion(change.entityType, change.entityId)
             if (change.isStaleComparedTo(current)) {
+                if (current?.changeId == change.id && current.timestamp == change.timestamp) beforeApply(true)
                 return@withContext ApplyIncomingChangeResult.IgnoredStale(current)
             }
 
+            beforeApply(false)
             when (change.entityType) {
                 EntityType.ACCOUNT -> applyAccountChange(change)
                 EntityType.CATEGORY -> applyCategoryChange(change)
@@ -168,7 +194,7 @@ class SyncStoreFacade(
                         AccountKey.ById(account.id),
                         listOf(account)
                     )
-                )
+                ).also { check(it !is StoreWriteResponse.Error) { "Incoming entity write failed; retry before advancing sync." } }
             }
             ChangeOp.DELETE -> accountStore.clear(AccountKey.ById(change.entityId))
         }
@@ -183,7 +209,7 @@ class SyncStoreFacade(
                         CategoryKey.ById(category.id),
                         listOf(category)
                     )
-                )
+                ).also { check(it !is StoreWriteResponse.Error) { "Incoming entity write failed; retry before advancing sync." } }
             }
             ChangeOp.DELETE -> categoryStore.clear(CategoryKey.ById(change.entityId))
         }
@@ -198,7 +224,7 @@ class SyncStoreFacade(
                         ScheduleKey.ById(schedule.id),
                         listOf(schedule)
                     )
-                )
+                ).also { check(it !is StoreWriteResponse.Error) { "Incoming entity write failed; retry before advancing sync." } }
             }
             ChangeOp.DELETE -> scheduleStore.clear(ScheduleKey.ById(change.entityId))
         }
@@ -213,7 +239,7 @@ class SyncStoreFacade(
                         ScheduleExceptionKey.ByKey(exception.scheduleId, exception.date),
                         listOf(exception)
                     )
-                )
+                ).also { check(it !is StoreWriteResponse.Error) { "Incoming entity write failed; retry before advancing sync." } }
             }
             ChangeOp.DELETE -> {
                 val parts = change.entityId.split("_", limit = 2)
@@ -238,7 +264,7 @@ class SyncStoreFacade(
                         PostingKey.ById(posting.id),
                         listOf(posting)
                     )
-                )
+                ).also { check(it !is StoreWriteResponse.Error) { "Incoming entity write failed; retry before advancing sync." } }
             }
             ChangeOp.DELETE -> postingStore.clear(PostingKey.ById(change.entityId))
         }
@@ -253,7 +279,7 @@ class SyncStoreFacade(
                         ReceiptKey.ById(receipt.id),
                         listOf(receipt)
                     )
-                )
+                ).also { check(it !is StoreWriteResponse.Error) { "Incoming entity write failed; retry before advancing sync." } }
             }
             ChangeOp.DELETE -> receiptStore.clear(ReceiptKey.ById(change.entityId))
         }
@@ -284,7 +310,7 @@ internal suspend fun ShillingDatabase.recordEntityChange(change: ChangeMessage) 
         entity_id = change.entityId,
         op = change.op.name,
         timestamp = change.timestamp,
-        payload_json = null
+        payload_json = Json.encodeToString(change)
     )
 }
 
@@ -294,6 +320,7 @@ internal suspend fun ShillingDatabase.recordEntityChange(change: ChangeMessage) 
  * SourceOfTruth and Bookkeeper own these tables; no other layer may touch them directly.
  */
 suspend fun ShillingDatabase.clearAllSyncMetadata() {
+    cloudStateQueries.deleteAll()
     bookkeepingQueries.deleteAll()
     changeLogQueries.deleteAll()
 }

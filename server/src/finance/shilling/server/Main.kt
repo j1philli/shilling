@@ -49,9 +49,12 @@ fun Routing.configRoute(authConfig: AuthConfig) {
 }
 
 fun main() {
+    val port = (System.getenv("SHILLING_SERVER_PORT") ?: "8081").toInt().also { require(it in 1..65535) }
+    val host = System.getenv("SHILLING_SERVER_HOST") ?: "0.0.0.0"
     val signalingHub = SignalingHub()
     val turnConfig = createTurnConfig()
     val authConfig = readAuthConfig()
+    val backupControl = createBackupControl(turnConfig)
     require(authConfig.authMode in setOf("none", "supabase")) { "Unsupported SHILLING_AUTH_MODE" }
     val householdLookup = createHouseholdMembershipLookup(authConfig)
     val tokenVerifier = createSupabaseTokenVerifier(authConfig)
@@ -61,7 +64,7 @@ fun main() {
         require(!authConfig.supabaseAnonKey.isNullOrBlank()) { "Hosted auth requires a publishable key" }
     }
 
-    log.i { "Shilling server starting on http://localhost:8081" }
+    log.i { "Shilling server starting on http://$host:$port" }
     log.i { "Auth mode: ${authConfig.authMode}" }
     log.i { "Mode: signaling + discovery only (no user data stored or relayed)" }
     if (turnConfig.turnSecret != null) {
@@ -72,7 +75,7 @@ fun main() {
 
     val authEnabled = authConfig.authMode == "supabase"
 
-    embeddedServer(Netty, port = 8081, host = "0.0.0.0") {
+    embeddedServer(Netty, port = port, host = host) {
         install(ContentNegotiation) { json() }
         install(WebSockets) {
             pingPeriod = 15.seconds
@@ -81,8 +84,10 @@ fun main() {
         }
         install(CORS) {
             anyHost()
+            allowMethod(HttpMethod.Post)
             allowHeader(HttpHeaders.ContentType)
             allowHeader(HttpHeaders.Authorization)
+            allowHeader("X-Shilling-Household")
             exposeHeader("Cross-Origin-Resource-Policy")
         }
         // Required for browsers with Cross-Origin-Embedder-Policy: require-corp
@@ -91,14 +96,17 @@ fun main() {
             call.response.header("Cross-Origin-Resource-Policy", "cross-origin")
         }
 
+        monitor.subscribe(ApplicationStopped) { backupControl.policies.close() }
         routing {
             get("/health") { call.respondText("ok") }
             configRoute(authConfig)
-            iceServerRoute(turnConfig, authEnabled = authEnabled, tokenVerifier = tokenVerifier)
+            iceServerRoute(turnConfig, authEnabled = authEnabled, tokenVerifier = tokenVerifier, backupControl = backupControl, householdLookup = householdLookup)
+            backupRoutes(backupControl, tokenVerifier, householdLookup)
             if (authEnabled) {
                 householdRoute(householdLookup, tokenVerifier)
             }
             signalingRoute(signalingHub, tokenVerifier, householdLookup)
+            signalingRoute(SignalingHub(), tokenVerifier, householdLookup, path = "/ws/recovery-keys")
         }
     }.start(wait = true)
 }

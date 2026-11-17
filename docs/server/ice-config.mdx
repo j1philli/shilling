@@ -59,3 +59,12 @@ These credentials expire after the TTL period, after which clients should reques
 ## Client Fallback
 
 If the server is unreachable, clients fall back to Google's public STUN server (`stun:stun.l.google.com:19302`). TURN is not available in this case, and the app does not add a non-WebRTC fallback transport.
+
+## Cloud sync policy
+
+Cloud sync requires configured TURN service and forces the TURN preference on.
+The toggle stays locked until cloud sync is disabled; this is enforced by the policy
+API as well as Settings. Clients preserve username/password credentials when
+building ICE configuration and refresh credentials before expiry. TURN is an ICE
+option, so direct connectivity remains preferred. See [cloud sync and recovery](backups.mdx) for
+recovery-key pairing and the limits of connectivity guarantees.

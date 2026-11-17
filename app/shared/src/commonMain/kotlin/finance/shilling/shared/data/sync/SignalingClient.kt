@@ -3,6 +3,8 @@ package finance.shilling.shared.data.sync
 import co.touchlab.kermit.Logger
 import finance.shilling.core.sync.SignalingMessage
 import io.ktor.client.*
+import io.ktor.client.plugins.HttpTimeoutConfig
+import io.ktor.client.plugins.timeout
 import io.ktor.client.plugins.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
@@ -17,7 +19,9 @@ class SignalingClient(
     serverUrl: String,
     private val deviceId: String,
     private val householdId: String,
-    private val authService: finance.shilling.shared.data.auth.AuthService? = null
+    private val authService: finance.shilling.shared.data.auth.AuthService? = null,
+    private val path: String = "/ws/signal",
+    private val accessToken: (suspend () -> String?)? = null
 ) {
     private val wsUrl = serverUrl
         .replace("http://", "ws://")
@@ -46,11 +50,18 @@ class SignalingClient(
             while (isActive) {
                 try {
                     log.i { "[SIG] Opening WebSocket to $wsUrl/ws/signal ..." }
-                    httpClient.webSocket("$wsUrl/ws/signal") {
+                    httpClient.webSocket("$wsUrl$path", request = {
+                        // Bootstrap HTTP requests have a short timeout. Signaling is a long-lived
+                        // control channel; WebSocket ping/pong detects dead connections instead.
+                        timeout {
+                            requestTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
+                            socketTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS
+                        }
+                    }) {
                         session = this
                         backoffMs = 1000L
                         log.i { "[SIG] WebSocket CONNECTED to $wsUrl/ws/signal" }
-                        val token = authService?.refreshTokenIfNeeded()
+                        val token = accessToken?.invoke() ?: authService?.refreshTokenIfNeeded()
                         log.i { "[SIG] Sending Join(device=$deviceId, household=$householdId, hasToken=${token != null})" }
                         send(json.encodeToString<SignalingMessage>(
                             SignalingMessage.Join(deviceId, householdId, token)
@@ -67,7 +78,7 @@ class SignalingClient(
                                     log.d { "[SIG] Non-text frame: ${frame.frameType}" }
                                 }
                             }
-                            log.w { "[SIG] Incoming frame loop ended (server closed connection)" }
+                            log.w { "[SIG] Incoming frame loop ended (close code=${closeReason.await()?.code})" }
                         } finally {
                             log.i { "[SIG] Frame loop exited — sending Close frame" }
                             withContext(NonCancellable) {

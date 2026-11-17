@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -73,6 +74,7 @@ import finance.shilling.shared.data.sync.WebRtcConnectionManager
 import io.github.vinceglb.filekit.PlatformFile
 import io.ktor.client.HttpClient
 import io.ktor.client.webrtc.WebRtc
+import finance.shilling.shared.data.backup.*
 import io.ktor.client.webrtc.WebRtcClient
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -83,6 +85,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
@@ -555,8 +558,8 @@ private fun AppBootstrapContent(
     val syncConfig = remember(wsUrl, householdId, deviceIdentity.deviceId) {
         SyncConfig(wsUrl, householdId, deviceIdentity.deviceId)
     }
-    val serverApi = remember(httpClient, serverUrl, authService) {
-        ServerApi(httpClient, serverUrl, authService)
+    val serverApi = remember(httpClient, serverUrl, authService, householdId) {
+        ServerApi(httpClient, serverUrl, authService, householdId)
     }
 
     val iceServers = rememberUpdatedState(iceServerList)
@@ -564,6 +567,26 @@ private fun AppBootstrapContent(
 
     val runtime = rememberSyncRuntime(syncConfig, authService, iceServers)
     val serverApiRef = rememberUpdatedState(serverApi)
+    val backupSession = koinInject<BackupSession>()
+    val backupVault = koinInject<BackupKeyVault>()
+    val cloudRepository = koinInject<finance.shilling.shared.data.store.cloud.CloudSyncRepository>()
+    val backupRtcPlatform = koinInject<WebRtcPlatform>()
+    val backupScope = rememberCoroutineScope()
+    val backupController = remember(serverUrl, householdId, authService, effectiveBootstrapStatus.syncReady, selfHosted) {
+        if (effectiveBootstrapStatus.syncReady) BackupController(
+            httpClient, serverUrl, householdId, deviceIdentity.deviceId, authService,
+            backupVault, backupRtcPlatform.createClient, backupScope, cloudRepository
+        ) else null
+    }
+    DisposableEffect(backupController) {
+        backupSession.controller = backupController
+        backupController?.start()
+        onDispose {
+            if (backupSession.controller === backupController) backupSession.controller = null
+            backupScope.launch(kotlinx.coroutines.NonCancellable) { backupController?.close() }
+        }
+    }
+
 
     DisposableEffect(runtime.peerSyncManager, syncConfig.deviceId) {
         syncDeps.state = SyncState(
@@ -594,19 +617,24 @@ private fun AppBootstrapContent(
             log.i {
                 "Starting sync services (device=${syncConfig.deviceId}, server=$serverUrl, ws=$wsUrl, household=$householdId)"
             }
-            activeRuntime.signalingClient.connect(syncScope)
-            activeRuntime.peerSyncManager.start(syncScope)
-            activeRuntime.incomingChangeRouter.start(syncScope)
             syncScope.launch {
-                try {
-                    val resp = serverApiRef.value.fetchIceServers()
-                    val fetched = resp.iceServers.flatMap { cfg -> cfg.urls.map { WebRtc.IceServer(it) } }
-                    if (fetched.isNotEmpty()) {
-                        iceServerList = fetched
-                        log.i { "ICE servers updated: ${fetched.size} entries" }
+                var started = false
+                while (isActive) {
+                    var retryMs = 30_000L
+                    try {
+                        val resp = serverApiRef.value.fetchIceServers()
+                        val fetched = resp.webRtcServers()
+                        if (fetched.isNotEmpty()) iceServerList = fetched
+                        retryMs = (resp.ttlSeconds.toLong() * 500).coerceIn(1_000, 30_000)
+                    } catch (e: kotlinx.coroutines.CancellationException) { throw e }
+                    catch (_: Exception) { log.w { "ICE configuration unavailable; retrying." } }
+                    if (!started) {
+                        activeRuntime.peerSyncManager.start(syncScope)
+                        activeRuntime.incomingChangeRouter.start(syncScope)
+                        activeRuntime.signalingClient.connect(syncScope)
+                        started = true
                     }
-                } catch (e: Exception) {
-                    log.w { "ICE server fetch failed: ${e.message}" }
+                    kotlinx.coroutines.delay(retryMs)
                 }
             }
 
@@ -621,6 +649,7 @@ private fun AppBootstrapContent(
     ShillingTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             scaffoldConfig.preScaffoldContent()
+            CompositionLocalProvider(LocalBackupController provides backupController) {
             ShillingScaffold(
                 authService = authService,
                 featureGate = featureGate,
@@ -635,6 +664,7 @@ private fun AppBootstrapContent(
                 developerToolsEnabled = scaffoldConfig.developerToolsEnabled,
                 navControllerHook = scaffoldConfig.navControllerHook
             )
+            }
         }
     }
 }

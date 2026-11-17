@@ -90,6 +90,8 @@ fun SettingsView(
             ListSectionHeader("Account")
             if (selfHosted) {
                 SelfHostedAccountSection(onResetOnboarding = resetOnboardingCallback.onReset)
+                ListSectionHeader("Cloud sync and recovery")
+                BackupSettingsSection()
             } else {
                 HostedAccountSection(
                     authState = authState,
@@ -100,6 +102,8 @@ fun SettingsView(
                 )
                 ListSectionHeader("Sync")
                 SyncStatusSection(status = bootstrapStatus, onRetry = hostedBootstrapRetryCallback.onRetry)
+                ListSectionHeader("Cloud sync and recovery")
+                BackupSettingsSection()
             }
 
             ListSectionHeader("About")

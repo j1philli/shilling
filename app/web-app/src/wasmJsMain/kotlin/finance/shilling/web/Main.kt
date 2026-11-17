@@ -90,6 +90,7 @@ private fun webPlatformModule(db: ShillingDatabase) = module {
     single { db }
     single { Settings() }
     single<IdGenerator> { WasmIdGenerator() }
+    single<finance.shilling.shared.data.backup.BackupKeyVault> { WebBackupKeyVault() }
     single<ReceiptFileStore> { WasmReceiptFileStore(get()) }
     single { createSyncHttpClient() }
     single {

@@ -53,9 +53,11 @@ create table if not exists public.user_profiles (
 );
 ```
 
+Cloud-peer preferences are managed through `/api/backup/policy` and `/api/backup/toggle`; the legacy `backup_enabled` profile field is not used by the cloud peer.
+
 Each new `auth.users` row should also create a `public.user_profiles` row. Hosted bootstrap will fail by design if the authenticated user has no hosted household metadata.
 
-The production schema is managed by `supabase/migrations/`. Its metadata policy grants authenticated clients read access to only their own `user_id` and `tier`. No client can update `user_profiles`, and `waitlist` is inaccessible through the public Data API. The server's secret key performs the household lookup. The Auth trigger updates a profile's tier when an anonymous account gains an email address.
+The auth metadata schema is managed by `supabase/migrations/`; initialize cloud-peer storage separately with `supabase/cloud-peer.sql` and `supabase/cloud-storage.sql`. Its metadata policy grants authenticated clients read access to only their own `user_id` and `tier`. No client can update `user_profiles`, and `waitlist` is inaccessible through the public Data API. The server's secret key performs the household lookup. The Auth trigger updates a profile's tier when an anonymous account gains an email address.
 
 ## Environment
 
@@ -75,7 +77,7 @@ For modern Supabase projects using asymmetric signing keys such as `ECC P-256`, 
 
 - dedicated sign-in and account-management screens outside the developer settings surface
 - tier/device metadata endpoints such as `/api/tier` or `/api/devices`
-- backup peer and hosted backup storage
+- automatic cloud worker migration and production capacity benchmarking (the initial [cloud peer and recovery flow](server/backups.mdx) is implemented)
 - hosted abuse controls beyond the current join authorization path
 - full Store5 boundary cleanup in sync and projection code
 

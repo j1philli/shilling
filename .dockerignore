@@ -6,3 +6,11 @@ build
 node_modules
 web-app-dist
 src-tauri/target
+
+app/ios-app/Frameworks
+data
+**/*.db
+**/*.sqlite
+**/*.sqlite-journal
+**/*.sqlite-wal
+**/*.sqlite-shm

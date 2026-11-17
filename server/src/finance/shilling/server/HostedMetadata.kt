@@ -22,6 +22,7 @@ private val hostedMetadataLog = co.touchlab.kermit.Logger.withTag("HostedMetadat
 
 interface HouseholdMembershipLookup {
     suspend fun householdIdForUser(userId: String): String?
+    suspend fun tierForUser(userId: String): String? = null
 }
 
 sealed class JoinAuthorizationResult {
@@ -39,9 +40,13 @@ class SupabaseHouseholdMembershipLookup(
     private val profilesUrl = supabaseUrl.trimEnd('/') + "/rest/v1/user_profiles"
     private val json = Json { ignoreUnknownKeys = true }
 
-    override suspend fun householdIdForUser(userId: String): String? = withContext(Dispatchers.IO) {
+    override suspend fun householdIdForUser(userId: String): String? = profile(userId)?.householdId
+
+    override suspend fun tierForUser(userId: String): String? = profile(userId)?.tier
+
+    private suspend fun profile(userId: String): UserProfileRow? = withContext(Dispatchers.IO) {
         val request = HttpRequest.newBuilder()
-            .uri(URI.create("$profilesUrl?select=household_id&user_id=eq.$userId"))
+            .uri(URI.create("$profilesUrl?select=household_id,tier&user_id=eq.$userId"))
             .timeout(Duration.ofSeconds(5))
             .header("apikey", serviceKey)
             .header("Accept", "application/json")
@@ -61,7 +66,7 @@ class SupabaseHouseholdMembershipLookup(
             return@withContext null
         }
 
-        rows.firstOrNull()?.householdId
+        rows.firstOrNull()
     }
 }
 
@@ -128,5 +133,6 @@ fun Route.householdRoute(
 @Serializable
 private data class UserProfileRow(
     @SerialName("household_id")
-    val householdId: String
+    val householdId: String,
+    val tier: String = "anonymous"
 )

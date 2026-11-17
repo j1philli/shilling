@@ -6,6 +6,7 @@ modules:
   - app/web-app
   - core
   - server
+  - backup-peer
   - third_party/sqldelight-kotlin-toolchain/sqldelight
 
 plugins:

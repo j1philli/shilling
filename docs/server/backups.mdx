@@ -1,0 +1,377 @@
+---
+title: Cloud sync and recovery
+order: 4
+---
+
+# Cloud sync and recovery
+
+The cloud peer uses a separate `backup-peer` JVM process. Each worker serves many households;
+there is no JVM or container per account. The signaling server owns policy and
+assignment metadata only. Device sync and recovery-key sharing use
+WebRTC data channels, including when ICE selects a TURN relay. Hosted workers
+persist compact sync logs in Supabase Postgres and encrypted receipt/checkpoint objects
+in a private Supabase Storage bucket over TLS.
+
+## Cloud peer behavior
+
+Cloud sync keeps a durable household change stream, including deletion tombstones
+and receipt bytes. A device can disconnect completely; another device can later
+connect to the worker and catch up into its existing budget through Store5. The
+worker serves many households in one JVM. Hosted storage uses Supabase Postgres plus private Storage;
+self-hosted storage defaults to SQLite.
+
+Settings → Cloud sync and recovery enables this behavior. While the app is active,
+the client checks for changes every five seconds over a WebRTC connection. Local
+edits still work offline. Suspended or closed apps catch up when they next run;
+this does not provide OS background execution or notifications.
+
+- **End-to-end encrypted** is the default. Devices encrypt changes with AES-GCM
+  and a recovery key that the worker never receives. Turning on sync opens a guided
+  setup that creates the key locally, offers copying it, and enables sync after
+  confirmation that it is saved. A device joining an encrypted household instead
+  offers key transfer or import; it does not silently generate a replacement.
+  Detailed recovery controls are under **Recovery and devices**.
+- **Trusted cloud** permits the service to read cloud data. Chunks remain encrypted
+  at rest with a service-held key. Each uploading device must explicitly consent
+  to cloud access. This mode
+  provides data access for future cloud processing, but no MCP or external-service
+  connection is implemented or authorized by enabling it. Trusted batches can be
+  decrypted and replayed by the service; a materialized cloud entity view and
+  integration query/write APIs are deferred.
+
+Changing mode or the active recovery key re-uploads the current device state in
+the new mode. Existing stream entries keep their original mode. Catch-up across
+older encrypted entries still requires their recovery keys. Switching back to E2E
+does not erase previously service-readable data or revoke data already disclosed.
+An automatic purge/re-encryption transition is not implemented.
+
+Cloud sync is not historical recovery: deletions and bad edits propagate. Historical backup scheduling and off-Supabase disaster recovery are deferred.
+
+## Persistence and delivery
+
+`private_backup.cloud_entries` stores household-scoped immutable object manifests,
+encryption/key identifiers, receipt references, chunk counts, and committed sequence
+numbers. Recent change batches live as binary ciphertext in `cloud_chunks`.
+Receipt bytes are separate immutable objects: changing a receipt's notes or other
+metadata reuses its existing object. Content digests stay inside the encrypted
+manifest; object names are random and household-scoped.
+
+Hosted receipt/checkpoint uploads initially stage encrypted binary chunks in Postgres.
+On commit, the worker publishes one binary object to private Supabase Storage,
+verifies it, commits the manifest, and removes staging rows. A bounded 64 MiB cache
+per worker reads ahead in 1 MiB ranges, avoiding whole-object re-downloads when
+many large receipts are transferred concurrently.
+SQLite keeps both manifests and ciphertext chunks locally and needs no object service.
+
+The client persists exact upload ciphertext before transmission. Replaying an
+acknowledged chunk or commit is idempotent across restarts. A failed Storage write
+never publishes an incomplete manifest. File bytes are verified against their encrypted
+digest before the Store5 merge is acknowledged. Missing files can be repaired without
+overwriting newer entity versions. Account reset clears local cursors.
+
+After catching up through at least 64 changes since the last checkpoint, an authorized
+device can publish a full encrypted checkpoint containing current state, deletion
+markers, and receipt references. The server accepts it only if the log head still
+matches the device's base sequence. Covered deltas are removed only after durable
+checkpoint publication. Lagging/new devices merge that checkpoint through Store5 and
+then replay its tail, preserving newer offline edits. The worker never needs an E2E
+recovery key to serve or prune this history. Trusted mode uses the same device-driven
+checkpoint flow. This is current-state compaction, not historical recovery.
+
+Batches contain up to 512 changes and a 32 MiB preparation budget including receipt
+bytes; WebRTC uses acknowledged 24 KiB chunks. Checkpoint manifests support up to
+50,000 entity versions and 512 receipt references, within 32 MiB. Larger households
+continue using the log until a larger checkpoint protocol is implemented. A 512 MiB
+ciphertext reservation quota per household remains enforced, with 64 MiB of
+checkpoint staging headroom so a full log can still be compacted. Checkpoints retain
+all deletion markers; older devices do not require retirement to catch up safely.
+
+Unreferenced receipt objects and abandoned uploads older than 24 hours become
+eligible for cleanup. Cleanup runs during subsequent uploads. Retired Storage objects go through
+a durable garbage queue so a SQL rollback cannot delete live objects; failures retry.
+
+
+TURN is required and locked on while cloud sync is enabled. It improves reachability
+but cannot reach offline devices or guarantee key delivery. Credentials must last
+at least 60 seconds. Hosted accounts require the paid tier and configured workers.
+
+## Recovery-key sync
+
+On an existing device, create a device invitation. Enter it on the new device,
+then approve that device on the existing device. Invitations expire after ten
+minutes. A random pairwise secret authenticates and encrypts the transfer in
+addition to WebRTC encryption; household membership alone grants no key access.
+
+Receipt is acknowledged only after protected storage succeeds. Pending devices
+retry when connected. Android uses Android Keystore wrapping, iOS uses device-only
+Keychain items, and browsers/Tauri use an IndexedDB non-extractable WebCrypto
+wrapping key. Browser storage remains subject to the security of the app origin.
+Revoking sharing prevents future transfers from that device, but cannot erase
+keys already received. Losing every device and the saved recovery key makes
+end-to-end cloud data unrecoverable. A cloud worker is never a key-sync peer.
+
+## Run the service
+
+Configure the signaling server with:
+
+```sh
+SHILLING_BACKUP_WORKERS=worker-1=<random-worker-secret>
+SHILLING_BACKUP_POLICY_FILE=/data/backup-policy.json
+SHILLING_TURN_URLS=turn:turn.example.com:3478
+SHILLING_TURN_SECRET=<coturn-shared-secret>
+```
+
+Self-hosted mode uses a writable persistent policy file with one writer. Hosted mode
+requires `SHILLING_CLOUD_CONTROL_DATABASE_URL`, `SHILLING_CLOUD_CONTROL_DATABASE_USER`
+(`shilling_cloud_control`), and `SHILLING_CLOUD_CONTROL_DATABASE_PASSWORD` instead.
+The `cloud_policies` table holds settings, consent attribution and worker assignments.
+Transactional assignment locking prevents capacity races between signaling processes.
+This role cannot read payload tables. Signaling rooms themselves are still in memory;
+household-affine routing is required if running multiple signaling processes.
+
+In a separate environment, configure and run the worker:
+
+```sh
+SHILLING_BACKUP_SERVER_URL=https://api.shilling.finance
+SHILLING_BACKUP_WORKER_SECRET=<matching-worker-secret>
+SHILLING_BACKUP_DATA_DIR=/data/backups
+SHILLING_BACKUP_STORAGE=auto
+just backup-peer
+```
+
+Export those variables before running the command. For a container, build
+`deploy/backup/Dockerfile` from the repository root and mount persistent storage at
+`/data` for self-hosted SQLite. Hosted workers do not need a payload volume.
+The worker needs outbound HTTPS/WebSocket connectivity to signaling and
+network access for WebRTC ICE. `/health` on port 8082 reports whether assignment
+and TURN configuration refreshes are succeeding and the backup database is reachable. The image supports Linux
+amd64/arm64; local JVM development also includes macOS native WebRTC libraries.
+
+For trusted cloud, configure a **32-byte random base64 storage key** on every worker
+that can serve trusted-cloud data with `SHILLING_BACKUP_STORAGE_KEY`, then set
+`SHILLING_BACKUP_TRUSTED_CLOUD_ENABLED=true` on signaling. Keep that key in a secret
+manager separate from the backup database. Retain it for disaster recovery; replacing it
+without migrating retained trusted-cloud data makes it unreadable. This
+release does not implement service-key rotation or automatic re-encryption.
+
+### Hosted Supabase storage
+
+The worker reads `/api/config` at startup. Hosted (`SUPABASE`) auth requires
+Supabase storage; self-hosted (`NONE`) auth defaults to local SQLite. Explicitly
+setting `SHILLING_BACKUP_STORAGE=sqlite` in hosted mode is rejected. Database
+outages pause transfers and fail readiness; there is no local-storage fallback.
+An explicit `supabase` override is also available for self-hosted operators.
+
+Run `supabase/cloud-peer.sql` and `supabase/cloud-storage.sql` once against a fresh
+Supabase project before starting the worker. Set login passwords separately for the
+`shilling_backup_worker` and `shilling_cloud_control` database roles. This initial schema creates `private_backup.cloud_entries` and
+`private_backup.cloud_chunks`, with composite household/batch keys, cascade deletion,
+sequence indexes, and RLS. It creates a `shilling_backup_worker` role with access
+only to payload manifests, staging/log chunks and garbage-collection records. Enable LOGIN and set its password through your secure
+database provisioning process; do not grant it `postgres` or `service_role`.
+The setup SQL contains no password. Keep `private_backup` out of Supabase's exposed
+API schemas. `anon`, `authenticated`, and `service_role` have no cloud table privileges.
+
+Configure these variables **on the worker**. Use dedicated database credentials
+for Postgres and a separate server-only API credential for Storage:
+
+```sh
+SHILLING_BACKUP_DATABASE_URL=jdbc:postgresql://db.<project-ref>.supabase.co:5432/postgres?sslmode=verify-full&sslrootcert=/run/secrets/supabase-ca.crt
+SHILLING_BACKUP_DATABASE_USER=shilling_backup_worker
+SHILLING_BACKUP_DATABASE_PASSWORD=<dedicated-role-password>
+SHILLING_BACKUP_DATABASE_POOL_SIZE=8
+SHILLING_CLOUD_STORAGE_URL=https://<project-ref>.supabase.co
+SHILLING_CLOUD_STORAGE_KEY=<server-only-secret-api-key-or-service-role-jwt>
+SHILLING_CLOUD_STORAGE_BUCKET=cloud-peer
+```
+
+Quote the URL when exporting it in a shell. Mount the Supabase project's CA
+certificate at the configured path. Remote connections require `sslmode=verify-full`.
+Use the direct connection or Supavisor endpoint from your project's Connect panel;
+with Supavisor the username is `shilling_backup_worker.<project-ref>`. The worker
+disables server-side prepared statements for transaction-pool compatibility.
+See [Supabase connection guidance](https://supabase.com/docs/guides/database/connecting-to-postgres).
+
+The Storage API credential is separate from the trusted-cloud encryption key. Keep
+it only on workers. The bucket must remain private; readiness rejects a public bucket.
+Client roles have restrictive policies denying this bucket even if other buckets
+have broad allow policies. Devices never receive Storage credentials, signed URLs,
+or direct Storage access. See [Storage access control](https://supabase.com/docs/guides/storage/security/access-control).
+
+One bounded connection pool serves every household in a worker. Account for the
+sum of pool sizes across workers against your database connection budget. A
+transaction-level household lock serializes concurrent writes, so retries and
+sequence allocation remain safe across worker processes. Backup contents stay encrypted in
+both modes: E2E chunks use device keys, trusted-cloud chunks use the separate
+worker storage key. Recovery keys are never written to Supabase.
+
+This is a pre-GA schema with no upgrade or import path for earlier prototypes.
+Use fresh cloud storage and device databases for this build.
+
+Self-hosted authentication remains trusted-operator mode. Restrict access to the
+entire instance with a trusted network/access layer as described in the
+[self-hosting guide](../self-hosting.mdx). `X-Shilling-Household` scopes self-hosted
+metadata requests; it is not an authentication credential.
+
+## Capacity and failure handling
+
+Workers default to 32 concurrent WebRTC connections and 256 assigned households;
+configure `SHILLING_BACKUP_MAX_CONNECTIONS` and `SHILLING_BACKUP_MAX_HOUSEHOLDS` to
+change these limits. Match the signaling server's `SHILLING_BACKUP_WORKER_CAPACITY` to the worker household limit; it rejects assignments beyond capacity without disrupting existing households. Transfers send one acknowledged 24 KiB chunk at a time, with
+bounded frame sizes and idle/negotiation timeouts. Interrupted requests retry with
+the same object IDs and ciphertext. Only complete uploads become visible. Active
+cloud devices currently occupy connection slots between five-second sync passes;
+size the worker pool and connection limit for active devices, not just households. Two
+staging uploads per household are allowed and abandoned staging expires after 24
+hours on the next upload. Client process restarts resume the persisted upload outbox.
+
+Assignments are durable and distributed across configured workers by household
+count. Worker restarts with the same identity and storage configuration find the same committed
+cloud batches. Hosted replacement workers use the same Supabase database and service
+storage key; no payload files need moving. For SQLite, move or remount the persistent
+household files. Update the assignment with the old worker and control plane
+stopped before starting the replacement. Automatic cross-host migration/failover and dynamic
+capacity-based scheduling are not implemented. Never run two owners for the same
+household files. A failed assignment refresh closes worker sessions rather than
+continuing with stale authorization; changes are observed within the 15-second
+poll interval.
+
+Measure native/JVM memory, active transfers, bandwidth, and storage latency in the
+target deployment before raising limits. TURN traffic adds bandwidth cost.
+
+## Live acceptance test
+
+On macOS with OrbStack, run `scripts/test-live-backup.sh`. It packages and
+launches the production signaling server and backup worker in separate processes,
+uses temporary policy/storage directories, and forces a JVM client through a local
+coturn relay. It uses synthetic budgets and a 2 MiB receipt; it does not connect to
+an existing account or deployment. Host port 3479/UDP must be free (override it with
+`SHILLING_TEST_TURN_PORT`). OrbStack must allow host access to container bridge
+addresses; the relay advertises those addresses.
+
+The test covers both encryption modes, Store5 catch-up into a nonempty budget, incorrect keys,
+ciphertext at rest, household isolation, interrupted uploads across hard worker
+restarts, tamper rejection, receipt recovery, and deletion propagation. Three independent
+client databases also hold concurrent TURN connections, race conflicting edits and
+receipt uploads, and verify convergence after an offline edit, a newer deletion,
+checkpoint compaction, and a hard worker restart. Logs and a
+result report remain in the printed temporary directory; child services and the
+TURN container are stopped when the run finishes. This is a functional test,
+not a production capacity benchmark or a browser/native UI transfer test.
+
+Signaling supports `SHILLING_SERVER_HOST` and `SHILLING_SERVER_PORT` (defaults
+`0.0.0.0` and `8081`) so isolated test instances can coexist with a running server.
+
+For the Supabase storage backend, run `scripts/test-supabase-backup.sh`. It applies
+the initial cloud-peer schema to disposable PostgreSQL with Supabase API roles,
+runs concurrency/isolation/permission checks, then runs the same WebRTC acceptance
+test using restricted database roles, the actual Supabase Storage API in a disposable
+container, and no worker payload volume. This tests
+the PostgreSQL backend locally, not a deployed Supabase project or Supavisor/TLS
+configuration. The live test also checks cloud handoff into a nonempty device after the source
+disconnects and the worker restarts, receipt recovery, and deletion propagation in
+both modes. Both scripts clean up their own containers.
+
+
+### Headless production web clients
+
+With Chrome installed and `npm ci` complete, build and serve the current web app
+with developer tools enabled (for the test household controls):
+
+```sh
+SHILLING_DB_NAME=shilling-cloud-e2e SHILLING_DEV_TOOLS=true bash build-web.sh
+npx serve web-app-dist --config ../serve.json --listen 8138
+```
+
+In another terminal, run the disposable hosted test with the browser suite enabled:
+
+```sh
+SHILLING_TEST_WEB_URL=http://127.0.0.1:8138 scripts/test-supabase-backup.sh
+```
+
+The same option works with `scripts/test-live-backup.sh` for SQLite. The live fixture
+runs `scripts/test-cloud-browser.mjs` against its temporary signaling server and
+worker, and saves browser logs, screenshots, and a report with its other artifacts.
+Three isolated Chrome contexts use the production Wasm app and native browser
+WebRTC. Direct `/ws/signal` connections are blocked and every peer connection is
+forced through TURN; selected candidate statistics confirm relay use. Both modes
+exercise UI onboarding, recovery-key creation/import or explicit trusted consent,
+concurrent account creation, conflicting edits, and cloud-only recovery with the
+other two devices closed. Reloads also verify that key/consent state persists.
+Synthetic recovery keys are temporarily saved with owner-only permissions in the
+test artifact directory. Browser receipt upload UI and non-Chromium engines are
+outside this suite; receipt transfer and integrity are covered by the JVM tests.
+
+## Cloud MCP
+
+The worker can expose the same `McpToolbox` used by desktop: accounts, categories,
+transactions, schedules, occurrences, budgets and balance projections. Schemas and
+handlers live once in `app/shared/.../mcp`; hosts supply authenticated client permissions
+to `McpServer`. Discovery filters tools by permission, and each invocation checks the grant
+again. Editing tools require both read and write access because they can return entity data.
+
+Remote access requires **enabled trusted-cloud mode and separate, explicit client consent**.
+Enabling trusted storage alone grants no integration access. E2E cloud data is unavailable
+to MCP; desktop can still operate on its locally decrypted data. Disabling cloud sync or
+returning to E2E clears all cloud MCP grants. Re-enabling trusted mode does not restore them.
+
+Set `SHILLING_CLOUD_MCP_URL=https://cloud-peer.example.com/mcp` on the assigned worker.
+The endpoint uses the worker health port; put it behind a TLS reverse proxy that preserves
+`Host`, limits request bodies to 1 MiB, and applies request/idle timeouts. Keep `/health`
+private. Never route MCP budget requests through the signaling service. The endpoint is
+absent when this variable is unset. HTTP is allowed only for localhost development.
+
+Client provisioning currently uses the authenticated control-plane API, not a Settings
+screen or an OAuth registration flow. It supports MCP clients configured with an explicit
+Bearer credential. For each client:
+
+1. Generate a distinct 32-byte random credential encoded as 64 lowercase hex characters.
+   Keep the raw credential on the client; send only its SHA-256 hex digest to policy storage.
+2. Read `/api/backup/policy` using the household user's authentication. Preserve its
+   `revision`, encryption mode and other settings.
+3. POST `/api/backup/toggle` with `mcpClients` containing the complete desired grant list.
+   Each grant has `clientId`, `tokenSha256`, `read`, `write`, and `expiresAt` (epoch milliseconds,
+   no more than 90 days ahead). Add the exact separate consent string in `mcpConsent`:
+   `I authorize these clients to access my cloud budget with the selected permissions`.
+   The server records the authenticated consenting user; caller-supplied `consentBy` is ignored.
+4. Configure that client's Streamable HTTP URL and `Authorization: Bearer <credential>`.
+   New grants can take up to 15 seconds to reach a worker. Revocations and permission changes
+   are checked against the control plane on each call, without waiting for that poll.
+
+Omitting `mcpClients` preserves grants; an empty list revokes all of them. A stale policy
+revision is rejected. Self-hosted policy operations follow the existing trusted-operator
+control-plane model (`X-Shilling-Household`); keep that API on the operator's trusted network.
+
+The worker implements JSON responses over
+[Streamable HTTP](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports).
+`initialize` returns a signed, client-bound `Mcp-Session-Id`; send it on subsequent POSTs.
+There is no SSE stream (`GET` returns 405). Sessions last seven days and survive worker
+restarts while its secret is unchanged. A session from another client is rejected.
+Unsupported protocol headers and untrusted Origins are rejected.
+
+Writes are deduplicated by client, session and JSON-RPC request ID. Retry the exact request
+with the same session and ID after an uncertain result. Clients needing retries across
+sessions may set `Idempotency-Key: <epoch-millis>.<UUID>` and reuse it with the exact body.
+Keys expire after seven days; expired keys are rejected rather than executing again.
+Encrypted command receipts commit atomically with the sync delta and survive checkpoint
+compaction. Reusing a key for a different body is rejected. These receipts live in the private
+`cloud_commands` table, inaccessible to Supabase's public API and control-plane role.
+
+Budget calls wait for a complete trusted checkpoint. Connected devices automatically
+publish the initial trusted baseline when MCP grants exist and sync has caught up. An empty
+or incomplete stream is not presented as a complete budget. The working view is disposable
+in-memory SQLite, reconstructed through Store5's existing validation/merge path. Receipt
+metadata is merged without downloading receipt bytes; the current tool catalog has no
+receipt-file tools. No plaintext budget database is persisted on the worker. Successful
+edits enter the normal encrypted sync log, and devices receive them only over WebRTC.
+
+There are at most two concurrent cloud MCP calls per worker, with a bounded HTTP queue.
+Each view is limited to 64 MiB of decoded history and 100,000 changes; larger histories need
+compaction. This bounds resource use without a service per user. Calls rebuild their view
+rather than keeping a permanent database per household. Dates omitted from tool arguments
+use the worker's local date; integrations should send explicit dates when timezone matters.
+
+The desktop MCP transport remains in the separate desktop branch. When combining branches,
+keep this shared catalog and required `McpServer(authorize = ...)` boundary; the desktop host
+supplies its locally authenticated client's current grants. Do not restore an implicit
+full-access constructor or duplicate tool definitions in either transport.

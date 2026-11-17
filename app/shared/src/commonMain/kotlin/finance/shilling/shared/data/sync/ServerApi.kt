@@ -1,5 +1,8 @@
 package finance.shilling.shared.data.sync
 
+import finance.shilling.core.backup.*
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.core.auth.HostedHouseholdResponse
 import finance.shilling.core.auth.ServerConfig
@@ -18,9 +21,11 @@ const val BOOTSTRAP_NETWORK_TIMEOUT_MS = 3_000L
 class ServerApi(
     private val httpClient: HttpClient,
     private val baseUrl: String,
-    private val authService: AuthService? = null
+    private val authService: AuthService? = null,
+    private val householdId: String? = null
 ) {
     private suspend fun HttpRequestBuilder.withAuth() {
+        householdId?.let { header("X-Shilling-Household", it) }
         authService?.refreshTokenIfNeeded()?.let { token ->
             header("Authorization", "Bearer $token")
         }
@@ -31,6 +36,18 @@ class ServerApi(
             expectSuccess = true
             withAuth()
         }.body()
+
+    suspend fun backupPolicy(): BackupPolicy = httpClient.get("$baseUrl/api/backup/policy") {
+        expectSuccess = true
+        withAuth()
+    }.body()
+
+    suspend fun updateBackupPolicy(update: BackupPolicyUpdate): BackupPolicy = httpClient.post("$baseUrl/api/backup/toggle") {
+        expectSuccess = true
+        withAuth()
+        contentType(ContentType.Application.Json)
+        setBody(update)
+    }.body()
 
     suspend fun fetchConfig(): ServerConfig =
         httpClient.get("$baseUrl/api/config") {

@@ -574,3 +574,7 @@ tasks module="":
 # Show Kotlin Toolchain modules
 modules:
     ./kotlin show modules
+
+# Run the independent backup worker; load credentials from your shell or secret manager.
+backup-peer: ensure-plugin
+    ./kotlin run --module backup-peer

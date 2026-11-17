@@ -31,6 +31,8 @@ import org.koin.dsl.module
 val dataModule: Module = module {
     single { DeviceIdentity(get(), get()) }
     single { ChangeNotifier() }
+    single { finance.shilling.shared.data.backup.BackupSession() }
+    single { finance.shilling.shared.data.store.cloud.CloudSyncRepository(get(), get(), get(), get()) }
     // One StoreSyncDeps shared by every store and repository; the sync runtime swaps its
     // peer manager in and out as sync starts and stops.
     single { StoreSyncDeps(get(), null, get<DeviceIdentity>().deviceId, get()) }
@@ -61,6 +63,9 @@ val dataModule: Module = module {
 
     single { ComputeWindowUseCase(get(), get(), get(), get(), get()) }
     single { ComputeBudgetUseCase(get(), get(), get()) }
+    factory { finance.shilling.shared.presentation.OccurrenceActions(get(), get()) }
+    factory { finance.shilling.shared.mcp.McpToolbox(get(), get(), get(), get(), get(), get(), get(), get()) }
+
 
     single {
         LocalDataWiper(
@@ -71,7 +76,9 @@ val dataModule: Module = module {
             categoryRepository = get(),
             scheduleRepository = get(),
             postingRepository = get(),
-            receiptRepository = get()
+            receiptRepository = get(),
+            backupSession = get(),
+            backupVault = get()
         )
     }
 }
