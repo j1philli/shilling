@@ -1,0 +1,17 @@
+---
+title: Usage analytics privacy
+---
+
+# Usage analytics privacy notice
+
+Sharing usage events is optional and off by default. The choice applies to this installation, including guest, hosted, and self-hosted use. Development builds have a separate choice and start opted out.
+
+When you enable **Share usage events**, Shilling sends these completed actions to PostHog Cloud in the United States: onboarding, creating a budget account, creating a schedule, saving a one-off transaction, completing a CSV import, and attaching a receipt. Onboarding includes guest, hosted, or self-hosted mode; schedules include expense, income, or transfer type.
+
+Events contain a random installation identifier, separate from your login, household, and device identifiers. This pseudonymous identifier allows events from the same installation to be counted together. It is retained in local settings when sharing is switched off and when the app's budget data is reset. Removing all app settings creates a new identifier on the next opted-in event.
+
+Shilling does not include balances, amounts, transaction descriptions, account or category names, filenames, receipt or CSV contents, household IDs, or error text in analytics events. It does not install autocapture, session replay, or error capture. PostHog receives the connection's IP address and enriches events with approximate location, including geographic coordinates derived from the IP address. Those coordinates are not device GPS location.
+
+Turn sharing off in **Settings → Product analytics** to stop future events. An already-sent request may finish. Switching off does not delete events already received by PostHog. Actions performed before opting in are not sent later. Analytics delivery is best effort and does not prevent saving budget data when PostHog is unavailable.
+
+Analytics goes directly to PostHog, including when you use a self-hosted Shilling server. Your Shilling server does not receive or relay these analytics events.

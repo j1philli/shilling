@@ -1,0 +1,454 @@
+{
+  "mainThreadOnly": true,
+  "doesNotMeasure": "Wasm GC objects, SQL worker, graphics or physical footprint",
+  "phases": [
+    {
+      "phase": "BEGIN home_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY home_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN plan_week_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY plan_week_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN plan_month_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY plan_month_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN schedules_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY schedules_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN categories_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY categories_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN accounts_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY accounts_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN activity_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY activity_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN receipts_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY receipts_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN settings_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY settings_0",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN home_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY home_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN plan_week_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY plan_week_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN plan_month_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY plan_month_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN schedules_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY schedules_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN categories_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY categories_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN accounts_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY accounts_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN activity_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY activity_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN receipts_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY receipts_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN settings_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY settings_1",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN transaction_editor",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY transaction_editor",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN schedule_editor",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY schedule_editor",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN category_editor",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY category_editor",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN account_editor",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY account_editor",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN csv_load_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY csv_review_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN csv_import_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY csv_imported_10000",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN home_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY home_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN activity_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY activity_after_import",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "BEGIN home_settle",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY home_settle",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "READY final_idle",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    },
+    {
+      "phase": "COMPLETE",
+      "dateFormats": 0,
+      "linearMemoryBytes": [
+        0,
+        18808832
+      ]
+    }
+  ]
+}

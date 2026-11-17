@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+node "$(dirname "$0")/scripts/ci/check-node-version.cjs"
+node "$(dirname "$0")/scripts/ci/check-java-version.cjs"
+
 SHILLING_DB_NAME="${SHILLING_DB_NAME:-shilling}"
 SHILLING_WASM_VARIANT="${SHILLING_WASM_VARIANT:-Release}"
 
@@ -13,6 +16,10 @@ case "$SHILLING_WASM_VARIANT" in
 esac
 # Show Settings > Developer tools. The dev `just` recipes turn this on; production builds leave it off.
 SHILLING_DEV_TOOLS="${SHILLING_DEV_TOOLS:-false}"
+SHILLING_DEVELOPMENT_BUILD=false
+if [ "$SHILLING_WASM_VARIANT" = Debug ]; then
+    SHILLING_DEVELOPMENT_BUILD=true
+fi
 # Favicon variant from app/web-app/icons/. The dev `just` recipes use dev; production builds use ga.
 SHILLING_ICON_VARIANT="${SHILLING_ICON_VARIANT:-ga}"
 
@@ -35,11 +42,17 @@ mkdir -p "$DIST"
 # Kotlin Toolchain packages wasm + skiko + import helpers into PKG_DIR.
 # Keep our custom index.html (Tauri logging, error overlay, favicons).
 echo "Writing index.html (dev tools: ${SHILLING_DEV_TOOLS})..."
-sed "s/<meta name=\"shilling-dev-tools\" content=\"false\">/<meta name=\"shilling-dev-tools\" content=\"${SHILLING_DEV_TOOLS}\">/" \
+sed -e "s/<meta name=\"shilling-dev-tools\" content=\"false\">/<meta name=\"shilling-dev-tools\" content=\"${SHILLING_DEV_TOOLS}\">/" \
+    -e "s/<meta name=\"shilling-development-build\" content=\"false\">/<meta name=\"shilling-development-build\" content=\"${SHILLING_DEVELOPMENT_BUILD}\">/" \
     app/web-app/index.html > "$DIST/index.html"
 echo "Copying Wasm package artifacts to $DIST/..."
 cp "$PKG_DIR/web-app.mjs" "$DIST/"
 cp "$PKG_DIR/web-app.wasm" "$DIST/"
+if [ "$SHILLING_WASM_VARIANT" = Release ]; then
+    # Optimize the Kotlin app's code/GC types and retain stack-trace names.
+    # The unmodified compiler package remains in PKG_DIR for debugging.
+    node scripts/optimize-wasm.cjs "$DIST/web-app.wasm"
+fi
 cp "$PKG_DIR/web-app.import-object.mjs" "$DIST/"
 cp "$PKG_DIR/web-app.js-builtins.mjs" "$DIST/"
 cp "$PKG_DIR/skiko.mjs" "$DIST/"
@@ -80,4 +93,4 @@ echo "Copying $SHILLING_ICON_VARIANT favicons..."
 cp "app/web-app/icons/$SHILLING_ICON_VARIANT/favicon.ico" "$DIST/"
 cp "app/web-app/icons/$SHILLING_ICON_VARIANT/apple-touch-icon.png" "$DIST/"
 
-echo "Done. Run 'cargo tauri dev' from the project root to launch, or 'just web' to serve."
+echo "Done. Run 'cargo tauri dev' from the project root to launch, or 'mise run web' to serve."

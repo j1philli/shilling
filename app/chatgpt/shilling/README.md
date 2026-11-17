@@ -9,10 +9,10 @@ This is a development integration, not a published or production-certified ChatG
 From the repository root, with the normal Shilling toolchain and Node 22 or later:
 
 ```sh
-just chatgpt
+mise run chatgpt
 ```
 
-This compiles the shared web app, installs locked plugin dependencies, builds the host shell and starts `http://localhost:8787/mcp`. Open `http://localhost:8787/client/` to inspect the same client directly. `just build-chatgpt` builds without starting the server. The Kotlin build uses Debug; use the normal release web build before `npm --prefix app/chatgpt/shilling run build` for deployment.
+This compiles the shared web app, installs locked plugin dependencies, builds the host shell and starts `http://localhost:8787/mcp`. Open `http://localhost:8787/client/` to inspect the same client directly. `mise run build-chatgpt` builds without starting the server. The Kotlin build uses Debug; use the normal release web build before `npm --prefix app/chatgpt/shilling run build` for deployment.
 
 If `web-app-dist` already contains a current compiled web client, only the packaging step is necessary:
 
@@ -64,7 +64,7 @@ Terminate HTTPS at your reverse proxy. No household data volume is attached to t
 ## Verification
 
 ```sh
-just test-chatgpt
+mise run test-chatgpt
 npm --prefix app/chatgpt/shilling exec -- playwright install chromium
 # Start a local server with SHILLING_AUTH_MODE=none for browser tests:
 SHILLING_AUTH_MODE=none ./kotlin run --module server
@@ -76,7 +76,7 @@ npm --prefix app/chatgpt/shilling run test:sync
 SHILLING_TEST_STANDALONE=1 npm --prefix app/chatgpt/shilling run test:sync
 # Isolate native WebRTC from application code when diagnosing networking:
 npm --prefix app/chatgpt/shilling run test:webrtc
-just guard-architecture
+mise run guard-architecture
 ```
 
 The protocol tests check empty entrypoint arguments, resource declarations, navigation validation and the absence of entity APIs. Browser tests exercise HTTP MCP requests, a sandboxed MCP Apps host, account creation and persistence, concurrent-panel exclusion, and missing WebRTC support. The sync test uses two isolated browser devices and the real signaling server to check account backfill, changes in both directions, persistence after reopening, and a new change after reconnection. `SHILLING_TEST_TRACE=1` prints diagnostic logs containing synthetic test data.

@@ -10,6 +10,9 @@ repositories:
   - id: google-canonical
     url: https://dl.google.com/dl/android/maven2
 
+aliases:
+  - nativeBilling: [android, iosArm64, iosSimulatorArm64]
+
 dependencies:
   - ../shared
   - ../../core
@@ -18,6 +21,8 @@ dependencies:
   - $libs.datetime
   - $libs.koin.core
   - $libs.koin.compose
+  - $libs.koin.compose.viewmodel
+  - $libs.lifecycle.runtime.compose
   - $libs.ktor.client.core
   - $libs.ktor.client.webrtc
   - $libs.serialization.json
@@ -35,12 +40,15 @@ dependencies:
   - $libs.navigation.compose
   - $libs.navigationevent.compose
 
+dependencies@nativeBilling:
+  - $libs.revenuecat.kmp.core
+
 settings:
   compose:
     enabled: true
-    version: 1.12.0
+    version: 1.13.0-alpha02
   kotlin:
-    version: "2.4.20"
+    version: "2.4.21"
     serialization: json
     compileIncrementally: true
   android:

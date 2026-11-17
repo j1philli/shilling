@@ -33,6 +33,7 @@ import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 
@@ -315,6 +316,42 @@ class AuthBootstrapTest {
     }
 
     @Test
+    fun verifiedActiveHostedSpaceCanChangeForIsolatedStoreGraphs() = runBlocking {
+        val settings = hostedSettings().also {
+            it.putString(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID, "old-household")
+        }
+        val authService = FakeAuthService("device-1", accountAuthenticatedState("device-1"))
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val httpClient = mockHttpClient { request ->
+            when (request.url.encodedPath) {
+                "/api/config" -> jsonResponse("""{"authMode":"SUPABASE","supabaseUrl":"https://supabase.test","supabaseAnonKey":"anon-key"}""")
+                "/api/household" -> jsonResponse("""{"householdId":"new-household"}""")
+                else -> error("Unexpected path: ${request.url.encodedPath}")
+            }
+        }
+
+        try {
+            val resolution = resolveStartupIdentity(
+                httpClient = httpClient,
+                serverUrl = "https://example.test",
+                settings = settings,
+                idGenerator = TestIdGenerator(),
+                deviceId = "device-1",
+                scope = scope,
+                authServiceFactory = { _, _, _, _, _ -> authService }
+            )
+
+            assertEquals(HostedBootstrapPhase.READY, resolution.identity.bootstrapStatus.phase)
+            assertTrue(resolution.identity.bootstrapStatus.syncReady)
+            assertEquals("new-household", resolution.identity.activeHouseholdId)
+            assertEquals("new-household", settings.getStringOrNull(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID))
+        } finally {
+            httpClient.close()
+            scope.cancel()
+        }
+    }
+
+    @Test
     fun authRuntimeIsReusedWhileConfigStaysTheSame() = runBlocking {
         val settings = isolatedSettings()
         val authService = FakeAuthService(
@@ -463,6 +500,18 @@ class AuthBootstrapTest {
             Result.failure(UnsupportedOperationException("Not used in tests"))
 
         override suspend fun signIn(email: String, password: String): Result<Unit> =
+            Result.failure(UnsupportedOperationException("Not used in tests"))
+
+        override suspend fun sendSignInLink(email: String): Result<Unit> =
+            Result.failure(UnsupportedOperationException("Not used in tests"))
+
+        override suspend fun handleAuthCallback(url: String): Result<Unit> =
+            Result.failure(UnsupportedOperationException("Not used in tests"))
+
+        override suspend fun refreshAccountStatus(): Result<Unit> =
+            Result.failure(UnsupportedOperationException("Not used in tests"))
+
+        override suspend fun setPassword(password: String): Result<Unit> =
             Result.failure(UnsupportedOperationException("Not used in tests"))
 
         override suspend fun signOut() {}

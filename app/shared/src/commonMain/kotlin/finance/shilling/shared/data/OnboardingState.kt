@@ -68,7 +68,9 @@ fun softReturnToWelcome(settings: Settings, notice: String = "session_expired") 
         SETTINGS_KEY_AUTH_USER_ID,
         SETTINGS_KEY_AUTH_TIER,
         SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION,
-        SETTINGS_KEY_AUTH_PENDING_EMAIL
+        SETTINGS_KEY_AUTH_PENDING_EMAIL,
+        SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID,
+        SETTINGS_KEY_CLOUD_RELAY_ENABLED
     ).forEach(settings::remove)
 }
 
@@ -100,9 +102,12 @@ fun resetOnboardingState(settings: Settings) {
         SETTINGS_KEY_AUTH_TIER,
         SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION,
         SETTINGS_KEY_AUTH_PENDING_EMAIL,
+        SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL,
+        SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID,
         SETTINGS_KEY_HELD_LOCAL_DATA,
         SETTINGS_KEY_PENDING_RESTORE_USER_ID,
-        SETTINGS_KEY_WELCOME_NOTICE
+        SETTINGS_KEY_WELCOME_NOTICE,
+        SETTINGS_KEY_CLOUD_RELAY_ENABLED
     ).forEach(settings::remove)
 }
 
@@ -114,7 +119,10 @@ fun clearHostedAuthSessionState(settings: Settings) {
         SETTINGS_KEY_AUTH_USER_ID,
         SETTINGS_KEY_AUTH_TIER,
         SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION,
-        SETTINGS_KEY_AUTH_PENDING_EMAIL
+        SETTINGS_KEY_AUTH_PENDING_EMAIL,
+        SETTINGS_KEY_AUTH_PENDING_SIGN_IN_EMAIL,
+        SETTINGS_KEY_AUTH_PASSWORD_SETUP_USER_ID,
+        SETTINGS_KEY_CLOUD_RELAY_ENABLED
     ).forEach(settings::remove)
 }
 
@@ -122,8 +130,8 @@ fun clearHostedAuthSessionState(settings: Settings) {
  * Wipes all local app state. All entity deletes go through Store5 repositories so that
  * in-memory caches stay coherent with the SQLDelight source of truth. The sync-metadata
  * tables (change_log, bookkeeping) are cleared through the store-layer helper that owns
- * them. The binary receipt file store (a platform service, not a Store5 entity) is
- * cleared directly via its interface.
+ * them. Binary receipt files are cleared through the platform-facing interface backed
+ * by Store5ReceiptFileStore.
  */
 suspend fun wipeLocalAppState(
     db: ShillingDatabase,
@@ -156,16 +164,20 @@ class LocalDataWiper(
     private val categoryRepository: CategoryRepository,
     private val scheduleRepository: ScheduleRepository,
     private val postingRepository: PostingRepository,
-    private val receiptRepository: ReceiptRepository
+    private val receiptRepository: ReceiptRepository,
+    private val graphs: finance.shilling.shared.data.store.FinanceSpaceGraphs? = null
 ) {
-    suspend fun wipe() = wipeLocalAppState(
-        db = db,
-        settings = settings,
-        fileStore = fileStore,
-        accountRepository = accountRepository,
-        categoryRepository = categoryRepository,
-        scheduleRepository = scheduleRepository,
-        postingRepository = postingRepository,
-        receiptRepository = receiptRepository
-    )
+    suspend fun wipe() {
+        if (graphs != null) { graphs.wipeAll(); return }
+        wipeLocalAppState(
+            db = db,
+            settings = settings,
+            fileStore = fileStore,
+            accountRepository = accountRepository,
+            categoryRepository = categoryRepository,
+            scheduleRepository = scheduleRepository,
+            postingRepository = postingRepository,
+            receiptRepository = receiptRepository
+        )
+    }
 }

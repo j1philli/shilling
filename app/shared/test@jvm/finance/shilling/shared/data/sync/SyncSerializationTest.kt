@@ -28,6 +28,7 @@ class SyncSerializationTest {
         val messages: List<SignalingMessage> = listOf(
             SignalingMessage.Join("device-1", "household-1"),
             SignalingMessage.PeerList(listOf("device-2", "device-3")),
+            SignalingMessage.PeerList(emptyList(), removedDeviceIds = listOf("device-2")),
             SignalingMessage.Offer("device-1", "device-2", "sdp-offer-data"),
             SignalingMessage.Answer("device-1", "device-2", "sdp-answer-data"),
             SignalingMessage.IceCandidate("device-1", "device-2", "candidate-data", "audio", 0)
@@ -38,6 +39,14 @@ class SyncSerializationTest {
             val decoded = json.decodeFromString<SignalingMessage>(encoded)
             assertEquals(original, decoded, "Round-trip failed for ${original::class.simpleName}")
         }
+    }
+
+    @Test
+    fun legacyPeerListDoesNotRemovePeers() {
+        val encoded = json.encodeToString<SignalingMessage>(SignalingMessage.PeerList(listOf("device-2")))
+        val legacy = encoded.replace(",\"removedDeviceIds\":[]", "")
+        val decoded = json.decodeFromString<SignalingMessage>(legacy)
+        assertEquals(SignalingMessage.PeerList(listOf("device-2")), decoded)
     }
 
     @Test
@@ -132,11 +141,10 @@ class SyncSerializationTest {
     // --- FileTransferMessage serialization ---
 
     @Test
-    fun fileTransferMessageRoundTrips() {
+    fun fileTransferControlMessagesRoundTripAsJson() {
         val messages: List<FileTransferMessage> = listOf(
             FileTransferMessage.FileRequest("r-1"),
             FileTransferMessage.FileHeader("r-1", 1024, 2, "image/jpeg"),
-            FileTransferMessage.FileChunk("r-1", 0, "base64data=="),
             FileTransferMessage.FileComplete("r-1"),
             FileTransferMessage.FileNotAvailable("r-1")
         )

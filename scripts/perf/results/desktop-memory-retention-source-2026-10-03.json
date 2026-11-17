@@ -1,0 +1,29 @@
+{
+  "baseCommit": "97f0210382bfcb5f92742270460246aa5520f0ca",
+  "configuration": "Final: screen expiry + checked review with original shareIn retained, names trimmed, startup snapshot release",
+  "sources": {
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/presentation/ActivityViewModel.kt": "d8135fb7f6328bb41848adae4e19f1566de8a7a7d7fffc1005e395ff9d6874fd",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/presentation/ImportViewModel.kt": "c2576b41934b6e3f6f7d2bc3f85453c20017a603cc6f545e7a4e8225b4e96147",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/presentation/PlanListViewModels.kt": "11653050c1aaa98fed93967e660d820a478bd289ac41ceb9961801da1d4a1a89",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/presentation/PlanOverviewViewModel.kt": "4b2b1bcbe287d6947fe921fde718181c8f19cee3986a94bb52acce4e50c7aff4",
+    "app/shared/src/commonMain/kotlin/finance/shilling/shared/presentation/ReceiptsViewModel.kt": "bdd5d8735af279766e572b88225dab1809049d74b38c2558818aa1ac87009003",
+    "build-web.sh": "8fe417de699ab880d6ba3ccb9cfa926b974a08eda745ee33fd428c416eab895e",
+    "scripts/trim-wasm-debug-names.cjs": "809b4f266c0ac2d48c000109ac60ddd6545584da2e05fa9fbaf0023e7e75ae18",
+    "scripts/perf/build_desktop_memory.sh": "143d7abf80db7d32f4572cdb5cde43ca711362a75244a135098ed09fc053037e",
+    "app/perf-web/runtime-profile.js": "6a262897410b357da0bd168533a2df0ecc00261b223ca0359b03e7f2129c163e",
+    "app/perf-web/src/wasmJsMain/kotlin/finance/shilling/perf/Main.kt": "ccffc26f12fb56a44ef2a5e27a6409941e771f05e113fc70d9ee8dcf41646c44",
+    "app/web-app/sqldelight.worker.js": "be6691806991a74a498662ea3f8ea1f3765a2147298493c157db7bf4054b831f"
+  },
+  "fixtureArtifacts": {
+    "perf-web-dist/perf-web.wasm": "b565663b242c8b9c6de4dc22a078f0d90f2dc7118cae52524615d0a8a19ca770",
+    "perf-web-dist/index.html": "8c6130569af9977a27285cacd51ad53068c854533843ce717a6ab7dfc6cf0e4a",
+    "perf-web-dist/sqldelight.worker.js": "6e34ab93219b3cef4d26dd02dd5d53ea4ebb6f55885eaafde9407b90a9533950"
+  },
+  "integrationBaseCommit": "7f39c734eab0e24b33deabbe2e10b0dab821dbb5",
+  "integrationNote": "Main advanced only in release publication configuration/scripts/docs; measured application and benchmark sources are unchanged.",
+  "coldFixtureArtifacts": {
+    "perf-web-dist/perf-web.wasm": "b565663b242c8b9c6de4dc22a078f0d90f2dc7118cae52524615d0a8a19ca770",
+    "perf-web-dist/index.html": "e9938f0bcf51173f387eb00e02de269b0c2d3c1e7faab8c55ca3b9bb1ca170c5",
+    "perf-web-dist/sqldelight.worker.js": "6e34ab93219b3cef4d26dd02dd5d53ea4ebb6f55885eaafde9407b90a9533950"
+  }
+}

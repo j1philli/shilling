@@ -20,16 +20,23 @@ import finance.shilling.shared.data.store.AccountRepository
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import finance.shilling.shared.presentation.formatAmountInput
+import finance.shilling.shared.presentation.formatCurrency
+import finance.shilling.shared.presentation.parseAmountInput
+import finance.shilling.shared.presentation.AccountsViewModel
+import org.koin.compose.viewmodel.koinViewModel
+import finance.shilling.shared.presentation.AccountEditorViewModel
+import finance.shilling.shared.presentation.EditorLoad
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun AccountsView(
     onOpenAccount: (String?) -> Unit,
     title: String = "Accounts",
-    headerBottom: (@Composable () -> Unit)? = null
+    headerBottom: (@Composable () -> Unit)? = null,
+    viewModel: AccountsViewModel = koinViewModel()
 ) {
-    val accountRepo = koinInject<AccountRepository>()
-    val accounts by remember { accountRepo.watchAll() }.collectAsState(initial = emptyList())
-    val sorted = remember(accounts) { accounts.sortedBy { it.name.lowercase() } }
+    val state by viewModel.state.collectAsState()
     var selectedKey by rememberSaveable { mutableStateOf<String?>(null) }
 
     ListDetailLayout(
@@ -42,23 +49,24 @@ fun AccountsView(
             ScreenScaffold(
                 title = title,
                 headerBottom = headerBottom,
-                subtitle = if (accounts.isEmpty()) null else "Total ${formatCurrency(accounts.sumOf { it.balance })}",
+                subtitle = state.subtitle,
                 actions = { AddButton("Add", onClick = { open(null) }) }
             ) { padding ->
-                if (sorted.isEmpty()) {
+                val empty = state.empty
+                if (empty != null) {
                     EmptyState(
-                        title = "No accounts yet",
-                        message = "Add the bank accounts and cash you budget with.",
-                        actionLabel = "Add account",
+                        title = empty.title,
+                        message = empty.message,
+                        actionLabel = empty.actionLabel,
                         onAction = { open(null) }
                     )
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = padding) {
-                        items(sorted, key = { it.id }) { account ->
+                        items(state.rows, key = { it.id }) { account ->
                             EntityListItem(
                                 title = account.name,
                                 trailing = {
-                                    Text(formatCurrency(account.balance), style = MaterialTheme.typography.bodyLarge)
+                                    Text(account.balance, style = MaterialTheme.typography.bodyLarge)
                                 },
                                 selected = twoPane && selectedKey == account.id,
                                 onClick = { open(account.id) }
@@ -87,74 +95,48 @@ fun AccountEditor(
     onClose: () -> Unit,
     onSaved: () -> Unit
 ) {
-    val accountRepo = koinInject<AccountRepository>()
-    if (accountId == null) {
-        AccountForm(existing = null, navIcon = navIcon, onClose = onClose, onSaved = onSaved)
-        return
-    }
-    val loadable = rememberLoadable(accountId) {
-        accountRepo.watchAll().map { list -> list.firstOrNull { it.id == accountId } }
-    }
-    when (loadable) {
-        Loadable.Loading -> EditorPlaceholder("Account", navIcon, onClose, loading = true, missingMessage = "")
-        is Loadable.Ready -> loadable.value?.let { account ->
-            AccountForm(existing = account, navIcon = navIcon, onClose = onClose, onSaved = onSaved)
-        } ?: EditorPlaceholder("Account", navIcon, onClose, loading = false, missingMessage = "This account was deleted.")
-    }
-}
-
-@Composable
-private fun AccountForm(
-    existing: Account?,
-    navIcon: ScreenNavIcon,
-    onClose: () -> Unit,
-    onSaved: () -> Unit
-) {
-    val accountRepo = koinInject<AccountRepository>()
-    val idGen = koinInject<IdGenerator>()
+    val viewModel = koinViewModel<AccountEditorViewModel>(key = "account-${accountId ?: "new"}") { parametersOf(accountId) }
+    val state by viewModel.state.collectAsState()
     val snackbar = LocalSnackbarController.current
     val scope = rememberCoroutineScope()
-    var name by rememberSaveable(existing?.id) { mutableStateOf(existing?.name.orEmpty()) }
-    var balanceText by rememberSaveable(existing?.id) {
-        mutableStateOf(existing?.let { formatAmountInput(it.balance).let { v -> if (it.balance < 0) "-$v" else v } }.orEmpty())
-    }
-    val balance = if (balanceText.isBlank()) 0.0 else parseAmountInput(balanceText)
-
-    EditorScaffold(
-        title = existing?.name ?: "New account",
-        navIcon = navIcon,
-        onClose = onClose,
-        saveEnabled = name.isNotBlank() && balance != null,
-        onSave = {
-            scope.launch {
-                accountRepo.upsert(Account(id = existing?.id ?: idGen.newId(), name = name.trim(), balance = balance!!))
-                snackbar.show(if (existing == null) "Account added" else "Account updated")
-                onSaved()
-            }
-        },
-        delete = existing?.let { account ->
-            DeleteConfirmation(
-                title = "Delete ${account.name}?",
-                message = "All transactions recorded to this account will be deleted, and schedules that use it " +
-                    "will need a new account. This can't be undone.",
-                confirmLabel = "Delete account",
-                onConfirm = {
-                    scope.launch {
-                        accountRepo.delete(account.id)
-                        snackbar.show("${account.name} deleted")
+    when (state.load) {
+        EditorLoad.LOADING -> EditorPlaceholder("Account", navIcon, onClose, loading = true, missingMessage = "")
+        EditorLoad.MISSING -> EditorPlaceholder("Account", navIcon, onClose, loading = false, missingMessage = state.missingMessage)
+        EditorLoad.READY -> EditorScaffold(
+            title = state.title,
+            navIcon = navIcon,
+            onClose = onClose,
+            saveEnabled = state.saveEnabled,
+            onSave = {
+                scope.launch {
+                    viewModel.save()?.let {
+                        snackbar.show(it)
                         onSaved()
                     }
                 }
+            },
+            delete = state.deleteConfirm?.let { copy ->
+                DeleteConfirmation(
+                    title = copy.title,
+                    message = copy.message,
+                    confirmLabel = copy.confirmLabel,
+                    onConfirm = {
+                        scope.launch {
+                            viewModel.delete()?.let(snackbar::show)
+                            onSaved()
+                        }
+                    }
+                )
+            }
+        ) {
+            TextInputField(value = state.name, onValueChange = viewModel::setName, label = "Name", placeholder = "e.g. Checking")
+            AmountField(
+                value = state.balanceText,
+                onValueChange = viewModel::setBalanceText,
+                label = state.balanceLabel,
+                allowNegative = true,
+                supportingText = state.balanceHint
             )
         }
-    ) {
-        TextInputField(value = name, onValueChange = { name = it }, label = "Name", placeholder = "e.g. Checking")
-        AmountField(
-            value = balanceText,
-            onValueChange = { balanceText = it },
-            label = if (existing == null) "Starting balance" else "Current balance",
-            allowNegative = true,
-            supportingText = "Balances are entered manually and aren't changed by recorded transactions."
-        )
     }
 }

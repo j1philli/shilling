@@ -10,6 +10,9 @@ CREATE TABLE change_log (
 );
 
 CREATE INDEX idx_change_log_household_timestamp ON change_log(household_id, timestamp);
+CREATE INDEX idx_change_log_entity_latest ON change_log(
+  household_id, entity_type, entity_id, timestamp DESC, change_id DESC
+);
 
 insert:
 INSERT OR REPLACE INTO change_log (household_id, change_id, entity_type, entity_id, op, timestamp, payload_json)
@@ -32,3 +35,9 @@ WHERE household_id = ? AND timestamp < ?;
 
 deleteAll:
 DELETE FROM change_log;
+
+deleteForSpace:
+DELETE FROM change_log WHERE household_id = ?;
+
+claimLegacy:
+UPDATE change_log SET household_id = ? WHERE household_id = '__local__';

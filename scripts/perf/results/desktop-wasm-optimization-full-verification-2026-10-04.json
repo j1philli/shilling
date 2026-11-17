@@ -1,0 +1,318 @@
+{
+  "sourceCommit": "d159c41007e5ff4a771127d82097eda8a14b676f",
+  "workload": "all",
+  "complete": true,
+  "readyCheckpoints": 28,
+  "allReadyDiagnosticsRecorded": true,
+  "allReadyCheckpointsVisible": true,
+  "forcedGC": false,
+  "pairedControl": false,
+  "phases": [
+    {
+      "name": "home_0",
+      "seconds": 30.906,
+      "totalFootprintMiB": 367.309,
+      "hostFootprintMiB": 62.7,
+      "webContentFootprintMiB": 277.0,
+      "gpuFootprintMiB": 19.0,
+      "networkFootprintMiB": 8.609375
+    },
+    {
+      "name": "plan_week_0",
+      "seconds": 45.988,
+      "totalFootprintMiB": 398.672,
+      "hostFootprintMiB": 62.9,
+      "webContentFootprintMiB": 305.1,
+      "gpuFootprintMiB": 22.0,
+      "networkFootprintMiB": 8.671875
+    },
+    {
+      "name": "plan_month_0",
+      "seconds": 60.905,
+      "totalFootprintMiB": 439.072,
+      "hostFootprintMiB": 63.2,
+      "webContentFootprintMiB": 344.9,
+      "gpuFootprintMiB": 22.3,
+      "networkFootprintMiB": 8.671875
+    },
+    {
+      "name": "schedules_0",
+      "seconds": 75.908,
+      "totalFootprintMiB": 446.972,
+      "hostFootprintMiB": 63.1,
+      "webContentFootprintMiB": 352.9,
+      "gpuFootprintMiB": 22.3,
+      "networkFootprintMiB": 8.671875
+    },
+    {
+      "name": "categories_0",
+      "seconds": 91.076,
+      "totalFootprintMiB": 448.072,
+      "hostFootprintMiB": 63.0,
+      "webContentFootprintMiB": 353.9,
+      "gpuFootprintMiB": 22.5,
+      "networkFootprintMiB": 8.671875
+    },
+    {
+      "name": "accounts_0",
+      "seconds": 106.085,
+      "totalFootprintMiB": 399.141,
+      "hostFootprintMiB": 63.3,
+      "webContentFootprintMiB": 304.6,
+      "gpuFootprintMiB": 22.6,
+      "networkFootprintMiB": 8.640625
+    },
+    {
+      "name": "activity_0",
+      "seconds": 121.121,
+      "totalFootprintMiB": 406.141,
+      "hostFootprintMiB": 63.2,
+      "webContentFootprintMiB": 311.5,
+      "gpuFootprintMiB": 22.8,
+      "networkFootprintMiB": 8.640625
+    },
+    {
+      "name": "receipts_0",
+      "seconds": 136.116,
+      "totalFootprintMiB": 406.741,
+      "hostFootprintMiB": 63.2,
+      "webContentFootprintMiB": 312.2,
+      "gpuFootprintMiB": 22.7,
+      "networkFootprintMiB": 8.640625
+    },
+    {
+      "name": "settings_0",
+      "seconds": 151.08,
+      "totalFootprintMiB": 421.541,
+      "hostFootprintMiB": 63.3,
+      "webContentFootprintMiB": 325.9,
+      "gpuFootprintMiB": 23.7,
+      "networkFootprintMiB": 8.640625
+    },
+    {
+      "name": "home_1",
+      "seconds": 166.086,
+      "totalFootprintMiB": 431.625,
+      "hostFootprintMiB": 63.1,
+      "webContentFootprintMiB": 336.4,
+      "gpuFootprintMiB": 23.5,
+      "networkFootprintMiB": 8.625
+    },
+    {
+      "name": "plan_week_1",
+      "seconds": 181.156,
+      "totalFootprintMiB": 437.509,
+      "hostFootprintMiB": 63.3,
+      "webContentFootprintMiB": 342.0,
+      "gpuFootprintMiB": 23.6,
+      "networkFootprintMiB": 8.609375
+    },
+    {
+      "name": "plan_month_1",
+      "seconds": 196.049,
+      "totalFootprintMiB": 474.209,
+      "hostFootprintMiB": 63.2,
+      "webContentFootprintMiB": 378.8,
+      "gpuFootprintMiB": 23.6,
+      "networkFootprintMiB": 8.609375
+    },
+    {
+      "name": "schedules_1",
+      "seconds": 211.194,
+      "totalFootprintMiB": 471.009,
+      "hostFootprintMiB": 53.6,
+      "webContentFootprintMiB": 385.3,
+      "gpuFootprintMiB": 23.5,
+      "networkFootprintMiB": 8.609375
+    },
+    {
+      "name": "categories_1",
+      "seconds": 226.093,
+      "totalFootprintMiB": 408.209,
+      "hostFootprintMiB": 53.6,
+      "webContentFootprintMiB": 322.5,
+      "gpuFootprintMiB": 23.5,
+      "networkFootprintMiB": 8.609375
+    },
+    {
+      "name": "accounts_1",
+      "seconds": 241.087,
+      "totalFootprintMiB": 414.109,
+      "hostFootprintMiB": 53.6,
+      "webContentFootprintMiB": 328.3,
+      "gpuFootprintMiB": 23.6,
+      "networkFootprintMiB": 8.609375
+    },
+    {
+      "name": "activity_1",
+      "seconds": 256.224,
+      "totalFootprintMiB": 423.709,
+      "hostFootprintMiB": 53.8,
+      "webContentFootprintMiB": 337.8,
+      "gpuFootprintMiB": 23.5,
+      "networkFootprintMiB": 8.609375
+    },
+    {
+      "name": "receipts_1",
+      "seconds": 271.206,
+      "totalFootprintMiB": 424.109,
+      "hostFootprintMiB": 53.8,
+      "webContentFootprintMiB": 338.1,
+      "gpuFootprintMiB": 23.6,
+      "networkFootprintMiB": 8.609375
+    },
+    {
+      "name": "settings_1",
+      "seconds": 286.133,
+      "totalFootprintMiB": 427.056,
+      "hostFootprintMiB": 53.8,
+      "webContentFootprintMiB": 340.7,
+      "gpuFootprintMiB": 23.9,
+      "networkFootprintMiB": 8.65625
+    },
+    {
+      "name": "transaction_editor",
+      "seconds": 301.294,
+      "totalFootprintMiB": 396.025,
+      "hostFootprintMiB": 31.0,
+      "webContentFootprintMiB": 331.7,
+      "gpuFootprintMiB": 24.7,
+      "networkFootprintMiB": 8.625
+    },
+    {
+      "name": "schedule_editor",
+      "seconds": 316.21,
+      "totalFootprintMiB": 397.309,
+      "hostFootprintMiB": 30.8,
+      "webContentFootprintMiB": 333.2,
+      "gpuFootprintMiB": 24.7,
+      "networkFootprintMiB": 8.609375
+    },
+    {
+      "name": "category_editor",
+      "seconds": 331.2,
+      "totalFootprintMiB": 398.209,
+      "hostFootprintMiB": 30.9,
+      "webContentFootprintMiB": 333.9,
+      "gpuFootprintMiB": 24.8,
+      "networkFootprintMiB": 8.609375
+    },
+    {
+      "name": "account_editor",
+      "seconds": 346.282,
+      "totalFootprintMiB": 400.609,
+      "hostFootprintMiB": 30.9,
+      "webContentFootprintMiB": 336.3,
+      "gpuFootprintMiB": 24.8,
+      "networkFootprintMiB": 8.609375
+    },
+    {
+      "name": "csv_review_10000",
+      "seconds": 355.451,
+      "totalFootprintMiB": 581.409,
+      "hostFootprintMiB": 31.1,
+      "webContentFootprintMiB": 516.7,
+      "gpuFootprintMiB": 25.0,
+      "networkFootprintMiB": 8.609375
+    },
+    {
+      "name": "csv_imported_10000",
+      "seconds": 373.774,
+      "totalFootprintMiB": 626.945,
+      "hostFootprintMiB": 31.3,
+      "webContentFootprintMiB": 561.5,
+      "gpuFootprintMiB": 25.3,
+      "networkFootprintMiB": 8.8447265625
+    },
+    {
+      "name": "home_after_import",
+      "seconds": 389.709,
+      "totalFootprintMiB": 552.42,
+      "hostFootprintMiB": 31.0,
+      "webContentFootprintMiB": 487.3,
+      "gpuFootprintMiB": 25.4,
+      "networkFootprintMiB": 8.7197265625
+    },
+    {
+      "name": "activity_after_import",
+      "seconds": 404.753,
+      "totalFootprintMiB": 553.635,
+      "hostFootprintMiB": 30.9,
+      "webContentFootprintMiB": 488.6,
+      "gpuFootprintMiB": 25.4,
+      "networkFootprintMiB": 8.7353515625
+    },
+    {
+      "name": "home_settle",
+      "seconds": 419.838,
+      "totalFootprintMiB": 566.235,
+      "hostFootprintMiB": 30.9,
+      "webContentFootprintMiB": 501.3,
+      "gpuFootprintMiB": 25.3,
+      "networkFootprintMiB": 8.7353515625
+    },
+    {
+      "name": "final_idle",
+      "seconds": 473.718,
+      "totalFootprintMiB": 564.035,
+      "hostFootprintMiB": 31.1,
+      "webContentFootprintMiB": 503.3,
+      "gpuFootprintMiB": 20.9,
+      "networkFootprintMiB": 8.7353515625
+    }
+  ],
+  "webContentLifetimePeakFootprintMiB": 749.1,
+  "mainLinearCapacitiesBytes": [
+    [
+      0,
+      18808832
+    ]
+  ],
+  "workerLinearCapacitiesBytes": [
+    [
+      22151168
+    ]
+  ],
+  "maxSkiaCpuFontCacheBytes": 140430,
+  "maxSkiaCpuResourceCacheBytes": 0,
+  "databaseIntegrity": {
+    "integrity": "ok",
+    "postings": 20000,
+    "importedRows": 10000,
+    "importedUniqueIds": 10000,
+    "importedVersionRecords": 10000,
+    "snapshotBytes": 17334272
+  },
+  "financialEquivalenceToCsvControl1": {
+    "equalColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "equalRows": 20000,
+    "financialValuesSha256": "5b7643c878c3fd312d8f6d66fce1b68fb04c0e8895aa54a262bec2c85737778f",
+    "importedRowsWithExpectedAmount": 10000
+  },
+  "visuallyInspectedScreens": [
+    "Home before import",
+    "Receipts",
+    "Plan Categories",
+    "Schedule editor",
+    "CSV review",
+    "Home after completion"
+  ],
+  "compilerFixtureSourceCommit": "5c56a5010f536a4b51fa9ac2ef609a61ead5bc6f",
+  "note": "Additional optimized-only coverage run; not a matched memory comparison. Editors were opened without saving changes. Original locked-screen attempt remains excluded.",
+  "fixtureWasmSha256": "57243ceca2b128fe5efe430515b24acd3f232a050aee8ef42bc00e53babddfc2",
+  "fixtureProbeSha256": {
+    "runtime-profile.js": "6a262897410b357da0bd168533a2df0ecc00261b223ca0359b03e7f2129c163e",
+    "allocation-profile.js": "24bc50c62d25dbd11c9a37b2be3878f515d51464e7cc0a9582da51949f8bd71a",
+    "allocation-worker-profile.js": "17ac9d3878353f61c66a8d737dba926be0850a5123d442399f9157a17f0854c0",
+    "sqldelight.worker.js": "0a6f057d359ca0f007dba7af36e756f1b5982db084588c4d91824369fe063ee4"
+  }
+}

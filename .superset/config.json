@@ -1,6 +1,6 @@
 {
   "setup": [
-    "direnv allow"
+    "mise trust"
   ],
   "teardown": []
 }

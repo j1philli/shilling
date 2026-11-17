@@ -1,23 +1,29 @@
 CREATE TABLE receipt_files(
-    receipt_id TEXT NOT NULL PRIMARY KEY,
+    space_id TEXT NOT NULL,
+    receipt_id TEXT NOT NULL,
     file_bytes BLOB NOT NULL,
     size_bytes INTEGER NOT NULL,
     mime_type TEXT,
-    FOREIGN KEY(receipt_id) REFERENCES receipts(id) ON DELETE CASCADE
+    FOREIGN KEY(space_id, receipt_id) REFERENCES receipts(space_id, id) ON UPDATE CASCADE ON DELETE CASCADE,
+    PRIMARY KEY(space_id, receipt_id)
 );
 
 selectByReceiptId:
-SELECT * FROM receipt_files WHERE receipt_id = ?;
+SELECT * FROM receipt_files WHERE receipt_id = ? AND space_id = :space_id;
 
 hasFile:
-SELECT COUNT(*) FROM receipt_files WHERE receipt_id = ?;
+SELECT COUNT(*) FROM receipt_files WHERE receipt_id = ? AND space_id = :space_id;
 
-upsert:
-INSERT OR REPLACE INTO receipt_files(receipt_id, file_bytes, size_bytes, mime_type)
-VALUES (?, ?, ?, ?);
+upsert {
+  INSERT OR IGNORE INTO receipt_files(receipt_id, file_bytes, size_bytes, mime_type, space_id) VALUES (:receipt_id, :file_bytes, :size_bytes, :mime_type, :space_id);
+  UPDATE receipt_files SET file_bytes = :file_bytes, size_bytes = :size_bytes, mime_type = :mime_type WHERE space_id = :space_id AND receipt_id = :receipt_id;
+}
 
 deleteByReceiptId:
-DELETE FROM receipt_files WHERE receipt_id = ?;
+DELETE FROM receipt_files WHERE receipt_id = ? AND space_id = :space_id;
 
 deleteAll:
-DELETE FROM receipt_files;
+DELETE FROM receipt_files WHERE space_id = :space_id;
+
+claimLegacy:
+UPDATE receipt_files SET space_id = ? WHERE space_id = '__local__';

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+#MISE description="Clear persisted desktop app state (Tauri dev shell + WebKit storage)"
+set -euo pipefail
+
+shopt -s nullglob
+
+# Stop the dev shell first so WebKit/preferences state is not recreated
+# while the reset is in progress.
+pkill -x shilling >/dev/null 2>&1 || true
+pkill -x Shilling >/dev/null 2>&1 || true
+pkill -if '/cargo-tauri tauri dev' >/dev/null 2>&1 || true
+sleep 1
+
+paths=(
+  "$HOME/Library/Application Support/finance.shilling.desktop"
+  "$HOME/Library/Application Support/shilling"
+  "$HOME/Library/Caches/finance.shilling.desktop"
+  "$HOME/Library/Caches/shilling"
+  "$HOME/Library/WebKit/finance.shilling.desktop"
+  "$HOME/Library/WebKit/shilling"
+  "$HOME/Library/Preferences/finance.shilling.desktop.plist"
+  "$HOME/Library/Preferences/shilling.plist"
+  "$HOME/Library/Saved Application State/finance.shilling.desktop.savedState"
+  "$HOME/Library/Saved Application State/shilling.savedState"
+  "$HOME/Library/Containers/finance.shilling.desktop"
+  "$HOME/Library/Containers/shilling"
+  "$HOME/Library/Logs/finance.shilling.desktop"
+  "$HOME/Library/Logs/com.shilling.desktop"
+)
+
+removed=0
+for path in "${paths[@]}"; do
+    if [ -e "$path" ]; then
+        rm -rf "$path"
+        echo "Removed $path"
+        removed=$((removed + 1))
+    fi
+done
+
+echo "Cleared desktop state ($removed paths)"

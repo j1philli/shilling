@@ -21,6 +21,8 @@ dependencies:
   - $libs.sqldelight.coroutines
   - $libs.sqldelight.async.extensions
   - $libs.koin.core
+  - $libs.koin.core.viewmodel
+  - $libs.lifecycle.viewmodel
   - $libs.store5
   - $libs.ktor.client.core
   - $libs.ktor.client.websockets
@@ -35,12 +37,17 @@ dependencies@nonJvm:
   - $libs.ktor.client.webrtc
 
 dependencies@android:
+  - androidx.sqlite:sqlite-framework:2.5.1
+  - androidx.sqlite:sqlite:2.5.1
   - $libs.kotlin.test.junit
 
 dependencies@jvm:
   - $libs.kotlin.test.junit
   - $libs.sqldelight.sqlite.driver
   - $libs.ktor.client.mock
+
+test-dependencies@jvm:
+  - $libs.coroutines.test
 
 plugins:
   sqldelight:
@@ -53,7 +60,7 @@ plugins:
 
 settings:
   kotlin:
-    version: "2.4.20"
+    version: "2.4.21"
     serialization: json
     # Opt into Kotlin/Native klib incremental compilation (Kotlin 2.4.20 Beta).
     # Companion flag: gradle.properties kotlin.incremental.native=true

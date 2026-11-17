@@ -130,12 +130,21 @@ fun createAuthService(
     deviceId: String,
     scope: CoroutineScope,
     httpClient: HttpClient
+): AuthService = createAuthServiceWithRedirect(serverConfig, settings, deviceId, scope, httpClient, null)
+
+fun createAuthServiceWithRedirect(
+    serverConfig: ServerConfig,
+    settings: Settings,
+    deviceId: String,
+    scope: CoroutineScope,
+    httpClient: HttpClient,
+    authRedirectUrl: String?
 ): AuthService =
     if (serverConfig.authMode == AuthMode.SUPABASE) {
         val url = serverConfig.supabaseUrl.orEmpty()
         val key = serverConfig.supabaseAnonKey.orEmpty()
         if (url.isNotBlank() && key.isNotBlank()) {
-            SupabaseAuthService(url, key, deviceId, settings, scope, httpClient)
+            SupabaseAuthService(url, key, deviceId, settings, scope, httpClient, authRedirectUrl)
         } else {
             log.w { "Hosted auth selected but Supabase config is incomplete; disabling hosted auth for this session" }
             NoOpAuthService(deviceId)
@@ -296,11 +305,9 @@ suspend fun resolveStartupIdentity(
 
     val authenticatedApi = ServerApi(httpClient, serverUrl, authService)
     val householdId = runCatching {
-        authenticatedApi.fetchHousehold().householdId.also {
-            settings.putString(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID, it)
-        }
+        authenticatedApi.fetchHousehold().householdId
     }.getOrElse { error ->
-        log.w { "Hosted household lookup failed: ${error.message}" }
+        AuthErrors.logFailure("household_lookup", error)
         return StartupStateResolution(
             identity = StartupIdentity(
                 serverConfig = configResolution.serverConfig,
@@ -323,6 +330,8 @@ suspend fun resolveStartupIdentity(
             authRuntime = authRuntime
         )
     }
+
+    settings.putString(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID, householdId)
 
     return StartupStateResolution(
         identity = StartupIdentity(
@@ -382,7 +391,7 @@ private suspend fun resolveServerConfig(
             }
             val hasCachedConfig = settings.getStringOrNull(SETTINGS_KEY_AUTH_MODE) != null
             if (!hasCachedConfig) {
-                log.e { "Config fetch failed for $serverUrl with no cached config: ${error.message}" }
+                AuthErrors.logFailure("fetch_config", error)
                 ConfigResolution(
                     serverConfig = ServerConfig(authMode = AuthMode.SUPABASE),
                     serverReachability = resolveReachability(error),
@@ -394,7 +403,7 @@ private suspend fun resolveServerConfig(
                 )
             } else {
                 val cached = cachedServerConfig(settings)
-                log.w { "Config fetch failed for $serverUrl: ${error.message}; using cached authMode=${cached.authMode}" }
+                AuthErrors.logFailure("fetch_config_using_cache", error)
                 ConfigResolution(
                     serverConfig = cached,
                     serverReachability = resolveReachability(error),
@@ -442,7 +451,8 @@ private fun errorMessage(
     error: Throwable?,
     defaultMessage: String
 ): String {
-    val baseMessage = error?.message?.takeIf { it.isNotBlank() } ?: defaultMessage
+    if (error != null) AuthErrors.logFailure("auth_bootstrap", error)
+    val baseMessage = defaultMessage
     return if (previousMessage.isNullOrBlank()) {
         baseMessage
     } else {

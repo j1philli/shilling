@@ -7,7 +7,7 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const web = resolve(root, "../../../web-app-dist");
 const dist = join(root, "dist");
 const source = await readFile(join(web, "index.html"), "utf8").catch(() => {
-  throw new Error("Build the shared web client first: just build-chatgpt");
+  throw new Error("Build the shared web client first: mise run build-chatgpt");
 });
 for (const asset of ["web-app.mjs", "web-app.wasm", "sqldelight.worker.js", "sql-wasm.wasm"]) await access(join(web, asset));
 const loader = "import './web-app.mjs';";

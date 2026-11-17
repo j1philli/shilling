@@ -43,6 +43,7 @@ class OnboardingStateTest {
             it.putString(SETTINGS_KEY_AUTH_TIER, "FREE")
             it.putString(SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION, "true")
             it.putString(SETTINGS_KEY_AUTH_PENDING_EMAIL, "user@example.com")
+            it.putBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, true)
         }
 
         clearHostedAuthSessionState(settings)
@@ -59,6 +60,7 @@ class OnboardingStateTest {
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_REFRESH_TOKEN))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_USER_ID))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_TIER))
+        assertFalse(settings.getBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, false))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_EMAIL_CONFIRMATION))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_PENDING_EMAIL))
     }
@@ -73,6 +75,7 @@ class OnboardingStateTest {
             it.putString(SETTINGS_KEY_AUTH_USER_ID, "user-1")
             it.putString(SETTINGS_KEY_AUTH_TIER, "FREE")
             it.putString(SETTINGS_KEY_AUTH_ACCESS_TOKEN, "access-token")
+            it.putBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, true)
         }
 
         softReturnToWelcome(settings, notice = "session_expired")
@@ -85,6 +88,7 @@ class OnboardingStateTest {
         assertEquals("hosted-household", settings.getStringOrNull(SETTINGS_KEY_HOSTED_HOUSEHOLD_ID))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_ACCESS_TOKEN))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_AUTH_USER_ID))
+        assertFalse(settings.getBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, false))
         assertTrue(matchesPendingRestore(settings, "user-1"))
         assertFalse(matchesPendingRestore(settings, "other-user"))
     }
@@ -153,10 +157,10 @@ class OnboardingStateTest {
             scheduleStore,
             syncDeps
         )
-        val receiptRepository = ReceiptRepository(notifier, receiptStore, postingStore, scheduleStore, syncDeps)
+        val receiptRepository = ReceiptRepository(notifier, receiptStore, syncDeps)
 
         accountRepository.upsert(Account(id = "a1", name = "Checking", balance = 10.0))
-        assertEquals(1, db.accountQueries.selectAll().awaitAsList().size)
+        assertEquals(1, db.accountQueries.selectAll(space_id = "__local__").awaitAsList().size)
 
         wipeLocalAppState(
             db = db,
@@ -164,6 +168,7 @@ class OnboardingStateTest {
             fileStore = object : ReceiptFileStore {
                 override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {}
                 override suspend fun read(receiptId: String): ByteArray? = null
+                override suspend fun openReader(receiptId: String) = read(receiptId)?.asReceiptReader()
                 override suspend fun hasFile(receiptId: String): Boolean = false
                 override suspend fun delete(receiptId: String) {}
                 override suspend fun clearAll() {}
@@ -176,7 +181,7 @@ class OnboardingStateTest {
             receiptRepository = receiptRepository
         )
 
-        assertEquals(0, db.accountQueries.selectAll().awaitAsList().size)
+        assertEquals(0, db.accountQueries.selectAll(space_id = "__local__").awaitAsList().size)
         assertNull(settings.getStringOrNull(SETTINGS_KEY_ONBOARDING_COMPLETED))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_HELD_LOCAL_DATA))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_PENDING_RESTORE_USER_ID))

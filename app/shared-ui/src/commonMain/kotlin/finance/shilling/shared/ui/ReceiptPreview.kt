@@ -26,8 +26,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 internal fun String.isPreviewableImageName(): Boolean {
     val ext = substringAfterLast('.', "").lowercase()
@@ -38,25 +36,6 @@ internal fun String.isPreviewableImageName(): Boolean {
 internal fun String.isHeifFamilyName(): Boolean {
     val ext = substringAfterLast('.', "").lowercase()
     return ext == "heic" || ext == "heif"
-}
-
-private fun String.toImageMimeType(): String {
-    val ext = substringAfterLast('.', "").lowercase()
-    return when (ext) {
-        "jpg", "jpeg" -> "image/jpeg"
-        "png" -> "image/png"
-        "gif" -> "image/gif"
-        "webp" -> "image/webp"
-        "bmp" -> "image/bmp"
-        else -> "application/octet-stream"
-    }
-}
-
-@OptIn(ExperimentalEncodingApi::class)
-private fun imageDataUri(fileName: String, bytes: ByteArray): String {
-    val mimeType = fileName.toImageMimeType()
-    val encoded = Base64.Default.encode(bytes)
-    return "data:$mimeType;base64,$encoded"
 }
 
 private val receiptOpenLog = Logger.withTag("ReceiptOpen")
@@ -96,15 +75,11 @@ fun rememberReceiptOpener(): (Receipt) -> Unit {
 }
 
 @Composable
-internal fun ReceiptImagePreviewDialog(
+internal fun DefaultReceiptImagePreviewDialog(
     fileName: String,
     imageBytes: ByteArray,
     onDismiss: () -> Unit
 ) {
-    val model = remember(fileName, imageBytes) {
-        imageDataUri(fileName, imageBytes)
-    }
-
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             color = MaterialTheme.colorScheme.surface,
@@ -125,7 +100,7 @@ internal fun ReceiptImagePreviewDialog(
                     TextButton(onClick = onDismiss) { Text("Close") }
                 }
                 AsyncImage(
-                    model = model,
+                    model = imageBytes,
                     contentDescription = fileName,
                     modifier = Modifier.fillMaxWidth().weight(1f),
                     contentScale = ContentScale.Fit
@@ -134,3 +109,6 @@ internal fun ReceiptImagePreviewDialog(
         }
     }
 }
+
+@Composable
+internal expect fun ReceiptImagePreviewDialog(fileName: String, imageBytes: ByteArray, onDismiss: () -> Unit)

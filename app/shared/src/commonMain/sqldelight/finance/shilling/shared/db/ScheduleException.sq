@@ -1,42 +1,48 @@
 CREATE TABLE schedule_exceptions(
+    space_id TEXT NOT NULL,
     schedule_id TEXT NOT NULL,
     date INTEGER NOT NULL,
     skip INTEGER NOT NULL DEFAULT 0,
     override_amount REAL,
     override_account_id TEXT,
     override_counter_account_id TEXT,
-    PRIMARY KEY(schedule_id, date),
-    FOREIGN KEY(schedule_id) REFERENCES schedules(id) ON DELETE CASCADE
+    PRIMARY KEY(space_id, schedule_id, date),
+    FOREIGN KEY(space_id, schedule_id) REFERENCES schedules(space_id, id) ON UPDATE CASCADE ON DELETE CASCADE
+
 );
 
 selectAll:
-SELECT * FROM schedule_exceptions;
+SELECT * FROM schedule_exceptions WHERE space_id = :space_id;
 
 selectByScheduleIds:
-SELECT * FROM schedule_exceptions WHERE schedule_id IN ?;
+SELECT * FROM schedule_exceptions WHERE schedule_id IN ? AND space_id = :space_id;
 
 selectByScheduleId:
-SELECT * FROM schedule_exceptions WHERE schedule_id = ?;
+SELECT * FROM schedule_exceptions WHERE schedule_id = ? AND space_id = :space_id;
 
 selectByKey:
-SELECT * FROM schedule_exceptions WHERE schedule_id = ? AND date = ?;
+SELECT * FROM schedule_exceptions WHERE schedule_id = ? AND date = ? AND space_id = :space_id;
 
-upsert:
-INSERT OR REPLACE INTO schedule_exceptions(
-    schedule_id, date, skip, override_amount, override_account_id, override_counter_account_id
-) VALUES (?, ?, ?, ?, ?, ?);
+upsert {
+  INSERT OR IGNORE INTO schedule_exceptions(
+    schedule_id, date, skip, override_amount, override_account_id, override_counter_account_id, space_id) VALUES (:schedule_id, :date, :skip, :override_amount, :override_account_id, :override_counter_account_id, :space_id);
+  UPDATE schedule_exceptions SET skip = :skip, override_amount = :override_amount, override_account_id = :override_account_id, override_counter_account_id = :override_counter_account_id WHERE space_id = :space_id AND schedule_id = :schedule_id AND date = :date;
+}
 
 deleteByScheduleId:
-DELETE FROM schedule_exceptions WHERE schedule_id = ?;
+DELETE FROM schedule_exceptions WHERE schedule_id = ? AND space_id = :space_id;
 
 deleteByKey:
-DELETE FROM schedule_exceptions WHERE schedule_id = ? AND date = ?;
+DELETE FROM schedule_exceptions WHERE schedule_id = ? AND date = ? AND space_id = :space_id;
 
 deleteAll:
-DELETE FROM schedule_exceptions;
+DELETE FROM schedule_exceptions WHERE space_id = :space_id;
 
 nullifyAccountOverrides:
-UPDATE schedule_exceptions SET override_account_id = NULL WHERE override_account_id = ?;
+UPDATE schedule_exceptions SET override_account_id = NULL WHERE override_account_id = ? AND space_id = :space_id;
 
 nullifyCounterAccountOverrides:
-UPDATE schedule_exceptions SET override_counter_account_id = NULL WHERE override_counter_account_id = ?;
+UPDATE schedule_exceptions SET override_counter_account_id = NULL WHERE override_counter_account_id = ? AND space_id = :space_id;
+
+claimLegacy:
+UPDATE schedule_exceptions SET space_id = ? WHERE space_id = '__local__';
