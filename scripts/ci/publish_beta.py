@@ -25,7 +25,9 @@ class TeamCity:
 
     def get(self, path):
         request = urllib.request.Request(self.url + "/httpAuth/" + path,
-                                        headers={"Accept": "application/json", "Authorization": self.authorization})
+                                        # Identify this build client: the public CI edge rejects urllib's default user agent.
+                                        headers={"Accept": "application/json", "Authorization": self.authorization,
+                                                 "User-Agent": "Shilling-CI/1.0"})
         try:
             with urllib.request.urlopen(request, timeout=60) as response:
                 return json.load(response)

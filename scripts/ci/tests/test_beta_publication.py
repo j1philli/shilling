@@ -199,6 +199,15 @@ class BaselineTest(unittest.TestCase):
         self.assertEqual(url.path, "repository/download/IosTestFlight/.lastSuccessful/beta-state.json")
         self.assertEqual(urllib.parse.parse_qs(url.query), {"branch": ["<default>"]})
 
+    def test_baseline_request_identifies_client_and_preserves_authentication(self):
+        from io import BytesIO
+        with patch.object(beta.urllib.request, "urlopen", return_value=BytesIO(b'{"schema": 1}')) as request:
+            self.assertEqual(self.api.previous_state("IosTestFlight"), {"schema": 1})
+        sent = request.call_args.args[0]
+        self.assertEqual(sent.get_header("User-agent"), "Shilling-CI/1.0")
+        self.assertEqual(sent.get_header("Authorization"), self.api.authorization)
+        self.assertTrue(sent.full_url.startswith("https://ci.example.invalid/httpAuth/repository/download/"))
+
     def test_empty_history(self):
         error = urllib.error.HTTPError("url", 404, "error", {}, None)
         self.addCleanup(error.close)
