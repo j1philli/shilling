@@ -56,7 +56,7 @@ check_xcode() {
     return
   fi
   local ver
-  ver=$(xcodebuild -version | head -1 | sed 's/Xcode //')
+  ver=$(xcodebuild -version | sed -n '1s/^Xcode //p')
   local major
   major=$(echo "$ver" | cut -d. -f1)
   if [ "$major" -lt 15 ]; then
