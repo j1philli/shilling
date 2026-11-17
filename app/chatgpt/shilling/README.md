@@ -63,11 +63,25 @@ Terminate HTTPS at your reverse proxy. No household data volume is attached to t
 
 ## Verification
 
+### Post-merge status (November 17, 2026)
+
+The merged client builds and the 206-test JVM suite, MCP protocol tests, architecture
+guard, and native loopback WebRTC probe pass. Browser acceptance is currently
+blocked: the harness below still seeds an HTTP signaling URL rejected by main's
+HTTPS-only policy and expects an `Accounts` control that it cannot find in the
+current UI. Earlier browser/sync passes described below predate this merge and
+must not be used as evidence for the current target. Update the harness for the
+current onboarding/navigation and trusted HTTPS signaling, then rerun embedded
+and standalone scenarios before claiming local browser coverage. Real ChatGPT
+and cross-network acceptance remain outstanding as well.
+
 ```sh
 mise run test-chatgpt
 npm --prefix app/chatgpt/shilling exec -- playwright install chromium
-# Start a local server with SHILLING_AUTH_MODE=none for browser tests:
+# Start the local signaling backend (browser harness requires the fixes above):
 SHILLING_AUTH_MODE=none ./kotlin run --module server
+# Expose signaling over trusted HTTPS; see the root README for certificate setup:
+mise run sync-proxy
 # In another terminal, after building:
 npm --prefix app/chatgpt/shilling run test:browser
 # Two-device sync and reconnection:
