@@ -1,0 +1,110 @@
+---
+title: Paid plans launch checklist
+---
+
+# Paid plans launch checklist
+
+Audit date: November 17, 2026. This checklist authorizes no deployment or
+production/store configuration changes. Earlier reports of configured products
+and applied hosted migrations must be verified against the target accounts.
+
+## A. Code mergeable without new credentials
+
+- [x] Hosted plan enforcement, billing controls, device removal, sponsored
+  memberships, isolated Store5 spaces, and linked transfers are already on main
+  (PRs #35 and #38). Do not duplicate or reimplement them.
+- [x] Live banking is deferred, unavailable in subscription copy, and prohibited
+  from passing through Shilling servers (PR #39).
+- [x] Merge current origin/main into the launch branch with a merge commit;
+  retain main's accountPlanLabel handling in Settings.
+- [ ] Run local architecture and JVM tests; push without rewriting history;
+  open a PR and require every GitHub and TeamCity check to pass before merging.
+
+The resulting code tree is unchanged from main apart from this checklist.
+No secrets, product activation, runtime configuration, release tag, or deployment
+are included. With all four RevenueCat server variables absent, hosted accounts
+remain Free. Partial configuration fails startup: install the complete set
+together. Cloud relay starts off and still requires a paid space plus TURN
+configuration. Self-hosted mode does not query hosted billing.
+
+## B. Josh's account/configuration and acceptance work
+
+1. **App Store Connect / Apple Developer.** Confirm the app with bundle ID
+   `finance.shilling.app`, the widget's registered ID from the Xcode project,
+   and App Group `group.finance.shilling.app` use the signing team. Complete
+   paid-app agreements, tax and banking. In the app's Subscriptions section,
+   create/verify the four products below in one subscription group: Gold above
+   Silver; monthly and annual at the same level within each tier. Complete
+   localizations, availability and review information. Configure sandbox testers.
+2. **Play Console.** Confirm package `finance.shilling.android`, Play App Signing,
+   a signed AAB on internal testing, licensed testers, and payments profile.
+   Under Monetize > Products > Subscriptions, create/verify `silver` and `gold`,
+   each with active auto-renewing `monthly` and `annual` base plans. No trial is
+   specified. Verify regional prices rather than assuming USD conversion.
+
+   | Tier | Period | USD | Apple product ID | Google subscription:base plan |
+   | --- | --- | --- | --- | --- |
+   | Silver | Monthly | $5 | `finance.shilling.silver.monthly` | `silver:monthly` |
+   | Silver | Annual | $50 | `finance.shilling.silver.annual` | `silver:annual` |
+   | Gold | Monthly | $20 | `finance.shilling.gold.monthly` | `gold:monthly` |
+   | Gold | Annual | $200 | `finance.shilling.gold.annual` | `gold:annual` |
+
+3. **RevenueCat project `shilling.finance`.** Verify project `projbb574ddb`,
+   Silver entitlement `entle617697949`, Gold entitlement `entl80b0ac903f`, and
+   offerings `silver` / `gold` against the dashboard before using these recorded
+   IDs. Attach each platform's matching monthly/annual products to its offering
+   packages and entitlement. Gold capabilities include Silver in application
+   code. In Apps & providers, install Apple's In-App Purchase key and Google's
+   Play service-account credentials, validate both, and configure purchase
+   notifications. Configure the separate App Store Connect integration if using
+   catalog import. Obtain the public `appl_...` and `goog_...` SDK keys. Create a
+   server API v2 secret key with `customer_information:customers:read` access.
+   Keep private keys in service credential stores; never commit or paste them.
+4. **Stripe / RevenueCat Web Billing.** Connect the intended Stripe merchant
+   account, complete onboarding, and configure RevenueCat Billing web products
+   with the same four prices and entitlement/package mappings. Generate Silver
+   and Gold Web Purchase Links; validate sandbox first. Production links belong
+   only in production runtime config. Verify checkout receives the authenticated
+   Supabase user ID so purchases follow the account across platforms.
+5. **Coolify > Shilling signaling service > Environment Variables.** Install the
+   following complete server set together, only when ready to enable billing:
+
+   ```dotenv
+   SHILLING_REVENUECAT_PROJECT_ID=projbb574ddb
+   SHILLING_REVENUECAT_SILVER_ENTITLEMENT_ID=entle617697949
+   SHILLING_REVENUECAT_GOLD_ENTITLEMENT_ID=entl80b0ac903f
+   ```
+
+   Add `SHILLING_REVENUECAT_SECRET_KEY` using the server v2 key from step 3 as a
+   secret. Add `SHILLING_REVENUECAT_IOS_PUBLIC_KEY` and
+   `SHILLING_REVENUECAT_ANDROID_PUBLIC_KEY` using their platform SDK keys;
+   set `SHILLING_REVENUECAT_SILVER_OFFERING_ID=silver`
+   and `SHILLING_REVENUECAT_GOLD_OFFERING_ID=gold`. Set
+   `SHILLING_REVENUECAT_SILVER_WEB_LINK` and
+   `SHILLING_REVENUECAT_GOLD_WEB_LINK` to the respective production Web Purchase Links.
+6. **Hosted auth/schema.** In the same Coolify service, verify
+   `SHILLING_AUTH_MODE=supabase`, `SHILLING_SUPABASE_URL` (project HTTPS URL),
+   `SHILLING_SUPABASE_ANON_KEY` (publishable key), and server-only
+   `SHILLING_SUPABASE_SERVICE_KEY` (rotated secret key). Leave legacy JWT secret
+   unset for RSA/ECC projects. In Supabase migration history, verify every
+   checked-in migration is applied before a future server deployment; earlier
+   handoff says applied, but this audit does not independently confirm it.
+7. **TURN provider and Coolify.** Provision WebRTC TURN with shared-secret
+   time-limited authentication. Set `SHILLING_TURN_URLS` to provider TURN/TURNS
+   URLs, `SHILLING_TURN_SECRET` to the matching shared secret, and
+   `SHILLING_TURN_TTL=86400` (seconds, or a deliberately chosen provider-supported
+   lifetime). Optional `SHILLING_STUN_URLS` overrides the default STUN servers.
+   Verify Free never receives hosted TURN credentials and paid devices receive
+   them only after enabling Cloud relay. Test an actual relay across two networks.
+   Free direct WebRTC may work across networks.
+8. **Acceptance and later release approval.** Arrange sandbox purchases on iOS,
+   Android, web and desktop: every tier/period, restore, cancellation, renewal,
+   expiry/refund, upgrade/downgrade and shared account identity. Test paid sponsor
+   loss, invitations/roles/last owner, concurrent device limits, revocation with
+   open channels and interrupted receipt transfer, populated-database upgrades,
+   space switching/downgrade selection and linked transfer retry/edit/delete.
+   Confirm Store5 isolation and WebRTC-only data exchange. Then separately
+   approve a tested release candidate and production rollout using
+   `docs/releases.mdx`; merging is not production rollout. TeamCity main builds
+   may publish changed iOS inputs to internal TestFlight automatically; this
+   docs-only delta changes no target inputs. No live banking work is required.
