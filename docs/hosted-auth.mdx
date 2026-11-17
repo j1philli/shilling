@@ -33,7 +33,7 @@ That order matters. Hosted clients no longer treat the Supabase user ID as the s
 - hosted signaling join validation checks server-owned household membership
 - Supabase access-token verification uses JWKS for modern Supabase projects
 - legacy HS256 verification remains supported only for older Supabase setups that still expose a shared JWT secret
-- desktop and web dev flows use `just desktop`; server startup uses `just server` and loads repo-root `.env`
+- desktop and web dev flows use `mise run desktop`; server startup uses `mise run server` and loads repo-root `.env`
 
 ## Supabase Requirements
 
@@ -117,8 +117,8 @@ For modern Supabase projects using asymmetric signing keys such as `ECC P-256`, 
 Single-client hosted bootstrap is testable now:
 
 ```sh
-just server
-just desktop
+mise run server
+mise run desktop
 ```
 
 On first hosted launch you should see:

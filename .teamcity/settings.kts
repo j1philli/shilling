@@ -26,6 +26,7 @@ project {
     buildType(DesktopMacOS)
     buildType(DesktopWindows)
     buildType(DesktopWindowsSigned)
+    buildType(DesktopMacOSSigned)
     buildType(LinuxTargets)
     buildType(AllTargets)
 
@@ -45,6 +46,8 @@ project {
         param("env.CLOUDFLARE_PAGES_DOMAIN", "app.shilling.finance")
         param("env.AMPER_SHARED_CACHES_ROOT", "/opt/shilling-ci/amper-cache")
         param("env.AMPER_BOOTSTRAP_CACHE_DIR", "/opt/shilling-ci/amper-bootstrap")
+        // Build jobs use the same maintained JDK as their agent process.
+        param("env.JAVA_HOME", "%teamcity.agent.jvm.java.home%")
         param("env.CI_RETRY_ATTEMPTS", "5")
         param("env.CI_RETRY_DELAY_SECONDS", "120")
     }
@@ -69,7 +72,19 @@ object CI : BuildType({
         }
         script {
             name = "Install npm dependencies"
-            scriptContent = "npm install"
+            scriptContent = "npm ci"
+        }
+        script {
+            name = "Node security regression checks"
+            scriptContent = "npm run test:security"
+        }
+        script {
+            name = "GLib safety regression checks"
+            scriptContent = "bash scripts/ci/test-glib-security.sh"
+        }
+        script {
+            name = "npm security advisories"
+            scriptContent = "npm audit --audit-level=low && npm audit --prefix scripts/ci/smoke --audit-level=low"
         }
         script {
             name = "Architecture guard"
@@ -383,6 +398,42 @@ object DesktopWindows : BuildType({
     }
 })
 
+// Uses the same runner-local Developer ID keychain as Faders and iOS signing.
+object DesktopMacOSSigned : BuildType({
+    name = "Desktop macOS — Signed and Notarized"
+    description = "Manually sign and notarize a universal Shilling DMG from main"
+    artifactRules = "desktop-artifacts/macos-signed/** => desktop-macos-signed.zip"
+    maxRunningBuilds = 1
+    vcs {
+        root(DslContext.settingsRoot)
+        branchFilter = "+:<default>"
+    }
+    params {
+        param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
+        param("env.MACOS_APP_IDENTITY", "%shilling.macos.app.identity%")
+        param("env.MACOS_KEYCHAIN_PATH", "%shilling.macos.keychain.path%")
+        param("env.MACOS_KEYCHAIN_PASSWORD_FILE", "%shilling.macos.keychain.password.file%")
+        param("env.MACOS_NOTARY_KEY_PATH", "%shilling.macos.notary.key.path%")
+        param("env.MACOS_NOTARY_KEY_ID", "%shilling.macos.notary.key.id%")
+        param("env.MACOS_NOTARY_ISSUER", "%shilling.macos.notary.issuer%")
+    }
+    dependencies {
+        snapshot(WebDeploy) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        artifacts(WebDeploy) {
+            buildRule = sameChain()
+            artifactRules = "web-app-dist.zip!** => web-app-dist"
+            cleanDestination = true
+        }
+    }
+    steps {
+        script {
+            name = "Sign, notarize, staple, and verify macOS app and DMG"
+            scriptContent = "python3 scripts/ci/build-desktop-macos-signed.py"
+        }
+    }
+    requirements { contains("teamcity.agent.jvm.os.name", "Mac") }
+})
+
 // Only this main-only job maps Azure signing parameters into its environment.
 // Manual until the publisher has completed identity validation and a signed
 // installer has been tested. No fallback to an unsigned artifact on failure.
@@ -453,7 +504,7 @@ object WebDeploy : BuildType({
         }
         script {
             name = "Prepare SQLDelight plugin"
-            scriptContent = "just ensure-plugin"
+            scriptContent = "bash scripts/ensure-plugin.sh"
         }
         script {
             name = "Build wasmJs artifacts"

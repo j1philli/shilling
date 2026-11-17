@@ -128,7 +128,7 @@ class WindowsSigningTests(unittest.TestCase):
         # context before the wrapper's cleanup and emits one fake installer.
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            for name in ("src-tauri/target", "src-tauri/gen", "web-app-dist", "scripts/ci", "deploy/desktop", "bin"):
+            for name in ("src-tauri/target", "src-tauri/gen", "web-app-dist", "scripts/ci", "deploy/desktop", "third_party/glib", "bin"):
                 (root / name).mkdir(parents=True, exist_ok=True)
             for name in ("web-app-dist/index.html", "web-app-dist/web-app.wasm", "src-tauri/target/old.exe", "src-tauri/gen/old", "src-tauri/Cargo.toml"):
                 (root / name).write_text("fixture")

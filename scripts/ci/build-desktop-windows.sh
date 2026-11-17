@@ -27,6 +27,9 @@ cp -R web-app-dist "$context/"
 # Agent checkouts can contain previous target/gen output. Never upload it as
 # build context or let a cached signed executable leak into an unsigned build.
 tar -C src-tauri --exclude=./target --exclude=./gen -cf - . | tar -C "$context/src-tauri" -xf -
+mkdir -p "$context/third_party"
+cp -R third_party/glib "$context/third_party/"
+
 cp deploy/desktop/windows-cross.Dockerfile "$context/Dockerfile"
 cp scripts/ci/windows_signing.py "$context/windows_signing.py"
 

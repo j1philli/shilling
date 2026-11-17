@@ -36,6 +36,12 @@ docker build --build-arg "VERSION=$(cat VERSION)" -t "shilling-smoke-server:$SHI
 docker build --build-arg "VERSION=$(cat VERSION)" -t "shilling-smoke-web:$SHILLING_SMOKE_TAG" "$context/web"
 docker build --build-arg "VERSION=$(cat VERSION)" -t "shilling-smoke-hosted-web:$SHILLING_SMOKE_TAG" \
     -f deploy/self-host/web.Dockerfile "$context/hosted-web"
-docker build -t "shilling-smoke-tests:$SHILLING_SMOKE_TAG" scripts/ci/smoke
+# Resolve the locked test packages on the CI host, then install from that cache
+# inside the image. Registry credentials never enter the Docker build context.
+mkdir -p "$context/npm-prefetch"
+cp scripts/ci/smoke/package.json scripts/ci/smoke/package-lock.json "$context/npm-prefetch/"
+npm ci --prefix "$context/npm-prefetch" --cache "$context/npm-cache" --ignore-scripts --no-audit --fetch-timeout=30000 --fetch-retries=2
+rm -rf "$context/npm-cache/_logs"
+docker build --build-context "npm-cache=$context/npm-cache" -t "shilling-smoke-tests:$SHILLING_SMOKE_TAG" scripts/ci/smoke
 "${compose[@]}" up -d server auth-fixture hosted-server web hosted-web
 "${compose[@]}" up --no-deps --abort-on-container-exit --exit-code-from tests tests

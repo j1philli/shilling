@@ -48,7 +48,9 @@ rejected. Existing HTTP settings must be changed to the HTTPS URL; the app does
 not silently upgrade them or fall back to an unencrypted connection.
 
 For local development, terminate TLS on a separate port such as 8443 and proxy
-to the HTTP development server on port 8081. Use a certificate trusted by each
+to the HTTP development server on port 8081. `mise run sync-proxy` does this with
+a locally trusted [mkcert](https://github.com/FiloSottile/mkcert) certificate
+and also trusts it in a booted iOS Simulator. Use a certificate trusted by each
 client, with the hostname or IP address the client connects to in its certificate
 names. An Android emulator may use `https://10.0.2.2:8443` when its certificate
 and trust configuration cover that address. The server's HTTP port is an internal

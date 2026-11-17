@@ -7,7 +7,7 @@
     "desktop": ["linux", "windows", "macos"]
   },
   "rules": [
-    {"paths": ["docs/*", "plans/*", "scripts/perf/*", "app/perf-*", ".github/*", ".superset/*", ".mcp.json", "conductor.json", "AGENTS.md", "CLAUDE.md", "CONTRIBUTING.md", "README.md", "SECURITY.md", ".gitignore", ".gitkeep", ".envrc", "Brewfile", "justfile"], "targets": []},
+    {"paths": ["docs/*", "plans/*", "scripts/perf/*", "app/perf-*", ".github/*", ".superset/*", ".mcp.json", "conductor.json", "AGENTS.md", "CLAUDE.md", "CONTRIBUTING.md", "README.md", "SECURITY.md", ".gitignore", ".gitkeep", "mise.toml", "mise.lock", "mise-tasks/*"], "targets": []},
     {"paths": ["app/shared/test@*", "app/shared/src/commonTest/*", "app/shared-ui/test@*", "core/test/*", "core/test@*", "server/test/*", "server/test@*", "scripts/ci/tests/*", "scripts/ci/fixtures/*", "scripts/ci/smoke/*", "scripts/ci/smoke-*", "scripts/ci/test-*", "scripts/ci/run-jvm-tests.sh", "scripts/ci/accept-successful-junit-reports.sh", "scripts/enforce-architecture.sh"], "targets": []},
     {"paths": ["app/ios-app/*", "app/ios-platform/*", "setup-webrtc.sh", "scripts/ci/build-ios.sh", "scripts/ci/check-ios-archive.py", "scripts/ci/ios_provenance.py", "scripts/ci/apple_store.py", "scripts/ci/apple-python.sh", "scripts/ci/apple-requirements.txt"], "targets": ["ios"]},
     {"paths": ["app/android-app/*", "scripts/ci/build-android.sh", "scripts/ci/ensure-android-sdk.sh"], "targets": ["android"]},
@@ -19,10 +19,10 @@
     {"paths": ["app/shared/src@jvm/*", "app/shared/src/jvmMain/*"], "targets": []},
     {"paths": ["app/shared/*"], "targets": ["clients"]},
     {"paths": ["server/*", "supabase/*", "scripts/ci/deploy-coolify.py"], "targets": ["server"]},
-    {"paths": ["src-tauri/*"], "targets": ["desktop"]},
+    {"paths": ["src-tauri/*", "third_party/glib/*"], "targets": ["desktop"]},
     {"paths": ["scripts/ci/build-desktop-linux.sh"], "targets": ["linux"]},
     {"paths": ["scripts/ci/build-desktop-windows.sh", "scripts/ci/windows_signing.py", "deploy/desktop/windows-cross.Dockerfile", "scripts/ci/check-windows-agent.ps1", "scripts/ci/setup-windows-agent.ps1"], "targets": ["windows"]},
-    {"paths": ["scripts/ci/build-desktop-macos.sh"], "targets": ["macos"]},
+    {"paths": ["scripts/ci/build-desktop-macos.sh", "scripts/ci/build-desktop-macos-signed.py"], "targets": ["macos"]},
     {"paths": ["scripts/ci/check-macos-agent.sh", "scripts/ci/setup-macos-agent.sh"], "targets": ["ios", "macos"]},
     {"paths": ["scripts/ci/check-linux-agent.sh", "scripts/ci/setup-linux-agent.sh"], "targets": ["android", "webBundle", "server"]},
     {"paths": ["scripts/ci/check-linux-web-agent.sh"], "targets": ["webBundle"]},

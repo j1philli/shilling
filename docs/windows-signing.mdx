@@ -33,6 +33,22 @@ generated **after** Authenticode signing, and its Windows build must not use
 `--no-sign` when publisher signing is requested (that flag disables Tauri's
 Windows signing hooks too).
 
+## Existing Shilling configuration (November 2026)
+
+Faders now has working Azure signing and Developer ID notarization on the same
+Tower and Mac agents. Shilling reuses that publisher identity. Its non-secret
+Azure parameters and all six Mac signing parameters have been copied into the
+Shilling parent project. The Azure client secret must be supplied through the
+private credential prompt; TeamCity does not export that stored value.
+
+The manual **Desktop macOS — Signed and Notarized** job builds a universal app,
+checks its notarization ticket and Gatekeeper acceptance, then signs, notarizes,
+and staples the DMG. It restores the runner's keychain search list afterward.
+Its artifact is `desktop-macos-signed.zip`. Both signed jobs require main and
+become available after this PR merges; existing release buttons are unchanged.
+No new Azure account or Apple certificate is required for this shared identity.
+The account-creation steps below are only for a future separate publisher.
+
 ## 1. Set up the signing account
 
 Use [Azure Artifact Signing](https://azure.microsoft.com/en-us/products/artifact-signing)
