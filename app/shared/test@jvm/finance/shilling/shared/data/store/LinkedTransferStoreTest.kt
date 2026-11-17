@@ -79,7 +79,7 @@ class LinkedTransferStoreTest {
             runCatching { f.transfers.save(invalid) }
             assertNull(f.graphs.current.postings.getById(invalid.debit.id))
             assertNull(f.transfers.get(invalid.key))
-            assertNull(f.db.latestEntityVersion(finance.shilling.shared.data.sync.EntityType.POSTING, invalid.debit.id, "home"))
+            assertNull(SyncVersions(f.db, "home", "test").load(finance.shilling.shared.data.sync.EntityType.POSTING, invalid.debit.id))
         } finally { f.close() }
     }
     @Test fun firstActivationClaimsLegacyDataAndLaterSwitchesRetireEditors() = runBlocking {

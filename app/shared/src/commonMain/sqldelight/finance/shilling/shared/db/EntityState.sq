@@ -1,0 +1,27 @@
+-- Per-entity sync state: last known field values, a hybrid logical clock version per
+-- field group, and the deletion tombstone. Kept after delete so offline deletes reach peers.
+CREATE TABLE entity_state (
+    space_id TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    values_json TEXT,
+    versions_json TEXT NOT NULL,
+    deleted_at TEXT,
+    PRIMARY KEY(space_id, entity_type, entity_id)
+);
+
+selectOne:
+SELECT * FROM entity_state WHERE space_id = ? AND entity_type = ? AND entity_id = ?;
+
+selectForSpace:
+SELECT * FROM entity_state WHERE space_id = ?;
+
+upsert:
+INSERT OR REPLACE INTO entity_state(space_id, entity_type, entity_id, values_json, versions_json, deleted_at)
+VALUES (?, ?, ?, ?, ?, ?);
+
+deleteForSpace:
+DELETE FROM entity_state WHERE space_id = ?;
+
+claimLegacy:
+UPDATE entity_state SET space_id = ? WHERE space_id = '__local__';
