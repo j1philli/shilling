@@ -38,6 +38,19 @@ class DatabaseBootstrapTest {
     }
 
     @Test
+    fun freshAndroidDatabaseIsInitialized() = runBlocking {
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        // What SQLiteOpenHelper leaves behind before the (no-op) schema callback runs.
+        driver.execute(null, "CREATE TABLE android_metadata (locale TEXT);", 0)
+        driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0)
+
+        ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
+
+        assertTrue(tableExists(driver, "accounts"))
+        assertTrue(tableExists(driver, "local_spaces"))
+    }
+
+    @Test
     fun validSchemaIsLeftIntact() = runBlocking {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         ShillingDatabase.Schema.create(driver).await()

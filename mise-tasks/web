@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+#MISE description="Serve the web app at http://localhost:3000 and rebuild on source changes"
+#MISE depends=["build-web"]
+#MISE env={SHILLING_DB_NAME="shilling-dev", SHILLING_WASM_VARIANT="Debug", SHILLING_DEV_TOOLS="true"}
+set -euo pipefail
+
+cleanup() {
+    echo ""
+    echo "Stopping web dev server..."
+    [ -n "${SERVE_PID:-}" ] && kill "$SERVE_PID" 2>/dev/null
+    wait 2>/dev/null
+}
+trap cleanup EXIT INT TERM
+
+npx serve web-app-dist --config ../serve.json &
+SERVE_PID=$!
+
+MARKER=$(mktemp)
+touch "$MARKER"
+
+echo ""
+echo "Watching for source changes... (Ctrl-C to stop)"
+echo ""
+
+while true; do
+    sleep 2
+    CHANGED=$(find app/shared/src app/shared-ui/src app/web-app/src app/web-app/index.html \
+        -newer "$MARKER" -name "*.kt" -o -newer "$MARKER" -name "*.html" 2>/dev/null | head -1)
+    if [ -n "$CHANGED" ]; then
+        echo "==> Source change detected, rebuilding..."
+        touch "$MARKER"
+        if SHILLING_ICON_VARIANT="${SHILLING_ICON_VARIANT:-dev}" ./build-web.sh; then
+            echo "==> Rebuild complete."
+        else
+            echo "==> Rebuild failed!"
+        fi
+    fi
+done

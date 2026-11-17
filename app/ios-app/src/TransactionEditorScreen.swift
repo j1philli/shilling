@@ -12,8 +12,6 @@ struct TransactionEditorScreen: View {
     @State private var titleDraft = EditorTextDraft()
     @State private var amount = ""
     @State private var loaded = false
-    @FocusState private var focusedField: Field?
-    private enum Field: Hashable { case title, amount }
     @State private var toast: Toast?
     @StateObject private var preview = ReceiptPreviewModel()
     let onDone: (Toast) -> Void
@@ -37,7 +35,7 @@ struct TransactionEditorScreen: View {
             missingMessage: state.missingMessage,
             saveEnabled: state.saveEnabled,
             delete: state.deleteConfirm,
-            showsKeyboardDone: focusedField != nil,
+            showsKeyboardDone: false,
             onSave: {
                 screen.setTitle(value: titleDraft.value)
                 let result: String?? = try? await asyncFunction(for: screen.save())
@@ -55,16 +53,15 @@ struct TransactionEditorScreen: View {
                     }
                     .pickerStyle(.segmented)
                 }
-                BufferedEditorTitleField("Description", initial: f.title, draft: titleDraft) {
+                EditorNativeTextField(label: "Description", value: f.title, draft: titleDraft) {
                     screen.setTitle(value: $0)
                 }
-                .focused($focusedField, equals: .title)
                 LabeledContent("Amount") {
-                    TextField("0.00", text: $amount)
-                        .focused($focusedField, equals: .amount)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .onChange(of: amount) { _, value in screen.setAmountText(value: value) }
+                    EditorNativeTextField(label: "Amount", value: amount, prompt: "0.00",
+                                          keyboard: .decimalPad, trailing: true) {
+                        amount = $0
+                        screen.setAmountText(value: $0)
+                    }
                 }
                 DatePicker("Date", selection: Binding(
                     get: { DateBridge.date(fromEpochDay: f.dateEpochDay) },

@@ -1,5 +1,0 @@
-brew "just"
-brew "node"
-brew "openjdk@21"
-brew "rust"
-brew "imagemagick"

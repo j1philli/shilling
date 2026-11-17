@@ -66,6 +66,7 @@ fun main() {
     }
     val entitlements = createHostedEntitlementLookup(authConfig)
     val devices = createHostedDeviceRegistry(authConfig)
+    val accounts = createHostedAccountStore(authConfig)
     val spaces = if (authConfig.supabaseUrl != null && authConfig.supabaseServiceKey != null)
         SupabaseSpaceManagement(authConfig.supabaseUrl, authConfig.supabaseServiceKey) else null
 
@@ -110,6 +111,7 @@ fun main() {
                     turnConfigured = turnConfig.turnSecret != null && turnConfig.turnUrls.isNotEmpty())
                 hostedDevicesRoute(tokenVerifier, householdLookup, devices, signalingHub)
                 billingConfigRoute(tokenVerifier)
+                accountDeletionRoute(tokenVerifier, entitlements, accounts, devices, signalingHub)
                 hostedSpacesRoute(tokenVerifier,
                     spaces,
                     entitlements, devices, signalingHub)

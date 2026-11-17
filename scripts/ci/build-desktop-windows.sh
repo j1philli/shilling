@@ -9,6 +9,8 @@ docker buildx version >/dev/null
 context="$(mktemp -d)"
 trap 'rm -rf "$context"' EXIT
 cp -R src-tauri web-app-dist "$context/"
+mkdir -p "$context/third_party"
+cp -R third_party/glib "$context/third_party/"
 cp deploy/desktop/windows-cross.Dockerfile "$context/Dockerfile"
 
 output="$PWD/desktop-artifacts/windows"

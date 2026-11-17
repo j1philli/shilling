@@ -119,6 +119,7 @@ struct EditorChrome<Content: View>: View {
                         }
                     }
                 }
+                .readableWidth(640)
                 // Number pads have no return key.
                 .scrollDismissesKeyboard(.interactively)
             }

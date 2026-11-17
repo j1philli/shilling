@@ -55,6 +55,7 @@ final class NativeUiPerformanceController: UIViewController {
                 if screen == "editor-choices" { try await runEditorChoices(); continue }
                 if screen == "editor-save" { try await runEditorSave(); continue }
                 if screen == "plan-transitions" { try await runPlanTransitions(); continue }
+                if screen == "schedule-recurrence" { try await runScheduleRecurrence(); continue }
                 if screen == "hosted-settings" { try await runHostedSettings(); continue }
                 if screen == "tabs" { try await runTabs(); continue }
                 if screen == "tab-resume" { try await runTabResume(); continue }
@@ -254,6 +255,17 @@ final class NativeUiPerformanceController: UIViewController {
         mount(AnyView(EditorNavigationFixture(route: route)))
         _ = try await waitForList(minimum: 4)
         for kind in ["account", "category", "schedule", "transaction"] {
+            // A changed start date can also change the weekly mask inferred by
+            // save(). Retain the complete original draft for a faithful restore.
+            let scheduleBackup = kind == "schedule" ? ScheduleEditorScreenModel(scheduleId: "ui-schedule-0", presetType: nil) : nil
+            defer { scheduleBackup?.close() }
+            if let scheduleBackup {
+                let backupDeadline = CACurrentMediaTime() + 5
+                while scheduleBackup.state.load != .ready {
+                    guard CACurrentMediaTime() < backupDeadline else { throw FixtureError("Schedule backup did not load") }
+                    await pause(0.02)
+                }
+            }
             withAnimation { route.path = [kind] }
             let deadline = CACurrentMediaTime() + 10
             var field: UITextField?
@@ -265,6 +277,19 @@ final class NativeUiPerformanceController: UIViewController {
             }
             guard let field, let original = field.text else { throw FixtureError("Missing editor name") }
             await pause(0.6)
+            var originalAmount: String?
+            var originalDay: Int64?
+            if kind == "schedule" || kind == "transaction" {
+                guard let amount = descendants(view).compactMap({ $0 as? UITextField }).first(where: { $0.keyboardType == .decimalPad }),
+                      let picker = descendants(view).compactMap({ $0 as? UIDatePicker }).first else { throw FixtureError("Editor amount/date controls missing") }
+                originalAmount = amount.text
+                originalDay = DateBridge.epochDay(from: picker.date)
+                amount.text = "56.78"
+                amount.sendActions(for: .editingChanged)
+                picker.setDate(DateBridge.date(fromEpochDay: originalDay! + 1), animated: false)
+                picker.sendActions(for: .valueChanged)
+                await pause(0.2)
+            }
             guard field.becomeFirstResponder() else { throw FixtureError("Name could not focus") }
             await pause(0.6)
             let bars = descendants(view).compactMap { $0 as? UINavigationBar }
@@ -329,8 +354,11 @@ final class NativeUiPerformanceController: UIViewController {
                     await pause(0.02)
                 }
                 saved = model.state.fields.title
-                model.setTitle(value: original)
-                guard try await asyncFunction(for: model.save()) != nil else { throw FixtureError("Schedule restore failed") }
+                let updated = model.state.fields.amountText == "56.78" && model.state.fields.startEpochDay == originalDay! + 1
+                guard let scheduleBackup,
+                      try await asyncFunction(for: scheduleBackup.save()) != nil, updated else {
+                    throw FixtureError("Schedule amount/date save or restore failed")
+                }
             } else {
                 let model = TransactionEditorScreenModel(postingId: "ui-posting-0")
                 defer { model.close() }
@@ -340,11 +368,14 @@ final class NativeUiPerformanceController: UIViewController {
                     await pause(0.02)
                 }
                 saved = model.state.fields.title
+                let updated = model.state.fields.amountText == "56.78" && model.state.fields.dateEpochDay == originalDay! + 1
                 model.setTitle(value: original)
-                guard try await asyncFunction(for: model.save()) != nil else { throw FixtureError("Transaction restore failed") }
+                model.setAmountText(value: originalAmount!)
+                model.setDate(epochDay: originalDay!)
+                guard try await asyncFunction(for: model.save()) != nil, updated else { throw FixtureError("Transaction amount/date save or restore failed") }
             }
             guard saved == expected, route.path.isEmpty else { throw FixtureError("Rapid save did not persist the complete name and dismiss") }
-            emit(["event": "editor-save-checked", "editor": kind, "saveDelayMs": saveDelayMs, "restored": true])
+            emit(["event": "editor-save-checked", "editor": kind, "saveDelayMs": saveDelayMs, "restored": true, "amountAndDateChecked": originalDay != nil])
         }
     }
 
@@ -412,12 +443,102 @@ final class NativeUiPerformanceController: UIViewController {
             // Move directly between fields without dismissing the keyboard. A late
             // resignation from the old field must not hide the new field's Done button.
             try await verifyKeyboardDone(amountField)
+            host?.traitOverrides.preferredContentSizeCategory = .accessibilityExtraExtraExtraLarge
+            await pause(0.5)
+            for field in [titleField, amountField] {
+                guard let font = field.font, font.pointSize > 30, field.bounds.height + 1 >= font.lineHeight else {
+                    throw FixtureError("Editor field clipped at accessibility text size")
+                }
+            }
+            screenshot("\(kind)-accessibility")
+            host?.traitOverrides.preferredContentSizeCategory = .large
+            await pause(0.3)
             withAnimation { route.path = [] }
             await pause(1)
             emit(["event": "choices-checked", "editor": kind, "categoryChoices": 41,
                   "accountChoices": 10, "transferChoices": 9, "keyboardDoneChecks": 2,
-                  "directFocusSwitchChecked": true, "database": querySnapshot()])
+                  "directFocusSwitchChecked": true, "accessibilityTextChecked": true, "database": querySnapshot()])
         }
+    }
+
+    private func runScheduleRecurrence() async throws {
+        let original = ScheduleEditorScreenModel(scheduleId: "ui-schedule-0", presetType: nil)
+        defer { original.close() }
+        let deadline = CACurrentMediaTime() + 5
+        while original.state.load != .ready {
+            guard CACurrentMediaTime() < deadline else { original.close(); throw FixtureError("Schedule did not load") }
+            await pause(0.02)
+        }
+        let frequencies = original.state.frequencies
+        let route = EditorNavigationRoute()
+        mount(AnyView(EditorNavigationFixture(route: route)))
+        _ = try await waitForList(minimum: 4)
+        route.path = ["schedule"]
+        await pause(1)
+        for frequency in frequencies {
+            try await chooseRecurrence("Repeats", title: frequency.label, count: frequencies.count)
+        }
+        try await chooseRecurrence("Repeats", title: "Monthly on a weekday", count: frequencies.count)
+        try await chooseRecurrence("Week", title: "Fourth", count: 5)
+        try await chooseRecurrence("Day", title: "Wednesday", count: 7)
+        // Open again after changing the selection to check the deferred menu's
+        // checked action and callback both use the latest immutable state.
+        try await chooseRecurrence("Week", title: "Second", count: 5)
+        try await chooseRecurrence("Week", title: "Fourth", count: 5)
+        screenshot("schedule-recurrence")
+        let bars = descendants(view).compactMap { $0 as? UINavigationBar }
+        let items = bars.flatMap { ($0.topItem?.rightBarButtonItems ?? [])
+            + ($0.topItem?.trailingItemGroups.flatMap(\.barButtonItems) ?? [])
+            + ($0.topItem?.pinnedTrailingGroup?.barButtonItems ?? []) }
+        guard let save = items.first(where: { $0.title == "Save" || $0.primaryAction?.title == "Save" }), save.isEnabled else {
+            throw FixtureError("Recurrence Save unavailable")
+        }
+        if let action = save.primaryAction { UIControl().sendAction(action) }
+        else if let action = save.action { UIApplication.shared.sendAction(action, to: save.target, from: save, for: nil) }
+        else { throw FixtureError("Recurrence Save has no action") }
+        await pause(1)
+        let saved = ScheduleEditorScreenModel(scheduleId: "ui-schedule-0", presetType: nil)
+        let savedDeadline = CACurrentMediaTime() + 5
+        while saved.state.load != .ready {
+            guard CACurrentMediaTime() < savedDeadline else { saved.close(); throw FixtureError("Saved recurrence did not load") }
+            await pause(0.02)
+        }
+        let checked = saved.state.fields.frequency == .monthlyByNthWeekday
+            && saved.state.fields.nth == 4 && saved.state.fields.nthWeekdayIndex == 2 && route.path.isEmpty
+        // This editor has not changed its draft. Saving it restores every original
+        // recurrence field, including the weekly mask changed by the nth-weekday save.
+        let restored = try await asyncFunction(for: original.save()) != nil
+        saved.close()
+        original.close()
+        guard checked && restored else { throw FixtureError("Recurrence save/restore failed") }
+        mount(AnyView(Text("Recurrence checked")))
+        await pause(6)
+        emit(["event": "recurrence-checked", "frequencyChoices": frequencies.count,
+              "weekChoices": 5, "dayChoices": 7, "savedAndRestored": true, "database": querySnapshot()])
+    }
+
+    private func chooseRecurrence(_ label: String, title: String, count: Int) async throws {
+        let list = try await waitForList(minimum: 8)
+        list.setContentOffset(CGPoint(x: 0, y: -list.adjustedContentInset.top), animated: false)
+        await pause(0.1)
+        var target: UIButton?
+        for _ in 0..<20 {
+            if let button = try? choiceButton(label), view.bounds.insetBy(dx: 0, dy: 100).contains(button.convert(button.bounds, to: view)) {
+                target = button; break
+            }
+            let end = max(-list.adjustedContentInset.top, list.contentSize.height - list.bounds.height + list.adjustedContentInset.bottom)
+            list.setContentOffset(CGPoint(x: 0, y: min(end, list.contentOffset.y + 100)), animated: false)
+            await pause(0.1)
+        }
+        guard let target else { throw FixtureError("Could not reveal \(label)") }
+        let actions = try await openChoices(target)
+        guard actions.count == count, actions.filter({ $0.state == .on }).count == 1,
+              actions.contains(where: { $0.state == .on && $0.title == target.accessibilityValue }),
+              let action = actions.first(where: { $0.title == title }) else { throw FixtureError("Incorrect \(label) options") }
+        target.sendAction(action)
+        target.contextMenuInteraction?.dismissMenu()
+        await pause(0.4)
+        guard target.accessibilityValue == title else { throw FixtureError("\(label) selection did not reach the form") }
     }
 
     private func verifyKeyboardDone(_ field: UITextField) async throws {
@@ -471,12 +592,19 @@ final class NativeUiPerformanceController: UIViewController {
     }
 
     private func runEditorNavigation() async throws {
+        let args = ProcessInfo.processInfo.arguments
+        let first = args.firstIndex(of: "--ui-editor-first").flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil }
+        var kinds = ["account", "category", "schedule", "transaction"]
+        if let first {
+            guard kinds.contains(first) else { throw FixtureError("Unknown first editor") }
+            kinds = [first] + kinds.filter { $0 != first }
+        }
         let route = EditorNavigationRoute()
         mount(AnyView(EditorNavigationFixture(route: route)))
         _ = try await waitForList(minimum: 4)
         await pause(0.5)
         for cycle in 0..<2 {
-            for kind in ["account", "category", "schedule", "transaction"] {
+            for kind in kinds {
                 begin("editor-navigation", "push-\(kind)")
                 withAnimation { route.path = [kind] }
                 let deadline = CACurrentMediaTime() + 10
@@ -494,13 +622,35 @@ final class NativeUiPerformanceController: UIViewController {
                 begin("editor-navigation", "push-settle-\(kind)")
                 await pause(0.4)
                 end("editor-navigation", "push-settle-\(kind)", extra: ["cycle": cycle])
-                if cycle == 0 { screenshot("navigation-\(kind)") }
+                if cycle == 0 {
+                    screenshot("navigation-\(kind)")
+                    for picker in descendants(view).compactMap({ $0 as? UIDatePicker }) {
+                        let frame = picker.convert(picker.bounds, to: view)
+                        let fitting = picker.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+                        guard frame.width + 1 >= fitting.width, frame.height + 1 >= fitting.height,
+                              frame.minX >= 0, frame.maxX <= view.bounds.maxX else {
+                            throw FixtureError("Editor date picker clipped or collapsed")
+                        }
+                        emit(["event": "editor-date-layout", "editor": kind,
+                              "frame": String(describing: picker.convert(picker.bounds, to: view)),
+                              "intrinsic": String(describing: picker.intrinsicContentSize),
+                              "fitting": String(describing: picker.sizeThatFits(CGSize(width: 320, height: 60))),
+                              "compressed": String(describing: picker.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize))])
+                    }
+                }
 
                 guard let field else { throw FixtureError("\(kind) field disappeared") }
+                let keyboardTiming = KeyboardAppearanceTiming()
                 begin("editor-navigation", "focus-\(kind)")
                 guard field.becomeFirstResponder() else { throw FixtureError("\(kind) field could not focus") }
+                let responderMs = keyboardTiming.elapsedMs
                 await pause(0.4)
-                end("editor-navigation", "focus-\(kind)", extra: ["cycle": cycle])
+                end("editor-navigation", "focus-\(kind)", extra: [
+                    "cycle": cycle, "firstKeyboardInProcess": cycle == 0 && kind == kinds[0],
+                    "becomeFirstResponderMs": responderMs,
+                    "keyboardWillShowMs": keyboardTiming.willShowMs.map { $0 as Any } ?? NSNull(),
+                    "keyboardDidShowMs": keyboardTiming.didShowMs.map { $0 as Any } ?? NSNull()
+                ])
 
                 begin("editor-navigation", "typing-\(kind)")
                 for _ in 0..<10 {
@@ -513,6 +663,14 @@ final class NativeUiPerformanceController: UIViewController {
                 // Include the last debounced model update in the measurement.
                 await pause(0.2)
                 end("editor-navigation", "typing-\(kind)", extra: ["cycle": cycle, "keystrokes": 10, "settleMs": 200])
+                // Observe through typing without extending the focus phase: the
+                // keyboard animation can finish after its fixed 400 ms window.
+                emit(["event": "keyboard-appearance", "editor": kind, "cycle": cycle,
+                      "firstKeyboardInProcess": cycle == 0 && kind == kinds[0],
+                      "becomeFirstResponderMs": responderMs,
+                      "keyboardWillShowMs": keyboardTiming.willShowMs.map { $0 as Any } ?? NSNull(),
+                      "keyboardDidShowMs": keyboardTiming.didShowMs.map { $0 as Any } ?? NSNull()])
+                keyboardTiming.stop()
                 field.resignFirstResponder()
                 await pause(0.2)
 
@@ -549,6 +707,22 @@ final class NativeUiPerformanceController: UIViewController {
                 end("plan-transitions", title, extra: ["cycle": cycle, "listItems": itemCount(list)])
             }
         }
+        // Check the other segmented bindings outside the measured transitions.
+        try selectSegment("Month")
+        _ = try await waitForList(minimum: 2000)
+        try selectSegment("Week")
+        _ = try await waitForList(minimum: overviewItems - 1, maximum: overviewItems + 2)
+        try selectSegment("Schedules")
+        _ = try await waitForList(minimum: 1000, maximum: 1003)
+        for title in ["Income", "Transfers"] {
+            try selectSegment(title)
+            _ = try await waitForList(minimum: 3, maximum: 4)
+        }
+        for title in ["Expenses", "All"] {
+            try selectSegment(title)
+            _ = try await waitForList(minimum: 1000, maximum: 1003)
+        }
+        emit(["event": "plan-controls-checked", "periods": 2, "filters": 4])
         mount(AnyView(Text("Plan closed")))
         await pause(6)
         emit(["event": "plan-closed", "database": querySnapshot()])
@@ -579,13 +753,14 @@ final class NativeUiPerformanceController: UIViewController {
         var tabs: ShillingTabBarController? = ShillingTabBarController()
         weak var receiptList: UIScrollView?
         weak var activityList: UIScrollView?
+        weak var planList: UIScrollView?
         mountController(tabs!)
         for cycle in 0..<6 {
             for key in ["HOME", "PLAN", "ACTIVITY", "RECEIPTS", "SETTINGS"] {
                 begin("tabs", "select-\(key)")
                 guard let tab = tabs?.tabs.first(where: { $0.identifier == key }) else { throw FixtureError("Missing tab") }
                 tabs?.selectedTab = tab
-                if key == "PLAN" { _ = try await waitForList(minimum: 1000) }
+                if key == "PLAN" { planList = try await waitForList(minimum: 1000) }
                 if key == "ACTIVITY" { activityList = try await waitForList(minimum: 7000) }
                 if key == "RECEIPTS" { receiptList = try await waitForList(minimum: 250) }
                 await pause(0.5)
@@ -599,7 +774,7 @@ final class NativeUiPerformanceController: UIViewController {
         tabs = nil
         await pause(6)
         emit(["event": "tabs-closed", "controllerReleased": released == nil,
-              "receiptListReleased": receiptList == nil, "activityListReleased": activityList == nil,
+              "receiptListReleased": receiptList == nil, "activityListReleased": activityList == nil, "planListReleased": planList == nil,
               "residentMiB": residentMiB(), "database": querySnapshot()])
         begin("tabs", "after-close-updates")
         for i in 0..<10 { _ = try await asyncFunction(for: NativeUiFixture.shared.changePosting(index: Int32(i))) }
@@ -610,13 +785,17 @@ final class NativeUiPerformanceController: UIViewController {
     private func runTabResume() async throws {
         var tabs: ShillingTabBarController? = ShillingTabBarController()
         mountController(tabs!)
-        for (key, minimum, maximum) in [("ACTIVITY", 7000, 7600), ("PLAN", 1000, 1010), ("RECEIPTS", 250, 252)] {
+        for (key, minimum, maximum) in [("ACTIVITY", 7000, 7600), ("PLAN", 1000, Int.max), ("RECEIPTS", 250, 252)] {
             guard let tab = tabs?.tabs.first(where: { $0.identifier == key }),
                   let settings = tabs?.tabs.first(where: { $0.identifier == "SETTINGS" }) else {
                 throw FixtureError("Missing tab")
             }
             tabs?.selectedTab = tab
-            let list = try await waitForList(minimum: minimum, maximum: maximum)
+            guard let selectedView = tabs?.selectedViewController?.view else { throw FixtureError("Selected tab has no view") }
+            // Plan's overview includes postings in its current date range, so
+            // its populated row count changes with the seeded day. Scope the
+            // search to this tab to exclude an outgoing Activity list.
+            let list = try await waitForList(minimum: minimum, maximum: maximum, in: selectedView)
             await pause(0.5)
             list.setContentOffset(CGPoint(x: 0, y: 1200), animated: false)
             await pause(0.5)
@@ -626,7 +805,8 @@ final class NativeUiPerformanceController: UIViewController {
             await pause(7) // Expires the shared StateFlow replay cache.
             begin("tab-resume", key)
             tabs?.selectedTab = tab
-            let resumed = try await waitForList(minimum: minimum, maximum: maximum)
+            guard let resumedView = tabs?.selectedViewController?.view else { throw FixtureError("Resumed tab has no view") }
+            let resumed = try await waitForList(minimum: previousItems, maximum: previousItems + 1, in: resumedView)
             // This checks populated cells in the hierarchy, not completed rendering.
             let listReadyMs = (CACurrentMediaTime() - phaseStarted) * 1000
             await pause(1)
@@ -1238,9 +1418,19 @@ final class NativeUiPerformanceController: UIViewController {
         host = controller
     }
 
+    private func displayed(_ view: UIView) -> Bool {
+        guard view.window != nil else { return false }
+        var current: UIView? = view
+        while let node = current {
+            if node.isHidden || node.alpha < 0.01 || node.layer.opacity < 0.01 { return false }
+            current = node.superview
+        }
+        return true
+    }
+
     private func selectSegment(_ title: String) throws {
         guard let picker = descendants(view).compactMap({ $0 as? UISegmentedControl })
-            .first(where: { control in (0..<control.numberOfSegments).contains { control.titleForSegment(at: $0) == title } }),
+            .first(where: { control in displayed(control) && (0..<control.numberOfSegments).contains { control.titleForSegment(at: $0) == title } }),
             let index = (0..<picker.numberOfSegments).first(where: { picker.titleForSegment(at: $0) == title }) else {
             throw FixtureError("\(title) picker not rendered")
         }
@@ -1248,14 +1438,15 @@ final class NativeUiPerformanceController: UIViewController {
         picker.sendActions(for: .valueChanged)
     }
 
-    private func waitForList(minimum: Int, maximum: Int = .max) async throws -> UIScrollView {
+    private func waitForList(minimum: Int, maximum: Int = .max, in root: UIView? = nil) async throws -> UIScrollView {
+        let container = root ?? view!
         let deadline = CACurrentMediaTime() + 30
         while CACurrentMediaTime() < deadline {
-            if let list = descendants(view).compactMap({ $0 as? UIScrollView })
-                .first(where: { itemCount($0) >= minimum && itemCount($0) < maximum && !visibleCells($0).isEmpty }) { return list }
+            if let list = descendants(container).compactMap({ $0 as? UIScrollView })
+                .first(where: { displayed($0) && itemCount($0) >= minimum && itemCount($0) < maximum && !visibleCells($0).isEmpty }) { return list }
             await pause(0.05)
         }
-        let observed = descendants(view).compactMap { $0 as? UIScrollView }
+        let observed = descendants(container).compactMap { $0 as? UIScrollView }
             .map { "items=\(itemCount($0)),visible=\(visibleCells($0).count)" }
         throw FixtureError("No populated native list rendered within 30 seconds (expected \(minimum)..<\(maximum), observed \(observed))")
     }
@@ -1379,6 +1570,26 @@ final class NativeUiPerformanceController: UIViewController {
 }
 
 private struct FixtureError: Error { let message: String; init(_ message: String) { self.message = message } }
+
+/// Keyboard notifications include the system animation. They are separate from
+/// app CPU and display-link callback gaps, and do not prove a frame was rendered.
+@MainActor
+private final class KeyboardAppearanceTiming: NSObject {
+    private let started = CACurrentMediaTime()
+    private(set) var willShowMs: Double?
+    private(set) var didShowMs: Double?
+    var elapsedMs: Double { (CACurrentMediaTime() - started) * 1000 }
+
+    override init() {
+        super.init()
+        NotificationCenter.default.addObserver(self, selector: #selector(willShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didShow), name: UIResponder.keyboardDidShowNotification, object: nil)
+    }
+    @objc private func willShow() { if willShowMs == nil { willShowMs = elapsedMs } }
+    @objc private func didShow() { if didShowMs == nil { didShowMs = elapsedMs } }
+    func stop() { NotificationCenter.default.removeObserver(self) }
+    deinit { NotificationCenter.default.removeObserver(self) }
+}
 
 private final class FixturePreviewSource: NSObject, QLPreviewControllerDataSource {
     let url: URL

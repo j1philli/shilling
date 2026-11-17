@@ -1,4 +1,4 @@
-// Self-hosted loopback signaling smoke benchmark. Start `just server`, then run:
+// Self-hosted loopback signaling smoke benchmark. Start `mise run server`, then run:
 // node scripts/perf/bench_signaling.cjs [ws://127.0.0.1:8081/ws/signal]
 const WebSocket = require('ws');
 const { performance } = require('node:perf_hooks');

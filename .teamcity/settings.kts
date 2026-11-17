@@ -45,6 +45,8 @@ project {
         param("env.CLOUDFLARE_PAGES_DOMAIN", "app.shilling.finance")
         param("env.AMPER_SHARED_CACHES_ROOT", "/opt/shilling-ci/amper-cache")
         param("env.AMPER_BOOTSTRAP_CACHE_DIR", "/opt/shilling-ci/amper-bootstrap")
+        // Build jobs use the same maintained JDK as their agent process.
+        param("env.JAVA_HOME", "%teamcity.agent.jvm.java.home%")
         param("env.CI_RETRY_ATTEMPTS", "5")
         param("env.CI_RETRY_DELAY_SECONDS", "120")
     }
@@ -69,7 +71,19 @@ object CI : BuildType({
         }
         script {
             name = "Install npm dependencies"
-            scriptContent = "npm install"
+            scriptContent = "npm ci"
+        }
+        script {
+            name = "Node security regression checks"
+            scriptContent = "npm run test:security"
+        }
+        script {
+            name = "GLib safety regression checks"
+            scriptContent = "bash scripts/ci/test-glib-security.sh"
+        }
+        script {
+            name = "npm security advisories"
+            scriptContent = "npm audit --audit-level=low && npm audit --prefix scripts/ci/smoke --audit-level=low"
         }
         script {
             name = "Architecture guard"
@@ -479,7 +493,7 @@ object WebDeploy : BuildType({
         }
         script {
             name = "Prepare SQLDelight plugin"
-            scriptContent = "just ensure-plugin"
+            scriptContent = "bash scripts/ensure-plugin.sh"
         }
         script {
             name = "Build wasmJs artifacts"

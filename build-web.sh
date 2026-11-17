@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+node "$(dirname "$0")/scripts/ci/check-node-version.cjs"
+node "$(dirname "$0")/scripts/ci/check-java-version.cjs"
+
 SHILLING_DB_NAME="${SHILLING_DB_NAME:-shilling}"
 SHILLING_WASM_VARIANT="${SHILLING_WASM_VARIANT:-Release}"
 
@@ -90,4 +93,4 @@ echo "Copying $SHILLING_ICON_VARIANT favicons..."
 cp "app/web-app/icons/$SHILLING_ICON_VARIANT/favicon.ico" "$DIST/"
 cp "app/web-app/icons/$SHILLING_ICON_VARIANT/apple-touch-icon.png" "$DIST/"
 
-echo "Done. Run 'cargo tauri dev' from the project root to launch, or 'just web' to serve."
+echo "Done. Run 'cargo tauri dev' from the project root to launch, or 'mise run web' to serve."

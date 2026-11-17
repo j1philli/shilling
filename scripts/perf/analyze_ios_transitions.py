@@ -3,6 +3,7 @@
 
 Record Animation Hitches with Time Profiler and Points of Interest added. Export
 OSSignpostIntervals, time-profile and hitches-summary tables from the same trace.
+Truncated CPU exports are rejected so absent data is not reported as zero work.
 """
 import argparse
 import json
@@ -74,6 +75,23 @@ def summarize(intervals_path, cpu_path, hitches_path):
         frames = {resolve(f).get("name", "") for f in backtrace.iter("frame")} if backtrace is not None else set()
         samples.append((timestamp, weight, main, frames))
 
+    if not samples:
+        raise ValueError("No Time Profiler samples; cannot interpret missing data as zero CPU or zero hitches")
+    sample_start = min(s[0] for s in samples)
+    sample_end = max(s[0] for s in samples)
+    workload_start = min(start for start, _, _ in intervals)
+    workload_end = max(end for _, end, _ in intervals)
+    # CPU sampling is sparse during idle work. Allow a small boundary margin,
+    # but reject a stream that ended before the signposted workload completed.
+    # This only checks the outer span, not internal gaps or hitch-stream health.
+    margin = 0.25
+    if sample_start > workload_start + margin or sample_end < workload_end - margin:
+        raise ValueError(
+            f"Time Profiler sample span {sample_start:.3f}–{sample_end:.3f}s does not cover "
+            f"NativeUIWorkload span {workload_start:.3f}–{workload_end:.3f}s. "
+            "Missing samples do not establish zero CPU or zero hitches; inspect the recording and re-export or record again."
+        )
+
     hitches = summarize_hitches(hitches_path)["samples"]
     result = []
     for start, end, name in intervals:
@@ -92,6 +110,7 @@ def summarize(intervals_path, cpu_path, hitches_path):
         })
     return {
         "phases": result,
+        "cpuSampleSpanSeconds": {"start": sample_start, "end": sample_end},
         "note": "Hitches are assigned by interval start. Rendering contexts and inclusive CPU stacks can overlap; do not add their durations or counts into wall-time percentages. Push intervals end at field readiness, not animation completion. Launch/seed work outside the signposts is excluded.",
     }
 

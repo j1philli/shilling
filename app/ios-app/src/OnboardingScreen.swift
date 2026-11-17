@@ -124,6 +124,7 @@ struct OnboardingScreen: View {
                 Text(state.loginSubtitle).textCase(nil)
             }
         }
+        .readableWidth(640)
         .navigationTitle(state.signIn.title)
     }
 }
@@ -195,6 +196,7 @@ private struct SelfHostedForm: View {
                 .disabled(!state.canContinueSelfHosted)
             }
         }
+        .readableWidth(640)
         .navigationTitle(state.selfHostedLabel)
         .onAppear {
             guard !loaded else { return }
