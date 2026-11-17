@@ -251,40 +251,30 @@ class IncomingChangeRouter(
     }
 
     private suspend fun applyChange(change: ChangeMessage) {
-        when (val result = storeFacade.applyIncomingChange(change)) {
-            is ApplyIncomingChangeResult.IgnoredStale -> {
-                val current = result.current
-                log.i {
-                    "[ROUTER] Ignoring stale ${change.entityType}/${change.op} entity=${change.entityId} " +
-                        "(incoming ts=${change.timestamp}, current ts=${current?.timestamp}, " +
-                        "incoming id=${change.id}, current id=${current?.changeId})"
-                }
-                return
+        when (storeFacade.applyIncomingChange(change)) {
+            ApplyIncomingChangeResult.IgnoredStale -> {
+                log.i { "[ROUTER] ${change.entityType}/${change.op} entity=${change.entityId} changed nothing (id=${change.id})" }
             }
             ApplyIncomingChangeResult.Applied -> {
+                if (change.entityType == EntityType.RECEIPT) prefetchReceiptFile(change.entityId)
+            }
+            ApplyIncomingChangeResult.Deleted -> {
                 if (change.entityType == EntityType.RECEIPT) {
-                    handleReceiptPrefetch(change)
+                    pendingMutex.withLock { pendingFileReceipts.remove(change.entityId) }
+                    fileStore?.delete(change.entityId)
                 }
             }
         }
     }
 
-    private suspend fun handleReceiptPrefetch(change: ChangeMessage) {
-        when (change.op) {
-            ChangeOp.UPSERT -> {
-                val receipt = (change.payload as? ChangePayload.ReceiptPayload)?.receipt ?: return
-                val hasLocal = fileStore?.hasFile(receipt.id) ?: true
-                log.i { "Receipt ${receipt.id} hasLocal=$hasLocal fileStore=${fileStore != null}" }
-                if (!hasLocal) {
-                    pendingMutex.withLock { pendingFileReceipts[receipt.id] = receipt.originalName }
-                    log.i { "Auto-prefetch: requesting file bytes for ${receipt.id}" }
-                    webRtcManager.broadcastFileMessage(FileTransferMessage.FileRequest(receipt.id))
-                }
-            }
-            ChangeOp.DELETE -> {
-                pendingMutex.withLock { pendingFileReceipts.remove(change.entityId) }
-                fileStore?.delete(change.entityId)
-            }
+    private suspend fun prefetchReceiptFile(receiptId: String) {
+        val receipt = storeFacade.receiptById(receiptId) ?: return
+        val hasLocal = fileStore?.hasFile(receipt.id) ?: true
+        log.i { "Receipt ${receipt.id} hasLocal=$hasLocal fileStore=${fileStore != null}" }
+        if (!hasLocal) {
+            pendingMutex.withLock { pendingFileReceipts[receipt.id] = receipt.originalName }
+            log.i { "Auto-prefetch: requesting file bytes for ${receipt.id}" }
+            webRtcManager.broadcastFileMessage(FileTransferMessage.FileRequest(receipt.id))
         }
     }
 }

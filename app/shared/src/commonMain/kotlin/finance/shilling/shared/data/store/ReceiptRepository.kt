@@ -5,7 +5,6 @@ import finance.shilling.shared.data.ReceiptFileStore
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import finance.shilling.shared.data.ReceiptWithPosting
-import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.EntityType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -50,7 +49,7 @@ class ReceiptRepository(
 
     suspend fun delete(receiptId: String) {
         store.clear(ReceiptKey.ById(receiptId))
-        broadcastChange(sync, EntityType.RECEIPT, ChangeOp.DELETE, receiptId)
+        broadcastEntityState(sync, EntityType.RECEIPT, receiptId)
         notifier.notifyChanged()
     }
 

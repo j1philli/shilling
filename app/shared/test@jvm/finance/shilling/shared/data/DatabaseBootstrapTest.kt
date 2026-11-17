@@ -123,6 +123,25 @@ class DatabaseBootstrapTest {
     }
 
     @Test
+    fun spaceScopedDatabaseGainsSyncVersionsWithoutLosingData() = runBlocking {
+        // Web keeps the old user_version; native drivers already report the new one.
+        for (version in listOf(2L, ShillingDatabase.Schema.version)) {
+            val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+            ShillingDatabase.Schema.create(driver).await()
+            driver.execute(null, "DROP TABLE entity_state;", 0)
+            driver.execute(null, "PRAGMA user_version = $version;", 0)
+            ShillingDatabase(driver).accountQueries.upsert("acct-1", "Checking", 123.45, space_id = "__local__").await()
+
+            ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
+
+            assertTrue(tableExists(driver, "entity_state"))
+            assertEquals(1L, rowCount(driver, "accounts"))
+            assertEquals(ShillingDatabase.Schema.version, userVersion(driver))
+            driver.close()
+        }
+    }
+
+    @Test
     fun publishedLegacySchemaMigratesWithoutLosingRecordsOrReceiptBytes() = runBlocking {
         for (version in listOf(1L, ShillingDatabase.Schema.version)) {
             val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)

@@ -17,7 +17,11 @@ data class ChangeMessage(
     val entityId: String,
     val timestamp: Long,
     val deviceId: String,
-    val payload: ChangePayload? = null
+    val payload: ChangePayload? = null,
+    /** Hybrid logical clock version per field group. Null from peers that predate field merging. */
+    val versions: Map<String, String>? = null,
+    /** Version of the latest delete; the entity exists only while some field version is newer. */
+    val deletedAt: String? = null
 )
 
 @Serializable

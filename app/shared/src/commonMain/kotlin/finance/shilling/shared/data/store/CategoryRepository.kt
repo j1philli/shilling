@@ -1,7 +1,6 @@
 package finance.shilling.shared.data.store
 
 import finance.shilling.shared.data.Category
-import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.EntityType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +29,7 @@ class CategoryRepository(
 
     suspend fun delete(categoryId: String) {
         store.clear(CategoryKey.ById(categoryId))
-        broadcastChange(sync, EntityType.CATEGORY, ChangeOp.DELETE, categoryId)
+        broadcastEntityState(sync, EntityType.CATEGORY, categoryId)
         notifier.notifyChanged()
     }
 

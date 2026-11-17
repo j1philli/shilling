@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.*
-import kotlin.time.Clock
 
 const val SPACE_TRANSFER_PREFIX = "space-transfer:"
 data class LinkedTransferKey(val linkId: String, val fromSpace: String, val toSpace: String)
@@ -47,32 +46,32 @@ class LinkedTransferStore(
                 graphs.writeAcrossSpaces(setOf(key.fromSpace, key.toSpace)) { active ->
                     validate(transfer)
                     val entries = listOf(key.fromSpace to transfer.debit, key.toSpace to transfer.credit)
-                    val changes = entries.map { (space, posting) -> space to change(active, posting, ChangeOp.UPSERT) }
                     db.transaction {
                         entries.forEach { (space, posting) ->
                             check(db.accountQueries.selectById(posting.accountId, space).awaitAsOneOrNull() != null) { "Choose an existing account in each space." }
                             val existing = db.postingQueries.selectById(posting.id, space).awaitAsOneOrNull()
                             check(existing == null || existing.pair_id == key.linkId) { "Transfer identifier conflicts with an existing transaction." }
                             db.postingQueries.upsert(posting.id, null, posting.type.name, posting.accountId, posting.date.toEpochDays().toLong(), posting.amount, key.linkId, posting.title, null, space).await()
+                            versions(active, space).recordLocalUpsert(EntityType.POSTING, posting.id,
+                                ChangePayload.PostingPayload(posting).toFields(), existing?.toDomain()?.let { ChangePayload.PostingPayload(it).toFields() })
                         }
-                        changes.forEach { (space, change) -> db.recordEntityChange(change, space) }
                     }
-                    publish(active, changes)
+                    publish(active, entries.map { (space, posting) -> space to posting.id })
                 }
             },
             delete = { key -> graphs.writeAcrossSpaces(setOf(key.fromSpace, key.toSpace)) { active ->
                 val current = storeRead(key)
                 if (current == null && db.postingQueries.selectById("${key.linkId}:debit", key.fromSpace).awaitAsOneOrNull() == null && db.postingQueries.selectById("${key.linkId}:credit", key.toSpace).awaitAsOneOrNull() == null) return@writeAcrossSpaces
                 check(current != null) { "Sync both spaces before deleting this linked transfer." }
-                val changes = listOf(key.fromSpace to change(active, current.debit, ChangeOp.DELETE), key.toSpace to change(active, current.credit, ChangeOp.DELETE))
+                val legs = listOf(key.fromSpace to current.debit, key.toSpace to current.credit)
                 db.transaction {
-                    changes.forEach { (space, change) ->
-                        db.receiptQueries.detachByPosting(space, change.entityId)
-                        db.postingQueries.deleteById(change.entityId, space)
-                        db.recordEntityChange(change, space)
+                    legs.forEach { (space, posting) ->
+                        db.receiptQueries.detachByPosting(space, posting.id)
+                        db.postingQueries.deleteById(posting.id, space)
+                        versions(active, space).recordLocalDelete(EntityType.POSTING, posting.id, ChangePayload.PostingPayload(posting).toFields())
                     }
                 }
-                publish(active, changes)
+                publish(active, legs.map { (space, posting) -> space to posting.id })
             } }
         ),
         converter = Converter.Builder<List<LinkedTransfer>, List<LinkedTransfer>, List<LinkedTransfer>>()
@@ -118,15 +117,14 @@ class LinkedTransferStore(
         require(debit.type == ScheduleType.EXPENSE && credit.type == ScheduleType.INCOME && debit.scheduleId == null && credit.scheduleId == null)
         require(debit.amount.isFinite() && debit.amount > 0 && debit.amount == credit.amount && debit.date == credit.date && debit.title == credit.title)
     }
-    private fun change(active: FinanceSpaceGraph, posting: Posting, op: ChangeOp) = ChangeMessage(
-        id = ids.newId(), entityType = EntityType.POSTING, op = op, entityId = posting.id,
-        timestamp = Clock.System.now().toEpochMilliseconds(), deviceId = active.sync.state.deviceId,
-        payload = if (op == ChangeOp.UPSERT) ChangePayload.PostingPayload(posting) else null
-    )
-    private suspend fun publish(active: FinanceSpaceGraph, changes: List<Pair<String, ChangeMessage>>) {
-        changes.filter { it.first == active.id }.forEach { (_, change) ->
-            // An inactive space is caught up through its next WebRTC full-state snapshot.
-            runCatching { active.sync.state.peerSyncManager?.broadcast(change) }
+    private fun versions(active: FinanceSpaceGraph, space: String) =
+        if (space == active.id) active.sync.versions else SyncVersions(db, space, active.sync.state.deviceId)
+    private suspend fun publish(active: FinanceSpaceGraph, postings: List<Pair<String, String>>) {
+        // An inactive space is caught up through its next WebRTC full-state snapshot.
+        val peer = active.sync.state.peerSyncManager ?: return
+        postings.filter { it.first == active.id }.forEach { (_, postingId) ->
+            val state = active.sync.versions.load(EntityType.POSTING, postingId) ?: return@forEach
+            runCatching { peer.broadcast(state.toChangeMessage(ids.newId(), EntityType.POSTING, postingId, active.sync.state.deviceId)) }
         }
     }
 }

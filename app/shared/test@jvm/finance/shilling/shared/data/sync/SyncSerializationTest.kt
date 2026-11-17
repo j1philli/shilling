@@ -21,6 +21,25 @@ class SyncSerializationTest {
         encodeDefaults = true
     }
 
+    // --- ChangeMessage versions ---
+
+    @Test
+    fun changeMessageVersionsRoundTripAndOlderPeersStillDecode() {
+        val change = ChangeMessage(
+            id = "c-1", entityType = EntityType.ACCOUNT, op = ChangeOp.DELETE, entityId = "a",
+            timestamp = 5L, deviceId = "phone",
+            versions = mapOf("name" to "000000000000005-000000-phone"),
+            deletedAt = "000000000000006-000000-phone"
+        )
+        assertEquals(change, json.decodeFromString<ChangeMessage>(json.encodeToString(change)))
+
+        // A peer on an older app version sends neither field and ignores them when receiving.
+        val older = """{"id":"c-2","entityType":"ACCOUNT","op":"UPSERT","entityId":"a","timestamp":5,"deviceId":"laptop"}"""
+        val decoded = json.decodeFromString<ChangeMessage>(older)
+        assertEquals(null, decoded.versions)
+        assertEquals(null, decoded.deletedAt)
+    }
+
     // --- SignalingMessage serialization ---
 
     @Test

@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
-import kotlin.time.Clock
 import org.mobilenativefoundation.store.core5.ExperimentalStoreApi
 import org.mobilenativefoundation.store.store5.*
 
@@ -98,7 +97,38 @@ class StoreSyncDeps(
     val spaceId: String = LOCAL_SPACE_ID
 ) {
     val scope = FinanceSpaceScope(spaceId)
+    val versions = SyncVersions(db, spaceId, deviceId)
     @Volatile var state = SyncState(peerSyncManager, deviceId)
+}
+
+/** Node id for stores without sync (tests, read-only space lookups). */
+private const val LOCAL_NODE = "local"
+
+private fun versionsFor(db: ShillingDatabase, sync: StoreSyncDeps?, spaceId: String) =
+    sync?.versions ?: SyncVersions(db, spaceId, LOCAL_NODE)
+
+/** Incoming sync writes carry [SuppressStoreBroadcast]; their versions are already merged. */
+private suspend fun isLocalWrite() = coroutineContext[SuppressStoreBroadcast] == null
+
+/** Writes rows and, for local edits, versions the field groups each write changed. */
+private suspend fun <T> SyncVersions.writeVersioned(
+    db: ShillingDatabase,
+    items: List<T>,
+    payload: (T) -> ChangePayload,
+    previous: suspend (T) -> T?,
+    write: suspend (T) -> Unit
+) {
+    val local = isLocalWrite()
+    db.transaction {
+        items.forEach { item ->
+            val before = if (local) previous(item) else null
+            write(item)
+            if (local) {
+                val changed = payload(item)
+                recordLocalUpsert(changed.entityType, changed.entityId, changed.toFields(), before?.let { payload(it).toFields() })
+            }
+        }
+    }
 }
 
 // --- Factory functions ---
@@ -106,6 +136,7 @@ class StoreSyncDeps(
 @OptIn(ExperimentalStoreApi::class)
 fun createAccountStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceId: String = sync?.spaceId ?: LOCAL_SPACE_ID): AccountStore {
     val lease = sync?.scope ?: FinanceSpaceScope(spaceId)
+    val versions = versionsFor(db, sync, spaceId)
     val store = MutableStoreBuilder.from<AccountKey, List<Account>, List<Account>, List<Account>>(
         // Store5 is the local source of truth. User data does not traverse the server.
         fetcher = Fetcher.of { _: AccountKey -> emptyList() },
@@ -119,7 +150,9 @@ fun createAccountStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
                 }
             },
             writer = { _, accounts -> lease.write {
-                accounts.forEach { a -> db.accountQueries.upsert(a.id, a.name, a.balance, space_id = spaceId).await() }
+                versions.writeVersioned(db, accounts, ChangePayload::AccountPayload,
+                    previous = { a -> db.accountQueries.selectById(a.id, space_id = spaceId).awaitAsOneOrNull()?.toDomain() }
+                ) { a -> db.accountQueries.upsert(a.id, a.name, a.balance, space_id = spaceId).await() }
             } },
             delete = { key -> lease.write {
                 when (key) {
@@ -134,8 +167,10 @@ fun createAccountStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
                             db.accountQueries.deleteById(account.id, space_id = spaceId)
                         }
                     }
-                    is AccountKey.ById -> db.transaction {
+                    is AccountKey.ById -> { val local = isLocalWrite(); db.transaction {
                         check(db.postingQueries.selectLinkedByAccount(spaceId, key.id).awaitAsList().isEmpty()) { "Delete linked space transfers before deleting this account." }
+                        val previous = db.accountQueries.selectById(key.id, space_id = spaceId).awaitAsOneOrNull()?.toDomain()
+                        val postings = db.postingQueries.selectByAccountId(key.id, space_id = spaceId).awaitAsList().map { it.toDomain() }
                         db.scheduleQueries.nullifyAccountId(key.id, space_id = spaceId)
                         db.scheduleQueries.nullifyCounterAccountId(key.id, space_id = spaceId)
                         db.receiptQueries.detachByAccount(space_id = spaceId, account_id = key.id)
@@ -143,15 +178,16 @@ fun createAccountStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
                         db.scheduleExceptionQueries.nullifyAccountOverrides(key.id, space_id = spaceId)
                         db.scheduleExceptionQueries.nullifyCounterAccountOverrides(key.id, space_id = spaceId)
                         db.accountQueries.deleteById(key.id, space_id = spaceId)
-                    }
+                        if (local) versions.recordLocalDelete(EntityType.ACCOUNT, key.id, previous?.let { ChangePayload.AccountPayload(it).toFields() })
+                        // Cascaded deletes are tombstoned too, so a peer's stale copy can't bring them back.
+                        postings.forEach { versions.recordLocalDelete(EntityType.POSTING, it.id, ChangePayload.PostingPayload(it).toFields()) }
+                    } }
                 }
             } }
         ),
         converter = identityConverter()
     ).disableCache().build(
-        updater = createUpdater(sync, EntityType.ACCOUNT) { account: Account ->
-            ChangePayload.AccountPayload(account) to account.id
-        },
+        updater = createUpdater(sync, EntityType.ACCOUNT) { account: Account -> ChangePayload.AccountPayload(account) },
         bookkeeper = createBookkeeper(db, spaceId) { it.toBookkeepingKey() }
     )
     return AccountStore(store)
@@ -160,6 +196,7 @@ fun createAccountStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
 @OptIn(ExperimentalStoreApi::class)
 fun createCategoryStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceId: String = sync?.spaceId ?: LOCAL_SPACE_ID): CategoryStore {
     val lease = sync?.scope ?: FinanceSpaceScope(spaceId)
+    val versions = versionsFor(db, sync, spaceId)
     val store = MutableStoreBuilder.from<CategoryKey, List<Category>, List<Category>, List<Category>>(
         fetcher = Fetcher.of { _: CategoryKey -> emptyList() },
         sourceOfTruth = SourceOfTruth.of(
@@ -172,7 +209,9 @@ fun createCategoryStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, space
                 }
             },
             writer = { _, categories -> lease.write {
-                categories.forEach { c -> db.categoryQueries.upsert(c.id, c.name, c.color, space_id = spaceId).await() }
+                versions.writeVersioned(db, categories, ChangePayload::CategoryPayload,
+                    previous = { c -> db.categoryQueries.selectById(c.id, space_id = spaceId).awaitAsOneOrNull()?.toDomain() }
+                ) { c -> db.categoryQueries.upsert(c.id, c.name, c.color, space_id = spaceId).await() }
             } },
             delete = { key -> lease.write {
                 when (key) {
@@ -182,18 +221,18 @@ fun createCategoryStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, space
                             db.categoryQueries.deleteById(category.id, space_id = spaceId)
                         }
                     }
-                    is CategoryKey.ById -> db.transaction {
+                    is CategoryKey.ById -> { val local = isLocalWrite(); db.transaction {
+                        val previous = db.categoryQueries.selectById(key.id, space_id = spaceId).awaitAsOneOrNull()?.toDomain()
                         db.categoryQueries.nullifyCategoryInSchedules(key.id, space_id = spaceId)
                         db.categoryQueries.deleteById(key.id, space_id = spaceId)
-                    }
+                        if (local) versions.recordLocalDelete(EntityType.CATEGORY, key.id, previous?.let { ChangePayload.CategoryPayload(it).toFields() })
+                    } }
                 }
             } }
         ),
         converter = identityConverter()
     ).disableCache().build(
-        updater = createUpdater(sync, EntityType.CATEGORY) { category: Category ->
-            ChangePayload.CategoryPayload(category) to category.id
-        },
+        updater = createUpdater(sync, EntityType.CATEGORY) { category: Category -> ChangePayload.CategoryPayload(category) },
         bookkeeper = createBookkeeper(db, spaceId) { it.toBookkeepingKey() }
     )
     return CategoryStore(store)
@@ -202,6 +241,7 @@ fun createCategoryStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, space
 @OptIn(ExperimentalStoreApi::class)
 fun createScheduleStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceId: String = sync?.spaceId ?: LOCAL_SPACE_ID): ScheduleStore {
     val lease = sync?.scope ?: FinanceSpaceScope(spaceId)
+    val versions = versionsFor(db, sync, spaceId)
     val store = MutableStoreBuilder.from<ScheduleKey, List<Schedule>, List<Schedule>, List<Schedule>>(
         fetcher = Fetcher.of { _: ScheduleKey -> emptyList() },
         sourceOfTruth = SourceOfTruth.of(
@@ -219,7 +259,9 @@ fun createScheduleStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, space
                 }
             },
             writer = { _, schedules -> lease.write {
-                schedules.forEach { s ->
+                versions.writeVersioned(db, schedules, ChangePayload::SchedulePayload,
+                    previous = { s -> db.scheduleQueries.selectById(s.id, space_id = spaceId).awaitAsOneOrNull()?.toDomain() }
+                ) { s ->
                     db.scheduleQueries.upsert(
                         id = s.id, title = s.title, amount = s.amount,
                         type = s.type.name,
@@ -253,11 +295,21 @@ fun createScheduleStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, space
                         }
                     }
                     is ScheduleKey.ById -> {
+                        val local = isLocalWrite()
                         db.transaction {
+                            val previous = db.scheduleQueries.selectById(key.id, space_id = spaceId).awaitAsOneOrNull()?.toDomain()
+                            val exceptions = db.scheduleExceptionQueries.selectByScheduleId(key.id, space_id = spaceId).awaitAsList().map { it.toDomain() }
+                            val postings = db.postingQueries.selectByScheduleId(key.id, space_id = spaceId).awaitAsList().map { it.toDomain() }
                             db.scheduleExceptionQueries.deleteByScheduleId(key.id, space_id = spaceId)
                             db.receiptQueries.detachBySchedule(space_id = spaceId, schedule_id = key.id)
                             db.postingQueries.deleteByScheduleId(key.id, space_id = spaceId)
                             db.scheduleQueries.deleteById(key.id, space_id = spaceId)
+                            if (local) versions.recordLocalDelete(EntityType.SCHEDULE, key.id, previous?.let { ChangePayload.SchedulePayload(it).toFields() })
+                            exceptions.forEach { e ->
+                                val payload = ChangePayload.ScheduleExceptionPayload(e)
+                                versions.recordLocalDelete(EntityType.SCHEDULE_EXCEPTION, payload.entityId, payload.toFields())
+                            }
+                            postings.forEach { versions.recordLocalDelete(EntityType.POSTING, it.id, ChangePayload.PostingPayload(it).toFields()) }
                         }
                     }
                     is ScheduleKey.Intersecting -> {
@@ -279,9 +331,7 @@ fun createScheduleStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, space
         ),
         converter = identityConverter()
     ).disableCache().build(
-        updater = createUpdater(sync, EntityType.SCHEDULE) { schedule: Schedule ->
-            ChangePayload.SchedulePayload(schedule) to schedule.id
-        },
+        updater = createUpdater(sync, EntityType.SCHEDULE) { schedule: Schedule -> ChangePayload.SchedulePayload(schedule) },
         bookkeeper = createBookkeeper(db, spaceId) { it.toBookkeepingKey() }
     )
     return ScheduleStore(store)
@@ -290,6 +340,7 @@ fun createScheduleStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, space
 @OptIn(ExperimentalStoreApi::class)
 fun createScheduleExceptionStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceId: String = sync?.spaceId ?: LOCAL_SPACE_ID): ScheduleExceptionStore {
     val lease = sync?.scope ?: FinanceSpaceScope(spaceId)
+    val versions = versionsFor(db, sync, spaceId)
     val store = MutableStoreBuilder.from<ScheduleExceptionKey, List<ScheduleException>, List<ScheduleException>, List<ScheduleException>>(
         fetcher = Fetcher.of { _: ScheduleExceptionKey -> emptyList() },
         sourceOfTruth = SourceOfTruth.of(
@@ -309,7 +360,9 @@ fun createScheduleExceptionStore(db: ShillingDatabase, sync: StoreSyncDeps? = nu
                 }
             },
             writer = { _, exceptions -> lease.write {
-                exceptions.forEach { e ->
+                versions.writeVersioned(db, exceptions, ChangePayload::ScheduleExceptionPayload,
+                    previous = { e -> db.scheduleExceptionQueries.selectByKey(e.scheduleId, e.date.toEpochDays().toLong(), space_id = spaceId).awaitAsOneOrNull()?.toDomain() }
+                ) { e ->
                     db.scheduleExceptionQueries.upsert(
                         schedule_id = e.scheduleId,
                         date = e.date.toEpochDays().toLong(),
@@ -330,19 +383,25 @@ fun createScheduleExceptionStore(db: ShillingDatabase, sync: StoreSyncDeps? = nu
                     is ScheduleExceptionKey.ByScheduleIds -> key.scheduleIds.forEach {
                         db.scheduleExceptionQueries.deleteByScheduleId(it, space_id = spaceId)
                     }
-                    is ScheduleExceptionKey.ByKey -> db.scheduleExceptionQueries.deleteByKey(
-                        key.scheduleId,
-                        key.date.toEpochDays().toLong(),
-                        space_id = spaceId
-                    )
+                    is ScheduleExceptionKey.ByKey -> { val local = isLocalWrite(); db.transaction {
+                        val previous = db.scheduleExceptionQueries.selectByKey(key.scheduleId, key.date.toEpochDays().toLong(), space_id = spaceId).awaitAsOneOrNull()?.toDomain()
+                        db.scheduleExceptionQueries.deleteByKey(
+                            key.scheduleId,
+                            key.date.toEpochDays().toLong(),
+                            space_id = spaceId
+                        )
+                        if (local) versions.recordLocalDelete(
+                            EntityType.SCHEDULE_EXCEPTION,
+                            exceptionEntityId(key.scheduleId, key.date),
+                            previous?.let { ChangePayload.ScheduleExceptionPayload(it).toFields() }
+                        )
+                    } }
                 }
             } }
         ),
         converter = identityConverter()
     ).disableCache().build(
-        updater = createUpdater(sync, EntityType.SCHEDULE_EXCEPTION) { exception: ScheduleException ->
-            ChangePayload.ScheduleExceptionPayload(exception) to "${exception.scheduleId}_${exception.date.toEpochDays()}"
-        },
+        updater = createUpdater(sync, EntityType.SCHEDULE_EXCEPTION) { exception: ScheduleException -> ChangePayload.ScheduleExceptionPayload(exception) },
         bookkeeper = createBookkeeper(db, spaceId) { it.toBookkeepingKey() }
     )
     return ScheduleExceptionStore(store)
@@ -351,6 +410,7 @@ fun createScheduleExceptionStore(db: ShillingDatabase, sync: StoreSyncDeps? = nu
 @OptIn(ExperimentalStoreApi::class)
 fun createPostingStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceId: String = sync?.spaceId ?: LOCAL_SPACE_ID): PostingStore {
     val lease = sync?.scope ?: FinanceSpaceScope(spaceId)
+    val versions = versionsFor(db, sync, spaceId)
     val store = MutableStoreBuilder.from<PostingKey, List<Posting>, List<Posting>, List<Posting>>(
         fetcher = Fetcher.of { _: PostingKey -> emptyList() },
         sourceOfTruth = SourceOfTruth.of(
@@ -370,8 +430,9 @@ fun createPostingStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
                 }
             },
             writer = { _, postings -> lease.write {
-                db.transaction {
-                postings.forEach { p ->
+                versions.writeVersioned(db, postings, ChangePayload::PostingPayload,
+                    previous = { p -> db.postingQueries.selectById(p.id, space_id = spaceId).awaitAsOneOrNull()?.toDomain() }
+                ) { p ->
                     db.postingQueries.upsert(
                         id = p.id,
                         schedule_id = p.scheduleId?.takeIf { it.isNotBlank() },
@@ -385,14 +446,20 @@ fun createPostingStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
                         space_id = spaceId
                     ).await()
                 }
-                }
             } },
             delete = { key -> lease.write {
                 when (key) {
                     PostingKey.All -> db.postingQueries.selectAll(space_id = spaceId).awaitAsList().forEach { posting ->
                         detachAndDeletePosting(db, spaceId, posting.id)
                     }
-                    is PostingKey.ById -> detachAndDeletePosting(db, spaceId, key.id)
+                    is PostingKey.ById -> {
+                        val local = isLocalWrite()
+                        db.transaction {
+                            val previous = db.postingQueries.selectById(key.id, space_id = spaceId).awaitAsOneOrNull()?.toDomain()
+                            detachAndDeletePosting(db, spaceId, key.id)
+                            if (local) versions.recordLocalDelete(EntityType.POSTING, key.id, previous?.let { ChangePayload.PostingPayload(it).toFields() })
+                        }
+                    }
                     is PostingKey.Between -> db.postingQueries.selectBetween(
                         date = key.start.toEpochDays().toLong(),
                         date_ = key.end.toEpochDays().toLong(),
@@ -408,9 +475,7 @@ fun createPostingStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
         ),
         converter = identityConverter()
     ).disableCache().build(
-        updater = createUpdater(sync, EntityType.POSTING) { posting: Posting ->
-            ChangePayload.PostingPayload(posting) to posting.id
-        },
+        updater = createUpdater(sync, EntityType.POSTING) { posting: Posting -> ChangePayload.PostingPayload(posting) },
         bookkeeper = createBookkeeper(db, spaceId) { it.toBookkeepingKey() }
     )
     val detailsStore = StoreBuilder.from<PostingDetailsKey, List<PostingWithDetails>, List<PostingWithDetails>>(
@@ -448,6 +513,7 @@ fun createPostingStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
 @OptIn(ExperimentalStoreApi::class)
 fun createReceiptStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceId: String = sync?.spaceId ?: LOCAL_SPACE_ID): ReceiptStore {
     val lease = sync?.scope ?: FinanceSpaceScope(spaceId)
+    val versions = versionsFor(db, sync, spaceId)
     val store = MutableStoreBuilder.from<ReceiptKey, List<Receipt>, List<Receipt>, List<Receipt>>(
         fetcher = Fetcher.of { _: ReceiptKey -> emptyList() },
         sourceOfTruth = SourceOfTruth.of(
@@ -462,7 +528,9 @@ fun createReceiptStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
                 }
             },
             writer = { _, receipts -> lease.write {
-                receipts.forEach { r ->
+                versions.writeVersioned(db, receipts, ChangePayload::ReceiptPayload,
+                    previous = { r -> db.receiptQueries.selectById(r.id, space_id = spaceId).awaitAsOneOrNull()?.toDomain() }
+                ) { r ->
                     db.receiptQueries.upsert(
                         id = r.id, posting_id = r.postingId, file_path = r.filePath,
                         original_name = r.originalName, added_at = r.addedAt,
@@ -476,7 +544,14 @@ fun createReceiptStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
                     ReceiptKey.All -> db.receiptQueries.selectAll(space_id = spaceId).awaitAsList().forEach { receipt ->
                         db.receiptQueries.deleteById(receipt.id, space_id = spaceId)
                     }
-                    is ReceiptKey.ById -> db.receiptQueries.deleteById(key.id, space_id = spaceId)
+                    is ReceiptKey.ById -> {
+                        val local = isLocalWrite()
+                        db.transaction {
+                            val previous = db.receiptQueries.selectById(key.id, space_id = spaceId).awaitAsOneOrNull()?.toDomain()
+                            db.receiptQueries.deleteById(key.id, space_id = spaceId)
+                            if (local) versions.recordLocalDelete(EntityType.RECEIPT, key.id, previous?.let { ChangePayload.ReceiptPayload(it).toFields() })
+                        }
+                    }
                     is ReceiptKey.ByPosting -> db.receiptQueries.selectByPostingId(key.postingId, space_id = spaceId).awaitAsList().forEach { receipt ->
                         db.receiptQueries.deleteById(receipt.id, space_id = spaceId)
                     }
@@ -485,9 +560,7 @@ fun createReceiptStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
         ),
         converter = identityConverter()
     ).disableCache().build(
-        updater = createUpdater(sync, EntityType.RECEIPT) { receipt: Receipt ->
-            ChangePayload.ReceiptPayload(receipt) to receipt.id
-        },
+        updater = createUpdater(sync, EntityType.RECEIPT) { receipt: Receipt -> ChangePayload.ReceiptPayload(receipt) },
         bookkeeper = createBookkeeper(db, spaceId) { it.toBookkeepingKey() }
     )
     // The list needs only attached posting titles/dates. Read the existing indexed
@@ -512,37 +585,28 @@ fun createReceiptStore(db: ShillingDatabase, sync: StoreSyncDeps? = null, spaceI
     return ReceiptStore(store, listStore, countsStore)
 }
 
-// --- Sync broadcast helper (for repository delete/special operations) ---
+// --- Sync broadcast helper (for repository deletes) ---
 
-suspend fun broadcastChange(
-    sync: StoreSyncDeps?,
-    entityType: EntityType,
-    op: ChangeOp,
-    entityId: String,
-    payload: ChangePayload? = null
-) {
+/** Sends the entity's current sync state (a tombstone after a delete) to connected peers. */
+suspend fun broadcastEntityState(sync: StoreSyncDeps?, entityType: EntityType, entityId: String) {
     val s = sync ?: run {
-        log.w { "[STORE] broadcastChange: sync is null for $entityType/$op/$entityId" }
+        log.w { "[STORE] broadcastEntityState: sync is null for $entityType/$entityId" }
         return
     }
     check(s.scope.active) { "This finance space was closed." }
     val state = s.state
-    val change = ChangeMessage(
-        id = s.idGenerator.newId(),
-        entityType = entityType,
-        op = op,
-        entityId = entityId,
-        timestamp = Clock.System.now().toEpochMilliseconds(),
-        deviceId = state.deviceId,
-        payload = payload
-    )
-    s.db.recordEntityChange(change, s.spaceId)
-    log.i { "[STORE] broadcastChange: $entityType/$op/$entityId via P2P (hasPeerManager=${state.peerSyncManager != null})" }
+    val peerSyncManager = state.peerSyncManager ?: run {
+        log.d { "[STORE] Offline — $entityType/$entityId goes out with the next full-state snapshot" }
+        return
+    }
+    val entityState = s.versions.load(entityType, entityId) ?: return
+    val change = entityState.toChangeMessage(s.idGenerator.newId(), entityType, entityId, state.deviceId)
+    log.i { "[STORE] broadcastEntityState: $entityType/${change.op}/$entityId via P2P" }
     try {
-        state.peerSyncManager?.broadcast(change)
-            ?: log.w { "[STORE] peerSyncManager is NULL in broadcastChange!" }
+        peerSyncManager.broadcast(change)
     } catch (e: Exception) {
-        log.w { "[STORE] broadcastChange failed: ${e::class.simpleName}: ${e.message}" }
+        if (e is kotlinx.coroutines.CancellationException) throw e
+        log.w { "[STORE] broadcastEntityState failed: ${e::class.simpleName}: ${e.message}" }
     }
 }
 
@@ -554,11 +618,15 @@ private fun <T : Any> identityConverter(): Converter<T, T, T> =
         .fromOutputToLocal { it }
         .build()
 
+/**
+ * Broadcasts each written entity's sync state. The source-of-truth writer already versioned
+ * the edit, so offline edits need nothing here: the next full-state snapshot carries them.
+ */
 @OptIn(ExperimentalStoreApi::class)
 private inline fun <Key : Any, reified Item : Any> createUpdater(
     sync: StoreSyncDeps?,
     entityType: EntityType,
-    crossinline toPayload: (Item) -> Pair<ChangePayload, String>
+    crossinline toPayload: (Item) -> ChangePayload
 ): Updater<Key, List<Item>, Unit> = Updater.by(
     post = { _, items ->
         log.i { "[STORE] Updater post: $entityType items=${items.size} sync=${sync != null}" }
@@ -572,35 +640,19 @@ private inline fun <Key : Any, reified Item : Any> createUpdater(
             return@by UpdaterResult.Success.Typed(Unit)
         }
         val state = sync.state
-        val peerSyncManager = state.peerSyncManager
+        val peerSyncManager = state.peerSyncManager ?: run {
+            log.d { "[STORE] peerSyncManager is NULL — $entityType x${items.size} goes out with the next full-state snapshot" }
+            return@by UpdaterResult.Success.Typed(Unit)
+        }
         try {
-            val changes = items.map { item ->
-                val (payload, entityId) = toPayload(item)
-                ChangeMessage(
-                    id = sync.idGenerator.newId(),
-                    entityType = entityType,
-                    op = ChangeOp.UPSERT,
-                    entityId = entityId,
-                    timestamp = Clock.System.now().toEpochMilliseconds(),
-                    deviceId = state.deviceId,
-                    payload = payload
-                )
-            }
-            // Commit version metadata together; never hold a database transaction
-            // while waiting for a WebRTC peer.
-            sync.db.transaction {
-                changes.forEach { sync.db.recordEntityChange(it, sync.spaceId) }
-            }
-            changes.forEach { change ->
-                val entityId = change.entityId
-                if (peerSyncManager == null) {
-                    log.d { "[STORE] peerSyncManager is NULL — $entityType/$entityId not broadcast (full-state backfill covers catch-up)" }
-                } else {
-                    log.d { "[STORE] Broadcasting $entityType/$entityId via P2P" }
-                    try { peerSyncManager.broadcast(change) }
-                    catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
-                    catch (failure: Exception) { throw PeerBroadcastFailure(failure) }
-                }
+            items.forEach { item ->
+                val entityId = toPayload(item).entityId
+                val entityState = sync.versions.load(entityType, entityId) ?: return@forEach
+                val change = entityState.toChangeMessage(sync.idGenerator.newId(), entityType, entityId, state.deviceId)
+                log.d { "[STORE] Broadcasting $entityType/$entityId via P2P" }
+                try { peerSyncManager.broadcast(change) }
+                catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+                catch (failure: Exception) { throw PeerBroadcastFailure(failure) }
             }
             UpdaterResult.Success.Typed(Unit)
         } catch (e: Exception) {
