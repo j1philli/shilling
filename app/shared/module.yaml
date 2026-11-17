@@ -47,6 +47,7 @@ dependencies@jvm:
   - $libs.ktor.client.mock
 
 test-dependencies@jvm:
+  - ../../core
   - $libs.coroutines.test
 
 plugins:
