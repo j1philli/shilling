@@ -35,7 +35,7 @@ class FinanceSpaceGraph(
     val schedules = ScheduleRepository(notifier, schedulesStore, exceptionsStore, sync)
     val postings = PostingRepository(idGenerator, notifier, postingsStore, accountsStore, categoriesStore, schedulesStore, sync)
     val receipts = ReceiptRepository(notifier, receiptsStore, sync)
-    val facade = SyncStoreFacade(db, id, accountsStore, categoriesStore, schedulesStore, exceptionsStore, postingsStore, receiptsStore)
+    val facade = SyncStoreFacade(db, id, accountsStore, categoriesStore, schedulesStore, exceptionsStore, postingsStore, receiptsStore, scope, sync.versions)
 }
 
 /** Swaps the entire graph; callers stop WebRTC before activating another space. */
@@ -72,6 +72,7 @@ class FinanceSpaceGraphs(
                     db.receiptFileQueries.claimLegacy(id)
                     db.bookkeepingQueries.claimLegacy(id)
                     db.changeLogQueries.claimLegacy(id)
+                    db.entityStateQueries.claimLegacy(id)
                     db.spaceQueries.claimLegacy(id, name, kind)
                 }
                 settings.putString("legacy_file_space", id)

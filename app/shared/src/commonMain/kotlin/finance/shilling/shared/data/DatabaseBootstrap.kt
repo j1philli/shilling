@@ -54,8 +54,22 @@ suspend fun ensureLocalSchemaReady(
     ).await()
     val hasSpaceRegistry = driver.executeQuery(null, "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='local_spaces';",
         { cursor -> cursor.next(); QueryResult.Value(cursor.getLong(0) == 1L) }, 0).await()
-    if (currentVersion == expectedVersion && hasRequiredTables && hasSpaceColumn && hasSpaceRegistry) {
+    val hasEntityState = driver.executeQuery(null, "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='entity_state';",
+        { cursor -> cursor.next(); QueryResult.Value(cursor.getLong(0) == 1L) }, 0).await()
+    if (currentVersion == expectedVersion && hasRequiredTables && hasSpaceColumn && hasSpaceRegistry && hasEntityState) {
         installProjectionIndexes(driver)
+        return
+    }
+
+    // Space-scoped layout from before field-level sync versions. Native drivers may already
+    // report the new user_version, so detect the missing table rather than trust the version.
+    if (hasRequiredTables && hasSpaceColumn && hasSpaceRegistry && !hasEntityState && currentVersion in 2L..expectedVersion) {
+        ShillingDatabase(driver).transaction {
+            ShillingDatabase.Schema.migrate(driver, 2L, expectedVersion).await()
+            driver.execute(null, "PRAGMA user_version = $expectedVersion;", 0).await()
+        }
+        installProjectionIndexes(driver)
+        log.i { "Added field-level sync versions" }
         return
     }
 

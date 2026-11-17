@@ -165,3 +165,9 @@ SELECT * FROM postings WHERE space_id = :space_id AND pair_id = :pair_id;
 
 selectLinkedByAccount:
 SELECT * FROM postings WHERE space_id = :space_id AND account_id = :account_id AND pair_id LIKE 'space-transfer:%';
+
+selectByScheduleId:
+SELECT * FROM postings WHERE schedule_id = ? AND space_id = :space_id;
+
+selectByAccountId:
+SELECT * FROM postings WHERE account_id = ? AND space_id = :space_id;

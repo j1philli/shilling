@@ -8,7 +8,6 @@ import finance.shilling.shared.data.PostingWithDetails
 import finance.shilling.shared.data.Schedule
 import finance.shilling.shared.data.ScheduleType
 import finance.shilling.shared.data.ScheduledTx
-import finance.shilling.shared.data.sync.ChangeOp
 import finance.shilling.shared.data.sync.EntityType
 import kotlinx.coroutines.yield
 import kotlinx.coroutines.withContext
@@ -137,7 +136,7 @@ class PostingRepository(
     suspend fun delete(id: String) {
         require(getById(id)?.pairId?.startsWith(SPACE_TRANSFER_PREFIX) != true) { "Delete both sides from Finance spaces in Settings." }
         store.clear(PostingKey.ById(id))
-        broadcastChange(sync, EntityType.POSTING, ChangeOp.DELETE, id)
+        broadcastEntityState(sync, EntityType.POSTING, id)
         notifier.notifyChanged()
     }
 
