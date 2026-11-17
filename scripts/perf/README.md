@@ -188,7 +188,7 @@ query/copy costs only, with no Store5, IndexedDB, UI or network workload.
 `ios-platform` module with the normal iOS app, including its receipt storage and
 WebRTC receive adapter. Entity/file operations use the production Store5 repositories.
 It resets only its own receipt files. The normal Shilling sandbox is preserved.
-Run `just setup-webrtc` first if the iOS framework has not been downloaded.
+Run `mise run setup-webrtc` first if the iOS framework has not been downloaded.
 
 Start the local signaling server as above, then run:
 

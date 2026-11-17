@@ -174,6 +174,17 @@ class PublicationTest(unittest.TestCase):
             beta.main()
         api.assert_not_called()
 
+    @patch.dict(os.environ, {"BUILD_VCS_BRANCH": "main", "SHILLING_BETA_FORCE": "1"})
+    @patch.object(beta, "publish")
+    @patch.object(beta, "snapshot", return_value={"commit": "abc", "fingerprint": "f", "inputs": {}})
+    @patch.object(beta, "TeamCity")
+    @patch.object(sys, "argv", ["publish_beta.py", "--target", "ios", "--channel", "testflight", "--", "publish"])
+    def test_forced_publish_does_not_read_baseline(self, api, snapshot, publish):
+        beta.main()
+        api.assert_not_called()
+        self.assertIsNone(publish.call_args.args[3])
+        self.assertTrue(publish.call_args.args[6])
+
 
 class BaselineTest(unittest.TestCase):
     def setUp(self):
@@ -182,19 +193,17 @@ class BaselineTest(unittest.TestCase):
             self.api = beta.TeamCity()
 
     def test_latest_successful_default_branch_build_including_skips(self):
-        with patch.object(self.api, "get", side_effect=[{"build": [{"id": 123, "branchName": "main"}]}, {"state": 1}]) as get:
+        with patch.object(self.api, "get", return_value={"state": 1}) as get:
             self.assertEqual(self.api.previous_state("IosTestFlight"), {"state": 1})
-        query = urllib.parse.parse_qs(urllib.parse.urlsplit(get.call_args_list[0].args[0]).query)
-        self.assertIn("state:finished,status:SUCCESS,branch:(default:true),personal:false,count:1", query["locator"][0])
-        self.assertEqual(get.call_args_list[1].args[0], "builds/id:123/artifacts/content/beta-state.json")
+        url = urllib.parse.urlsplit(get.call_args.args[0])
+        self.assertEqual(url.path, "repository/download/IosTestFlight/.lastSuccessful/beta-state.json")
+        self.assertEqual(urllib.parse.parse_qs(url.query), {"branch": ["<default>"]})
 
     def test_empty_history(self):
-        with patch.object(self.api, "get", return_value={"count": 0}):
+        error = urllib.error.HTTPError("url", 404, "error", {}, None)
+        self.addCleanup(error.close)
+        with patch.object(beta.urllib.request, "urlopen", side_effect=error):
             self.assertIsNone(self.api.previous_state("NewTrack"))
-
-    def test_default_branch_can_have_no_logical_name(self):
-        with patch.object(self.api, "get", side_effect=[{"build": [{"id": 123}]}, {"state": 1}]):
-            self.assertEqual(self.api.previous_state("IosTestFlight"), {"state": 1})
 
     def test_only_missing_artifacts_allow_bootstrap(self):
         for status in (401, 403, 404, 500):
@@ -202,13 +211,12 @@ class BaselineTest(unittest.TestCase):
             self.addCleanup(error.close)
             with patch.object(beta.urllib.request, "urlopen", side_effect=error):
                 if status == 404:
-                    self.assertIsNone(self.api.get("builds/id:123/artifacts/content/beta-state.json"))
+                    self.assertIsNone(self.api.get("repository/download/IosTestFlight/.lastSuccessful/beta-state.json"))
                 else:
                     with self.assertRaises(RuntimeError):
-                        self.api.get("builds/id:123/artifacts/content/beta-state.json")
+                        self.api.get("repository/download/IosTestFlight/.lastSuccessful/beta-state.json")
                 with self.assertRaises(RuntimeError):
-                    self.api.get("builds?locator=test")
-
+                    self.api.get("app/rest/builds?locator=test")
 
 if __name__ == "__main__":
     unittest.main()

@@ -11,7 +11,11 @@ import finance.shilling.shared.data.SETTINGS_KEY_HOSTED_HOUSEHOLD_ID
 import finance.shilling.shared.data.SETTINGS_KEY_LOCAL_HOUSEHOLD_ID
 import finance.shilling.shared.data.SETTINGS_KEY_SERVER_URL
 import finance.shilling.shared.data.ServerUrlCallback
+import finance.shilling.core.auth.HostedPlan
 import finance.shilling.shared.data.analytics.ProductAnalytics
+import finance.shilling.shared.data.auth.DeleteHostedAccountCallback
+import finance.shilling.shared.data.sync.secureServerUrl
+import finance.shilling.shared.data.sync.SECURE_SIGNALING_REQUIRED
 import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.shared.data.auth.AuthState
 import finance.shilling.shared.data.auth.DependencyReachability
@@ -150,8 +154,12 @@ class SettingsViewModel(
     private val categoryRepository: CategoryRepository,
     private val scheduleRepository: ScheduleRepository,
     private val windowUseCase: ComputeWindowUseCase,
-    private val analytics: ProductAnalytics
+    private val analytics: ProductAnalytics,
+    private val deleteAccountCallback: DeleteHostedAccountCallback
 ) : ViewModel() {
+    private val accountDeletion = AccountDeletionFlow(deleteAccountCallback)
+    val deletion: StateFlow<AccountDeletionStep> = accountDeletion.step
+
     private val analyticsState = MutableStateFlow(analytics.consent to analytics.configured)
     private val aboutTaps = MutableStateFlow(0)
     private val ready = sessionState.phase.filterIsInstance<SessionPhase.Ready>()
@@ -242,11 +250,22 @@ class SettingsViewModel(
         }
     }
 
+    /** [accountPlan]: the plan Settings already shows, if loaded. The server re-checks it. */
+    fun startAccountDeletion(accountPlan: HostedPlan?) = accountDeletion.start(accountPlan)
+    fun continueAccountDeletion() = accountDeletion.continueAfterWarning()
+    fun cancelAccountDeletion() = accountDeletion.cancel()
+    suspend fun confirmAccountDeletion(acknowledgeActiveSubscription: Boolean): String? =
+        accountDeletion.confirm(acknowledgeActiveSubscription)
+
     fun retrySync() = retryCallback.onRetry()
 
     /** Returns the snackbar message. */
     fun saveServerUrl(url: String): String {
-        val trimmed = url.trim()
+        val trimmed = try {
+            secureServerUrl(url).toString().trimEnd('/')
+        } catch (_: IllegalArgumentException) {
+            return SECURE_SIGNALING_REQUIRED
+        }
         settings.putString(SETTINGS_KEY_SERVER_URL, trimmed)
         serverUrlCallback.onChange(trimmed)
         return "Reconnecting to $trimmed"

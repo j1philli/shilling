@@ -63,6 +63,7 @@ class HostedUiPerformanceActivity : ComponentActivity() {
                     single { HostedBootstrapRetryCallback { } }
                     single { ResetOnboardingCallback { error("Synthetic fixture") } }
                     single { RestartHostedLoginCallback { error("Synthetic fixture") } }
+                    single { finance.shilling.shared.data.auth.DeleteHostedAccountCallback { error("Synthetic fixture") } }
                     single { ServerUrlCallback { error("Synthetic fixture") } }
                     single { HouseholdIdCallback { error("Synthetic fixture") } }
                     single { CloudRelayCallback { } }

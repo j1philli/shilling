@@ -9,6 +9,9 @@ repositories:
     url: https://dl.google.com/dl/android/maven2
 
 dependencies:
+  # JWT/JWKS libraries otherwise select vulnerable Jackson 2.22.0 transitives.
+  - com.fasterxml.jackson.core:jackson-core:2.22.3
+  - com.fasterxml.jackson.core:jackson-databind:2.22.3
   - ../core
   - $libs.coroutines.core
   - $libs.datetime

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.beforeAll(async ({ request }) => {
-  for (const url of ['http://server:8081/health', 'http://hosted-server:8081/health', 'http://web/api/config', 'http://hosted-web/api/config']) {
+  for (const url of ['http://server:8081/health', 'http://hosted-server:8081/health', 'https://web/api/config', 'http://hosted-web/api/config']) {
     await expect.poll(async () => {
       try { return (await request.get(url)).status(); } catch { return 0; }
     }, { timeout: 60_000 }).toBe(200);
@@ -11,7 +11,7 @@ test.beforeAll(async ({ request }) => {
 test('self-hosted image boots the app and completes onboarding', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('http://web');
+  await page.goto('https://web');
   await expect(page.getByRole('button', { name: 'Continue', exact: true })).toBeVisible();
   expect(await page.evaluate(() => crossOriginIsolated)).toBe(true);
   // Compose's accessibility elements sit beneath the canvas. Click their

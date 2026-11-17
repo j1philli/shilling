@@ -62,8 +62,6 @@ node_modules/
 .packager/
 supabase/.temp/
 
-# direnv
-.direnv/
 
 # SQLite database files (local dev data, never commit)
 *.db
@@ -78,3 +76,6 @@ release-output/
 apple-output/
 beta-output/
 __pycache__/
+
+# Standalone tests for the vendored GLib dependency
+third_party/glib/Cargo.lock
