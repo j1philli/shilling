@@ -18,6 +18,11 @@ import finance.shilling.shared.data.store.createScheduleStore
 import finance.shilling.shared.data.sync.PeerConnectionStatus
 import finance.shilling.shared.data.usecase.ComputeBudgetUseCase
 import finance.shilling.shared.data.usecase.ComputeWindowUseCase
+import finance.shilling.shared.mcp.McpAccess
+import finance.shilling.shared.mcp.McpHost
+import finance.shilling.shared.mcp.McpServer
+import finance.shilling.shared.mcp.McpToolbox
+import finance.shilling.shared.presentation.AssistantAccessViewModel
 import finance.shilling.shared.presentation.DisplayPreferences
 import finance.shilling.shared.presentation.ActivityViewModel
 import finance.shilling.shared.presentation.HomeViewModel
@@ -118,6 +123,12 @@ val dataModule: Module = module {
     // Needs SessionState and the Settings callbacks from sessionModule.
     viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { HostedDevicesViewModel(get(), get(), get(), get(), get()) }
+
+    // Assistant (MCP) access. Only the desktop platform module binds an McpHost.
+    single { McpToolbox(get(), get(), get(), get(), get(), get(), get(), get()) }
+    single { McpServer(get()) }
+    single { McpAccess(getOrNull<McpHost>(), get<McpServer>()::handle, get()) }
+    viewModel { AssistantAccessViewModel(get()) }
 
     single {
         LocalDataWiper(

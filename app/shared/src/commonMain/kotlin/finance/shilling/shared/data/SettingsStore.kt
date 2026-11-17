@@ -38,3 +38,8 @@ const val SETTINGS_KEY_CLOUD_RELAY_ENABLED = "shilling_cloud_relay_enabled"
 const val SETTINGS_KEY_THEME_MODE = "shilling_theme_mode"
 const val SETTINGS_KEY_CURRENCY_SYMBOL = "shilling_currency_symbol"
 const val SETTINGS_KEY_WEEK_START = "shilling_week_start"
+
+// Assistant (MCP) access, desktop only
+const val SETTINGS_KEY_MCP_ENABLED = "shilling_mcp_enabled"
+const val SETTINGS_KEY_MCP_TOKEN = "shilling_mcp_token"
+const val SETTINGS_KEY_MCP_PORT = "shilling_mcp_port"

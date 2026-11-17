@@ -23,6 +23,8 @@ import finance.shilling.shared.data.IdGenerator
 import finance.shilling.shared.data.initKoin
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.sync.createSyncHttpClient
+import finance.shilling.shared.mcp.McpAccess
+import finance.shilling.shared.mcp.McpHost
 import finance.shilling.shared.db.ShillingDatabase
 import finance.shilling.shared.ui.AppBootstrapScaffoldConfig
 import finance.shilling.shared.ui.ShillingAppBootstrap
@@ -91,8 +93,10 @@ fun main() {
         val driver = WebWorkerDriver(Worker("sqldelight.worker.js"))
         (ShillingDatabase.Schema.create(driver) as QueryResult.AsyncValue).await()
         (driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version};", 0) as QueryResult.AsyncValue).await()
-        initKoin(webPlatformModule(ShillingDatabase(driver)), sessionModule).get<AppSession>().start()
+        val koin = initKoin(webPlatformModule(ShillingDatabase(driver)), sessionModule)
+        koin.get<AppSession>().start()
         koinReady = true
+        koin.get<McpAccess>().resume()
     }
     ComposeViewport(document.body!!) {
         if (!koinReady) {
@@ -134,6 +138,8 @@ private fun webPlatformModule(db: ShillingDatabase) = module {
     single<IdGenerator> { WasmIdGenerator() }
     single<ReceiptFileStore> { WasmReceiptFileStore(get()) }
     single { createSyncHttpClient() }
+    // Assistant (MCP) access needs the Tauri shell's loopback server; browsers don't get it.
+    if (isTauriEnvironment()) single<McpHost> { TauriMcpHost(MainScope()) }
     single {
         WebRtcPlatform(
             createClient = { currentIceServers ->

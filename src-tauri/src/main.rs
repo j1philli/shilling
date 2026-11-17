@@ -1,5 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod mcp;
+
 use tauri::menu::{MenuBuilder, PredefinedMenuItem, SubmenuBuilder};
 #[cfg(target_os = "macos")]
 use tauri::Manager;
@@ -30,6 +32,12 @@ fn install_unified_toolbar(window: &tauri::WebviewWindow) -> tauri::Result<()> {
 
 fn main() {
     let mut builder = tauri::Builder::default()
+        .manage(mcp::McpState::default())
+        .invoke_handler(tauri::generate_handler![
+            mcp::mcp_start,
+            mcp::mcp_stop,
+            mcp::mcp_respond
+        ])
         .plugin(tauri_plugin_shell::init())
         .plugin(
             tauri_plugin_log::Builder::new()
