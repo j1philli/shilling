@@ -238,6 +238,14 @@ target deployment before raising limits. TURN traffic adds bandwidth cost.
 
 ## Live acceptance test
 
+**Integration status (2026-11-17):** the process-level scripts below still configure
+an HTTP loopback signaling URL and fail before transfer under the current HTTPS-only
+client policy. They need a trusted TLS fixture before their earlier recovery results
+can validate this merged revision. The regular in-process JVM WebRTC test uses TLS.
+Native iOS Settings has moved to SwiftUI; the cloud recovery controls currently exist
+only in Compose Settings and still need a native iOS counterpart.
+
+
 On macOS with OrbStack, run `scripts/test-live-backup.sh`. It packages and
 launches the production signaling server and backup worker in separate processes,
 uses temporary policy/storage directories, and forces a JVM client through a local
