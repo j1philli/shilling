@@ -14,14 +14,15 @@ struct ReceiptEditorScreen: View {
     @State private var notes = ""
     @State private var loaded = false
     @State private var toast: Toast?
-    @State private var preview: URL?
+    @StateObject private var preview = ReceiptPreviewModel()
     @State private var picking = false
     let launchCamera: Bool
     let onDone: (Toast) -> Void
 
     init(receiptId: String?, launchCamera: Bool = false, onDone: @escaping (Toast) -> Void) {
-        let screen = ReceiptEditorScreenModel(receiptId: receiptId)
-        _model = StateObject(wrappedValue: FlowModel(screen: screen, initial: screen.state, flow: screen.stateFlow))
+        _model = StateObject(wrappedValue: FlowModel(
+            create: { ReceiptEditorScreenModel(receiptId: receiptId) }, state: { $0.state }, flow: { $0.stateFlow }
+        ))
         self.launchCamera = launchCamera
         self.onDone = onDone
     }
@@ -101,7 +102,7 @@ struct ReceiptEditorScreen: View {
                 attach(postingId)
             }
         }
-        .quickLookPreview($preview)
+        .quickLookPreview($preview.url)
         .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .task { await model.observe() }
         .onChange(of: state.load) { _, _ in syncFields() }
@@ -126,10 +127,13 @@ struct ReceiptEditorScreen: View {
     }
 
     private func open() {
-        if let path = screen.previewPath() {
-            preview = URL(fileURLWithPath: path)
-        } else {
-            toast = Toast("Couldn't open \(model.state.title)")
+        Task {
+            let result: String?? = try? await asyncFunction(for: screen.previewPath())
+            if let path = result ?? nil {
+                preview.url = URL(fileURLWithPath: path)
+            } else {
+                toast = Toast("Couldn't open \(model.state.title)")
+            }
         }
     }
 

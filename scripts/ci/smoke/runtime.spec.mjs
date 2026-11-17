@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.beforeAll(async ({ request }) => {
-  for (const url of ['http://server:8081/health', 'http://hosted-server:8081/health', 'http://web/api/config', 'http://hosted-web/api/config']) {
+  for (const url of ['http://server:8081/health', 'http://hosted-server:8081/health', 'https://web/api/config', 'http://hosted-web/api/config']) {
     await expect.poll(async () => {
       try { return (await request.get(url)).status(); } catch { return 0; }
     }, { timeout: 60_000 }).toBe(200);
@@ -11,7 +11,7 @@ test.beforeAll(async ({ request }) => {
 test('self-hosted image boots the app and completes onboarding', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('http://web');
+  await page.goto('https://web');
   await expect(page.getByRole('button', { name: 'Continue', exact: true })).toBeVisible();
   expect(await page.evaluate(() => crossOriginIsolated)).toBe(true);
   // Compose's accessibility elements sit beneath the canvas. Click their
@@ -36,7 +36,7 @@ test('hosted web bundle renders welcome and sign-in form', async ({ page }) => {
   });
   await page.goto('http://hosted-web');
   await expect(page.getByText('Welcome to Shilling', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: /^Sign in Sign in/ }).click({ force: true });
+  await page.getByRole('button', { name: /^Continue with email/ }).click({ force: true });
   await expect(page.getByText('Sign in or create an account to continue.', { exact: true })).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -50,6 +50,10 @@ test('packaged server enforces hosted authentication', async ({ request, page })
   const household = await request.get('http://hosted-web/api/household', { headers: { Authorization: `Bearer ${token}` } });
   expect(household.status()).toBe(200);
   expect(await household.json()).toEqual({ householdId: 'smoke-household' });
+  expect((await request.get('http://hosted-web/api/spaces')).status()).toBe(401);
+  const spaces = await request.get('http://hosted-web/api/spaces', { headers: { Authorization: `Bearer ${token}` } });
+  expect(spaces.status()).toBe(200);
+  expect((await spaces.json()).spaces).toEqual([{ id: 'smoke-household', name: 'Home', kind: 'home', role: 'owner' }]);
   await page.goto('http://hosted-web/api/config');
   for (const [accessToken, householdId] of [[null, 'smoke-household'], ['invalid', 'smoke-household'], [token, 'another-household']]) {
     const code = await page.evaluate(({ accessToken, householdId }) => new Promise((resolve, reject) => {

@@ -1,6 +1,10 @@
 package finance.shilling.shared.data.sync
 
+import finance.shilling.shared.data.auth.AccountDeletionException
+import finance.shilling.shared.data.auth.AccountDeletionResult
 import finance.shilling.shared.data.auth.AuthService
+import finance.shilling.core.auth.HostedAccountDeletionConflict
+import finance.shilling.core.auth.HostedAccountDeletionRequest
 import finance.shilling.core.auth.HostedHouseholdResponse
 import finance.shilling.core.auth.HostedEntitlementsResponse
 import finance.shilling.core.auth.HostedBillingConfig
@@ -12,7 +16,10 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.encodeURLPathPart
+import io.ktor.http.isSuccess
+import io.ktor.http.contentType
 import io.ktor.client.plugins.websocket.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
@@ -24,6 +31,11 @@ class ServerApi(
     private val baseUrl: String,
     private val authService: AuthService? = null
 ) {
+    // Validate when making a request so bootstrap can report old HTTP settings as
+    // unavailable while preserving local access. Never send a token over HTTP.
+    private val secureBaseUrl: String
+        get() = secureServerUrl(baseUrl).toString().trimEnd('/')
+
     private suspend fun HttpRequestBuilder.withAuth() {
         authService?.refreshTokenIfNeeded()?.let { token ->
             header("Authorization", "Bearer $token")
@@ -31,48 +43,74 @@ class ServerApi(
     }
 
     suspend fun fetchIceServers(allowRelay: Boolean = false): IceServersResponse =
-        httpClient.get("$baseUrl/api/ice-servers?allowRelay=$allowRelay") {
+        httpClient.get("$secureBaseUrl/api/ice-servers?allowRelay=$allowRelay") {
             expectSuccess = true
             withAuth()
         }.body()
 
     suspend fun fetchConfig(): ServerConfig =
-        httpClient.get("$baseUrl/api/config") {
+        httpClient.get("$secureBaseUrl/api/config") {
             expectSuccess = true
         }.body()
 
     suspend fun fetchHousehold(): HostedHouseholdResponse =
-        httpClient.get("$baseUrl/api/household") {
+        httpClient.get("$secureBaseUrl/api/household") {
             expectSuccess = true
             withAuth()
         }.body()
 
     suspend fun fetchEntitlements(): HostedEntitlementsResponse =
-        httpClient.get("$baseUrl/api/tier?refresh=true") {
+        httpClient.get("$secureBaseUrl/api/tier?refresh=true") {
             expectSuccess = true
             withAuth()
         }.body()
 
     suspend fun fetchBillingConfig(): HostedBillingConfig =
-        httpClient.get("$baseUrl/api/billing/config") {
+        httpClient.get("$secureBaseUrl/api/billing/config") {
             expectSuccess = true
             withAuth()
         }.body()
 
+    suspend fun fetchSpaces(): finance.shilling.core.auth.HostedSpacesResponse =
+        httpClient.get("$secureBaseUrl/api/spaces") { expectSuccess = true; withAuth() }.body()
+
+    suspend fun spaceCommand(command: finance.shilling.core.auth.HostedSpaceCommand): finance.shilling.core.auth.HostedSpacesResponse =
+        httpClient.post("$secureBaseUrl/api/spaces") {
+            expectSuccess = true; withAuth()
+            contentType(io.ktor.http.ContentType.Application.Json)
+            setBody(command)
+        }.body()
+
     suspend fun fetchDevices(): List<String> =
-        httpClient.get("$baseUrl/api/devices") {
+        httpClient.get("$secureBaseUrl/api/devices") {
             expectSuccess = true
             withAuth()
         }.body()
 
     suspend fun fetchDeviceDetails(): List<RegisteredDevice> =
-        httpClient.get("$baseUrl/api/devices/details") {
+        httpClient.get("$secureBaseUrl/api/devices/details") {
             expectSuccess = true
             withAuth()
         }.body()
 
+    suspend fun deleteAccount(acknowledgeActiveSubscription: Boolean): AccountDeletionResult {
+        val response = httpClient.post("$baseUrl/api/account/delete") {
+            withAuth()
+            contentType(io.ktor.http.ContentType.Application.Json)
+            setBody(HostedAccountDeletionRequest(acknowledgeActiveSubscription))
+            // Deletion fans out to Supabase and RevenueCat; allow more than the bootstrap timeout.
+            timeout { requestTimeoutMillis = 30_000; socketTimeoutMillis = 30_000 }
+        }
+        return when {
+            response.status.isSuccess() -> AccountDeletionResult.Deleted
+            response.status == HttpStatusCode.Conflict ->
+                AccountDeletionResult.SubscriptionActive(response.body<HostedAccountDeletionConflict>().activeSubscriptionPlan)
+            else -> throw AccountDeletionException("Couldn't delete your account. Check your connection and try again.")
+        }
+    }
+
     suspend fun removeDevice(deviceId: String) {
-        httpClient.delete("$baseUrl/api/devices/${deviceId.encodeURLPathPart()}") {
+        httpClient.delete("$secureBaseUrl/api/devices/${deviceId.encodeURLPathPart()}") {
             expectSuccess = true
             withAuth()
         }

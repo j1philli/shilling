@@ -8,7 +8,9 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -18,6 +20,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,6 +31,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -39,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import com.russhwolf.settings.Settings
 import finance.shilling.shared.presentation.AssistantAccessUiState
 import finance.shilling.shared.presentation.AssistantAccessViewModel
+import finance.shilling.shared.presentation.AccountDeletionStep
 import finance.shilling.shared.presentation.DeveloperInfo
 import finance.shilling.shared.presentation.SettingsAccount
 import finance.shilling.shared.presentation.SettingsUiState
@@ -51,6 +57,8 @@ import finance.shilling.shared.presentation.fullLabel
 import finance.shilling.shared.presentation.label
 import finance.shilling.shared.session.HostedCredentialsMode
 import kotlinx.coroutines.launch
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.ktor.http.encodeURLPathPart
 import kotlinx.datetime.DayOfWeek
 import org.koin.compose.koinInject
@@ -64,7 +72,7 @@ fun SettingsView(
     assistantViewModel: AssistantAccessViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val devicesState by devicesViewModel.state.collectAsState()
+    val devicesState by devicesViewModel.state.collectAsStateWithLifecycle(minActiveState = Lifecycle.State.RESUMED)
     val assistantState by assistantViewModel.state.collectAsState()
     val snackbar = LocalSnackbarController.current
     val showDeveloperTools = developerToolsEnabled || state.developerToolsUnlocked
@@ -76,7 +84,7 @@ fun SettingsView(
 
             state.account?.let { account ->
                 ListSectionHeader("Account")
-                AccountSection(account, viewModel)
+                AccountSection(account, viewModel, devicesState)
             }
             state.sync?.let { sync ->
                 ListSectionHeader("Sync")
@@ -88,12 +96,27 @@ fun SettingsView(
                 if (!devicesState.selfHosted) {
                     ListSectionHeader("Subscription")
                     HostedBillingSection(devicesState, devicesViewModel)
+                    ListSectionHeader("Finance spaces")
+                    HostedSpacesSection()
                 }
             }
 
             if (assistantState.available) {
                 ListSectionHeader(assistantState.title)
                 AssistantAccessSection(assistantState, assistantViewModel)
+            }
+
+            ListSectionHeader("Product analytics")
+            ShillingCard {
+                Text("Share usage events")
+                Text(state.analyticsNotice, style = MaterialTheme.typography.bodySmall)
+                Switch(
+                    modifier = Modifier.semantics { contentDescription = "Share usage events" },
+                    checked = state.analyticsConsent,
+                    onCheckedChange = viewModel::setAnalyticsConsent,
+                    enabled = state.analyticsConfigured
+                )
+                if (!state.analyticsConfigured) Text("Available after a PostHog project is configured.")
             }
 
             ListSectionHeader("About")
@@ -116,6 +139,7 @@ fun SettingsView(
             if (showDeveloperTools && developer != null) {
                 ListSectionHeader("Developer tools")
                 DeveloperToolsSection(developer, viewModel)
+                AnalyticsConfigSection(viewModel)
             }
         }
     }
@@ -148,8 +172,8 @@ private fun HostedBillingSection(state: HostedDevicesUiState, viewModel: HostedD
 
     ShillingCard {
         Text("Hosted plan", style = MaterialTheme.typography.titleMedium)
-        Text("Your plan: ${state.accountPlan?.name?.lowercase()?.replaceFirstChar { it.uppercase() } ?: "Loading"}")
-        Text(if (state.bankReadingEnabled) "Bank reading is included when available" else "Bank reading requires Silver")
+        Text("Your plan: ${state.accountPlanLabel ?: "Loading"}")
+        Text("Live bank connections are deferred and unavailable")
         if (!state.canPurchase) {
             Text("Create an account to subscribe and restore purchases on other devices.")
         } else if (PlatformBilling.usesNativeStore) {
@@ -312,6 +336,22 @@ private fun AssistantAccessSection(state: AssistantAccessUiState, viewModel: Ass
 }
 
 @Composable
+private fun AnalyticsConfigSection(viewModel: SettingsViewModel) {
+    var host by remember { mutableStateOf(viewModel.analyticsHost) }
+    var token by remember { mutableStateOf(viewModel.analyticsProjectToken) }
+    val snackbar = LocalSnackbarController.current
+    ShillingCard {
+        Text("PostHog project", style = MaterialTheme.typography.titleMedium)
+        OutlinedTextField(value = host, onValueChange = { host = it }, label = { Text("HTTPS host") })
+        OutlinedTextField(value = token, onValueChange = { token = it }, label = { Text("Project token") })
+        Button(onClick = {
+            val valid = viewModel.saveAnalyticsConfig(host, token)
+            snackbar.show(if (valid) "PostHog project saved" else "Enter an HTTPS host and project token")
+        }) { Text("Save PostHog project") }
+    }
+}
+
+@Composable
 private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewModel) {
     val settings = koinInject<Settings>()
     val snackbar = LocalSnackbarController.current
@@ -356,7 +396,7 @@ private fun AppearanceSection(state: SettingsUiState, viewModel: SettingsViewMod
 }
 
 @Composable
-private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewModel) {
+private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewModel, devices: HostedDevicesUiState) {
     val scope = rememberCoroutineScope()
     var confirming by remember { mutableStateOf(false) }
     var password by remember { mutableStateOf("") }
@@ -417,7 +457,19 @@ private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewMode
         }
         accountMessage?.let { Text(it) }
         OutlinedButton(onClick = { confirming = true }) { Text(account.actionLabel) }
+        if (account is SettingsAccount.SignedIn) {
+            TextButton(
+                onClick = { viewModel.startAccountDeletion(devices.accountPlan) },
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) { Text(AccountDeletionStep.ACTION_LABEL) }
+            Text(
+                AccountDeletionStep.FOOTNOTE,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
+    AccountDeletionDialogs(viewModel, devices)
 
     if (confirming) {
         ConfirmDialog(
@@ -427,6 +479,64 @@ private fun AccountSection(account: SettingsAccount, viewModel: SettingsViewMode
             destructive = account.confirm.destructive,
             onConfirm = { scope.launch { viewModel.confirmAccountAction() } },
             onDismiss = { confirming = false }
+        )
+    }
+}
+
+@Composable
+private fun AccountDeletionDialogs(viewModel: SettingsViewModel, devices: HostedDevicesUiState) {
+    val step by viewModel.deletion.collectAsState()
+    val scope = rememberCoroutineScope()
+    val snackbar = LocalSnackbarController.current
+    val uriHandler = LocalUriHandler.current
+
+    when (val current = step) {
+        AccountDeletionStep.Idle -> Unit
+        is AccountDeletionStep.SubscriptionWarning -> {
+            // Native stores expose a management URL; web purchasers use their billing email.
+            var managementUrl by remember(current) { mutableStateOf<String?>(null) }
+            LaunchedEffect(current) {
+                val config = devices.billingConfig ?: return@LaunchedEffect
+                val key = PlatformBilling.publicKey(config) ?: return@LaunchedEffect
+                val userId = devices.userId ?: return@LaunchedEffect
+                if (!PlatformBilling.usesNativeStore) return@LaunchedEffect
+                managementUrl = runCatching {
+                    PlatformBilling.configure(key, userId)
+                    PlatformBilling.managementUrl()
+                }.getOrNull()
+            }
+            AlertDialog(
+                onDismissRequest = viewModel::cancelAccountDeletion,
+                title = { Text(current.title) },
+                text = { Text(current.message) },
+                confirmButton = {
+                    TextButton(onClick = viewModel::continueAccountDeletion) { Text(current.continueLabel) }
+                },
+                dismissButton = {
+                    managementUrl?.let { url ->
+                        TextButton(onClick = { uriHandler.openUri(url) }) { Text(current.manageLabel) }
+                    }
+                    TextButton(onClick = viewModel::cancelAccountDeletion) { Text("Cancel") }
+                }
+            )
+        }
+        is AccountDeletionStep.Confirm -> ConfirmDialog(
+            title = current.confirmCopy.title,
+            message = current.confirmCopy.message,
+            confirmLabel = current.confirmCopy.confirmLabel,
+            destructive = current.confirmCopy.destructive,
+            onConfirm = {
+                scope.launch {
+                    viewModel.confirmAccountDeletion(current.acknowledgeActiveSubscription)?.let { snackbar.show(it) }
+                }
+            },
+            onDismiss = viewModel::cancelAccountDeletion
+        )
+        AccountDeletionStep.Deleting -> AlertDialog(
+            onDismissRequest = {},
+            confirmButton = {},
+            title = { Text(AccountDeletionStep.DELETING_LABEL) },
+            text = { CircularProgressIndicator(modifier = Modifier.size(24.dp)) }
         )
     }
 }

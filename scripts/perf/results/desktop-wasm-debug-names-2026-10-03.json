@@ -1,0 +1,21 @@
+{
+  "fullBytes": 22861768,
+  "shippedBytes": 15622459,
+  "savedBytes": 7239309,
+  "reductionPercent": 31.66556934704262,
+  "fullSha256": "62c31faac595be99486720bd8751f6d0b0bf05d48c60a933a7aaab593c154da9",
+  "shippedSha256": "0ffe5ae6bdefe54249f3a580239df0c6238ee76129e29b1e0a83d3cef7513e0e",
+  "executableSectionsIdentical": true,
+  "otherCustomSectionsIdentical": true,
+  "moduleAndFunctionNameSubsectionsIdentical": true,
+  "engineValidation": {
+    "full": true,
+    "shipped": true
+  },
+  "removedNameSubsections": [
+    2,
+    4,
+    7,
+    10
+  ]
+}

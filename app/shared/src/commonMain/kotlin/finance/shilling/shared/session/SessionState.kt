@@ -54,6 +54,7 @@ sealed interface SessionPhase {
     data class Ready(
         val authService: AuthService,
         val featureGate: FeatureGate,
-        val selfHosted: Boolean
+        val selfHosted: Boolean,
+        val spaceId: String = "__local__"
     ) : SessionPhase
 }

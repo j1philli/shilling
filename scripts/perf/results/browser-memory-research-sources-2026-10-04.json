@@ -1,0 +1,83 @@
+{
+  "accessed": "2026-10-04",
+  "sources": [
+    {
+      "url": "https://lists.gnucash.org/pipermail/gnucash-user/2025-August/117398.html",
+      "kind": "first-hand user measurement on official project list",
+      "app": "GnuCash 4.13",
+      "platform": "Windows 11",
+      "reportedMemory": "160\u2013170 MB loaded; approximately 280 MB during loading",
+      "workload": "20 years of records; file mentioned as 60 MB",
+      "limitations": "Task Manager metric; not same hardware, version, dataset or OS"
+    },
+    {
+      "url": "https://community.alzex.com/d/1601-alzex-running-slowly-on-macos-tahoe",
+      "kind": "vendor community support reply",
+      "app": "Alzex Finance",
+      "platform": "macOS before Tahoe",
+      "reportedMemory": "100\u2013300 MB described as normal even with large databases",
+      "limitations": "Support estimate without exact version, dataset or reproducible protocol; Tahoe report is a regression, not typical usage"
+    },
+    {
+      "url": "https://community.quicken.com/discussion/7974432/cloud-reset-causes-memory-leak-out-of-memory-crash-on-mac",
+      "kind": "first-hand user bug report",
+      "app": "Quicken Classic Business & Personal beta 9.1.0",
+      "platform": "macOS 26.5.1",
+      "reportedMemory": "approximately 500 MB before cloud-reset leak",
+      "workload": "5502 attachments",
+      "limitations": "Single bug-report baseline, not a benchmark; later runaway usage excluded"
+    },
+    {
+      "url": "https://github.com/tauri-apps/tauri/issues/5889",
+      "kind": "first-hand comparative experiment",
+      "date": "2022-12-21",
+      "reportedMemory": "Postman web: Tauri 421 MB, Safari 471 MB, Electron 337 MB, Chrome 381 MB on macOS 12.6.1; vscode.dev: Tauri 429 MB, Electron 332 MB",
+      "limitations": "Old versions; different apps/hardware; issue questions shared-memory accounting; contextual only"
+    },
+    {
+      "url": "https://tauri-apps.github.io/benchmark_results/",
+      "kind": "official methodology",
+      "finding": "Memory results are Linux-only maximum usage from time -v; not a macOS loaded-budget baseline"
+    },
+    {
+      "url": "https://v2.tauri.app/concept/process-model/",
+      "kind": "official architecture",
+      "finding": "Tauri separates Rust core and OS webview; macOS uses WKWebView"
+    },
+    {
+      "url": "https://developer.chrome.com/docs/devtools/memory-problems",
+      "kind": "official measurement guidance",
+      "finding": "OS memory footprint and JavaScript heap are distinct; no universal good memory number"
+    },
+    {
+      "url": "https://docs.webkit.org/Infrastructure/MemoryInspection.html",
+      "kind": "official measurement guidance",
+      "finding": "macOS physical footprint includes dirty/swapped allocations; allocation and region inspection have different scopes"
+    },
+    {
+      "url": "https://actualbudget.org/docs/install/",
+      "kind": "official product architecture",
+      "finding": "Actual supports browser-only local data and an optional server; hosting memory limits are not client footprint"
+    },
+    {
+      "url": "https://developer.apple.com/documentation/safari-developer-tools/webdriver",
+      "kind": "official automation behavior",
+      "finding": "Safari automated sessions isolate browsing data; local session creation requires remote automation setting, disabled on this machine"
+    },
+    {
+      "url": "https://webkit.org/blog/17899/introducing-the-jetstream-3-benchmark-suite/",
+      "kind": "official engine engineering report",
+      "finding": "WasmGC object layout and allocation/collection changed for Kotlin and other languages; cited benchmark improvements concern performance, not a claimed Shilling RAM reduction."
+    },
+    {
+      "url": "https://v8.dev/blog/wasm-gc-porting",
+      "kind": "official engine documentation",
+      "finding": "Managed WasmGC allocations are distinct from linear memory capacity."
+    },
+    {
+      "url": "https://actualbudget.org/docs/transactions/importing/",
+      "kind": "official import documentation",
+      "finding": "Local CSV import workflow and duplicate handling."
+    }
+  ]
+}

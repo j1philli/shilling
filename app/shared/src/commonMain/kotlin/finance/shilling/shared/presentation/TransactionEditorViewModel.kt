@@ -8,6 +8,8 @@ import finance.shilling.shared.data.PostingWithDetails
 import finance.shilling.shared.data.Receipt
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.ScheduleType
+import finance.shilling.shared.data.analytics.ProductAnalytics
+import finance.shilling.shared.data.analytics.ProductEvent
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.PostingRepository
@@ -76,7 +78,8 @@ class TransactionEditorViewModel(
     categoryRepository: CategoryRepository,
     private val receiptRepository: ReceiptRepository,
     private val fileStore: ReceiptFileStore,
-    private val idGenerator: IdGenerator
+    private val idGenerator: IdGenerator,
+    private val analytics: ProductAnalytics
 ) : ViewModel() {
     private val form = EditorForm(TransactionFields(), if (postingId == null) EditorLoad.READY else EditorLoad.LOADING)
     private var existing: PostingWithDetails? = null
@@ -102,7 +105,8 @@ class TransactionEditorViewModel(
             f
         }
         build(fields, l, accounts.map { Choice(it.id, it.name) }, categories.map { Choice(it.id, it.name) }, attached)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, TransactionEditorUiState(load = form.load, isNew = postingId == null))
+    }.stateIn(viewModelScope, SharingStarted.Eagerly,
+        TransactionEditorUiState(load = form.load, isNew = postingId == null, fields = form.fields))
 
     init {
         if (postingId != null) {
@@ -148,7 +152,7 @@ class TransactionEditorViewModel(
     fun setCategory(id: String?) = form.update { it.copy(categoryId = id) }
 
     suspend fun save(): String? {
-        if (!state.value.saveEnabled) return null
+        if (form.load != EditorLoad.READY || !canSave(form.fields)) return null
         val f = form.fields
         val amount = parseAmountInput(f.amountText) ?: return null
         val from = f.accountId ?: return null
@@ -160,6 +164,7 @@ class TransactionEditorViewModel(
             } else {
                 postingRepository.recordAdHoc(f.title.trim(), amount, f.type, from, f.categoryId, date)
             }
+            analytics.captureAsync(ProductEvent.POSTING_CREATED)
             return "Transaction added"
         }
         val posting = details.posting
@@ -187,16 +192,16 @@ class TransactionEditorViewModel(
     suspend fun attachReceipt(fileName: String, bytes: ByteArray): String? {
         val postingId = debitId.value ?: return null
         val receiptId = idGenerator.newId()
-        fileStore.store(receiptId, fileName, bytes)
-        receiptRepository.save(
+        receiptRepository.saveWithFile(
             Receipt(
                 id = receiptId,
                 postingId = postingId,
                 filePath = fileName,
                 originalName = fileName,
                 addedAt = Clock.System.now().toEpochMilliseconds()
-            )
+            ), fileStore, bytes
         )
+        analytics.captureAsync(ProductEvent.RECEIPT_ATTACHED)
         return "Receipt attached"
     }
 
@@ -215,14 +220,13 @@ class TransactionEditorViewModel(
     ): TransactionEditorUiState {
         val details = existing
         val isScheduled = details?.posting?.scheduleId != null
+        val linkedSpaceTransfer = details?.posting?.pairId?.startsWith(finance.shilling.shared.data.store.SPACE_TRANSFER_PREFIX) == true
         val isTransfer = f.type == ScheduleType.TRANSFER
-        val amount = parseAmountInput(f.amountText)
-        val transferValid = !isTransfer || (f.toAccountId != null && f.toAccountId != f.accountId)
         return TransactionEditorUiState(
             load = l,
             isNew = details == null,
             title = details?.title ?: if (postingId == null) "New transaction" else "Transaction",
-            subtitle = details?.let { if (isScheduled) "Recorded from a schedule" else "One-off ${f.type.label.lowercase()}" },
+            subtitle = details?.let { if (linkedSpaceTransfer) "Linked space transfer. Edit both sides in Settings → Finance spaces." else if (isScheduled) "Recorded from a schedule" else "One-off ${f.type.label.lowercase()}" },
             fields = f,
             accounts = accounts,
             categories = categories,
@@ -235,7 +239,7 @@ class TransactionEditorViewModel(
             // Scheduled postings without their own category inherit the schedule's.
             categoryNoneLabel = if (isScheduled) "Same as schedule" else "Uncategorized",
             dateHint = if (isScheduled) "Changing the date may show the original occurrence as due again." else null,
-            deleteConfirm = details?.let {
+            deleteConfirm = details?.takeUnless { linkedSpaceTransfer }?.let {
                 ConfirmCopy(
                     title = "Delete transaction?",
                     message = if (isScheduled) {
@@ -249,8 +253,14 @@ class TransactionEditorViewModel(
             },
             showsReceipts = details != null,
             receipts = attached.map { AttachedReceiptUi(it, "Added ${formatTimestamp(it.addedAt)}") },
-            saveEnabled = l == EditorLoad.READY && f.title.isNotBlank() && amount != null && amount > 0 &&
-                f.accountId != null && transferValid
+            saveEnabled = l == EditorLoad.READY && canSave(f)
         )
+    }
+
+    private fun canSave(f: TransactionFields): Boolean {
+        if (existing?.posting?.pairId?.startsWith(finance.shilling.shared.data.store.SPACE_TRANSFER_PREFIX) == true) return false
+        val amount = parseAmountInput(f.amountText)
+        return f.title.isNotBlank() && amount != null && amount > 0 && f.accountId != null &&
+            (f.type != ScheduleType.TRANSFER || (f.toAccountId != null && f.toAccountId != f.accountId))
     }
 }

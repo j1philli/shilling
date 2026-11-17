@@ -4,6 +4,7 @@ import finance.shilling.shared.data.auth.AuthErrors
 
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutines
 import com.rickclephas.kmp.nativecoroutines.NativeCoroutinesState
+import finance.shilling.shared.presentation.AccountDeletionStep
 import finance.shilling.shared.presentation.CredentialsCopy
 import finance.shilling.shared.presentation.CredentialsOutcome
 import finance.shilling.shared.presentation.SettingsUiState
@@ -20,6 +21,18 @@ import kotlinx.datetime.DayOfWeek
 class SettingsScreenModel : IosViewModelHost() {
     private val viewModel = viewModel<SettingsViewModel>()
     private val devicesViewModel = viewModel<HostedDevicesViewModel>()
+    private val spacesViewModel = viewModel<finance.shilling.shared.presentation.HostedSpacesViewModel>()
+    @NativeCoroutinesState
+    val spacesState: StateFlow<finance.shilling.shared.presentation.HostedSpacesUiState> = spacesViewModel.state
+    val transferToday: String get() = spacesViewModel.transferToday
+    fun createTransferId(): String = spacesViewModel.newTransferId()
+    @NativeCoroutines
+    suspend fun transferAction(linkId: String, fromSpace: String, fromAccount: String, toSpace: String, toAccount: String, title: String, amount: String, date: String, delete: Boolean): String =
+        spacesViewModel.transferAction(linkId, fromSpace, fromAccount, toSpace, toAccount, title, amount, date, delete)
+    fun refreshSpaces() = spacesViewModel.refresh()
+    @NativeCoroutines
+    suspend fun spaceAction(action: String, spaceId: String?, name: String?, kind: String?, email: String?, role: String?, userId: String?, invitationId: String?, code: String?): String =
+        spacesViewModel.execute(finance.shilling.core.auth.HostedSpaceCommand(action, spaceId, name, kind, email, role, userId, invitationId, code))
 
     @NativeCoroutinesState
     val state: StateFlow<SettingsUiState> = viewModel.state
@@ -98,6 +111,10 @@ class SettingsScreenModel : IosViewModelHost() {
     }
     fun saveServerUrl(url: String): String = viewModel.saveServerUrl(url)
     fun saveHouseholdId(id: String): String = viewModel.saveHouseholdId(id)
+    fun setAnalyticsConsent(value: Boolean) = viewModel.setAnalyticsConsent(value)
+    fun saveAnalyticsConfig(host: String, projectToken: String): Boolean = viewModel.saveAnalyticsConfig(host, projectToken)
+    val analyticsHost: String get() = viewModel.analyticsHost
+    val analyticsProjectToken: String get() = viewModel.analyticsProjectToken
 
     @NativeCoroutines
     suspend fun submitCredentials(mode: HostedCredentialsMode, email: String, password: String): CredentialsOutcome {
@@ -125,6 +142,21 @@ class SettingsScreenModel : IosViewModelHost() {
 
     @NativeCoroutines
     suspend fun confirmAccountAction(): Unit = viewModel.confirmAccountAction()
+
+    @NativeCoroutinesState
+    val deletion: StateFlow<AccountDeletionStep> = viewModel.deletion
+    val deleteAccountLabel: String = AccountDeletionStep.ACTION_LABEL
+    val deleteAccountFootnote: String = AccountDeletionStep.FOOTNOTE
+    val deletingAccountLabel: String = AccountDeletionStep.DELETING_LABEL
+
+    fun startAccountDeletion() = viewModel.startAccountDeletion(devicesViewModel.state.value.accountPlan)
+    fun continueAccountDeletion() = viewModel.continueAccountDeletion()
+    fun cancelAccountDeletion() = viewModel.cancelAccountDeletion()
+
+    /** Null on success (the app returns to Welcome) or when a subscription reminder is shown. */
+    @NativeCoroutines
+    suspend fun confirmAccountDeletion(acknowledgeActiveSubscription: Boolean): String? =
+        viewModel.confirmAccountDeletion(acknowledgeActiveSubscription)
 
     @NativeCoroutines
     suspend fun addSampleData(): String = viewModel.addSampleData()

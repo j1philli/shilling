@@ -11,6 +11,10 @@ import finance.shilling.shared.data.LocalDataWiper
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.SETTINGS_KEY_SERVER_URL
 import finance.shilling.shared.data.SETTINGS_KEY_CLOUD_RELAY_ENABLED
+import finance.shilling.shared.data.SETTINGS_KEY_WELCOME_NOTICE
+import finance.shilling.shared.data.WELCOME_NOTICE_ACCOUNT_DELETED
+import finance.shilling.shared.data.auth.AccountDeletionException
+import finance.shilling.shared.data.auth.AccountDeletionResult
 import finance.shilling.shared.data.auth.AuthRuntime
 import finance.shilling.shared.data.auth.AuthService
 import finance.shilling.shared.data.auth.DeviceIdentity
@@ -46,6 +50,7 @@ import finance.shilling.shared.data.sync.FileTransferManager
 import finance.shilling.shared.data.sync.PeerConnectionStatus
 import finance.shilling.shared.data.sync.IncomingChangeRouter
 import finance.shilling.shared.data.sync.ServerApi
+import finance.shilling.shared.data.sync.secureServerUrl
 import finance.shilling.shared.data.sync.SignalingClient
 import finance.shilling.shared.data.sync.SyncConfig
 import finance.shilling.shared.data.sync.WebRtcConnectionManager
@@ -103,12 +108,9 @@ class AppSession(
     private val idGenerator: IdGenerator,
     private val httpClient: HttpClient,
     private val deviceIdentity: DeviceIdentity,
-    private val syncDeps: StoreSyncDeps,
-    private val localDataWiper: LocalDataWiper,
+    private val graphs: finance.shilling.shared.data.store.FinanceSpaceGraphs,
     private val webRtcPlatform: WebRtcPlatform,
-    private val fileStore: ReceiptFileStore,
     private val notifier: ChangeNotifier,
-    private val syncStoreFacade: SyncStoreFacade,
     private val peerConnectionStatus: PeerConnectionStatus,
     private val config: AppSessionConfig = AppSessionConfig()
 ) : SessionState, OnboardingActions {
@@ -256,7 +258,7 @@ class AppSession(
 
     override suspend fun continueSelfHosted(selectedUrl: String): Result<Unit> = onMain {
         validateSelfHostedServer(selectedUrl).onSuccess {
-            if (heldLocalData) localDataWiper.wipe()
+            if (heldLocalData) graphs.wipeAll()
             completeFirstLaunchOnboarding(settings, DeploymentSelection.SELF_HOSTED, selectedUrl)
             serverUrl = selectedUrl
             onboardingComplete = true
@@ -278,6 +280,31 @@ class AppSession(
      * the auth SDK restoring the old one from its own storage.
      */
     suspend fun startOver() = onMain {
+        signOutAndWipe()
+        resetOnboarding()
+    }
+
+    /**
+     * Settings "Delete account": the server removes the hosted account (memberships, devices,
+     * profile, Auth user, billing customer). Then this device ends the session, wipes its local
+     * data, and returns to Welcome. Other devices keep their own local copies.
+     */
+    suspend fun deleteHostedAccount(acknowledgeActiveSubscription: Boolean): Result<AccountDeletionResult> = onMain {
+        val service = authRuntime?.authService ?: startupIdentity?.authService
+            ?: return@onMain Result.failure(AccountDeletionException("Sign in to delete your account"))
+        val result = runCatching {
+            ServerApi(httpClient, serverUrl, service).deleteAccount(acknowledgeActiveSubscription)
+        }
+        if (result.getOrNull() == AccountDeletionResult.Deleted) {
+            signOutAndWipe()
+            settings.putString(SETTINGS_KEY_WELCOME_NOTICE, WELCOME_NOTICE_ACCOUNT_DELETED)
+            resetOnboarding()
+        }
+        result
+    }
+
+    /** Stop sync, end every auth session, and delete all local data. */
+    private suspend fun signOutAndWipe() {
         clearMainEffects(includeBootstrap = true)
         val activeServices = listOfNotNull(startupIdentity?.authService, authRuntime?.authService, welcomeAuthService)
         val services = if (activeServices.isEmpty() && savedDeploymentSelection(settings) == DeploymentSelection.HOSTED) {
@@ -288,8 +315,7 @@ class AppSession(
         services
             .distinct()
             .forEach { service -> runCatching { service.signOut() } }
-        localDataWiper.wipe()
-        resetOnboarding()
+        graphs.wipeAll()
     }
 
     /** After local data was wiped: back to a fresh Welcome. */
@@ -334,7 +360,29 @@ class AppSession(
 
     fun changeHouseholdId(id: String) {
         scope.launch {
+            stopSyncEffects()
+            graphs.activate(id)
             householdId = id
+            reconcile()
+        }
+    }
+
+    suspend fun applyHostedSpaces(data: finance.shilling.core.auth.HostedSpacesResponse) {
+        withContext(config.dispatcher) {
+            stopSyncEffects()
+            val selected = data.activeSpaceId
+            if (selected == null) {
+                startupIdentity = startupIdentity?.let { it.copy(bootstrapStatus = it.bootstrapStatus.copy(syncReady = false)) }
+                settings.remove(finance.shilling.shared.data.SETTINGS_KEY_HOSTED_HOUSEHOLD_ID)
+            } else {
+                val space = data.spaces.firstOrNull { it.id == selected } ?: error("Selected space membership is missing")
+                graphs.activate(space.id, space.name, space.kind)
+                settings.putString(finance.shilling.shared.data.SETTINGS_KEY_HOSTED_HOUSEHOLD_ID, selected)
+                startupIdentity = startupIdentity?.copy(activeHouseholdId = selected, hostedHouseholdId = selected)
+                householdId = selected
+            }
+            startupRetryToken += 1
+            settingsRevision += 1
             reconcile()
         }
     }
@@ -442,14 +490,15 @@ class AppSession(
 
         val wsUrl = serverUrl.replace("http://", "ws://").replace("https://", "wss://")
         val syncConfig = SyncConfig(wsUrl, activeHousehold, deviceId)
-        runtimeEffect.update(listOf(syncConfig, authService)) {
+        val graph = graphs.current
+        runtimeEffect.update(listOf(syncConfig, authService, graph)) {
             val runtime = createSyncRuntime(syncConfig, authService)
             syncRuntime = runtime
-            syncDeps.state = SyncState(peerSyncManager = runtime.peerSyncManager, deviceId = syncConfig.deviceId)
+            graph.sync.state = SyncState(peerSyncManager = runtime.peerSyncManager, deviceId = syncConfig.deviceId)
             // Stores outlive this runtime; don't leave them broadcasting through a stopped manager.
             onDispose {
                 syncRuntime = null
-                syncDeps.state = SyncState(peerSyncManager = null, deviceId = syncConfig.deviceId)
+                graph.sync.state = SyncState(peerSyncManager = null, deviceId = syncConfig.deviceId)
             }
         }
         val runtime = syncRuntime!!
@@ -505,7 +554,7 @@ class AppSession(
             featureGateKey = authService to selfHosted
             featureGate = FeatureGate(authService, selfHosted)
         }
-        _phase.value = SessionPhase.Ready(authService, featureGate!!, selfHosted)
+        _phase.value = SessionPhase.Ready(authService, featureGate!!, selfHosted, graphs.current.id)
     }
 
     private suspend fun runBootstrapLoop(
@@ -560,6 +609,10 @@ class AppSession(
             if (remaining > 0L) delay(remaining)
             manualRetryStartedAt = null
         }
+        if (resolution.identity.bootstrapStatus.syncReady && graphs.current.id != resolution.identity.activeHouseholdId) {
+            stopSyncEffects()
+            graphs.activate(resolution.identity.activeHouseholdId)
+        }
         authRuntime = resolution.authRuntime
         startupIdentity = resolution.identity
         statusFlow.value = resolution.identity.bootstrapStatus
@@ -587,7 +640,7 @@ class AppSession(
     }
 
     private suspend fun completeHostedOnboarding(wipeHeldData: Boolean) {
-        if (wipeHeldData) localDataWiper.wipe() else clearWelcomeHoldState(settings)
+        if (wipeHeldData) graphs.wipeAll() else clearWelcomeHoldState(settings)
         completeFirstLaunchOnboarding(settings, DeploymentSelection.HOSTED, serverUrl)
         onboardingComplete = true
         settingsRevision += 1
@@ -596,9 +649,10 @@ class AppSession(
     }
 
     private suspend fun validateSelfHostedServer(url: String): Result<Unit> {
-        val trimmedUrl = url.trim()
-        if (!trimmedUrl.startsWith("http://") && !trimmedUrl.startsWith("https://")) {
-            return Result.failure(IllegalArgumentException("Enter a full URL including http:// or https://."))
+        val trimmedUrl = try {
+            secureServerUrl(url).toString().trimEnd('/')
+        } catch (error: IllegalArgumentException) {
+            return Result.failure(error)
         }
         return runCatching {
             val serverConfig = ServerApi(httpClient, trimmedUrl).fetchConfig()
@@ -624,19 +678,26 @@ class AppSession(
             webRtcClient, signalingClient, syncConfig.deviceId,
             peerConnectionStatus = peerConnectionStatus,
             allowRelay = { cloudRelayEnabled },
-            delayFn = webRtcPlatform.delayFn
+            delayFn = webRtcPlatform.delayFn,
+            receiveMessageFn = webRtcPlatform.receiveMessage, onChannelOpen = webRtcPlatform.onChannelOpen
         )
         val incomingChangeRouter = IncomingChangeRouter(
-            syncStoreFacade,
+            graphs.current.facade,
             notifier,
             webRtcManager,
-            FileTransferManager(fileStore),
-            fileStore,
+            FileTransferManager(graphs.current.files),
+            graphs.current.files,
             delayFn = webRtcPlatform.delayFn,
             deviceId = syncConfig.deviceId,
-            idGenerator = idGenerator
+            idGenerator = idGenerator,
+            hasConnectedPeers = { peerConnectionStatus.connectedPeerIds.value.isNotEmpty() }
         )
         return SyncRuntime(signalingClient, webRtcManager, incomingChangeRouter)
+    }
+
+    private fun stopSyncEffects() {
+        syncEffect.clear()
+        runtimeEffect.clear()
     }
 
     private fun clearMainEffects(includeBootstrap: Boolean) {

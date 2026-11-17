@@ -15,6 +15,8 @@ export default defineConfig({
     navigationTimeout: 30_000,
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
-    launchOptions: { args: ['--unsafely-treat-insecure-origin-as-secure=http://web,http://hosted-web'] },
+    // The self-hosted image uses Caddy's internal CA; the hosted bundle is served over plain HTTP.
+    ignoreHTTPSErrors: true,
+    launchOptions: { args: ['--unsafely-treat-insecure-origin-as-secure=http://hosted-web'] },
   },
 });

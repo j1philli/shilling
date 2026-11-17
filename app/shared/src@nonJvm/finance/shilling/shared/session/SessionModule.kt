@@ -5,6 +5,7 @@ import finance.shilling.shared.data.CloudRelayCallback
 import finance.shilling.shared.data.ResetOnboardingCallback
 import finance.shilling.shared.data.RestartHostedLoginCallback
 import finance.shilling.shared.data.ServerUrlCallback
+import finance.shilling.shared.data.auth.DeleteHostedAccountCallback
 import finance.shilling.shared.data.auth.HostedBootstrapRetryCallback
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -20,12 +21,9 @@ val sessionModule: Module = module {
             idGenerator = get(),
             httpClient = get(),
             deviceIdentity = get(),
-            syncDeps = get(),
-            localDataWiper = get(),
+            graphs = get(),
             webRtcPlatform = get(),
-            fileStore = get(),
             notifier = get(),
-            syncStoreFacade = get(),
             peerConnectionStatus = get(),
             config = getOrNull() ?: AppSessionConfig()
         )
@@ -38,7 +36,9 @@ val sessionModule: Module = module {
     single { ResetOnboardingCallback(get<AppSession>()::startOver) }
     // Soft-return to Welcome while keeping local data for a matching re-login.
     single { RestartHostedLoginCallback(get<AppSession>()::restartHostedLogin) }
+    single { DeleteHostedAccountCallback(get<AppSession>()::deleteHostedAccount) }
     single { ServerUrlCallback(get<AppSession>()::changeServerUrl) }
     single { HouseholdIdCallback(get<AppSession>()::changeHouseholdId) }
+    single { finance.shilling.shared.presentation.SpaceSelectionCallback(get<AppSession>()::applyHostedSpaces) }
     single { CloudRelayCallback(get<AppSession>()::changeCloudRelay) }
 }

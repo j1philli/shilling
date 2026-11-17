@@ -10,6 +10,11 @@ import subprocess
 import sys
 import zipfile
 
+# Keep direct script execution and import-based workflow tests consistent.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from ios_provenance import load_candidate
+from apple_store import AppleAPI, approval, promote
+
 REPO = "j1philli/shilling"
 TARGETS = ("server", "web", "android", "ios", "linux", "windows", "macos")
 ROOT = Path(__file__).resolve().parents[2]
@@ -89,7 +94,7 @@ def release_notes(manifest):
     lines += ["", "Package status:"]
     caveats = {
         "android": "Android: debug-signed APK and unsigned release AAB; no Play upload.",
-        "ios": ("iOS: App Store-signed IPA for App Store Connect upload; not directly installable from GitHub. No automatic TestFlight/App Store upload."
+        "ios": ("iOS: promotes the tested, Apple-approved build to the App Store. The signed IPA is retained for provenance and is not directly installable from GitHub."
                 if any(name.endswith("_ios.ipa") for name in manifest.get("assets", {}))
                 else "iOS: unsigned development app archive; not installable on an iPhone. No TestFlight/App Store upload."),
         "macos": "macOS: unsigned universal DMG; not notarized.",
@@ -124,9 +129,14 @@ def main():
         shutil.copy2("deploy/self-host/compose.yaml", output / "compose.yaml")
         (output / "shilling.env.example").write_text(f"SHILLING_VERSION={tag}\n")
         assets += [output / "compose.yaml", output / "shilling.env.example"]
+    ios_candidate = None
+    if "ios" in targets:
+        ios_candidate = load_candidate("release-input/clients/ios", version, commit)
     manifest = {"version": version, "tag": tag, "commit": commit, "targets": targets,
                 "teamcity_build": os.environ.get("TEAMCITY_BUILD_ID"),
                 "assets": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in assets}}
+    if ios_candidate:
+        manifest["ios_candidate"] = ios_candidate
     manifest_path = output / "release-manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
     assets.append(manifest_path)
@@ -135,6 +145,19 @@ def main():
     notes_path.write_text(notes)
     print(f"Release {tag} from {commit}: {', '.join(targets)}", flush=True)
     print(notes, flush=True)
+    # An unapproved or mismatched iOS build blocks the entire release before
+    # tags, drafts, images, or hosted deployments are changed. Preview reports
+    # approval readiness but remains usable while Apple is reviewing the app.
+    apple_api = AppleAPI() if ios_candidate else None
+    ios_approval = None
+    if ios_candidate:
+        try:
+            ios_approval = approval(apple_api, ios_candidate)
+        except ValueError as error:
+            if dry_run != "1":
+                raise
+            print(f"iOS release blocked: {error}", flush=True)
+        (output / "ios-approval.json").write_text(json.dumps(ios_approval or {"ready": False}, indent=2) + "\n")
     if "server" in targets:
         run("python3", "scripts/ci/deploy-coolify.py", "--check-only")
     if dry_run == "1":
@@ -176,7 +199,7 @@ def main():
     if not release:
         args = ["gh", "release", "create", tag, "--repo", REPO, "--verify-tag", "--draft", "--title", tag,
                 "--notes-file", str(notes_path)]
-        # The current 0.x builds are development distributions, not store releases.
+        # GitHub prerelease labeling is independent of App Store approval.
         if version.startswith("0."):
             args.append("--prerelease")
         run(*args)
@@ -190,6 +213,9 @@ def main():
         run("gh", "release", "upload", tag, "release-output/server-deployment.json", "--repo", REPO, "--clobber")
     if "web" in targets:
         run("bash", "scripts/ci/deploy-hosted-web.sh", env=release_env)
+    if ios_candidate:
+        promote(apple_api, ios_candidate, ios_approval, output / "ios-deployment.json")
+        run("gh", "release", "upload", tag, "release-output/ios-deployment.json", "--repo", REPO, "--clobber")
     # Publish the release last. A failure above leaves a resumable draft.
     run("gh", "release", "edit", tag, "--repo", REPO, "--draft=false", "--latest=" + ("false" if version.startswith("0.") else "true"))
     print(f"Released {tag}: https://github.com/{REPO}/releases/tag/{tag}")

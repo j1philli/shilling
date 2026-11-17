@@ -4,9 +4,12 @@ import app.cash.sqldelight.async.coroutines.await
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.russhwolf.settings.Settings
 import finance.shilling.shared.data.IdGenerator
+import finance.shilling.shared.data.ReceiptFileReader
 import finance.shilling.shared.data.ReceiptFileStore
 import finance.shilling.shared.data.dataModule
+import finance.shilling.shared.data.store.FinanceSpaceGraphs
 import finance.shilling.shared.data.store.PostingRepository
+import finance.shilling.shared.data.store.ReceiptFileStoreFactory
 import finance.shilling.shared.db.ShillingDatabase
 import finance.shilling.shared.presentation.today
 import kotlinx.coroutines.runBlocking
@@ -49,7 +52,7 @@ class McpServerTest {
             single { db }
             single { Settings() }
             single<IdGenerator> { object : IdGenerator { override fun newId() = "id-${++nextId}" } }
-            single<ReceiptFileStore> { NoReceiptFiles }
+            single<ReceiptFileStoreFactory> { ReceiptFileStoreFactory { _, _ -> NoReceiptFiles } }
         }
         app = koinApplication { modules(platformModule, dataModule) }
         server = app.koin.get()
@@ -90,6 +93,26 @@ class McpServerTest {
         assertTrue(hint("list_accounts", "readOnlyHint"))
         assertTrue(!hint("record_transaction", "readOnlyHint"))
         assertTrue(hint("delete_transaction", "destructiveHint"))
+    }
+
+    @Test
+    fun toolsFollowTheActiveFinanceSpace() = runBlocking {
+        val spaces = app.koin.get<FinanceSpaceGraphs>()
+        // Leaving the pre-spaces local space claims its data, so start from a real home space.
+        spaces.activate("space-home")
+        callOk("save_account", """{"name":"Home checking"}""")
+        assertEquals(1, callOk("list_accounts")["accounts"]!!.jsonArray.size)
+
+        // Switching spaces in the app must move the assistant with it.
+        spaces.activate("space-work", "Work", "shared")
+        assertEquals(0, callOk("list_accounts")["accounts"]!!.jsonArray.size)
+        callOk("save_account", """{"name":"Work card"}""")
+        val work = callOk("list_accounts")["accounts"]!!.jsonArray
+        assertEquals(listOf("Work card"), work.map { it.jsonObject["name"]!!.jsonPrimitive.content })
+
+        spaces.activate("space-home")
+        val home = callOk("list_accounts")["accounts"]!!.jsonArray
+        assertEquals(listOf("Home checking"), home.map { it.jsonObject["name"]!!.jsonPrimitive.content })
     }
 
     @Test
@@ -207,6 +230,7 @@ class McpServerTest {
     private object NoReceiptFiles : ReceiptFileStore {
         override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {}
         override suspend fun read(receiptId: String): ByteArray? = null
+        override suspend fun openReader(receiptId: String): ReceiptFileReader? = null
         override suspend fun hasFile(receiptId: String): Boolean = false
         override suspend fun delete(receiptId: String) {}
         override suspend fun clearAll() {}

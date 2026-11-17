@@ -1,0 +1,2318 @@
+{
+  "scope": "Physical Pixel 6, isolated Release fixture, private-based audit worktree, 2026-09-29",
+  "method": "Three alternating process cohorts per variant and dataset; five samples per workload per process; synthetic data through Store5; driver row counters count rows delivered to Kotlin.",
+  "postings": 10000,
+  "schedules": 1000,
+  "retained": {
+    "250": {
+      "combined": {
+        "summary": {
+          "initial": {
+            "samples": 15,
+            "medianMs": 93.157,
+            "minMs": 61.006,
+            "maxMs": 134.764,
+            "medianRowsRead": 11250,
+            "medianSelectQueries": 6,
+            "medianDriverQueryMs": 119.387
+          },
+          "posting_edit": {
+            "samples": 15,
+            "medianMs": 102.976,
+            "minMs": 69.878,
+            "maxMs": 150.008,
+            "medianRowsRead": 10000,
+            "medianSelectQueries": 1,
+            "medianDriverQueryMs": 89.766
+          },
+          "schedule_edit": {
+            "samples": 15,
+            "medianMs": 22.771,
+            "minMs": 14.232,
+            "maxMs": 82.636,
+            "medianRowsRead": 1000,
+            "medianSelectQueries": 1,
+            "medianDriverQueryMs": 9.907
+          },
+          "receipt_edit": {
+            "samples": 15,
+            "medianMs": 26.142,
+            "minMs": 12.116,
+            "maxMs": 52.26,
+            "medianRowsRead": 251,
+            "medianSelectQueries": 3,
+            "medianDriverQueryMs": 9.571
+          }
+        },
+        "runs": [
+          {
+            "process": 0,
+            "metrics": [
+              {
+                "workload": "initial",
+                "run": 0,
+                "milliseconds": 66.971,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 61.466
+              },
+              {
+                "workload": "initial",
+                "run": 1,
+                "milliseconds": 84.576,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 114.992
+              },
+              {
+                "workload": "initial",
+                "run": 2,
+                "milliseconds": 112.886,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 121.086
+              },
+              {
+                "workload": "initial",
+                "run": 3,
+                "milliseconds": 87.974,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 94.699
+              },
+              {
+                "workload": "initial",
+                "run": 4,
+                "milliseconds": 62.244,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 75.084
+              },
+              {
+                "workload": "posting_edit",
+                "run": 0,
+                "milliseconds": 125.797,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 116.433
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 0,
+                "milliseconds": 21.239,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 7.128
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 0,
+                "milliseconds": 36.876,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 14.763
+              },
+              {
+                "workload": "posting_edit",
+                "run": 1,
+                "milliseconds": 94.886,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 80.79
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 1,
+                "milliseconds": 38.218,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 17.733
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 1,
+                "milliseconds": 36.493,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 12.664
+              },
+              {
+                "workload": "posting_edit",
+                "run": 2,
+                "milliseconds": 102.976,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 89.766
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 2,
+                "milliseconds": 73.797,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 58.583
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 2,
+                "milliseconds": 29.691,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 9.571
+              },
+              {
+                "workload": "posting_edit",
+                "run": 3,
+                "milliseconds": 113.865,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 101.204
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 3,
+                "milliseconds": 19.682,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 8.178
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 3,
+                "milliseconds": 16.123,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 6.49
+              },
+              {
+                "workload": "posting_edit",
+                "run": 4,
+                "milliseconds": 74.14,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 63.807
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 4,
+                "milliseconds": 17.302,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 8.958
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 4,
+                "milliseconds": 27.67,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 12.51
+              }
+            ]
+          },
+          {
+            "process": 1,
+            "metrics": [
+              {
+                "workload": "initial",
+                "run": 0,
+                "milliseconds": 95.653,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 84.131
+              },
+              {
+                "workload": "initial",
+                "run": 1,
+                "milliseconds": 100.206,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 119.387
+              },
+              {
+                "workload": "initial",
+                "run": 2,
+                "milliseconds": 99.986,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 144.732
+              },
+              {
+                "workload": "initial",
+                "run": 3,
+                "milliseconds": 74.457,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 128.295
+              },
+              {
+                "workload": "initial",
+                "run": 4,
+                "milliseconds": 134.764,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 211.319
+              },
+              {
+                "workload": "posting_edit",
+                "run": 0,
+                "milliseconds": 103.746,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 95.616
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 0,
+                "milliseconds": 14.232,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 7.807
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 0,
+                "milliseconds": 17.719,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 3.305
+              },
+              {
+                "workload": "posting_edit",
+                "run": 1,
+                "milliseconds": 116.647,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 103.153
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 1,
+                "milliseconds": 17.356,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 8.212
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 1,
+                "milliseconds": 25.921,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 12.429
+              },
+              {
+                "workload": "posting_edit",
+                "run": 2,
+                "milliseconds": 90.703,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 76.479
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 2,
+                "milliseconds": 61.012,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 29.174
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 2,
+                "milliseconds": 40.001,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 17.413
+              },
+              {
+                "workload": "posting_edit",
+                "run": 3,
+                "milliseconds": 118.855,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 103.058
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 3,
+                "milliseconds": 77.989,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 62.783
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 3,
+                "milliseconds": 26.142,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 6.663
+              },
+              {
+                "workload": "posting_edit",
+                "run": 4,
+                "milliseconds": 99.114,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 79.68
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 4,
+                "milliseconds": 64.957,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 48.745
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 4,
+                "milliseconds": 43.482,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 11.468
+              }
+            ]
+          },
+          {
+            "process": 2,
+            "metrics": [
+              {
+                "workload": "initial",
+                "run": 0,
+                "milliseconds": 61.006,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 65.899
+              },
+              {
+                "workload": "initial",
+                "run": 1,
+                "milliseconds": 104.18,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 139.731
+              },
+              {
+                "workload": "initial",
+                "run": 2,
+                "milliseconds": 85.771,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 139.933
+              },
+              {
+                "workload": "initial",
+                "run": 3,
+                "milliseconds": 111.86,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 156.63
+              },
+              {
+                "workload": "initial",
+                "run": 4,
+                "milliseconds": 93.157,
+                "selectQueries": 6,
+                "rowsRead": 11250,
+                "sqlQueryMs": 114.107
+              },
+              {
+                "workload": "posting_edit",
+                "run": 0,
+                "milliseconds": 150.008,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 141.836
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 0,
+                "milliseconds": 22.771,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 9.205
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 0,
+                "milliseconds": 12.116,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 2.982
+              },
+              {
+                "workload": "posting_edit",
+                "run": 1,
+                "milliseconds": 80.381,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 69.843
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 1,
+                "milliseconds": 18.074,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 9.907
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 1,
+                "milliseconds": 25.791,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 7.396
+              },
+              {
+                "workload": "posting_edit",
+                "run": 2,
+                "milliseconds": 105.748,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 94.513
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 2,
+                "milliseconds": 14.41,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 8.135
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 2,
+                "milliseconds": 16.239,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 4.804
+              },
+              {
+                "workload": "posting_edit",
+                "run": 3,
+                "milliseconds": 69.878,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 60.098
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 3,
+                "milliseconds": 82.636,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 53.575
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 3,
+                "milliseconds": 52.26,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 14.142
+              },
+              {
+                "workload": "posting_edit",
+                "run": 4,
+                "milliseconds": 88.585,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 81.001
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 4,
+                "milliseconds": 30.086,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 17.366
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 4,
+                "milliseconds": 17.621,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 4.675
+              }
+            ]
+          }
+        ]
+      },
+      "joined": {
+        "summary": {
+          "initial": {
+            "samples": 15,
+            "medianMs": 17.329,
+            "minMs": 10.389,
+            "maxMs": 53.22,
+            "medianRowsRead": 250,
+            "medianSelectQueries": 1,
+            "medianDriverQueryMs": 10.782
+          },
+          "posting_edit": {
+            "samples": 15,
+            "medianMs": 23.339,
+            "minMs": 14.479,
+            "maxMs": 51.645,
+            "medianRowsRead": 250,
+            "medianSelectQueries": 1,
+            "medianDriverQueryMs": 11.697
+          },
+          "schedule_edit": {
+            "samples": 15,
+            "medianMs": 22.963,
+            "minMs": 12.832,
+            "maxMs": 51.534,
+            "medianRowsRead": 250,
+            "medianSelectQueries": 1,
+            "medianDriverQueryMs": 11.766
+          },
+          "receipt_edit": {
+            "samples": 15,
+            "medianMs": 30.296,
+            "minMs": 19.319,
+            "maxMs": 77.247,
+            "medianRowsRead": 251,
+            "medianSelectQueries": 3,
+            "medianDriverQueryMs": 13.272
+          }
+        },
+        "runs": [
+          {
+            "process": 0,
+            "metrics": [
+              {
+                "workload": "initial",
+                "run": 0,
+                "milliseconds": 10.389,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 2.589
+              },
+              {
+                "workload": "initial",
+                "run": 1,
+                "milliseconds": 14.338,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 8.535
+              },
+              {
+                "workload": "initial",
+                "run": 2,
+                "milliseconds": 14.667,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 8.552
+              },
+              {
+                "workload": "initial",
+                "run": 3,
+                "milliseconds": 17.694,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 11.636
+              },
+              {
+                "workload": "initial",
+                "run": 4,
+                "milliseconds": 53.22,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 35.08
+              },
+              {
+                "workload": "posting_edit",
+                "run": 0,
+                "milliseconds": 40.117,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 24.665
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 0,
+                "milliseconds": 40.539,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 29.113
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 0,
+                "milliseconds": 30.296,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 14.498
+              },
+              {
+                "workload": "posting_edit",
+                "run": 1,
+                "milliseconds": 22.154,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 11.092
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 1,
+                "milliseconds": 21.89,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 10.991
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 1,
+                "milliseconds": 30.105,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 12.083
+              },
+              {
+                "workload": "posting_edit",
+                "run": 2,
+                "milliseconds": 18.984,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 10.713
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 2,
+                "milliseconds": 26.502,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 15.296
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 2,
+                "milliseconds": 67.612,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 37.645
+              },
+              {
+                "workload": "posting_edit",
+                "run": 3,
+                "milliseconds": 50.02,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 33.212
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 3,
+                "milliseconds": 51.534,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 32.664
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 3,
+                "milliseconds": 68.869,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 37.548
+              },
+              {
+                "workload": "posting_edit",
+                "run": 4,
+                "milliseconds": 30.783,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 20.336
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 4,
+                "milliseconds": 21.778,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 11.009
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 4,
+                "milliseconds": 63.666,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 34.931
+              }
+            ]
+          },
+          {
+            "process": 1,
+            "metrics": [
+              {
+                "workload": "initial",
+                "run": 0,
+                "milliseconds": 11.279,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 3.132
+              },
+              {
+                "workload": "initial",
+                "run": 1,
+                "milliseconds": 11.973,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 7.764
+              },
+              {
+                "workload": "initial",
+                "run": 2,
+                "milliseconds": 13.325,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 8.042
+              },
+              {
+                "workload": "initial",
+                "run": 3,
+                "milliseconds": 13.001,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 7.497
+              },
+              {
+                "workload": "initial",
+                "run": 4,
+                "milliseconds": 23.886,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 14.477
+              },
+              {
+                "workload": "posting_edit",
+                "run": 0,
+                "milliseconds": 18.557,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 10.647
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 0,
+                "milliseconds": 23.684,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 10.712
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 0,
+                "milliseconds": 29.247,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 8.832
+              },
+              {
+                "workload": "posting_edit",
+                "run": 1,
+                "milliseconds": 33.718,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 20.691
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 1,
+                "milliseconds": 12.832,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 6.401
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 1,
+                "milliseconds": 19.319,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 8.311
+              },
+              {
+                "workload": "posting_edit",
+                "run": 2,
+                "milliseconds": 15.203,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 7.672
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 2,
+                "milliseconds": 21.741,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 11.818
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 2,
+                "milliseconds": 26.264,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 12.404
+              },
+              {
+                "workload": "posting_edit",
+                "run": 3,
+                "milliseconds": 15.625,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 7.417
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 3,
+                "milliseconds": 21.428,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 10.776
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 3,
+                "milliseconds": 23.881,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 11.972
+              },
+              {
+                "workload": "posting_edit",
+                "run": 4,
+                "milliseconds": 31.653,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 19.587
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 4,
+                "milliseconds": 19.645,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 10.751
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 4,
+                "milliseconds": 34.635,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 13.272
+              }
+            ]
+          },
+          {
+            "process": 2,
+            "metrics": [
+              {
+                "workload": "initial",
+                "run": 0,
+                "milliseconds": 33.575,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 13.289
+              },
+              {
+                "workload": "initial",
+                "run": 1,
+                "milliseconds": 25.381,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 16.454
+              },
+              {
+                "workload": "initial",
+                "run": 2,
+                "milliseconds": 17.329,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 10.782
+              },
+              {
+                "workload": "initial",
+                "run": 3,
+                "milliseconds": 18.081,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 10.849
+              },
+              {
+                "workload": "initial",
+                "run": 4,
+                "milliseconds": 19.053,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 11.443
+              },
+              {
+                "workload": "posting_edit",
+                "run": 0,
+                "milliseconds": 51.645,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 32.89
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 0,
+                "milliseconds": 37.327,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 29.775
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 0,
+                "milliseconds": 77.247,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 36.551
+              },
+              {
+                "workload": "posting_edit",
+                "run": 1,
+                "milliseconds": 23.339,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 11.697
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 1,
+                "milliseconds": 22.963,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 10.651
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 1,
+                "milliseconds": 23.387,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 10.75
+              },
+              {
+                "workload": "posting_edit",
+                "run": 2,
+                "milliseconds": 14.479,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 6.69
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 2,
+                "milliseconds": 21.377,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 11.766
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 2,
+                "milliseconds": 27.036,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 11.613
+              },
+              {
+                "workload": "posting_edit",
+                "run": 3,
+                "milliseconds": 33.398,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 19.764
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 3,
+                "milliseconds": 23.115,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 12.252
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 3,
+                "milliseconds": 63.373,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 35.421
+              },
+              {
+                "workload": "posting_edit",
+                "run": 4,
+                "milliseconds": 20.992,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 11.244
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 4,
+                "milliseconds": 50.089,
+                "selectQueries": 1,
+                "rowsRead": 250,
+                "sqlQueryMs": 34.196
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 4,
+                "milliseconds": 67.637,
+                "selectQueries": 3,
+                "rowsRead": 251,
+                "sqlQueryMs": 36.851
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "1000": {
+      "combined": {
+        "summary": {
+          "initial": {
+            "samples": 15,
+            "medianMs": 91.246,
+            "minMs": 57.55,
+            "maxMs": 123.138,
+            "medianRowsRead": 12000,
+            "medianSelectQueries": 6,
+            "medianDriverQueryMs": 126.379
+          },
+          "posting_edit": {
+            "samples": 15,
+            "medianMs": 104.885,
+            "minMs": 50.623,
+            "maxMs": 154.285,
+            "medianRowsRead": 10000,
+            "medianSelectQueries": 1,
+            "medianDriverQueryMs": 86.544
+          },
+          "schedule_edit": {
+            "samples": 15,
+            "medianMs": 27.61,
+            "minMs": 15.428,
+            "maxMs": 85.648,
+            "medianRowsRead": 1000,
+            "medianSelectQueries": 1,
+            "medianDriverQueryMs": 16.877
+          },
+          "receipt_edit": {
+            "samples": 15,
+            "medianMs": 38.416,
+            "minMs": 18.191,
+            "maxMs": 98.054,
+            "medianRowsRead": 1001,
+            "medianSelectQueries": 3,
+            "medianDriverQueryMs": 15.796
+          }
+        },
+        "runs": [
+          {
+            "process": 0,
+            "metrics": [
+              {
+                "workload": "initial",
+                "run": 0,
+                "milliseconds": 86.675,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 100.928
+              },
+              {
+                "workload": "initial",
+                "run": 1,
+                "milliseconds": 89.206,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 125.874
+              },
+              {
+                "workload": "initial",
+                "run": 2,
+                "milliseconds": 95.311,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 184.947
+              },
+              {
+                "workload": "initial",
+                "run": 3,
+                "milliseconds": 112.794,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 190.536
+              },
+              {
+                "workload": "initial",
+                "run": 4,
+                "milliseconds": 122.884,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 140.695
+              },
+              {
+                "workload": "posting_edit",
+                "run": 0,
+                "milliseconds": 56.256,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 49.307
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 0,
+                "milliseconds": 22.035,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 9.646
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 0,
+                "milliseconds": 29.64,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 10.731
+              },
+              {
+                "workload": "posting_edit",
+                "run": 1,
+                "milliseconds": 83.176,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 68.343
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 1,
+                "milliseconds": 74.21,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 46.003
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 1,
+                "milliseconds": 18.191,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 7.931
+              },
+              {
+                "workload": "posting_edit",
+                "run": 2,
+                "milliseconds": 112.305,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 100.663
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 2,
+                "milliseconds": 27.61,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 16.877
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 2,
+                "milliseconds": 40.699,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 17.315
+              },
+              {
+                "workload": "posting_edit",
+                "run": 3,
+                "milliseconds": 119.735,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 100.664
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 3,
+                "milliseconds": 85.648,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 66.697
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 3,
+                "milliseconds": 36.935,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 13.694
+              },
+              {
+                "workload": "posting_edit",
+                "run": 4,
+                "milliseconds": 153.186,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 141.264
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 4,
+                "milliseconds": 22.32,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 12.099
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 4,
+                "milliseconds": 54.392,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 20.889
+              }
+            ]
+          },
+          {
+            "process": 1,
+            "metrics": [
+              {
+                "workload": "initial",
+                "run": 0,
+                "milliseconds": 79.901,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 91.995
+              },
+              {
+                "workload": "initial",
+                "run": 1,
+                "milliseconds": 75.623,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 108.788
+              },
+              {
+                "workload": "initial",
+                "run": 2,
+                "milliseconds": 120.297,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 160.947
+              },
+              {
+                "workload": "initial",
+                "run": 3,
+                "milliseconds": 123.138,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 292.772
+              },
+              {
+                "workload": "initial",
+                "run": 4,
+                "milliseconds": 114.618,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 198.202
+              },
+              {
+                "workload": "posting_edit",
+                "run": 0,
+                "milliseconds": 50.623,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 42.973
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 0,
+                "milliseconds": 29.527,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 17.294
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 0,
+                "milliseconds": 40.094,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 20.395
+              },
+              {
+                "workload": "posting_edit",
+                "run": 1,
+                "milliseconds": 154.285,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 144.955
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 1,
+                "milliseconds": 23.104,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 10.985
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 1,
+                "milliseconds": 58.888,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 31.724
+              },
+              {
+                "workload": "posting_edit",
+                "run": 2,
+                "milliseconds": 104.885,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 86.544
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 2,
+                "milliseconds": 43.98,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 20.835
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 2,
+                "milliseconds": 35.637,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 12.256
+              },
+              {
+                "workload": "posting_edit",
+                "run": 3,
+                "milliseconds": 97.07,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 86.333
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 3,
+                "milliseconds": 68.762,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 44.781
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 3,
+                "milliseconds": 98.054,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 61.817
+              },
+              {
+                "workload": "posting_edit",
+                "run": 4,
+                "milliseconds": 109.772,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 99.076
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 4,
+                "milliseconds": 59.259,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 36.774
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 4,
+                "milliseconds": 57.876,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 35.05
+              }
+            ]
+          },
+          {
+            "process": 2,
+            "metrics": [
+              {
+                "workload": "initial",
+                "run": 0,
+                "milliseconds": 57.55,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 75.587
+              },
+              {
+                "workload": "initial",
+                "run": 1,
+                "milliseconds": 94.367,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 141.503
+              },
+              {
+                "workload": "initial",
+                "run": 2,
+                "milliseconds": 87.888,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 126.379
+              },
+              {
+                "workload": "initial",
+                "run": 3,
+                "milliseconds": 91.246,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 99.323
+              },
+              {
+                "workload": "initial",
+                "run": 4,
+                "milliseconds": 88.242,
+                "selectQueries": 6,
+                "rowsRead": 12000,
+                "sqlQueryMs": 104.393
+              },
+              {
+                "workload": "posting_edit",
+                "run": 0,
+                "milliseconds": 59.332,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 49.538
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 0,
+                "milliseconds": 25.387,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 13.312
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 0,
+                "milliseconds": 31.125,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 13.074
+              },
+              {
+                "workload": "posting_edit",
+                "run": 1,
+                "milliseconds": 82.364,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 71.977
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 1,
+                "milliseconds": 20.734,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 7.845
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 1,
+                "milliseconds": 22.246,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 8.595
+              },
+              {
+                "workload": "posting_edit",
+                "run": 2,
+                "milliseconds": 88.328,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 75.482
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 2,
+                "milliseconds": 32.049,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 17.49
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 2,
+                "milliseconds": 27.122,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 12.446
+              },
+              {
+                "workload": "posting_edit",
+                "run": 3,
+                "milliseconds": 114.763,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 101.091
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 3,
+                "milliseconds": 15.428,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 7.702
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 3,
+                "milliseconds": 68.007,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 46.545
+              },
+              {
+                "workload": "posting_edit",
+                "run": 4,
+                "milliseconds": 140.292,
+                "selectQueries": 1,
+                "rowsRead": 10000,
+                "sqlQueryMs": 127.43
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 4,
+                "milliseconds": 23.585,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 11.227
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 4,
+                "milliseconds": 38.416,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 15.796
+              }
+            ]
+          }
+        ]
+      },
+      "joined": {
+        "summary": {
+          "initial": {
+            "samples": 15,
+            "medianMs": 36.599,
+            "minMs": 17.297,
+            "maxMs": 81.876,
+            "medianRowsRead": 1000,
+            "medianSelectQueries": 1,
+            "medianDriverQueryMs": 28.067
+          },
+          "posting_edit": {
+            "samples": 15,
+            "medianMs": 46.835,
+            "minMs": 19.031,
+            "maxMs": 95.606,
+            "medianRowsRead": 1000,
+            "medianSelectQueries": 1,
+            "medianDriverQueryMs": 35.245
+          },
+          "schedule_edit": {
+            "samples": 15,
+            "medianMs": 46.911,
+            "minMs": 33.009,
+            "maxMs": 100.357,
+            "medianRowsRead": 1000,
+            "medianSelectQueries": 1,
+            "medianDriverQueryMs": 32.267
+          },
+          "receipt_edit": {
+            "samples": 15,
+            "medianMs": 55.662,
+            "minMs": 38.15,
+            "maxMs": 75.156,
+            "medianRowsRead": 1001,
+            "medianSelectQueries": 3,
+            "medianDriverQueryMs": 36.475
+          }
+        },
+        "runs": [
+          {
+            "process": 0,
+            "metrics": [
+              {
+                "workload": "initial",
+                "run": 0,
+                "milliseconds": 57.775,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 36.431
+              },
+              {
+                "workload": "initial",
+                "run": 1,
+                "milliseconds": 21.506,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 14.189
+              },
+              {
+                "workload": "initial",
+                "run": 2,
+                "milliseconds": 27.604,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 20.904
+              },
+              {
+                "workload": "initial",
+                "run": 3,
+                "milliseconds": 17.297,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 12.873
+              },
+              {
+                "workload": "initial",
+                "run": 4,
+                "milliseconds": 35.212,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 27.821
+              },
+              {
+                "workload": "posting_edit",
+                "run": 0,
+                "milliseconds": 33.41,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 23.578
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 0,
+                "milliseconds": 36.964,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 24.554
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 0,
+                "milliseconds": 46.174,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 29.931
+              },
+              {
+                "workload": "posting_edit",
+                "run": 1,
+                "milliseconds": 92.358,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 76.915
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 1,
+                "milliseconds": 46.911,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 34.479
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 1,
+                "milliseconds": 43.953,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 23.498
+              },
+              {
+                "workload": "posting_edit",
+                "run": 2,
+                "milliseconds": 50.358,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 35.988
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 2,
+                "milliseconds": 47.14,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 31.909
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 2,
+                "milliseconds": 58.074,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 39.3
+              },
+              {
+                "workload": "posting_edit",
+                "run": 3,
+                "milliseconds": 52.616,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 38.264
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 3,
+                "milliseconds": 43.686,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 31.3
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 3,
+                "milliseconds": 73.214,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 53.405
+              },
+              {
+                "workload": "posting_edit",
+                "run": 4,
+                "milliseconds": 64.095,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 48.411
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 4,
+                "milliseconds": 33.009,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 22.171
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 4,
+                "milliseconds": 38.15,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 22.801
+              }
+            ]
+          },
+          {
+            "process": 1,
+            "metrics": [
+              {
+                "workload": "initial",
+                "run": 0,
+                "milliseconds": 36.599,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 21.467
+              },
+              {
+                "workload": "initial",
+                "run": 1,
+                "milliseconds": 70.201,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 61.417
+              },
+              {
+                "workload": "initial",
+                "run": 2,
+                "milliseconds": 29.06,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 22.827
+              },
+              {
+                "workload": "initial",
+                "run": 3,
+                "milliseconds": 39.329,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 31.415
+              },
+              {
+                "workload": "initial",
+                "run": 4,
+                "milliseconds": 28.193,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 21.783
+              },
+              {
+                "workload": "posting_edit",
+                "run": 0,
+                "milliseconds": 38.364,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 24.869
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 0,
+                "milliseconds": 50.804,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 37.374
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 0,
+                "milliseconds": 64.211,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 40.076
+              },
+              {
+                "workload": "posting_edit",
+                "run": 1,
+                "milliseconds": 46.835,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 35.387
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 1,
+                "milliseconds": 100.357,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 82.056
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 1,
+                "milliseconds": 62.015,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 38.896
+              },
+              {
+                "workload": "posting_edit",
+                "run": 2,
+                "milliseconds": 47.223,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 35.679
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 2,
+                "milliseconds": 46.648,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 31.106
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 2,
+                "milliseconds": 53.709,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 35.935
+              },
+              {
+                "workload": "posting_edit",
+                "run": 3,
+                "milliseconds": 44.356,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 31.644
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 3,
+                "milliseconds": 98.956,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 83.263
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 3,
+                "milliseconds": 75.156,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 46.684
+              },
+              {
+                "workload": "posting_edit",
+                "run": 4,
+                "milliseconds": 41.103,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 26.274
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 4,
+                "milliseconds": 44.862,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 32.267
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 4,
+                "milliseconds": 43.521,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 26.416
+              }
+            ]
+          },
+          {
+            "process": 2,
+            "metrics": [
+              {
+                "workload": "initial",
+                "run": 0,
+                "milliseconds": 62.719,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 42.646
+              },
+              {
+                "workload": "initial",
+                "run": 1,
+                "milliseconds": 81.876,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 70.485
+              },
+              {
+                "workload": "initial",
+                "run": 2,
+                "milliseconds": 52.144,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 40.58
+              },
+              {
+                "workload": "initial",
+                "run": 3,
+                "milliseconds": 49.789,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 39.319
+              },
+              {
+                "workload": "initial",
+                "run": 4,
+                "milliseconds": 36.214,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 28.067
+              },
+              {
+                "workload": "posting_edit",
+                "run": 0,
+                "milliseconds": 19.031,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 9.75
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 0,
+                "milliseconds": 34.585,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 23.74
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 0,
+                "milliseconds": 59.281,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 36.475
+              },
+              {
+                "workload": "posting_edit",
+                "run": 1,
+                "milliseconds": 46.474,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 35.1
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 1,
+                "milliseconds": 79.896,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 64.963
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 1,
+                "milliseconds": 56.38,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 37.556
+              },
+              {
+                "workload": "posting_edit",
+                "run": 2,
+                "milliseconds": 42.149,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 30.341
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 2,
+                "milliseconds": 51.577,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 38.848
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 2,
+                "milliseconds": 53.808,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 38.06
+              },
+              {
+                "workload": "posting_edit",
+                "run": 3,
+                "milliseconds": 95.606,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 81.133
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 3,
+                "milliseconds": 45.069,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 30.506
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 3,
+                "milliseconds": 50.938,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 36.116
+              },
+              {
+                "workload": "posting_edit",
+                "run": 4,
+                "milliseconds": 50.615,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 35.245
+              },
+              {
+                "workload": "schedule_edit",
+                "run": 4,
+                "milliseconds": 85.62,
+                "selectQueries": 1,
+                "rowsRead": 1000,
+                "sqlQueryMs": 69.533
+              },
+              {
+                "workload": "receipt_edit",
+                "run": 4,
+                "milliseconds": 55.662,
+                "selectQueries": 3,
+                "rowsRead": 1001,
+                "sqlQueryMs": 35.971
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "rejectedAttachedIdFlow": {
+    "250": {
+      "combined": {
+        "initial": {
+          "samples": 15,
+          "medianMs": 89.162,
+          "minMs": 59.329,
+          "maxMs": 124.201,
+          "medianRowsRead": 11250,
+          "medianSelectQueries": 6,
+          "medianDriverQueryMs": 104.885
+        },
+        "posting_edit": {
+          "samples": 15,
+          "medianMs": 96.476,
+          "minMs": 60.359,
+          "maxMs": 152.848,
+          "medianRowsRead": 10000,
+          "medianSelectQueries": 1,
+          "medianDriverQueryMs": 87.38
+        },
+        "schedule_edit": {
+          "samples": 15,
+          "medianMs": 28.908,
+          "minMs": 14.681,
+          "maxMs": 96.896,
+          "medianRowsRead": 1000,
+          "medianSelectQueries": 1,
+          "medianDriverQueryMs": 16.772
+        },
+        "receipt_edit": {
+          "samples": 15,
+          "medianMs": 24.248,
+          "minMs": 11.838,
+          "maxMs": 65.197,
+          "medianRowsRead": 251,
+          "medianSelectQueries": 3,
+          "medianDriverQueryMs": 5.68
+        }
+      },
+      "attached": {
+        "initial": {
+          "samples": 15,
+          "medianMs": 26.677,
+          "minMs": 14.846,
+          "maxMs": 54.542,
+          "medianRowsRead": 500,
+          "medianSelectQueries": 3,
+          "medianDriverQueryMs": 12.682
+        },
+        "posting_edit": {
+          "samples": 15,
+          "medianMs": 25.384,
+          "minMs": 12.142,
+          "maxMs": 54.201,
+          "medianRowsRead": 250,
+          "medianSelectQueries": 1,
+          "medianDriverQueryMs": 10.864
+        },
+        "schedule_edit": {
+          "samples": 15,
+          "medianMs": 26.141,
+          "minMs": 9.824,
+          "maxMs": 55.051,
+          "medianRowsRead": 250,
+          "medianSelectQueries": 1,
+          "medianDriverQueryMs": 11.584
+        },
+        "receipt_edit": {
+          "samples": 15,
+          "medianMs": 31.78,
+          "minMs": 12.788,
+          "maxMs": 60.994,
+          "medianRowsRead": 251,
+          "medianSelectQueries": 3,
+          "medianDriverQueryMs": 9.97
+        }
+      }
+    },
+    "1000": {
+      "combined": {
+        "initial": {
+          "samples": 15,
+          "medianMs": 83.535,
+          "minMs": 55.524,
+          "maxMs": 114.372,
+          "medianRowsRead": 12000,
+          "medianSelectQueries": 6,
+          "medianDriverQueryMs": 125.128
+        },
+        "posting_edit": {
+          "samples": 15,
+          "medianMs": 109.474,
+          "minMs": 34.602,
+          "maxMs": 177.23,
+          "medianRowsRead": 10000,
+          "medianSelectQueries": 1,
+          "medianDriverQueryMs": 97.643
+        },
+        "schedule_edit": {
+          "samples": 15,
+          "medianMs": 29.408,
+          "minMs": 16.186,
+          "maxMs": 79.0,
+          "medianRowsRead": 1000,
+          "medianSelectQueries": 1,
+          "medianDriverQueryMs": 12.69
+        },
+        "receipt_edit": {
+          "samples": 15,
+          "medianMs": 49.644,
+          "minMs": 25.371,
+          "maxMs": 91.292,
+          "medianRowsRead": 1001,
+          "medianSelectQueries": 3,
+          "medianDriverQueryMs": 22.042
+        }
+      },
+      "attached": {
+        "initial": {
+          "samples": 15,
+          "medianMs": 51.668,
+          "minMs": 33.18,
+          "maxMs": 89.369,
+          "medianRowsRead": 2000,
+          "medianSelectQueries": 5,
+          "medianDriverQueryMs": 50.599
+        },
+        "posting_edit": {
+          "samples": 15,
+          "medianMs": 49.222,
+          "minMs": 26.155,
+          "maxMs": 84.119,
+          "medianRowsRead": 1000,
+          "medianSelectQueries": 3,
+          "medianDriverQueryMs": 70.051
+        },
+        "schedule_edit": {
+          "samples": 15,
+          "medianMs": 60.938,
+          "minMs": 33.728,
+          "maxMs": 99.132,
+          "medianRowsRead": 1000,
+          "medianSelectQueries": 3,
+          "medianDriverQueryMs": 87.877
+        },
+        "receipt_edit": {
+          "samples": 15,
+          "medianMs": 78.971,
+          "minMs": 20.238,
+          "maxMs": 118.249,
+          "medianRowsRead": 1001,
+          "medianSelectQueries": 3,
+          "medianDriverQueryMs": 29.087
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "baseCommit": "8e957e8263b81e9a65e9a8096a58ee55260d841d",
+  "machine": [
+    "Mac15,6",
+    "38654705664"
+  ],
+  "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.0.1\nBuildVersion:\t\t26A434\n",
+  "theme": "Dark",
+  "controlAssets": {
+    "perf-web.import-object.mjs": "7b84a5b41b40d623d1b067e2b3fcf16092abe5f2a31fd4820bbe0a49f3df4106",
+    "index.html": "c16c16cbb1381d16d2ca9f01b343fd8bad4ff4e076f7569857a69dd687b38428",
+    "allocation-profile.js": "24bc50c62d25dbd11c9a37b2be3878f515d51464e7cc0a9582da51949f8bd71a",
+    "import-map-loader.js": "a66d5d181914ed2118a3704d176857005c086521102b39d4fef499e48b4707eb",
+    "perf-web.mjs": "54ba5234ba5da29a6243f6242cc9f51791e966edbc68551e30038980c6e2362f",
+    "bootstrap-profile.mjs": "c2fedd4294724ba0e2533ad0ecfee610bc2ed6520d4f8f5c80d2a4451322b27a",
+    "js-joda.esm.js": "da8bc3071911f307525044765bf36ef53d1e77d1b241125cfb434127eb8dfd6d",
+    "perf-web.js-builtins.mjs": "a370c66f8031ae3a8d5718123a7fb1aeed4f43caca681181ef69b512321d5b94",
+    "skiko.mjs": "93d422c209952d9134432c426ce002555aff94ba5a812cee5984c782833108d9",
+    "sql-wasm.js": "f1c84000dbc856c9d87f4f3aabc4d3654bd436165db4be3da13751db3a9c20d7",
+    "skiko.wasm": "089052ba37e2a6e8345117bf6fe0f5730cfc8de1eb4c2bbc8921cf8e457ae3cb",
+    "runtime-profile.js": "6a262897410b357da0bd168533a2df0ecc00261b223ca0359b03e7f2129c163e",
+    "sqldelight.worker.js": "8fab2ce8da66ec09c2caed300516580a298eeebfa5afa9f5ad30f3179aa32b1f",
+    "perf-web.wasm": "6b3f50a9b763205315168097bb39ffaff6f5e61055b6773f499777925d6c8fcc",
+    "sql-profile.js": "84f8a5f393ab6007eb3ea9315ed12bf18345122eaccef478030729b1ad62c171",
+    "allocation-worker-profile.js": "17ac9d3878353f61c66a8d737dba926be0850a5123d442399f9157a17f0854c0",
+    "sql-wasm.wasm": "38c14f6e379210bc942bdc4ebca44e7bfdb4318ecc1c72ca666a28fdce96670a",
+    "composeResources/shared_ui.generated.resources/drawable/app_logo.png": "986ec5463e24fdc84bf6d2e75d076b8dac4635de3ba24527fdd15a0d69b42e87"
+  },
+  "candidateAssets": {
+    "perf-web.import-object.mjs": "7b84a5b41b40d623d1b067e2b3fcf16092abe5f2a31fd4820bbe0a49f3df4106",
+    "index.html": "c16c16cbb1381d16d2ca9f01b343fd8bad4ff4e076f7569857a69dd687b38428",
+    "allocation-profile.js": "24bc50c62d25dbd11c9a37b2be3878f515d51464e7cc0a9582da51949f8bd71a",
+    "import-map-loader.js": "a66d5d181914ed2118a3704d176857005c086521102b39d4fef499e48b4707eb",
+    "perf-web.mjs": "54ba5234ba5da29a6243f6242cc9f51791e966edbc68551e30038980c6e2362f",
+    "bootstrap-profile.mjs": "c2fedd4294724ba0e2533ad0ecfee610bc2ed6520d4f8f5c80d2a4451322b27a",
+    "js-joda.esm.js": "da8bc3071911f307525044765bf36ef53d1e77d1b241125cfb434127eb8dfd6d",
+    "perf-web.js-builtins.mjs": "a370c66f8031ae3a8d5718123a7fb1aeed4f43caca681181ef69b512321d5b94",
+    "skiko.mjs": "93d422c209952d9134432c426ce002555aff94ba5a812cee5984c782833108d9",
+    "sql-wasm.js": "f1c84000dbc856c9d87f4f3aabc4d3654bd436165db4be3da13751db3a9c20d7",
+    "skiko.wasm": "089052ba37e2a6e8345117bf6fe0f5730cfc8de1eb4c2bbc8921cf8e457ae3cb",
+    "runtime-profile.js": "6a262897410b357da0bd168533a2df0ecc00261b223ca0359b03e7f2129c163e",
+    "sqldelight.worker.js": "8fab2ce8da66ec09c2caed300516580a298eeebfa5afa9f5ad30f3179aa32b1f",
+    "perf-web.wasm": "032debb56563ddeb990d439b4d63359c0c8126425e69446507ce4fce37a59e10",
+    "sql-profile.js": "84f8a5f393ab6007eb3ea9315ed12bf18345122eaccef478030729b1ad62c171",
+    "allocation-worker-profile.js": "17ac9d3878353f61c66a8d737dba926be0850a5123d442399f9157a17f0854c0",
+    "sql-wasm.wasm": "38c14f6e379210bc942bdc4ebca44e7bfdb4318ecc1c72ca666a28fdce96670a",
+    "composeResources/shared_ui.generated.resources/drawable/app_logo.png": "986ec5463e24fdc84bf6d2e75d076b8dac4635de3ba24527fdd15a0d69b42e87"
+  },
+  "differingAssets": [
+    "perf-web.wasm"
+  ],
+  "sourceHashes": {
+    "app/perf-web/src/wasmJsMain/kotlin/finance/shilling/perf/Main.kt": "83fb0927e101c0b7352c60d274b904c1e586469f3229d9ced376f90cda202b56",
+    "app/perf-web/bootstrap-profile.mjs": "c2fedd4294724ba0e2533ad0ecfee610bc2ed6520d4f8f5c80d2a4451322b27a",
+    "scripts/perf/profile_desktop_memory.py": "71b372b0c380a2cf95c8275c7ef97a1f20ecc7117b2fe22acbce806ee6118b56",
+    "scripts/perf/build_desktop_memory.sh": "0456ed9650836ab1178836f8ca8330d46ea179e492f0c8c5d6e8289e4859dd40",
+    "scripts/optimize-wasm.cjs": "c3ea791555a7cac34653484df1cea042968b9ec925a49a058ff198ea6521dfa6"
+  },
+  "typeOptimization": {
+    "args": [
+      "node",
+      "node_modules/binaryen/bin/wasm-opt",
+      "/Users/joshpa8c/.t3/worktrees/shilling-v1/t3code-5400d20b/build/perf/webcontent-2026-10-06/bootstrap-dist/perf-web.wasm",
+      "-o",
+      "/Users/joshpa8c/.t3/worktrees/shilling-v1/t3code-5400d20b/build/perf/webcontent-2026-10-06/type-merged.wasm",
+      "--enable-gc",
+      "--enable-reference-types",
+      "--enable-exception-handling",
+      "--enable-bulk-memory",
+      "--enable-sign-ext",
+      "--enable-nontrapping-float-to-int",
+      "--enable-multivalue",
+      "--closed-world",
+      "--type-merging",
+      "-Oz",
+      "-g"
+    ],
+    "seconds": 38.15065813064575,
+    "before": {
+      "bytes": 9405360,
+      "sha256": "6b3f50a9b763205315168097bb39ffaff6f5e61055b6773f499777925d6c8fcc"
+    },
+    "after": {
+      "bytes": 9203175,
+      "sha256": "032debb56563ddeb990d439b4d63359c0c8126425e69446507ce4fce37a59e10"
+    }
+  },
+  "candidatePackagedWasm": {
+    "bytes": 9203175,
+    "sha256": "032debb56563ddeb990d439b4d63359c0c8126425e69446507ce4fce37a59e10"
+  },
+  "limitations": [
+    "Sequential process snapshots, no simultaneous whole-app peak",
+    "No forced GC; other user applications remained open",
+    "Staged loader deliberately changes initialization order and timing",
+    "regions-1 included early heap/vmmap inspection",
+    "bootstrap-1 included failed Instruments attachment; no allocation stacks obtained; SIP unchanged",
+    "Clean bootstrap runs are bootstrap-2 and bootstrap-3",
+    "Baseline stages use 10000-posting seed; regions-1 ends with 20000 postings",
+    "Only synthetic local data; no production database opened; loopback signaling fixture only"
+  ],
+  "archivedTextNormalization": "Native heap/vmmap text has trailing whitespace stripped; JSON profiles are copied byte-for-byte."
+}

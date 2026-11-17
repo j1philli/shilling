@@ -3,7 +3,7 @@ import PhotosUI
 import UniformTypeIdentifiers
 
 /// A picked receipt file: its name and bytes.
-struct PickedFile {
+struct PickedFile: Sendable {
     let name: String
     let data: Data
 }
@@ -31,18 +31,18 @@ struct ReceiptSourceButtons: View {
         Button { showingFiles = true } label: { Label("Attach file", systemImage: "doc") }
             .fullScreenCover(isPresented: $showingCamera) {
                 CameraPicker { image in
-                    if let data = image.jpegData(compressionQuality: 0.85) {
-                        onPick(PickedFile(name: "Receipt \(Self.timestamp()).jpg", data: data))
+                    Task { @MainActor in
+                        if let file = await ReceiptFilePreparation.jpeg(image, name: "Receipt \(Self.timestamp()).jpg") {
+                            onPick(file)
+                        }
                     }
                 }
                 .ignoresSafeArea()
             }
             .fileImporter(isPresented: $showingFiles, allowedContentTypes: [.item]) { result in
                 guard case .success(let url) = result else { return }
-                let scoped = url.startAccessingSecurityScopedResource()
-                defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-                if let data = try? Data(contentsOf: url) {
-                    onPick(PickedFile(name: url.lastPathComponent, data: data))
+                Task { @MainActor in
+                    if let file = try? await ReceiptFilePreparation.read(url) { onPick(file) }
                 }
             }
             .onAppear {

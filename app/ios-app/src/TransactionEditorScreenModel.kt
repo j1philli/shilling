@@ -29,7 +29,7 @@ class UndoHandle(private val undoable: Undoable) {
 /** Swift-facing transaction editor; [postingId] null creates one. */
 class TransactionEditorScreenModel(postingId: String?) : IosViewModelHost() {
     private val viewModel = viewModel<TransactionEditorViewModel>(postingId)
-    private val fileStore = KoinPlatform.getKoin().get<ReceiptFileStore>()
+    private val fileStore = KoinPlatform.getKoin().get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.files
 
     @NativeCoroutinesState
     val state: StateFlow<TransactionEditorUiState> = viewModel.state
@@ -56,9 +56,10 @@ class TransactionEditorScreenModel(postingId: String?) : IosViewModelHost() {
     suspend fun detachReceipt(receiptId: String): UndoHandle? = viewModel.detachReceipt(receiptId)?.let(::UndoHandle)
 
     /** A temporary copy of the receipt's file, named after the original, for Quick Look. */
-    fun previewPath(receiptId: String): String? {
+    @NativeCoroutines
+    suspend fun previewPath(receiptId: String): String? {
         val receipt = state.value.receipts.firstOrNull { it.id == receiptId } ?: return null
-        return (fileStore as? IosReceiptFileStore)?.previewPath(receiptId, receipt.name)
+        return fileStore.prepareIosReceiptPreview(receiptId, receipt.name)
     }
 }
 

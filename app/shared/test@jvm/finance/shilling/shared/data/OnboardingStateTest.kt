@@ -157,10 +157,10 @@ class OnboardingStateTest {
             scheduleStore,
             syncDeps
         )
-        val receiptRepository = ReceiptRepository(notifier, receiptStore, postingStore, scheduleStore, syncDeps)
+        val receiptRepository = ReceiptRepository(notifier, receiptStore, syncDeps)
 
         accountRepository.upsert(Account(id = "a1", name = "Checking", balance = 10.0))
-        assertEquals(1, db.accountQueries.selectAll().awaitAsList().size)
+        assertEquals(1, db.accountQueries.selectAll(space_id = "__local__").awaitAsList().size)
 
         wipeLocalAppState(
             db = db,
@@ -168,6 +168,7 @@ class OnboardingStateTest {
             fileStore = object : ReceiptFileStore {
                 override suspend fun store(receiptId: String, fileName: String, bytes: ByteArray) {}
                 override suspend fun read(receiptId: String): ByteArray? = null
+                override suspend fun openReader(receiptId: String) = read(receiptId)?.asReceiptReader()
                 override suspend fun hasFile(receiptId: String): Boolean = false
                 override suspend fun delete(receiptId: String) {}
                 override suspend fun clearAll() {}
@@ -180,7 +181,7 @@ class OnboardingStateTest {
             receiptRepository = receiptRepository
         )
 
-        assertEquals(0, db.accountQueries.selectAll().awaitAsList().size)
+        assertEquals(0, db.accountQueries.selectAll(space_id = "__local__").awaitAsList().size)
         assertNull(settings.getStringOrNull(SETTINGS_KEY_ONBOARDING_COMPLETED))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_HELD_LOCAL_DATA))
         assertNull(settings.getStringOrNull(SETTINGS_KEY_PENDING_RESTORE_USER_ID))

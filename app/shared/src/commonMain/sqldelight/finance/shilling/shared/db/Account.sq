@@ -1,21 +1,27 @@
 CREATE TABLE accounts(
-    id TEXT NOT NULL PRIMARY KEY,
+    space_id TEXT NOT NULL,
+    id TEXT NOT NULL,
     name TEXT NOT NULL,
-    balance REAL NOT NULL
+    balance REAL NOT NULL,
+    PRIMARY KEY(space_id, id)
 );
 
 selectAll:
-SELECT * FROM accounts;
+SELECT * FROM accounts WHERE space_id = :space_id;
 
 selectById:
-SELECT * FROM accounts WHERE id = ?;
+SELECT * FROM accounts WHERE id = ? AND space_id = :space_id;
 
-upsert:
-INSERT OR REPLACE INTO accounts(id, name, balance)
-VALUES (?, ?, ?);
+upsert {
+  INSERT OR IGNORE INTO accounts(id, name, balance, space_id) VALUES (:id, :name, :balance, :space_id);
+  UPDATE accounts SET name = :name, balance = :balance WHERE space_id = :space_id AND id = :id;
+}
 
 deleteById:
-DELETE FROM accounts WHERE id = ?;
+DELETE FROM accounts WHERE id = ? AND space_id = :space_id;
 
 deleteAll:
-DELETE FROM accounts;
+DELETE FROM accounts WHERE space_id = :space_id;
+
+claimLegacy:
+UPDATE accounts SET space_id = ? WHERE space_id = '__local__';

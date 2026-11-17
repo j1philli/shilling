@@ -7,21 +7,34 @@ import KMPNativeCoroutinesAsync
 final class SettingsModel: ObservableObject {
     @Published private(set) var state: SettingsUiState
     @Published private(set) var devicesState: HostedDevicesUiState
+    @Published private(set) var spacesState: HostedSpacesUiState
     @Published private(set) var silverOffers: [IosBillingOffer] = []
     @Published private(set) var goldOffers: [IosBillingOffer] = []
     @Published private(set) var managementURL: String?
     @Published private(set) var billingError: String?
+    @Published private(set) var deletion: AccountDeletionStep
     let screen = SettingsScreenModel()
 
     init() {
         state = screen.state
         devicesState = screen.devicesState
+        spacesState = screen.spacesState
+        deletion = screen.deletion
+    }
+
+    func observeDeletion() async {
+        do {
+            for try await value in asyncSequence(for: screen.deletionFlow) {
+                if deletion !== value { deletion = value }
+            }
+        } catch {}
     }
 
     func observe() async {
         do {
             for try await value in asyncSequence(for: screen.stateFlow) {
-                state = value
+                // StateFlow replays its current object when a tab becomes visible again.
+                if state !== value { state = value }
             }
         } catch {}
     }
@@ -29,9 +42,13 @@ final class SettingsModel: ObservableObject {
     func observeDevices() async {
         do {
             for try await value in asyncSequence(for: screen.devicesStateFlow) {
-                devicesState = value
+                if devicesState !== value { devicesState = value }
             }
         } catch {}
+    }
+
+    func observeSpaces() async {
+        do { for try await value in asyncSequence(for: screen.spacesStateFlow) { if spacesState !== value { spacesState = value } } } catch {}
     }
 
     func loadBilling() async {
@@ -53,11 +70,25 @@ final class SettingsModel: ObservableObject {
 
 /// Native Settings: same sections, copy and actions as the Compose Settings.
 struct SettingsScreen: View {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var model = SettingsModel()
     @State private var confirmingAccountAction = false
     @State private var toast: Toast?
     @State private var password = ""
     @State private var accountMessage: String?
+    @State private var spaceName = ""
+    @State private var spaceBusiness = false
+    @State private var inviteEmail = ""
+    @State private var invitationCode = ""
+    @State private var spaceMessage: String?
+    @State private var transferLink = ""
+    @State private var transferFrom = ""
+    @State private var transferTo = ""
+    @State private var transferTitle = ""
+    @State private var transferAmount = ""
+    @State private var transferDate = ""
+    @State private var pendingSpaceAction: (() -> Void)?
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         let state = model.state
@@ -74,6 +105,21 @@ struct SettingsScreen: View {
                     devicesSection(model.devicesState)
                     if !model.devicesState.selfHosted {
                         subscriptionSection(model.devicesState)
+                        spacesSection
+                        if model.spacesState.gold { transfersSection }
+                    }
+                }
+                Section("Product analytics") {
+                    Toggle("Share usage events", isOn: Binding(
+                        get: { state.analyticsConsent },
+                        set: { model.screen.setAnalyticsConsent(value: $0) }
+                    ))
+                    .disabled(!state.analyticsConfigured)
+                    Text(state.analyticsNotice)
+                        .font(.footnote).foregroundStyle(.secondary)
+                    if !state.analyticsConfigured {
+                        Text("Available after a PostHog project is configured.")
+                            .font(.footnote).foregroundStyle(.secondary)
                     }
                 }
                 aboutSection
@@ -82,12 +128,127 @@ struct SettingsScreen: View {
                     DeveloperSections(developer: developer, screen: model.screen, toast: $toast)
                 }
             }
+            .readableWidth(720)
             .navigationTitle("Settings")
         }
+        .alert("Confirm membership change", isPresented: Binding(get: { pendingSpaceAction != nil }, set: { if !$0 { pendingSpaceAction = nil } })) {
+            Button("Confirm", role: .destructive) { let action = pendingSpaceAction; pendingSpaceAction = nil; action?() }
+            Button("Cancel", role: .cancel) { pendingSpaceAction = nil }
+        } message: {
+            Text("This changes access to the space. Leaving or removing a member stops future sync; copies already saved on devices remain. A space must retain an owner while other members remain.")
+        }
+        .modifier(AccountDeletionAlerts(model: model, toast: $toast, openURL: openURL))
         .overlay(alignment: .bottom) { ToastView(toast: $toast) }
         .task { await model.observe() }
-        .task { await model.observeDevices() }
+        .task { await model.observeDeletion() }
+        .task(id: scenePhase) {
+            if scenePhase == .active { await model.observeSpaces() }
+        }
+        .onAppear { transferLink = model.screen.createTransferId(); transferDate = model.screen.transferToday }
+        .task(id: scenePhase) {
+            if scenePhase == .active { await model.observeDevices() }
+        }
         .task(id: model.devicesState.billingConfig?.iosPublicKey) { await model.loadBilling() }
+    }
+
+    private func spaceAction(_ action: String, space: String? = nil, name: String? = nil, kind: String? = nil, email: String? = nil, role: String? = nil, user: String? = nil, invitation: String? = nil, code: String? = nil) {
+        Task {
+            do { spaceMessage = try await asyncFunction(for: model.screen.spaceAction(action: action, spaceId: space, name: name, kind: kind, email: email, role: role, userId: user, invitationId: invitation, code: code)) }
+            catch { spaceMessage = error.localizedDescription }
+        }
+    }
+
+    private var spacesSection: some View {
+        let state = model.spacesState
+        let active = state.data.spaces.first { $0.id == state.data.activeSpaceId }
+        return Section("Finance spaces") {
+            if state.data.requiresSpaceSelection { Text("Gold has ended. Choose one active space to resume hosted sync; your other local books are kept.").foregroundStyle(.red) }
+            Text("Each space keeps its accounts, transactions and receipts separate. One paid member can sponsor the space.")
+            if let error = state.error { Text(error).foregroundStyle(.red) }
+            if let message = spaceMessage { Text(message) }
+            Button("Refresh spaces") { model.screen.refreshSpaces() }
+            ForEach(state.data.spaces, id: \.id) { space in
+                if space.id == active?.id { Text("\(space.name) · \(space.kind) · active") }
+                else { Button("Open \(space.name)") { spaceAction("select", space: space.id) } }
+            }
+            TextField("New space name", text: $spaceName)
+            Toggle("Business space", isOn: $spaceBusiness)
+            Button("Create space") { spaceAction("create", name: spaceName, kind: spaceBusiness ? "business" : "home") }.disabled(spaceName.trimmingCharacters(in: .whitespaces).isEmpty)
+            Text("Free and Silver include one space. Gold supports multiple spaces.")
+            TextField("Invitation code", text: $invitationCode).textInputAutocapitalization(.never).autocorrectionDisabled()
+            Button("Accept invitation") { spaceAction("accept", code: invitationCode.trimmingCharacters(in: .whitespaces)) }.disabled(invitationCode.isEmpty)
+            Button("Decline invitation") { spaceAction("decline", code: invitationCode.trimmingCharacters(in: .whitespaces)) }.disabled(invitationCode.isEmpty)
+            if let active = active {
+                ForEach(state.data.members, id: \.userId) { member in
+                    Text("\(member.email ?? member.userId) · \(member.role)")
+                    if active.role == "owner" {
+                        Menu("Change role") {
+                            ForEach(["owner", "admin", "member"].filter { $0 != member.role }, id: \.self) { role in
+                                Button("Make \(role)") { pendingSpaceAction = { spaceAction("role", space: active.id, role: role, user: member.userId) } }
+                            }
+                        }
+                    }
+                    if active.role == "owner" || active.role == "admin" && member.role == "member" {
+                        Button("Remove member", role: .destructive) { pendingSpaceAction = { spaceAction("remove", space: active.id, user: member.userId) } }
+                    }
+                }
+                if active.role == "owner" || active.role == "admin" {
+                    TextField("Invite email address", text: $inviteEmail).textInputAutocapitalization(.never).autocorrectionDisabled()
+                    Button("Create invitation") { spaceAction("invite", space: active.id, email: inviteEmail, role: "member") }.disabled(inviteEmail.isEmpty)
+                    if let code = state.data.invitationCode { Text("Invitation code: \(code)").textSelection(.enabled) }
+                    ForEach(state.data.invitations, id: \.id) { invitation in
+                        Text("\(invitation.email) · expires \(invitation.expiresAt)")
+                        Button("Revoke invitation") { spaceAction("revoke_invitation", space: active.id, invitation: invitation.id) }
+                    }
+                }
+                Button("Leave \(active.name)", role: .destructive) { pendingSpaceAction = { spaceAction("leave", space: active.id) } }
+            }
+        }.disabled(state.busy)
+    }
+
+    private func accountKey(_ account: SpaceAccountChoice) -> String { "\(account.spaceId)/\(account.accountId)" }
+    private func transferAction(_ transfer: LinkedTransfer?, delete: Bool) {
+        let from = model.spacesState.accounts.first { accountKey($0) == transferFrom }
+        let to = model.spacesState.accounts.first { accountKey($0) == transferTo }
+        guard let sourceSpace = transfer?.key.fromSpace ?? from?.spaceId,
+              let sourceAccount = transfer?.debit.accountId ?? from?.accountId,
+              let targetSpace = transfer?.key.toSpace ?? to?.spaceId,
+              let targetAccount = transfer?.credit.accountId ?? to?.accountId else { return }
+        Task {
+            do { spaceMessage = try await asyncFunction(for: model.screen.transferAction(linkId: transfer?.key.linkId ?? transferLink, fromSpace: sourceSpace, fromAccount: sourceAccount, toSpace: targetSpace, toAccount: targetAccount, title: transferTitle, amount: transferAmount, date: transferDate, delete: delete)) }
+            catch { spaceMessage = error.localizedDescription }
+        }
+    }
+    private var transfersSection: some View {
+        Section("Linked space transfers") {
+            Text("Open one of the spaces first. Sync both spaces to this device before editing a pair. Enter both sides in the same currency; currency conversion is not supported.")
+            ForEach(model.spacesState.transfers, id: \.key.linkId) { transfer in
+                Text("\(transfer.debit.title ?? "Transfer") · \(transfer.debit.amount) · \(transfer.debit.date)")
+                Button("Edit both sides") {
+                    transferLink = transfer.key.linkId
+                    transferFrom = "\(transfer.key.fromSpace)/\(transfer.debit.accountId)"
+                    transferTo = "\(transfer.key.toSpace)/\(transfer.credit.accountId)"
+                    transferTitle = transfer.debit.title ?? ""
+                    transferAmount = String(transfer.debit.amount)
+                    transferDate = transfer.debit.date.description
+                }
+                Button("Delete both sides", role: .destructive) { pendingSpaceAction = { transferAction(transfer, delete: true) } }
+            }
+            Text("Transfer ID: \(transferLink)").textSelection(.enabled)
+            Button("Start new transfer") { transferLink = model.screen.createTransferId(); transferTitle = ""; transferAmount = "" }
+            Picker("From", selection: $transferFrom) {
+                Text("Choose account").tag("")
+                ForEach(model.spacesState.accounts, id: \.self) { account in Text(account.label).tag(accountKey(account)) }
+            }
+            Picker("To", selection: $transferTo) {
+                Text("Choose account").tag("")
+                ForEach(model.spacesState.accounts, id: \.self) { account in Text(account.label).tag(accountKey(account)) }
+            }
+            TextField("Transfer title", text: $transferTitle)
+            TextField("Amount", text: $transferAmount)
+            TextField("Date (YYYY-MM-DD)", text: $transferDate)
+            Button("Save both sides") { transferAction(nil, delete: false) }.disabled(transferFrom.isEmpty || transferTo.isEmpty || transferTitle.isEmpty || transferAmount.isEmpty)
+        }.disabled(model.spacesState.busy)
     }
 
     // MARK: Appearance
@@ -189,6 +350,12 @@ struct SettingsScreen: View {
             } message: {
                 Text(account.confirm.message)
             }
+            if account is SettingsAccountSignedIn {
+                Button(model.screen.deleteAccountLabel, role: .destructive) {
+                    model.screen.startAccountDeletion()
+                }
+                Text(model.screen.deleteAccountFootnote).font(.footnote).foregroundStyle(.secondary)
+            }
         }
     }
 
@@ -259,9 +426,7 @@ struct SettingsScreen: View {
     private func subscriptionSection(_ devices: HostedDevicesUiState) -> some View {
         Section("Subscription") {
             Text("Your plan: \(devices.accountPlanLabel ?? "Loading")")
-            Text(devices.bankReadingEnabled
-                 ? "Bank reading is included when available"
-                 : "Bank reading requires Silver")
+            Text("Live bank connections are deferred and unavailable")
                 .font(.footnote).foregroundStyle(.secondary)
             if !devices.canPurchase {
                 Text("Create an account to subscribe and restore purchases on other devices.")
@@ -338,6 +503,8 @@ private struct DeveloperSections: View {
 
     @State private var serverUrl = ""
     @State private var householdId = ""
+    @State private var analyticsHost = ""
+    @State private var analyticsProjectToken = ""
 
     var body: some View {
         Section {
@@ -368,6 +535,22 @@ private struct DeveloperSections: View {
         .onAppear {
             if serverUrl.isEmpty { serverUrl = developer.serverUrl }
             if householdId.isEmpty { householdId = developer.householdId }
+            if analyticsHost.isEmpty { analyticsHost = screen.analyticsHost }
+            if analyticsProjectToken.isEmpty { analyticsProjectToken = screen.analyticsProjectToken }
+        }
+
+        Section("PostHog project") {
+            TextField("HTTPS host", text: $analyticsHost)
+                .keyboardType(.URL)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            TextField("Project token", text: $analyticsProjectToken)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            Button("Save PostHog project") {
+                toast = Toast(screen.saveAnalyticsConfig(host: analyticsHost, projectToken: analyticsProjectToken)
+                    ? "PostHog project saved" : "Enter an HTTPS host and project token")
+            }
         }
 
         if !developer.bootstrapLines.isEmpty {
@@ -400,6 +583,78 @@ private struct DeveloperSections: View {
             Text("Sample data")
         } footer: {
             Text("Adds demo accounts, categories and schedules for testing.")
+        }
+    }
+}
+
+/// Settings "Delete account": subscription reminder (paid plans), final confirmation, progress.
+/// Each button sets the next step itself; the bindings never write, so a dismissing alert
+/// cannot cancel the step that replaced it.
+private struct AccountDeletionAlerts: ViewModifier {
+    @ObservedObject var model: SettingsModel
+    @Binding var toast: Toast?
+    let openURL: OpenURLAction
+
+    private var warning: AccountDeletionStepSubscriptionWarning? {
+        model.deletion as? AccountDeletionStepSubscriptionWarning
+    }
+    private var confirm: AccountDeletionStepConfirm? { model.deletion as? AccountDeletionStepConfirm }
+    private var deleting: Bool { model.deletion is AccountDeletionStepDeleting }
+
+    func body(content: Content) -> some View {
+        content
+            .alert(warning?.title ?? "", isPresented: Binding(get: { warning != nil }, set: { _ in })) {
+                warningButtons
+            } message: {
+                Text(warning?.message ?? "")
+            }
+            .alert(confirm?.confirmCopy.title ?? "", isPresented: Binding(get: { confirm != nil }, set: { _ in })) {
+                confirmButtons
+            } message: {
+                Text(confirm?.confirmCopy.message ?? "")
+            }
+            .disabled(deleting)
+            .overlay { progress }
+    }
+
+    @ViewBuilder
+    private var warningButtons: some View {
+        if let warning {
+            Button(warning.continueLabel) { model.screen.continueAccountDeletion() }
+            // Native purchases have a management URL; web purchasers use their billing email.
+            if let link = model.managementURL, let url = URL(string: link) {
+                Button(warning.manageLabel) {
+                    model.screen.cancelAccountDeletion()
+                    openURL(url)
+                }
+            }
+        }
+        Button("Cancel", role: .cancel) { model.screen.cancelAccountDeletion() }
+    }
+
+    @ViewBuilder
+    private var confirmButtons: some View {
+        if let confirm {
+            Button(confirm.confirmCopy.confirmLabel, role: .destructive) { delete(acknowledging: confirm.acknowledgeActiveSubscription) }
+        }
+        Button("Cancel", role: .cancel) { model.screen.cancelAccountDeletion() }
+    }
+
+    @ViewBuilder
+    private var progress: some View {
+        if deleting {
+            ProgressView(model.screen.deletingAccountLabel)
+                .padding()
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        }
+    }
+
+    private func delete(acknowledging: Bool) {
+        Task {
+            let result = try? await asyncFunction(
+                for: model.screen.confirmAccountDeletion(acknowledgeActiveSubscription: acknowledging)
+            )
+            if let message = result ?? nil { toast = Toast(message) }
         }
     }
 }

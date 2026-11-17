@@ -1,6 +1,8 @@
 package finance.shilling.shared.data
 
 import finance.shilling.shared.data.auth.DeviceIdentity
+import finance.shilling.shared.data.analytics.ProductAnalytics
+import finance.shilling.shared.data.analytics.ProductAnalyticsEnvironment
 import finance.shilling.shared.data.store.AccountRepository
 import finance.shilling.shared.data.store.CategoryRepository
 import finance.shilling.shared.data.store.ChangeNotifier
@@ -64,42 +66,36 @@ fun initKoin(vararg modules: Module): Koin =
  * Shared data graph: identity, Store5 stores, repositories, use cases, and the sync facade.
  *
  * Every dependency is resolved from Koin, so the platform module must provide:
- * `ShillingDatabase`, `Settings`, `IdGenerator`, `ReceiptFileStore`, and `HttpClient`.
+ * `ShillingDatabase`, `Settings`, `IdGenerator`, scoped `ReceiptFileStoreFactory`, and `HttpClient`.
  */
 val dataModule: Module = module {
+    single { ProductAnalytics(get(), get(), get(), getOrNull<ProductAnalyticsEnvironment>() ?: ProductAnalyticsEnvironment()) }
     single { DeviceIdentity(get(), get()) }
     single { ChangeNotifier() }
-    // One StoreSyncDeps shared by every store and repository; the sync runtime swaps its
-    // peer manager in and out as sync starts and stops.
-    single { StoreSyncDeps(get(), null, get<DeviceIdentity>().deviceId, get()) }
     single { PeerConnectionStatus() }
-
-    single { createAccountStore(get(), get()) }
-    single { createCategoryStore(get(), get()) }
-    single { createScheduleStore(get(), get()) }
-    single { createScheduleExceptionStore(get(), get()) }
-    single { createPostingStore(get(), get()) }
-    single { createReceiptStore(get(), get()) }
     single {
-        SyncStoreFacade(
-            db = get(),
-            accountStore = get(),
-            categoryStore = get(),
-            scheduleStore = get(),
-            scheduleExceptionStore = get(),
-            postingStore = get(),
-            receiptStore = get()
+        finance.shilling.shared.data.store.FinanceSpaceGraphs(
+            get(), get(), get(), get(), get(),
+            get<finance.shilling.shared.data.store.ReceiptFileStoreFactory>()
         )
     }
-
-    single { AccountRepository(get(), get(), get()) }
-    single { CategoryRepository(get(), get(), get()) }
-    single { ScheduleRepository(get(), get(), get(), get()) }
-    single { PostingRepository(get(), get(), get(), get(), get(), get(), get()) }
-    single { ReceiptRepository(get(), get(), get(), get(), get()) }
-
-    single { ComputeWindowUseCase(get(), get(), get(), get(), get()) }
-    single { ComputeBudgetUseCase(get(), get(), get()) }
+    factory<ReceiptFileStore> { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.files }
+    single { finance.shilling.shared.data.store.LinkedTransferStore(get(), get(), get(), get()) }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.sync }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.accountsStore }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.categoriesStore }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.schedulesStore }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.exceptionsStore }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.postingsStore }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.receiptsStore }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.facade }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.accounts }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.categories }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.schedules }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.postings }
+    factory { get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.receipts }
+    factory { ComputeWindowUseCase(get(), get(), get(), get()) }
+    factory { ComputeBudgetUseCase(get(), get()) }
 
     viewModel { HomeViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { ActivityViewModel(get()) }
@@ -112,21 +108,23 @@ val dataModule: Module = module {
     viewModel { AccountsViewModel(get()) }
     // Editors take the item id (null = new) as a parameter.
     viewModel { params -> CategoryEditorViewModel(params.getOrNull(), get(), get()) }
-    viewModel { params -> AccountEditorViewModel(params.getOrNull(), get(), get()) }
+    viewModel { params -> AccountEditorViewModel(params.getOrNull(), get(), get(), get()) }
     // Parameters: schedule id (null = new), then the preset type for new schedules.
-    viewModel { ImportViewModel(get(), get(), get()) }
+    viewModel { ImportViewModel(get(), get(), get(), get()) }
     // OnboardingActions comes from sessionModule (AppSession).
-    viewModel { OnboardingViewModel(get(), get()) }
-    viewModel { params -> ReceiptEditorViewModel(params.getOrNull(), get(), get(), get(), get()) }
-    viewModel { params -> TransactionEditorViewModel(params.getOrNull(), get(), get(), get(), get(), get(), get()) }
-    viewModel { params -> ScheduleEditorViewModel(params.getOrNull(), params.getOrNull(), get(), get(), get(), get()) }
+    viewModel { OnboardingViewModel(get(), get(), get()) }
+    viewModel { params -> ReceiptEditorViewModel(params.getOrNull(), get(), get(), get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.files, get(), get()) }
+    viewModel { params -> TransactionEditorViewModel(params.getOrNull(), get(), get(), get(), get(), get<finance.shilling.shared.data.store.FinanceSpaceGraphs>().current.files, get(), get()) }
+    viewModel { params -> ScheduleEditorViewModel(params.getOrNull(), params.getOrNull(), get(), get(), get(), get(), get()) }
     // Needs SessionState and the Settings callbacks from sessionModule.
-    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel { finance.shilling.shared.presentation.HostedSpacesViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { HostedDevicesViewModel(get(), get(), get(), get(), get()) }
 
     // Assistant (MCP) access. Only the desktop platform module binds an McpHost.
-    single { McpToolbox(get(), get(), get(), get(), get(), get(), get(), get()) }
-    single { McpServer(get()) }
+    // Per request: repositories follow the active finance space (FinanceSpaceGraphs.current).
+    factory { McpToolbox(get(), get(), get(), get(), get(), get(), get(), get()) }
+    single { val koin = getKoin(); McpServer({ koin.get<McpToolbox>() }) }
     single { McpAccess(getOrNull<McpHost>(), get<McpServer>()::handle, get()) }
     viewModel { AssistantAccessViewModel(get()) }
 
@@ -139,7 +137,8 @@ val dataModule: Module = module {
             categoryRepository = get(),
             scheduleRepository = get(),
             postingRepository = get(),
-            receiptRepository = get()
+            receiptRepository = get(),
+            graphs = get()
         )
     }
 }

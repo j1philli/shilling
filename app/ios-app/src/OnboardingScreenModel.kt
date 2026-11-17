@@ -30,6 +30,11 @@ object AppRoot {
         .map { it.toAppPhase() }
         .stateIn(MainScope(), SharingStarted.Eagerly, KoinPlatform.getKoin().get<SessionState>().phase.value.toAppPhase())
 
+    @NativeCoroutinesState
+    val spaceId: StateFlow<String> = KoinPlatform.getKoin().get<SessionState>().phase
+        .map { (it as? SessionPhase.Ready)?.spaceId ?: "__local__" }
+        .stateIn(MainScope(), SharingStarted.Eagerly, "__local__")
+
     @NativeCoroutines
     suspend fun handleAuthCallback(url: String): String = KoinPlatform.getKoin().get<AppSession>()
         .handleAuthCallback(url).fold(
@@ -54,6 +59,7 @@ class OnboardingScreenModel : IosViewModelHost() {
     fun open(route: OnboardingRoute) = viewModel.open(route)
     fun back() = viewModel.back()
     fun getStarted() = viewModel.getStarted()
+    fun setAnalyticsConsent(value: Boolean) = viewModel.setAnalyticsConsent(value)
     fun confirmDestructive() = viewModel.confirmDestructive()
     fun dismissDestructive() = viewModel.dismissDestructive()
     fun setSelfHostedUrl(value: String) = viewModel.setSelfHostedUrl(value)

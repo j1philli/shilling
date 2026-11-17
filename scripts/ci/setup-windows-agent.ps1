@@ -44,18 +44,18 @@ if (-not $javaCmd) {
 # ---------- Node.js ----------
 
 $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
-if (-not $nodeCmd) {
-    Write-Host "Installing Node.js..."
-    winget install --id OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements --silent
-} else {
-    $ver = (& node --version) -replace 'v(\d+).*', '$1'
-    if ([int]$ver -lt 18) {
-        Write-Host "Upgrading Node.js..."
-        winget install --id OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements --silent
-    } else {
-        Write-Host "Node.js v$ver already installed"
-    }
+$needsNode = -not $nodeCmd
+if ($nodeCmd) {
+    & node (Join-Path $PSScriptRoot "check-node-version.cjs")
+    $needsNode = $LASTEXITCODE -ne 0
 }
+if ($needsNode) {
+    Write-Host "Installing/upgrading Node.js LTS with October 2026 security fixes..."
+    winget install --id OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements --silent
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+}
+& node (Join-Path $PSScriptRoot "check-node-version.cjs")
+if ($LASTEXITCODE -ne 0) { throw "A patched Node.js LTS release is required; restart the agent after upgrading." }
 
 # ---------- Rust ----------
 

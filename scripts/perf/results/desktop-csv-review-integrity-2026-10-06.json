@@ -1,0 +1,82 @@
+{
+  "control-1": {
+    "integrity": "ok",
+    "postings": 20000,
+    "importedRows": 10000,
+    "importedUniqueIds": 10000,
+    "importedVersionRecords": 10000,
+    "snapshotBytes": 17231872,
+    "financialColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "financialValuesSha256": "3236e5e70f0494d3ad1a8dc30d04f83cc1b2a326d64e7212e4f6789c2bb5f424",
+    "importedRowsWithExpectedValues": 10000
+  },
+  "candidate-1": {
+    "integrity": "ok",
+    "postings": 20000,
+    "importedRows": 10000,
+    "importedUniqueIds": 10000,
+    "importedVersionRecords": 10000,
+    "snapshotBytes": 17371136,
+    "financialColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "financialValuesSha256": "3236e5e70f0494d3ad1a8dc30d04f83cc1b2a326d64e7212e4f6789c2bb5f424",
+    "importedRowsWithExpectedValues": 10000
+  },
+  "control-2": {
+    "integrity": "ok",
+    "postings": 20000,
+    "importedRows": 10000,
+    "importedUniqueIds": 10000,
+    "importedVersionRecords": 10000,
+    "snapshotBytes": 17297408,
+    "financialColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "financialValuesSha256": "3236e5e70f0494d3ad1a8dc30d04f83cc1b2a326d64e7212e4f6789c2bb5f424",
+    "importedRowsWithExpectedValues": 10000
+  },
+  "candidate-2": {
+    "integrity": "ok",
+    "postings": 20000,
+    "importedRows": 10000,
+    "importedUniqueIds": 10000,
+    "importedVersionRecords": 10000,
+    "snapshotBytes": 17383424,
+    "financialColumns": [
+      "schedule_id",
+      "type",
+      "account_id",
+      "date",
+      "amount",
+      "pair_id",
+      "title",
+      "category_id"
+    ],
+    "financialValuesSha256": "3236e5e70f0494d3ad1a8dc30d04f83cc1b2a326d64e7212e4f6789c2bb5f424",
+    "importedRowsWithExpectedValues": 10000
+  }
+}

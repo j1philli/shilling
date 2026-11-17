@@ -1,0 +1,152 @@
+# Shilling development environment: tools, project dependencies, and tasks.
+#
+#   mise install            # once: install the pinned tools below
+#   mise run desktop        # any task; `mise tasks` lists them
+#
+# Long tasks live as scripts in mise-tasks/. See README.md for setup.
+
+min_version = "2026.10.19"
+
+[settings]
+# Record tool URLs and checksums in mise.lock and verify every download against it.
+lockfile = true
+# [deps] below is experimental in mise.
+experimental = true
+
+[tools]
+# Patched releases (October 21, 2026 security fixes); see SECURITY.md.
+node = "22.23.4"
+java = "temurin-25.0.5+8.0.LTS"
+rust = "1.99.1"
+tauri-cli = "2.12.4"
+
+[env]
+# Task scripts read SHILLING_ROOT instead of guessing the checkout location.
+SHILLING_ROOT = "{{config_root}}"
+
+# Reinstall node_modules whenever package.json or package-lock.json changes,
+# before any `mise run` / `mise exec`.
+[deps.npm]
+auto = true
+run = "npm ci"
+
+[doctor.checks.xcode]
+description = "Xcode 15+ is installed (iOS builds only)"
+run = "xcodebuild -version | awk 'NR==1 { split($2, v, \".\"); exit !(v[1] >= 15) }'"
+hint = "Install Xcode from the App Store, then run: sudo xcode-select -s /Applications/Xcode.app"
+os = "macos"
+
+[doctor.checks.ios-simulator]
+description = "An iOS Simulator runtime is installed (iOS builds only)"
+depends = ["xcode"]
+run = "xcrun simctl list runtimes | grep -q '^iOS'"
+hint = "Run: xcodebuild -downloadPlatform iOS"
+os = "macos"
+
+[doctor.checks.android-sdk]
+description = "Android SDK 37 platform is installed (Android builds only)"
+run = "test -d \"${ANDROID_HOME:-$HOME/Library/Android/sdk}/platforms/android-37.0\""
+hint = "Install Android Studio, then add the Android 37 SDK platform in its SDK Manager. Set ANDROID_HOME if the SDK is not at ~/Library/Android/sdk."
+
+# ─── Setup ───────────────────────────────────────────────────────────
+
+[tasks.setup-webrtc]
+description = "Download WebRTC.xcframework for iOS (idempotent)"
+run = "./setup-webrtc.sh"
+sources = ["setup-webrtc.sh"]
+outputs = ["app/ios-app/Frameworks/WebRTC.xcframework/.version"]
+
+[tasks.ensure-plugin]
+description = "Reset stale SQLDelight plugin build state and warm the plugin compile"
+hide = true
+run = "./scripts/ensure-plugin.sh"
+
+# ─── Build ───────────────────────────────────────────────────────────
+
+[tasks.build-web]
+description = "Build the wasmJs web app (dev database, dev icons, dev tools)"
+depends = ["ensure-plugin"]
+env = { SHILLING_DB_NAME = "shilling-dev", SHILLING_WASM_VARIANT = "Debug", SHILLING_DEV_TOOLS = "true" }
+run = 'SHILLING_ICON_VARIANT="${SHILLING_ICON_VARIANT:-dev}" ./build-web.sh'
+
+[tasks.build-all]
+description = "Compile every module for every platform"
+depends = ["setup-webrtc", "ensure-plugin"]
+run = "./kotlin build"
+
+[tasks.clean]
+description = "Remove all build outputs and caches"
+run = "./kotlin clean"
+
+# ─── Run ─────────────────────────────────────────────────────────────
+
+[tasks.desktop]
+description = "Build the web app and launch the Tauri desktop shell"
+depends = ["build-web"]
+run = '''
+variant="${SHILLING_ICON_VARIANT:-dev}"
+if [ "$variant" = ga ]; then
+    cargo tauri dev
+else
+    cargo tauri dev --config "src-tauri/tauri.$variant.conf.json"
+fi
+'''
+
+# ─── Test ────────────────────────────────────────────────────────────
+
+[tasks.test]
+description = "Run the architecture guard and JVM tests"
+depends = ["guard-architecture"]
+run = "./scripts/ci/run-jvm-tests.sh"
+
+[tasks.guard-architecture]
+description = "Fail on forbidden relay/server data-sync patterns"
+run = "./scripts/enforce-architecture.sh"
+
+[tasks.test-glib-security]
+description = "Check the vendored GLib safety fix with optimizations enabled"
+run = "./scripts/ci/test-glib-security.sh"
+
+# ─── Release & assets ────────────────────────────────────────────────
+
+[tasks.check-version]
+description = "Check that every distributable declares the shared product version"
+tools = { python = "3.14.9" }
+run = "python3 scripts/ci/check-version.py"
+
+[tasks.set-version]
+description = "Set the shared release version; pass --android and/or --ios for store uploads"
+tools = { python = "3.14.9" }
+usage = '''
+arg "<version>" help="New version, e.g. 0.1.4"
+flag "--android" help="Also bump the Android version code"
+flag "--ios" help="Also bump the iOS build number"
+'''
+run = '''
+python3 scripts/ci/set-version.py "${usage_version}" \
+    $([ "${usage_android:-false}" = true ] && echo --android) \
+    $([ "${usage_ios:-false}" = true ] && echo --ios)
+'''
+
+[tasks.generate-icons]
+description = "Regenerate committed platform icons from icons/source"
+tools = { python = "3.14.9" }
+# Not in `tools`: mise 2026.10 can't install locked conda dependencies for task tools.
+run = "mise exec conda:imagemagick@7.1.2_31 -- ./scripts/generate-icons.sh"
+
+# ─── Kotlin Toolchain ────────────────────────────────────────────────
+
+[tasks.kotlin-tasks]
+description = "Show Kotlin Toolchain tasks, optionally for one module (e.g. web-app)"
+usage = 'arg "[module]" help="Module name"'
+run = '''
+if [ -z "${usage_module:-}" ]; then
+    ./kotlin show tasks
+else
+    ./kotlin show tasks 2>&1 | grep ":${usage_module}:"
+fi
+'''
+
+[tasks.kotlin-modules]
+description = "Show Kotlin Toolchain modules"
+run = "./kotlin show modules"

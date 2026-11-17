@@ -34,8 +34,11 @@ private val SERVER_INSTRUCTIONS = """
 /**
  * Stateless MCP server: turns one JSON-RPC message (a Streamable HTTP POST body) into its response.
  * Transport, auth and sessions belong to the platform [McpHost]; tools come from [McpToolbox].
+ *
+ * [toolbox] is called for each request because repositories belong to the active finance space:
+ * a toolbox kept from startup would keep using that space after the user switches.
  */
-class McpServer(private val toolbox: McpToolbox, private val version: String = "1.0") {
+class McpServer(private val toolbox: () -> McpToolbox, private val version: String = "1.0") {
     private val json = Json { encodeDefaults = false }
 
     /** Returns the response body, or null when nothing is owed (notifications and responses). */
@@ -94,7 +97,7 @@ class McpServer(private val toolbox: McpToolbox, private val version: String = "
     }
 
     private fun toolList(): JsonArray = buildJsonArray {
-        toolbox.tools.forEach { tool ->
+        toolbox().tools.forEach { tool ->
             add(buildJsonObject {
                 put("name", tool.name)
                 put("title", tool.title)
@@ -116,7 +119,7 @@ class McpServer(private val toolbox: McpToolbox, private val version: String = "
     private suspend fun callTool(id: JsonElement, params: JsonObject): JsonElement {
         val name = (params["name"] as? JsonPrimitive)?.contentOrNull
             ?: return error(id, INVALID_PARAMS, "Missing tool name")
-        val tool = toolbox.tools.firstOrNull { it.name == name }
+        val tool = toolbox().tools.firstOrNull { it.name == name }
             ?: return error(id, INVALID_PARAMS, "Unknown tool: $name")
         val arguments = when (val raw = params["arguments"]) {
             null, is JsonNull -> JsonObject(emptyMap())

@@ -9,6 +9,7 @@ import finance.shilling.shared.data.store.SyncStoreFacade
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -24,7 +25,9 @@ class IncomingChangeRouter(
     private val fileRetryIntervalMs: Long = 30_000L,
     private val delayFn: suspend (Long) -> Unit = { delay(it) },
     private val deviceId: String = "",
-    private val idGenerator: IdGenerator? = null
+    private val idGenerator: IdGenerator? = null,
+    /** Actual open P2P channels, not signaling-server presence. */
+    private val hasConnectedPeers: () -> Boolean = { true }
 ) {
     private val processedIds = mutableSetOf<String>()
     private val pendingMutex = Mutex()
@@ -115,6 +118,9 @@ class IncomingChangeRouter(
     }
 
     private suspend fun scanAndRequestMissingFiles() {
+        // A peer-connected event scans immediately. While offline, per-receipt
+        // presence queries and queued FileRequests cannot make any progress.
+        if (!hasConnectedPeers()) return
         try {
             val missing = storeFacade.findReceiptsMissingFiles { receiptId ->
                 fileStore?.hasFile(receiptId) == true
@@ -130,6 +136,7 @@ class IncomingChangeRouter(
     }
 
     private suspend fun retryPendingFileRequests() {
+        if (!hasConnectedPeers()) return
         val snapshot = pendingMutex.withLock { pendingFileReceipts.toMap() }
         if (snapshot.isEmpty()) return
         val toRemove = mutableListOf<String>()
@@ -164,7 +171,7 @@ class IncomingChangeRouter(
         val ftm = fileTransferManager ?: return
         when (msg) {
             is FileTransferMessage.FileRequest -> {
-                // Dedup: skip if we're already sending this file (duplicate from P2P + signaling)
+                // Dedup: skip if we're already sending this file (duplicate P2P request)
                 if (msg.receiptId in inProgressSends) {
                     log.d { "FileRequest from $peerId: id=${msg.receiptId} — already sending, skipping duplicate" }
                     return
@@ -179,21 +186,20 @@ class IncomingChangeRouter(
                     )
                     if (messages != null) {
                         inProgressSends.add(msg.receiptId)
-                        log.i { "Sending file ${msg.receiptId} to $peerId (${messages.size} messages)" }
+                        log.i { "Sending file ${msg.receiptId} to $peerId (streamed chunks)" }
                         var sentCount = 0
                         try {
-                            for ((i, m) in messages.withIndex()) {
-                                webRtcManager.sendFileMessage(peerId, m)
-                                sentCount++
-                                // Yield between chunks to avoid flooding the data channel buffer
-                                if (m is FileTransferMessage.FileChunk && i % 5 == 4) {
-                                    kotlinx.coroutines.yield()
-                                }
-                            }
+                            sentCount = webRtcManager.sendFileMessages(peerId, messages.catch { failure ->
+                                // Only source read failures abort the remote partial file.
+                                // Downstream send failures must not queue a stale abort for reconnect.
+                                if (failure is CancellationException) throw failure
+                                webRtcManager.sendFileMessage(peerId, FileTransferMessage.FileNotAvailable(msg.receiptId))
+                                throw failure
+                            })
                         } finally {
                             inProgressSends.remove(msg.receiptId)
                         }
-                        log.i { "File send complete: ${msg.receiptId} ($sentCount/${messages.size} messages sent)" }
+                        log.i { "File send complete: ${msg.receiptId} ($sentCount messages sent)" }
                     } else {
                         log.w { "prepareTransfer returned null for ${msg.receiptId} (hasFile=true but read failed)" }
                         webRtcManager.sendFileMessage(
