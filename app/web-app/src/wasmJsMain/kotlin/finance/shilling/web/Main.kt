@@ -141,6 +141,7 @@ private fun webPlatformModule(db: ShillingDatabase) = module {
     }
     single { Settings() }
     single<IdGenerator> { WasmIdGenerator() }
+    single<finance.shilling.shared.data.backup.BackupKeyVault> { WebBackupKeyVault() }
     single<finance.shilling.shared.data.store.ReceiptFileStoreFactory> {
         finance.shilling.shared.data.store.ReceiptFileStoreFactory { id, legacy -> WasmReceiptFileStore(get(), id) }
     }

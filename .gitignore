@@ -72,6 +72,12 @@ supabase/.temp/
 .context/
 .cache/
 
+# Backup development state (control metadata and encrypted objects)
+/data/
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
 release-output/
 apple-output/
 beta-output/

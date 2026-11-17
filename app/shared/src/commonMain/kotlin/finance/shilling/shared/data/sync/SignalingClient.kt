@@ -3,6 +3,8 @@ package finance.shilling.shared.data.sync
 import co.touchlab.kermit.Logger
 import finance.shilling.core.sync.SignalingMessage
 import io.ktor.client.*
+import io.ktor.client.plugins.HttpTimeoutConfig
+import io.ktor.client.plugins.timeout
 import io.ktor.client.plugins.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.*
@@ -17,7 +19,9 @@ class SignalingClient(
     private val serverUrl: String,
     private val deviceId: String,
     private val householdId: String,
-    private val authService: finance.shilling.shared.data.auth.AuthService? = null
+    private val authService: finance.shilling.shared.data.auth.AuthService? = null,
+    private val path: String = "/ws/signal",
+    private val accessToken: (suspend () -> String?)? = null
 ) {
     private val _incomingMessages = MutableSharedFlow<SignalingMessage>(extraBufferCapacity = 64)
     val incomingMessages: SharedFlow<SignalingMessage> = _incomingMessages
@@ -43,7 +47,7 @@ class SignalingClient(
         connectionJob = null
         _policyRejected.value = false
         val wsUrl = try {
-            secureSignalingUrl(serverUrl)
+            secureSignalingUrl(serverUrl, path)
         } catch (_: IllegalArgumentException) {
             // Old saved HTTP settings must disable sync without crashing local budgeting.
             log.e { "[SIG] $SECURE_SIGNALING_REQUIRED" }
@@ -60,7 +64,7 @@ class SignalingClient(
                             session = this
                             backoff.reset()
                             log.i { "[SIG] Encrypted signaling connected" }
-                            val token = authService?.refreshTokenIfNeeded()
+                            val token = accessToken?.invoke() ?: authService?.refreshTokenIfNeeded()
                             log.i { "[SIG] Sending Join(device=$deviceId, household=$householdId, hasToken=${token != null})" }
                             send(json.encodeToString<SignalingMessage>(
                                 SignalingMessage.Join(deviceId, householdId, token)

@@ -25,6 +25,8 @@ val sessionModule: Module = module {
             webRtcPlatform = get(),
             notifier = get(),
             peerConnectionStatus = get(),
+            backupSession = get(),
+            backupVault = get(),
             config = getOrNull() ?: AppSessionConfig()
         )
     }

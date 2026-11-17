@@ -51,8 +51,14 @@ class SignalingHub(
     suspend fun register(householdId: String, deviceId: String, session: WebSocketSession) {
         val peer = Peer(session, queueCapacity)
         var replaced: Peer? = null
+        var existingPeers = emptyList<Pair<String, Peer>>()
         val peers = households.compute(householdId) { _, existing ->
-            (existing ?: ConcurrentHashMap()).also { replaced = it.put(deviceId, peer) }
+            (existing ?: ConcurrentHashMap()).also {
+                // Snapshot inside the same household lock as insertion. Concurrent joins
+                // must not notify each other twice and restart WebRTC negotiation.
+                existingPeers = it.entries.filter { entry -> entry.key != deviceId }.map { entry -> entry.key to entry.value }
+                replaced = it.put(deviceId, peer)
+            }
         }!!
         replaced?.let { disconnect(householdId, deviceId, it, "Signaling session replaced") }
         peer.sender = session.launch(start = CoroutineStart.UNDISPATCHED) {
@@ -71,7 +77,6 @@ class SignalingHub(
             }
         }
 
-        val existingPeers = peers.entries.filter { it.key != deviceId }.map { it.key to it.value }
         if (existingPeers.isNotEmpty()) {
             enqueue(householdId, deviceId, peer, json.encodeToString<SignalingMessage>(
                 SignalingMessage.PeerList(existingPeers.map { it.first })
@@ -164,14 +169,15 @@ fun Routing.signalingRoute(
     householdLookup: HouseholdMembershipLookup? = null,
     entitlements: HostedEntitlementLookup? = null,
     devices: HostedDeviceRegistry? = null,
-    spaces: SupabaseSpaceManagement? = null
+    spaces: SupabaseSpaceManagement? = null,
+    path: String = "/ws/signal"
 ) {
     val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
 
-    webSocket("/ws/signal") {
+    webSocket(path) {
         var deviceId: String? = null
         var householdId: String? = null
         log.d { "[WS] New WebSocket connection" }

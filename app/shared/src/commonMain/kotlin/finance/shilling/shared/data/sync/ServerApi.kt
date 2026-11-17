@@ -1,5 +1,7 @@
 package finance.shilling.shared.data.sync
 
+import finance.shilling.core.backup.*
+import io.ktor.http.ContentType
 import finance.shilling.shared.data.auth.AccountDeletionException
 import finance.shilling.shared.data.auth.AccountDeletionResult
 import finance.shilling.shared.data.auth.AuthService
@@ -29,7 +31,8 @@ const val BOOTSTRAP_NETWORK_TIMEOUT_MS = 3_000L
 class ServerApi(
     private val httpClient: HttpClient,
     private val baseUrl: String,
-    private val authService: AuthService? = null
+    private val authService: AuthService? = null,
+    private val householdId: String? = null
 ) {
     // Validate when making a request so bootstrap can report old HTTP settings as
     // unavailable while preserving local access. Never send a token over HTTP.
@@ -37,6 +40,7 @@ class ServerApi(
         get() = secureServerUrl(baseUrl).toString().trimEnd('/')
 
     private suspend fun HttpRequestBuilder.withAuth() {
+        householdId?.let { header("X-Shilling-Household", it) }
         authService?.refreshTokenIfNeeded()?.let { token ->
             header("Authorization", "Bearer $token")
         }
@@ -47,6 +51,18 @@ class ServerApi(
             expectSuccess = true
             withAuth()
         }.body()
+
+    suspend fun backupPolicy(): BackupPolicy = httpClient.get("$secureBaseUrl/api/backup/policy") {
+        expectSuccess = true
+        withAuth()
+    }.body()
+
+    suspend fun updateBackupPolicy(update: BackupPolicyUpdate): BackupPolicy = httpClient.post("$secureBaseUrl/api/backup/toggle") {
+        expectSuccess = true
+        withAuth()
+        contentType(ContentType.Application.Json)
+        setBody(update)
+    }.body()
 
     suspend fun fetchConfig(): ServerConfig =
         httpClient.get("$secureBaseUrl/api/config") {

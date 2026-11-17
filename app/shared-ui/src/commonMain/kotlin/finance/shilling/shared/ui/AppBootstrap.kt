@@ -64,6 +64,7 @@ fun ShillingAppBootstrap(
     val session = koinInject<AppSession>()
     remember(session) { session.start() }
     val phase by session.phase.collectAsState()
+    val backupController by koinInject<finance.shilling.shared.data.backup.BackupSession>().controllerState.collectAsState()
 
     when (val current = phase) {
         is SessionPhase.Onboarding -> ShillingTheme {
@@ -82,7 +83,7 @@ fun ShillingAppBootstrap(
                 override val viewModelStore = androidx.lifecycle.ViewModelStore()
             } }
             androidx.compose.runtime.DisposableEffect(owner) { onDispose { owner.viewModelStore.clear() } }
-            androidx.compose.runtime.CompositionLocalProvider(androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner provides owner) { ShillingTheme {
+            androidx.compose.runtime.CompositionLocalProvider(LocalBackupController provides backupController, androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner provides owner) { ShillingTheme {
             Surface(modifier = Modifier.fillMaxSize()) {
                 scaffoldConfig.preScaffoldContent()
                 ShillingScaffold(

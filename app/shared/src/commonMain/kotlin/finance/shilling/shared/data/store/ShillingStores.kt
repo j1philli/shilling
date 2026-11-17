@@ -532,7 +532,7 @@ suspend fun broadcastChange(
         entityType = entityType,
         op = op,
         entityId = entityId,
-        timestamp = Clock.System.now().toEpochMilliseconds(),
+        timestamp = maxOf(Clock.System.now().toEpochMilliseconds(), (s.db.latestEntityVersion(entityType, entityId)?.timestamp ?: -1L) + 1),
         deviceId = state.deviceId,
         payload = payload
     )
@@ -581,7 +581,7 @@ private inline fun <Key : Any, reified Item : Any> createUpdater(
                     entityType = entityType,
                     op = ChangeOp.UPSERT,
                     entityId = entityId,
-                    timestamp = Clock.System.now().toEpochMilliseconds(),
+                    timestamp = maxOf(Clock.System.now().toEpochMilliseconds(), (sync.db.latestEntityVersion(entityType, entityId)?.timestamp ?: -1L) + 1),
                     deviceId = state.deviceId,
                     payload = payload
                 )

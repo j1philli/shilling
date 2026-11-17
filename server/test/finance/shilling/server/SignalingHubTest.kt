@@ -24,6 +24,23 @@ import kotlin.test.assertTrue
 import kotlinx.serialization.json.Json
 
 class SignalingHubTest {
+    @Test fun concurrentJoinsAnnounceEachPeerExactlyOnce() = runBlocking {
+        repeat(100) {
+            val hub = SignalingHub()
+            val a = FakeWebSocketSession()
+            val b = FakeWebSocketSession()
+            val start = CompletableDeferred<Unit>()
+            val one = async(Dispatchers.Default) { start.await(); hub.register("house", "a", a) }
+            val two = async(Dispatchers.Default) { start.await(); hub.register("house", "b", b) }
+            start.complete(Unit)
+            one.await(); two.await()
+            assertEquals(listOf("b"), a.sentMessages().flatMap { (decode(it) as SignalingMessage.PeerList).deviceIds })
+            assertEquals(listOf("a"), b.sentMessages().flatMap { (decode(it) as SignalingMessage.PeerList).deviceIds })
+            hub.unregister("house", "a", a)
+            hub.unregister("house", "b", b)
+        }
+    }
+
     @Test
     fun admissionsOverlapButPolicyMutationWaitsAndCancelledMutationReleasesPermits() = runBlocking {
         withTimeout(5_000) {

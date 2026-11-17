@@ -47,7 +47,8 @@ fun Routing.iceServerRoute(
     authEnabled: Boolean = false,
     tokenVerifier: SupabaseTokenVerifier? = null,
     householdLookup: HouseholdMembershipLookup? = null,
-    entitlements: HostedEntitlementLookup? = null
+    entitlements: HostedEntitlementLookup? = null,
+    backupControl: BackupControl? = null
 ) {
     get("/api/ice-servers") {
         val servers = mutableListOf<IceServerConfig>()
@@ -59,7 +60,8 @@ fun Routing.iceServerRoute(
 
         // Hosted TURN is a household entitlement; authentication alone does not grant it.
         val relayRequested = call.request.queryParameters["allowRelay"] == "true"
-        val includeTurn = if (!relayRequested) {
+        val worker = backupControl?.workerForToken(call.request.headers[io.ktor.http.HttpHeaders.Authorization]?.removePrefix("Bearer "))
+        val includeTurn = if (worker != null) true else if (!relayRequested) {
             false
         } else if (!authEnabled) {
             true

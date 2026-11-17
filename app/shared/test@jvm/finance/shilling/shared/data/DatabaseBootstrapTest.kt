@@ -2,6 +2,7 @@ package finance.shilling.shared.data
 
 import app.cash.sqldelight.async.coroutines.awaitAsOne
 import app.cash.sqldelight.async.coroutines.await
+import app.cash.sqldelight.async.coroutines.awaitAsOne
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlPreparedStatement
@@ -14,6 +15,21 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class DatabaseBootstrapTest {
+    @Test fun cloudMetadataUpgradePreservesExistingSpaceData() = runBlocking {
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        try {
+            ShillingDatabase.Schema.create(driver).await()
+            val db = ShillingDatabase(driver)
+            db.accountQueries.upsert("existing", "Saved", 42.0, space_id = "__local__").await()
+            driver.execute(null, "DROP TABLE cloud_state;", 0).await()
+            driver.execute(null, "PRAGMA user_version = 2;", 0).await()
+            ensureLocalSchemaReady(driver)
+            assertTrue(tableExists(driver, "cloud_state"))
+            assertEquals(ShillingDatabase.Schema.version, userVersion(driver))
+            assertEquals("Saved", db.accountQueries.selectById("existing", "__local__").awaitAsOne().name)
+        } finally { driver.close() }
+    }
+
     @Test
     fun androidMetadataAloneDoesNotMakeAFreshDatabaseRequireMigration() = runBlocking {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
@@ -91,10 +107,10 @@ class DatabaseBootstrapTest {
     }
 
     @Test
-    fun versionMismatchPreservesExistingData() = runBlocking {
+    fun unsupportedFutureVersionPreservesExistingData() = runBlocking {
         val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         ShillingDatabase.Schema.create(driver).await()
-        driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version - 1};", 0)
+        driver.execute(null, "PRAGMA user_version = ${ShillingDatabase.Schema.version + 1};", 0)
         val db = ShillingDatabase(driver)
         db.accountQueries.upsert("acct-1", "Checking", 123.45, space_id = "__local__").await()
 
@@ -102,7 +118,7 @@ class DatabaseBootstrapTest {
             ensureLocalSchemaReady(driver, logTag = "DatabaseBootstrapTest")
         }
 
-        assertEquals(ShillingDatabase.Schema.version - 1, userVersion(driver))
+        assertEquals(ShillingDatabase.Schema.version + 1, userVersion(driver))
         assertEquals(1L, rowCount(driver, "accounts"))
     }
 

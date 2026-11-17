@@ -26,11 +26,11 @@ internal fun secureServerUrl(value: String): Url {
     return url
 }
 
-internal fun secureSignalingUrl(serverUrl: String): String {
+internal fun secureSignalingUrl(serverUrl: String, path: String = "/ws/signal"): String {
     val url = secureServerUrl(serverUrl)
     return URLBuilder(url).apply {
         protocol = URLProtocol.WSS
-        encodedPath = url.encodedPath.trimEnd('/') + "/ws/signal"
+        encodedPath = url.encodedPath.trimEnd('/') + path
     }.buildString()
 }
 

@@ -73,6 +73,7 @@ class MainActivity : ComponentActivity() {
             single { ShillingDatabase(driver) }
             single { settings }
             single<IdGenerator> { AndroidIdGenerator() }
+            single<finance.shilling.shared.data.backup.BackupKeyVault> { AndroidBackupKeyVault(appContext) }
             single<finance.shilling.shared.data.store.ReceiptFileStoreFactory> {
                 finance.shilling.shared.data.store.ReceiptFileStoreFactory { id, legacy -> AndroidReceiptFileStore(appContext, if (legacy) null else id) }
             }

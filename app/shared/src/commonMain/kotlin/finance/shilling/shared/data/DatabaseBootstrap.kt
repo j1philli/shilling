@@ -54,7 +54,12 @@ suspend fun ensureLocalSchemaReady(
     ).await()
     val hasSpaceRegistry = driver.executeQuery(null, "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='local_spaces';",
         { cursor -> cursor.next(); QueryResult.Value(cursor.getLong(0) == 1L) }, 0).await()
-    if (currentVersion == expectedVersion && hasRequiredTables && hasSpaceColumn && hasSpaceRegistry) {
+    if (currentVersion in 2L..expectedVersion && hasRequiredTables && hasSpaceColumn && hasSpaceRegistry) {
+        // Cloud cursors are additive metadata; never reset an existing finance database.
+        val hasCloudState = driver.executeQuery(null, "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='cloud_state';",
+            { cursor -> cursor.next(); QueryResult.Value(cursor.getLong(0) == 1L) }, 0).await()
+        if (!hasCloudState) driver.execute(null, "CREATE TABLE cloud_state (namespace TEXT NOT NULL PRIMARY KEY, state_json TEXT NOT NULL);", 0).await()
+        if (currentVersion != expectedVersion) driver.execute(null, "PRAGMA user_version = $expectedVersion;", 0).await()
         installProjectionIndexes(driver)
         return
     }

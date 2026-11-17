@@ -51,11 +51,13 @@ fun Routing.configRoute(authConfig: AuthConfig) {
 
 fun main() {
     Logger.setMinSeverity(Severity.Info)
-    val port = System.getenv("SHILLING_PORT")?.toInt() ?: 8081
+    val port = (System.getenv("SHILLING_SERVER_PORT") ?: System.getenv("SHILLING_PORT"))?.toInt() ?: 8081
+    val host = System.getenv("SHILLING_SERVER_HOST") ?: "0.0.0.0"
     require(port in 1..65535) { "SHILLING_PORT must be between 1 and 65535" }
     val signalingHub = SignalingHub()
     val turnConfig = createTurnConfig()
     val authConfig = readAuthConfig()
+    val backupControl = createBackupControl(turnConfig)
     require(authConfig.authMode in setOf("none", "supabase")) { "Unsupported SHILLING_AUTH_MODE" }
     val householdLookup = createHouseholdMembershipLookup(authConfig)
     val tokenVerifier = createSupabaseTokenVerifier(authConfig)
@@ -81,7 +83,7 @@ fun main() {
 
     val authEnabled = authConfig.authMode == "supabase"
 
-    embeddedServer(Netty, port = port, host = "0.0.0.0") {
+    embeddedServer(Netty, port = port, host = host) {
         install(ContentNegotiation) { json() }
         install(WebSockets) {
             pingPeriod = 15.seconds
@@ -90,8 +92,10 @@ fun main() {
         }
         install(CORS) {
             anyHost()
+            allowMethod(HttpMethod.Post)
             allowHeader(HttpHeaders.ContentType)
             allowHeader(HttpHeaders.Authorization)
+            allowHeader("X-Shilling-Household")
             exposeHeader("Cross-Origin-Resource-Policy")
         }
         // Required for browsers with Cross-Origin-Embedder-Policy: require-corp
@@ -100,11 +104,13 @@ fun main() {
             call.response.header("Cross-Origin-Resource-Policy", "cross-origin")
         }
 
+        monitor.subscribe(ApplicationStopped) { backupControl.policies.close() }
         routing {
             get("/health") { call.respondText("ok") }
             configRoute(authConfig)
             iceServerRoute(turnConfig, authEnabled = authEnabled, tokenVerifier = tokenVerifier,
-                householdLookup = householdLookup, entitlements = entitlements)
+                householdLookup = householdLookup, entitlements = entitlements, backupControl = backupControl)
+            backupRoutes(backupControl, tokenVerifier, householdLookup, entitlements)
             if (authEnabled) {
                 householdRoute(householdLookup, tokenVerifier)
                 hostedEntitlementRoute(tokenVerifier, householdLookup, entitlements, devices,
@@ -117,6 +123,7 @@ fun main() {
                     entitlements, devices, signalingHub)
             }
             signalingRoute(signalingHub, tokenVerifier, householdLookup, entitlements, devices, spaces)
+            signalingRoute(SignalingHub(), tokenVerifier, householdLookup, entitlements, devices, spaces, path = "/ws/recovery-keys")
         }
     }.start(wait = true)
 }

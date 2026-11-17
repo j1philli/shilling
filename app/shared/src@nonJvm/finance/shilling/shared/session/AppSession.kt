@@ -112,6 +112,8 @@ class AppSession(
     private val webRtcPlatform: WebRtcPlatform,
     private val notifier: ChangeNotifier,
     private val peerConnectionStatus: PeerConnectionStatus,
+    private val backupSession: finance.shilling.shared.data.backup.BackupSession,
+    private val backupVault: finance.shilling.shared.data.backup.BackupKeyVault,
     private val config: AppSessionConfig = AppSessionConfig()
 ) : SessionState, OnboardingActions {
     private val log = Logger.withTag(config.logTag)
@@ -182,6 +184,7 @@ class AppSession(
     private val householdSyncEffect = Effect()
     private val runtimeEffect = Effect()
     private val syncEffect = Effect()
+    private val backupEffect = Effect()
 
     /** Starts the session. Idempotent; call once Koin is up (platform entry point). */
     fun start() {
@@ -258,7 +261,7 @@ class AppSession(
 
     override suspend fun continueSelfHosted(selectedUrl: String): Result<Unit> = onMain {
         validateSelfHostedServer(selectedUrl).onSuccess {
-            if (heldLocalData) graphs.wipeAll()
+            if (heldLocalData) graphs.wipeAll { backupVault.delete("$serverUrl|$it") }
             completeFirstLaunchOnboarding(settings, DeploymentSelection.SELF_HOSTED, selectedUrl)
             serverUrl = selectedUrl
             onboardingComplete = true
@@ -315,7 +318,7 @@ class AppSession(
         services
             .distinct()
             .forEach { service -> runCatching { service.signOut() } }
-        graphs.wipeAll()
+        graphs.wipeAll { backupVault.delete("$serverUrl|$it") }
     }
 
     /** After local data was wiped: back to a fresh Welcome. */
@@ -507,6 +510,20 @@ class AppSession(
             authoritativeStatus = startup.bootstrapStatus,
             liveStatus = statusFlow.value
         )
+        backupEffect.update(listOf(effectiveStatus.syncReady, serverUrl, activeHousehold, authService, graph)) {
+            if (!effectiveStatus.syncReady) return@update
+            val controller = finance.shilling.shared.data.backup.BackupController(
+                httpClient, serverUrl, activeHousehold, deviceId, authService,
+                backupVault, webRtcPlatform.createClient, scope, graph.cloud
+            )
+            backupSession.controller = controller
+            controller.start()
+            onDispose {
+                if (backupSession.controller === controller) backupSession.controller = null
+                controller.cancel()
+                scope.launch(kotlinx.coroutines.NonCancellable) { controller.close() }
+            }
+        }
         syncEffect.update(listOf(effectiveStatus.syncReady, serverUrl, activeHousehold, deviceId, runtime, cloudRelayEnabled)) {
             if (!effectiveStatus.syncReady) {
                 log.w { "Hosted bootstrap is not ready; signaling remains disabled until auth and household metadata are available" }
@@ -640,7 +657,7 @@ class AppSession(
     }
 
     private suspend fun completeHostedOnboarding(wipeHeldData: Boolean) {
-        if (wipeHeldData) graphs.wipeAll() else clearWelcomeHoldState(settings)
+        if (wipeHeldData) graphs.wipeAll { backupVault.delete("$serverUrl|$it") } else clearWelcomeHoldState(settings)
         completeFirstLaunchOnboarding(settings, DeploymentSelection.HOSTED, serverUrl)
         onboardingComplete = true
         settingsRevision += 1
@@ -696,6 +713,7 @@ class AppSession(
     }
 
     private fun stopSyncEffects() {
+        backupEffect.clear()
         syncEffect.clear()
         runtimeEffect.clear()
     }
@@ -705,6 +723,7 @@ class AppSession(
             bootstrapEffect.clear()
             statusPublishEffect.clear()
         }
+        backupEffect.clear()
         syncEffect.clear()
         runtimeEffect.clear()
         householdSyncEffect.clear()

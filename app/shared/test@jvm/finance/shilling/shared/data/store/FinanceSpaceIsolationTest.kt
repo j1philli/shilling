@@ -43,6 +43,19 @@ class FinanceSpaceIsolationTest {
         assertNotEquals(db.latestEntityVersion(EntityType.ACCOUNT, "same", "home"), db.latestEntityVersion(EntityType.ACCOUNT, "same", "business"))
     }
 
+    @Test fun cloudSnapshotsKeepTombstonesInTheirSpaceAndRejectRetiredGraphs(): Unit = runBlocking {
+        val db = db()
+        val a = graph(db, "a")
+        val b = graph(db, "b")
+        a.accounts.upsert(Account("same", "A", 1.0))
+        b.accounts.upsert(Account("same", "B", 2.0))
+        a.accounts.delete("same")
+        assertEquals(ChangeOp.DELETE, a.facade.cloudState("device").single().op)
+        assertEquals(ChangeOp.UPSERT, b.facade.cloudState("device").single().op)
+        a.scope.retire()
+        assertFailsWith<IllegalStateException> { a.cloud.cursor("https://server|a") }
+    }
+
     @Test fun accountCascadesAndReceiptDetachmentStayInsideTheirSpace() = runBlocking {
         val db = db()
         val a = graph(db, "a")

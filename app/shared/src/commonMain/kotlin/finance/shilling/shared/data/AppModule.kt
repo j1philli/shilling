@@ -68,6 +68,8 @@ val dataModule: Module = module {
     single { DeviceIdentity(get(), get()) }
     single { ChangeNotifier() }
     single { PeerConnectionStatus() }
+    single { finance.shilling.shared.data.backup.BackupSession() }
+    factory { finance.shilling.shared.mcp.McpToolbox(get(), get(), get(), get(), get(), get(), get(), get()) }
     single {
         finance.shilling.shared.data.store.FinanceSpaceGraphs(
             get(), get(), get(), get(), get(),

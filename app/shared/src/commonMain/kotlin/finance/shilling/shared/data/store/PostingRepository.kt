@@ -86,7 +86,7 @@ class PostingRepository(
         )).first().firstOrNull()?.posting
     }
 
-    /** Record an ad-hoc transfer as a linked debit/credit pair. */
+    /** Record an ad-hoc transfer as a linked debit/credit pair; returns the debit leg's id. */
     suspend fun recordAdHocTransfer(
         title: String,
         amount: Double,
@@ -94,7 +94,7 @@ class PostingRepository(
         toAccountId: String,
         categoryId: String?,
         date: LocalDate
-    ) {
+    ): String {
         val pairId = idGenerator.newId()
         val base = Posting(
             id = "", scheduleId = null, type = ScheduleType.EXPENSE,
@@ -102,8 +102,10 @@ class PostingRepository(
             pairId = pairId, title = title,
             categoryId = categoryId?.takeIf { it.isNotBlank() }
         )
-        record(base.copy(id = idGenerator.newId()))
+        val debitId = idGenerator.newId()
+        record(base.copy(id = debitId))
         record(base.copy(id = idGenerator.newId(), type = ScheduleType.INCOME, accountId = toAccountId))
+        return debitId
     }
 
     suspend fun getBetween(start: LocalDate, end: LocalDate): List<Posting> =
@@ -148,6 +150,7 @@ class PostingRepository(
         notifier.notifyChanged()
     }
 
+    /** Returns the new posting's id. */
     suspend fun recordAdHoc(
         title: String,
         amount: Double,
@@ -155,7 +158,7 @@ class PostingRepository(
         accountId: String,
         categoryId: String?,
         date: LocalDate
-    ) {
+    ): String {
         val id = idGenerator.newId()
         val posting = Posting(
             id = id, scheduleId = null, type = type,
@@ -170,6 +173,7 @@ class PostingRepository(
             )
         )
         notifier.notifyChanged()
+        return id
     }
 
     suspend fun bulkImport(

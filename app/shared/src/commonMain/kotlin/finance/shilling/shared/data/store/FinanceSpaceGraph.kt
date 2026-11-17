@@ -36,6 +36,7 @@ class FinanceSpaceGraph(
     val postings = PostingRepository(idGenerator, notifier, postingsStore, accountsStore, categoriesStore, schedulesStore, sync)
     val receipts = ReceiptRepository(notifier, receiptsStore, sync)
     val facade = SyncStoreFacade(db, id, accountsStore, categoriesStore, schedulesStore, exceptionsStore, postingsStore, receiptsStore)
+    val cloud = finance.shilling.shared.data.store.cloud.CloudSyncRepository(db, facade, files, notifier, scope)
 }
 
 /** Swaps the entire graph; callers stop WebRTC before activating another space. */
@@ -95,10 +96,11 @@ class FinanceSpaceGraphs(
 
     suspend fun accountsInSpace(id: String): List<Account> = createAccountStore(db, spaceId = id).readLocalSourceOfTruth(AccountKey.All)
 
-    suspend fun wipeAll() = transitions.withLock {
+    suspend fun wipeAll(clearSecrets: suspend (String) -> Unit = {}) = transitions.withLock {
         current.sync.state = current.sync.state.copy(peerSyncManager = null)
         current.scope.retire()
         for (row in db.spaceQueries.selectAll().awaitAsList()) {
+            clearSecrets(row.space_id)
             val space = graph(row.space_id, row.legacy_files == 1L)
             space.files.clearAll()
             space.receipts.clearAll()
@@ -109,6 +111,7 @@ class FinanceSpaceGraphs(
             db.clearAllSyncMetadata(row.space_id)
             db.spaceQueries.deleteById(row.space_id)
         }
+        db.cloudStateQueries.deleteAll()
         resetOnboardingState(settings)
         settings.remove("active_local_space")
         settings.remove("legacy_file_space")

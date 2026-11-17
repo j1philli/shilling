@@ -10,7 +10,7 @@ check_absent() {
   local pattern="$1"
   local description="$2"
   if rg -n "$pattern" \
-    AGENTS.md CLAUDE.md app core server docs \
+    AGENTS.md CLAUDE.md app core server backup-peer docs \
     --glob '!docs/server/entity-sync.mdx' \
     --glob '!docs/server/overview.mdx' \
     --glob '!node_modules' >/tmp/shilling-arch-check.$$ 2>/dev/null; then
@@ -49,6 +49,8 @@ REPOSITORY_FILES=(
 SYNC_FILES=(
   app/shared/src/commonMain/kotlin/finance/shilling/shared/data/sync/*.kt
   app/shared/src@nonJvm/finance/shilling/shared/data/sync/*.kt
+  app/shared/src/commonMain/kotlin/finance/shilling/shared/data/backup/*.kt
+  backup-peer/src/finance/shilling/backup/*.kt
 )
 # All commonMain code under app/shared/.../data/ EXCEPT the store/ package must go through
 # Store5. The store/ directory itself holds the SourceOfTruth and Store5-internal sync
@@ -75,6 +77,17 @@ check_absent_in 'ShillingDatabase|db\.[A-Za-z0-9_]+Queries\.[A-Za-z0-9_]+\(|db\.
 check_absent_in '\.[A-Za-z0-9_]+Queries\.[A-Za-z0-9_]+\(|\.transaction\(' \
   'direct SQLDelight access outside app/shared/.../data/store/ (all entity + metadata I/O must go through Store5 repositories or the store-layer helpers that own those tables)' \
   "${SHARED_DATA_NON_STORE_FILES[@]}"
+
+check_absent_in 'java\.sql|com\.zaxxer|org\.postgresql|jdbc:postgresql' \
+  'direct backup database access outside the worker Store5 repository' \
+  "${SYNC_FILES[@]}" server/src app/shared/src@jvm/finance/shilling/shared/data/sync
+
+check_absent_in 'SupabaseObjectStorage|/storage/v1|SHILLING_CLOUD_STORAGE_KEY' \
+  'direct hosted object-storage access from devices or signaling' \
+  app/shared/src/commonMain/kotlin/finance/shilling/shared/data/backup \
+  app/shared/src/commonMain/kotlin/finance/shilling/shared/data/sync \
+  app/shared/src@nonJvm/finance/shilling/shared/data/sync \
+  app/android-app/src app/ios-app/src app/web-app/src server/src
 
 if [ "$fail" -ne 0 ]; then
   exit 1

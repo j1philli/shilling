@@ -32,9 +32,9 @@ dependencies:
   - $libs.supabase.auth
   - $libs.kermit
   - $libs.kotlin.test
-
-dependencies@nonJvm:
   - $libs.ktor.client.webrtc
+  - dev.whyoleg.cryptography:cryptography-core:0.6.0
+  - dev.whyoleg.cryptography:cryptography-provider-optimal:0.6.0
 
 dependencies@android:
   - androidx.sqlite:sqlite-framework:2.5.1
@@ -42,6 +42,12 @@ dependencies@android:
   - $libs.kotlin.test.junit
 
 dependencies@jvm:
+  - org.postgresql:postgresql:42.7.13
+  - com.zaxxer:HikariCP:7.1.0
+  # Ktor's published native classifier is Linux x64. Include supported worker/dev hosts explicitly.
+  - dev.onvoid.webrtc:webrtc-java:0.16.0:macos-aarch64
+  - dev.onvoid.webrtc:webrtc-java:0.16.0:macos-x86_64
+  - dev.onvoid.webrtc:webrtc-java:0.16.0:linux-aarch64
   - $libs.kotlin.test.junit
   - $libs.sqldelight.sqlite.driver
   - $libs.ktor.client.mock

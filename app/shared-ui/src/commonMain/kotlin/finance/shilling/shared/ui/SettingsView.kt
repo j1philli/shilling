@@ -91,6 +91,9 @@ fun SettingsView(
                 }
             }
 
+            ListSectionHeader("Cloud sync and recovery")
+            BackupSettingsSection()
+
             ListSectionHeader("Product analytics")
             ShillingCard {
                 Text("Share usage events")

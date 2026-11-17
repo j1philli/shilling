@@ -9,6 +9,7 @@ repositories:
     url: https://dl.google.com/dl/android/maven2
 
 dependencies:
+  - ../app/shared
   # JWT/JWKS libraries otherwise select vulnerable Jackson 2.22.0 transitives.
   - com.fasterxml.jackson.core:jackson-core:2.22.3
   - com.fasterxml.jackson.core:jackson-databind:2.22.3
@@ -24,6 +25,16 @@ dependencies:
   - $libs.ktor.server.auth.jwt
   - $libs.ktor.serialization.kotlinx.json
   - $libs.kermit
+
+test-dependencies:
+  - $libs.sqldelight.sqlite.driver
+  - $libs.sqldelight.runtime
+  - $libs.sqldelight.coroutines
+  - $libs.sqldelight.async.extensions
+  - $libs.store5
+  - $libs.ktor.client.cio
+  - $libs.ktor.client.webrtc
+  - $libs.ktor.client.core
 
 settings:
   kotlin:

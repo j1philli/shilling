@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS cloud_state (
+    namespace TEXT NOT NULL PRIMARY KEY,
+    state_json TEXT NOT NULL
+);
+
+selectState:
+SELECT state_json FROM cloud_state WHERE namespace=?;
+
+putState:
+INSERT OR REPLACE INTO cloud_state(namespace,state_json) VALUES (?,?);
+
+deleteAll:
+DELETE FROM cloud_state;
