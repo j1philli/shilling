@@ -35,6 +35,11 @@ It defaults to self-hosted mode on port 8081 and needs no Supabase credentials. 
 
 ## Development
 
+The experimental [ChatGPT client target](app/chatgpt/shilling/README.md) embeds the
+full shared web app with sidebar and conversation-panel entrypoints. Run
+`just chatgpt` to build and serve it locally. Its MCP service opens screens only;
+application data remains in Store5 and syncs over WebRTC.
+
 ```sh
 just test                # architecture guard and JVM tests
 just guard-architecture  # WebRTC, signaling, and Store5 invariant checks

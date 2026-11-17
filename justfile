@@ -56,6 +56,20 @@ ensure-plugin:
 build-web: deps ensure-plugin
     SHILLING_ICON_VARIANT="${SHILLING_ICON_VARIANT:-dev}" SHILLING_DB_NAME=shilling-dev SHILLING_WASM_VARIANT=Debug SHILLING_DEV_TOOLS=true ./build-web.sh
 
+# Build the complete shared web client with the ChatGPT host adapter.
+build-chatgpt: deps ensure-plugin
+    SHILLING_DB_NAME=shilling-chatgpt SHILLING_WASM_VARIANT=Debug ./build-web.sh
+    npm --prefix app/chatgpt/shilling ci
+    npm --prefix app/chatgpt/shilling run build
+
+# Serve the embedded client and its data-free MCP entrypoints.
+chatgpt: build-chatgpt
+    npm --prefix app/chatgpt/shilling start
+
+test-chatgpt:
+    npm --prefix app/chatgpt/shilling ci
+    npm --prefix app/chatgpt/shilling test
+
 # Build everything (all platforms, all modules)
 build-all: setup-webrtc ensure-plugin
     ./kotlin build

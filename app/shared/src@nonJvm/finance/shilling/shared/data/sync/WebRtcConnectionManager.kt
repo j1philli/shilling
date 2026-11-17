@@ -487,6 +487,8 @@ class WebRtcConnectionManager(
     private fun collectIceCandidates(connection: WebRtcPeerConnection, peerId: String) {
         scope?.launch {
             connection.iceCandidates.collect { ice ->
+                // Events queued by a replaced connection must not affect its successor.
+                if (peers[peerId] !== connection) return@collect
                 log.d { "[RTC] ICE gathered for $peerId: ${ice.candidate.take(60)}" }
                 signalingClient.send(
                     SignalingMessage.IceCandidate(
@@ -500,6 +502,8 @@ class WebRtcConnectionManager(
     private fun collectConnectionState(connection: WebRtcPeerConnection, peerId: String) {
         scope?.launch {
             connection.iceConnectionState.collect { state ->
+                // Events queued by a replaced connection must not affect its successor.
+                if (peers[peerId] !== connection) return@collect
                 val chState = dataChannels[peerId]?.state
                 log.i { "[RTC] ICE state $peerId: $state (channel=$chState)" }
                 when (state) {
@@ -526,6 +530,8 @@ class WebRtcConnectionManager(
         }
         scope?.launch {
             connection.state.collect { state ->
+                // Events queued by a replaced connection must not affect its successor.
+                if (peers[peerId] !== connection) return@collect
                 log.i { "[RTC] PeerConnection state $peerId: $state" }
             }
         }
@@ -534,6 +540,8 @@ class WebRtcConnectionManager(
     private fun collectDataChannelEvents(connection: WebRtcPeerConnection, peerId: String) {
         scope?.launch(start = CoroutineStart.UNDISPATCHED) {
             connection.dataChannelEvents.collect { event ->
+                // Events queued by a replaced connection must not affect its successor.
+                if (peers[peerId] !== connection) return@collect
                 when (event) {
                     is DataChannelEvent.Open -> {
                         val ch = event.channel
@@ -637,6 +645,7 @@ class WebRtcConnectionManager(
             try {
                 while (isActive) {
                     val text = channel.receiveText()
+                    if (dataChannels[peerId] !== channel) return@launch
                     messageCount++
                     if (!openDrainDone) {
                         openDrainDone = true
@@ -672,7 +681,7 @@ class WebRtcConnectionManager(
                 log.d { "[RTC] listenForMessages cancelled: peer=$peerId (received $messageCount msgs)" }
             } catch (e: Throwable) {
                 log.w { "[RTC] listenForMessages ended: peer=$peerId ${e::class.simpleName}: ${e.message} (received $messageCount msgs)" }
-                cleanupPeer(peerId)
+                if (dataChannels[peerId] === channel) cleanupPeer(peerId)
             }
         }
     }
