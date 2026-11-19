@@ -3,6 +3,8 @@ package finance.shilling.shared.ui
 import finance.shilling.shared.data.auth.AuthErrors
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -28,14 +30,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.russhwolf.settings.Settings
+import finance.shilling.shared.presentation.AssistantAccessUiState
+import finance.shilling.shared.presentation.AssistantAccessViewModel
 import finance.shilling.shared.presentation.AccountDeletionStep
 import finance.shilling.shared.presentation.DeveloperInfo
 import finance.shilling.shared.presentation.SettingsAccount
@@ -60,10 +68,12 @@ import org.koin.compose.viewmodel.koinViewModel
 fun SettingsView(
     developerToolsEnabled: Boolean,
     viewModel: SettingsViewModel = koinViewModel(),
-    devicesViewModel: HostedDevicesViewModel = koinViewModel()
+    devicesViewModel: HostedDevicesViewModel = koinViewModel(),
+    assistantViewModel: AssistantAccessViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsState()
     val devicesState by devicesViewModel.state.collectAsStateWithLifecycle(minActiveState = Lifecycle.State.RESUMED)
+    val assistantState by assistantViewModel.state.collectAsState()
     val snackbar = LocalSnackbarController.current
     val showDeveloperTools = developerToolsEnabled || state.developerToolsUnlocked
 
@@ -89,6 +99,11 @@ fun SettingsView(
                     ListSectionHeader("Finance spaces")
                     HostedSpacesSection()
                 }
+            }
+
+            if (assistantState.available) {
+                ListSectionHeader(assistantState.title)
+                AssistantAccessSection(assistantState, assistantViewModel)
             }
 
             ListSectionHeader("Product analytics")
@@ -242,6 +257,81 @@ private fun DevicesSection(state: HostedDevicesUiState, viewModel: HostedDevices
             }
         }
         OutlinedButton(onClick = viewModel::refresh) { Text("Refresh devices") }
+    }
+}
+
+@Composable
+private fun AssistantAccessSection(state: AssistantAccessUiState, viewModel: AssistantAccessViewModel) {
+    val scope = rememberCoroutineScope()
+    val snackbar = LocalSnackbarController.current
+    @Suppress("DEPRECATION")
+    val clipboard = LocalClipboardManager.current
+    var confirmingNewToken by remember { mutableStateOf(false) }
+    var portText by remember(state.port) { mutableStateOf(state.port.toString()) }
+    fun copy(text: String, what: String) {
+        clipboard.setText(AnnotatedString(text))
+        snackbar.show("$what copied")
+    }
+
+    ShillingCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                state.body,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f).padding(end = 16.dp)
+            )
+            Switch(checked = state.enabled, onCheckedChange = viewModel::setEnabled)
+        }
+        Text(
+            state.status,
+            style = MaterialTheme.typography.bodySmall,
+            color = if (state.isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextInputField(
+                value = portText,
+                onValueChange = { raw -> portText = raw.filter { it.isDigit() }.take(5) },
+                label = "Port",
+                capitalization = KeyboardCapitalization.None,
+                supportingText = "Change it if another app already uses this port.",
+                modifier = Modifier.weight(1f).padding(end = 8.dp)
+            )
+            OutlinedButton(
+                onClick = { scope.launch { snackbar.show(viewModel.setPort(portText)) } },
+                enabled = portText.isNotBlank() && (portText != state.port.toString() || (state.enabled && state.isError))
+            ) { Text("Save port") }
+        }
+        if (state.enabled) {
+            Text("Connect Claude Code", style = MaterialTheme.typography.labelLarge)
+            SelectionContainer {
+                Text(state.claudeCodeCommand, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
+            }
+            OutlinedButton(onClick = { copy(state.claudeCodeCommand, "Command") }) { Text("Copy command") }
+            Text("Other MCP clients", style = MaterialTheme.typography.labelLarge)
+            Text(
+                "Streamable HTTP at ${state.endpoint}, with the token as a bearer Authorization header.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Row {
+                OutlinedButton(onClick = { copy(state.jsonConfig, "Configuration") }, modifier = Modifier.padding(end = 8.dp)) {
+                    Text("Copy JSON config")
+                }
+                OutlinedButton(onClick = { copy(state.token, "Token") }) { Text("Copy token") }
+            }
+            OutlinedButton(onClick = { confirmingNewToken = true }) { Text("Create new token") }
+        }
+    }
+
+    if (confirmingNewToken) {
+        ConfirmDialog(
+            title = "Create a new token?",
+            message = "Assistants using the current token will lose access until you update their configuration.",
+            confirmLabel = "Create token",
+            destructive = true,
+            onConfirm = { scope.launch { snackbar.show(viewModel.regenerateToken()) } },
+            onDismiss = { confirmingNewToken = false }
+        )
     }
 }
 

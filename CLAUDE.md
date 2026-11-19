@@ -67,6 +67,10 @@ app/shared/               # client shared library (JVM + wasmJs + iOS + android)
     usecase/
       ComputeWindowUseCase.kt  # Friday window computation, balanceAt, cashCurve
       ComputeBudgetUseCase.kt  # monthly budget computation
+  src/commonMain/kotlin/finance/shilling/shared/mcp/  # assistant access (desktop): MCP over loopback HTTP
+    McpServer.kt         # stateless JSON-RPC/MCP handler (initialize, tools/list, tools/call)
+    McpToolbox.kt        # budget tools (reads + Store5-backed writes) and their input schemas
+    McpAccess.kt         # McpHost transport interface, Settings toggle + port + bearer token, start/stop
   src/commonMain/kotlin/finance/shilling/shared/session/
     Credentials.kt       # sign-in modes/results for onboarding
     SessionState.kt      # SessionPhase + SessionState + OnboardingActions (AppSession, readable from view models)
@@ -134,6 +138,7 @@ app/web-app/              # Tauri desktop app (wasmJs)
   src/wasmJsMain/kotlin/finance/shilling/web/
     Main.kt              # entry point, platform Koin module, WebWorkerDriver setup
     WasmPlatformServices.kt # wasmJs IdGenerator + ReceiptFileStore stubs
+    TauriMcpHost.kt      # McpHost over Tauri: `mcp-request` events in, `mcp_respond` out
 app/ios-app/              # native SwiftUI iOS app (no Compose) over the shared view models
   module.yaml         # product: ios/app
   module.xcodeproj/   # Kotlin Toolchain–managed Xcode project (has -lsqlite3 linker flag)
@@ -165,6 +170,7 @@ app/ios-app/              # native SwiftUI iOS app (no Compose) over the shared 
 src-tauri/            # Tauri native shell (Rust)
   tauri.conf.json     # app config, bundle identifier, frontend dist path
   src/main.rs         # Rust entry point
+  src/mcp.rs          # assistant endpoint: 127.0.0.1:<port>/mcp, bearer + Host/Origin checks, forwards to the web app
 server/               # Ktor JVM server for WebRTC signaling + hosted metadata
   module.yaml         # JVM server module (depends on ../core for shared protocol models)
   src/finance/shilling/server/
@@ -200,6 +206,14 @@ writes via `PeerSyncManager`. Bookkeeper uses `Bookkeeping.sq` to track failed w
 `WebRtcConnectionManager` establishes data channels, and `IncomingChangeRouter` applies
 remote changes to the local SQLDelight database. The signaling server must not relay user
 data payloads. `PeerSyncManager` orchestrates the lifecycle.
+
+**Assistant access (MCP)**: Desktop-only, opt-in from Settings. `src-tauri/src/mcp.rs` serves
+Streamable HTTP on `127.0.0.1:<port>/mcp` (port set in Settings, default 47615; POST only, bearer token, loopback Host/Origin), and
+forwards each JSON-RPC body to the web app, where `McpServer` answers using `McpToolbox`. Tools go
+through the same repositories and use cases as the UI, so writes are Store5 writes and sync to peers
+like any other edit. `McpToolbox` is a Koin `factory` resolved per request, so tools always act on
+the active finance space. This is local, not a sync transport. Add tools in `McpToolbox`; the Rust side
+never needs to change.
 
 **Server**: Ktor JVM server providing WebRTC signaling via WebSocket (`/ws/signal`),
 hosted bootstrap config via `GET /api/config`, hosted household lookup via

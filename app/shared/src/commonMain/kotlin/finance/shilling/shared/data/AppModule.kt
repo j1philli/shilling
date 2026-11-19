@@ -20,6 +20,11 @@ import finance.shilling.shared.data.store.createScheduleStore
 import finance.shilling.shared.data.sync.PeerConnectionStatus
 import finance.shilling.shared.data.usecase.ComputeBudgetUseCase
 import finance.shilling.shared.data.usecase.ComputeWindowUseCase
+import finance.shilling.shared.mcp.McpAccess
+import finance.shilling.shared.mcp.McpHost
+import finance.shilling.shared.mcp.McpServer
+import finance.shilling.shared.mcp.McpToolbox
+import finance.shilling.shared.presentation.AssistantAccessViewModel
 import finance.shilling.shared.presentation.DisplayPreferences
 import finance.shilling.shared.presentation.ActivityViewModel
 import finance.shilling.shared.presentation.HomeViewModel
@@ -115,6 +120,13 @@ val dataModule: Module = module {
     viewModel { SettingsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
     viewModel { finance.shilling.shared.presentation.HostedSpacesViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModel { HostedDevicesViewModel(get(), get(), get(), get(), get()) }
+
+    // Assistant (MCP) access. Only the desktop platform module binds an McpHost.
+    // Per request: repositories follow the active finance space (FinanceSpaceGraphs.current).
+    factory { McpToolbox(get(), get(), get(), get(), get(), get(), get(), get()) }
+    single { val koin = getKoin(); McpServer({ koin.get<McpToolbox>() }) }
+    single { McpAccess(getOrNull<McpHost>(), get<McpServer>()::handle, get()) }
+    viewModel { AssistantAccessViewModel(get()) }
 
     single {
         LocalDataWiper(
