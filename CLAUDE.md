@@ -208,10 +208,10 @@ The server is not part of the user-data traversal path and does not expose REST 
 sync. Hosted metadata lives in Supabase, not a local server database.
 
 **ICE/TURN configuration**: Clients fetch ICE server config from `GET /api/ice-servers`
-at startup instead of hardcoding STUN servers. The server reads STUN/TURN config from
-env vars and generates time-limited TURN credentials using coturn's `use-auth-secret`
-HMAC-SHA1 mechanism. When no TURN secret is configured (homelab), only STUN is returned.
-Clients fall back to Google's public STUN if the server is unreachable.
+before opening peer connections. The server reads STUN/TURN config from env vars and
+either generates coturn `use-auth-secret` HMAC-SHA1 credentials or requests short-lived
+Cloudflare Realtime TURN credentials. When neither provider is configured, only STUN
+is returned. Clients fall back to Cloudflare's public STUN if the server is unreachable.
 
 **SQLDelight codegen**: Schema is defined in `.sq` files (one per table) under
 `app/shared/src/commonMain/sqldelight/`. The [sqldelight-kotlin-toolchain](https://github.com/j1philli/sqldelight-kotlin-toolchain)
@@ -416,10 +416,12 @@ Transfers create two postings (debit + credit) linked by `pair_id`.
   `"shilling"`). The server has no local app database; hosted metadata lives in
   Supabase and the server is control-plane only.
 - **ICE/TURN server env vars** (all optional):
-  - `SHILLING_STUN_URLS`: Comma-separated STUN URLs (default: `stun:stun.l.google.com:19302`)
+  - `SHILLING_STUN_URLS`: Comma-separated STUN URLs (default: `stun:stun.cloudflare.com:3478`)
   - `SHILLING_TURN_URLS`: Comma-separated TURN URLs (default: empty = no TURN)
   - `SHILLING_TURN_SECRET`: coturn shared secret for `use-auth-secret` mode (default: empty = TURN disabled)
   - `SHILLING_TURN_TTL`: TURN credential validity in seconds (default: `86400` = 24h)
+  - `SHILLING_CLOUDFLARE_TURN_KEY_ID`: Cloudflare TURN key ID (default: empty)
+  - `SHILLING_CLOUDFLARE_TURN_API_TOKEN`: Cloudflare TURN key API token (default: empty)
 
 ## iOS Simulator Testing
 

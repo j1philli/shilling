@@ -60,6 +60,7 @@ import io.ktor.client.webrtc.WebRtc
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -147,7 +148,7 @@ class AppSession(
     private var syncRuntime: SyncRuntime? = null
 
     /** Read by the WebRTC client per connection, so ICE updates apply to new peers. */
-    private var iceServers = listOf(WebRtc.IceServer("stun:stun.l.google.com:19302"))
+    private var iceServers = listOf(WebRtc.IceServer("stun:stun.cloudflare.com:3478"))
     private var directIceServers = iceServers
     private var cloudRelayEnabled = settings.getBoolean(SETTINGS_KEY_CLOUD_RELAY_ENABLED, false)
     private val webRtcClient by lazy { webRtcPlatform.createClient { if (cloudRelayEnabled) iceServers else directIceServers } }
@@ -516,8 +517,9 @@ class AppSession(
             log.i { "Starting sync services (device=$deviceId, server=$serverUrl, ws=$wsUrl, household=$activeHousehold)" }
             val serverApi = ServerApi(httpClient, serverUrl, authService)
             syncScope.launch {
+                iceServers = directIceServers
+                var refreshDelayMs = 30_000L
                 try {
-                    iceServers = directIceServers
                     val response = serverApi.fetchIceServers(allowRelay = cloudRelayEnabled)
                     val fetched = response.iceServers.map { cfg ->
                         WebRtc.IceServer(cfg.urls, cfg.username.orEmpty(), cfg.credential.orEmpty())
@@ -530,12 +532,41 @@ class AppSession(
                         iceServers = fetched
                         log.i { "ICE servers updated: ${fetched.size} entries" }
                     }
+                    refreshDelayMs = (response.ttlSeconds.toLong() * 800L).coerceAtLeast(1_000L)
                 } catch (e: Exception) {
+                    if (e is CancellationException) throw e
                     log.w { "ICE server fetch failed: ${e.message}" }
                 }
                 runtime.signalingClient.connect(syncScope)
                 runtime.peerSyncManager.start(syncScope)
                 runtime.incomingChangeRouter.start(syncScope)
+                while (true) {
+                    webRtcPlatform.delayFn(refreshDelayMs)
+                    refreshDelayMs = 30_000L
+                    try {
+                        val response = serverApi.fetchIceServers(allowRelay = cloudRelayEnabled)
+                        val fetched = response.iceServers.map { cfg ->
+                            WebRtc.IceServer(cfg.urls, cfg.username.orEmpty(), cfg.credential.orEmpty())
+                        }
+                        val direct = response.iceServers.filter { cfg ->
+                            cfg.urls.none { it.startsWith("turn:", ignoreCase = true) || it.startsWith("turns:", ignoreCase = true) }
+                        }.map { cfg -> WebRtc.IceServer(cfg.urls, cfg.username.orEmpty(), cfg.credential.orEmpty()) }
+                        if (direct.isNotEmpty()) directIceServers = direct
+                        if (fetched.isNotEmpty()) {
+                            iceServers = fetched
+                            log.i { "ICE servers refreshed: ${fetched.size} entries" }
+                            if (cloudRelayEnabled && response.iceServers.any { cfg ->
+                                    cfg.urls.any { it.startsWith("turn:", ignoreCase = true) || it.startsWith("turns:", ignoreCase = true) }
+                                }) {
+                                runtime.peerSyncManager.refreshIceConnections()
+                            }
+                        }
+                        refreshDelayMs = (response.ttlSeconds.toLong() * 800L).coerceAtLeast(1_000L)
+                    } catch (e: Exception) {
+                        if (e is CancellationException) throw e
+                        log.w { "ICE server refresh failed: ${e.message}" }
+                    }
+                }
             }
             syncScope.launch {
                 webRtcPlatform.resumeSignals.collect {

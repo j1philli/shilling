@@ -31,10 +31,12 @@ This starts the server on port 8081 in self-hosted mode by default. If a repo-ro
 | `SHILLING_SUPABASE_ANON_KEY` | _(empty)_ | Supabase publishable key served to clients from `/api/config` |
 | `SHILLING_SUPABASE_SERVICE_KEY` | _(empty)_ | Supabase server key used for hosted `user_profiles` lookups |
 | `SHILLING_SUPABASE_JWT_SECRET` | _(empty)_ | Legacy HS256 secret for old Supabase projects only |
-| `SHILLING_STUN_URLS` | `stun:stun.l.google.com:19302` | Comma-separated STUN server URLs |
+| `SHILLING_STUN_URLS` | `stun:stun.cloudflare.com:3478` | Comma-separated STUN server URLs |
 | `SHILLING_TURN_URLS` | _(empty)_ | Comma-separated TURN server URLs |
 | `SHILLING_TURN_SECRET` | _(empty)_ | coturn shared secret for credential generation |
 | `SHILLING_TURN_TTL` | `86400` | TURN credential validity in seconds (24h) |
+| `SHILLING_CLOUDFLARE_TURN_KEY_ID` | _(empty)_ | Cloudflare Realtime TURN key ID; use with the API token instead of coturn settings |
+| `SHILLING_CLOUDFLARE_TURN_API_TOKEN` | _(empty)_ | Server-only API token associated with the Cloudflare TURN key |
 
 ## Architecture
 

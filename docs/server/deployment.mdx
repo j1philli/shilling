@@ -44,6 +44,21 @@ Set these Coolify application variables for runtime only:
 | `SHILLING_SUPABASE_ANON_KEY` | `{{project.supabase_publishable_key}}` |
 | `SHILLING_SUPABASE_SERVICE_KEY` | `{{project.supabase_secret_service_key}}` |
 
+To enable Cloudflare Realtime TURN for eligible hosted spaces, create a TURN key
+in the Cloudflare dashboard under **Realtime → TURN**. Add these as runtime-only
+variables on the Coolify server application, with the API token marked secret:
+
+| Coolify application variable | Cloudflare source |
+| --- | --- |
+| `SHILLING_CLOUDFLARE_TURN_KEY_ID` | TURN key ID |
+| `SHILLING_CLOUDFLARE_TURN_API_TOKEN` | API token for that TURN key |
+
+Both values are required. Do not set `SHILLING_TURN_URLS` or
+`SHILLING_TURN_SECRET` at the same time. `SHILLING_STUN_URLS` defaults to
+`stun:stun.cloudflare.com:3478`; `SHILLING_TURN_TTL` defaults to 86400 seconds.
+No TeamCity parameter is required for production TURN because Coolify builds
+the server from the public repository and supplies its runtime environment.
+
 The service key is used only on the server for `public.user_profiles` lookups.
 For the current Supabase project, the legacy `service_role` key works for that
 REST request; the newer `sb_secret` key returned `401 Invalid API key` when
