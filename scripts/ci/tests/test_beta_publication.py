@@ -32,6 +32,8 @@ class TargetRulesTest(unittest.TestCase):
             "app/web-app/index.html": set(policy["groups"]["webBundle"]),
             "src-tauri/src/main.rs": set(policy["groups"]["desktop"]),
             "scripts/ci/build-desktop-macos.sh": {"macos"},
+            "scripts/ci/windows_signing.py": {"windows"},
+            "deploy/desktop/windows-cross.Dockerfile": {"windows"},
             "scripts/ci/build-ios.sh": {"ios"},
             "server/src/Server.kt": {"server"},
             "core/src/commonMain/Model.kt": set(targets.TARGETS),

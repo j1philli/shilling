@@ -25,6 +25,8 @@ project {
     buildType(DesktopLinux)
     buildType(DesktopMacOS)
     buildType(DesktopWindows)
+    buildType(DesktopWindowsSigned)
+    buildType(DesktopMacOSSigned)
     buildType(LinuxTargets)
     buildType(AllTargets)
 
@@ -394,6 +396,81 @@ object DesktopWindows : BuildType({
     requirements {
         equals("teamcity.agent.jvm.os.name", "Linux")
     }
+})
+
+// Uses the same runner-local Developer ID keychain as Faders and iOS signing.
+object DesktopMacOSSigned : BuildType({
+    name = "Desktop macOS — Signed and Notarized"
+    description = "Manually sign and notarize a universal Shilling DMG from main"
+    artifactRules = "desktop-artifacts/macos-signed/** => desktop-macos-signed.zip"
+    maxRunningBuilds = 1
+    vcs {
+        root(DslContext.settingsRoot)
+        branchFilter = "+:<default>"
+    }
+    params {
+        param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
+        param("env.MACOS_APP_IDENTITY", "%shilling.macos.app.identity%")
+        param("env.MACOS_KEYCHAIN_PATH", "%shilling.macos.keychain.path%")
+        param("env.MACOS_KEYCHAIN_PASSWORD_FILE", "%shilling.macos.keychain.password.file%")
+        param("env.MACOS_NOTARY_KEY_PATH", "%shilling.macos.notary.key.path%")
+        param("env.MACOS_NOTARY_KEY_ID", "%shilling.macos.notary.key.id%")
+        param("env.MACOS_NOTARY_ISSUER", "%shilling.macos.notary.issuer%")
+    }
+    dependencies {
+        snapshot(WebDeploy) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        artifacts(WebDeploy) {
+            buildRule = sameChain()
+            artifactRules = "web-app-dist.zip!** => web-app-dist"
+            cleanDestination = true
+        }
+    }
+    steps {
+        script {
+            name = "Sign, notarize, staple, and verify macOS app and DMG"
+            scriptContent = "python3 scripts/ci/build-desktop-macos-signed.py"
+        }
+    }
+    requirements { contains("teamcity.agent.jvm.os.name", "Mac") }
+})
+
+// Only this main-only job maps Azure signing parameters into its environment.
+// Manual until the publisher has completed identity validation and a signed
+// installer has been tested. No fallback to an unsigned artifact on failure.
+object DesktopWindowsSigned : BuildType({
+    name = "Desktop Windows — Signed (Linux)"
+    description = "Manually build and verify an Azure-signed Windows installer from main on Linux"
+    artifactRules = "desktop-artifacts/windows/** => desktop-windows-signed.zip"
+    maxRunningBuilds = 1
+    vcs {
+        root(DslContext.settingsRoot)
+        branchFilter = "+:<default>"
+    }
+    params {
+        param("env.BUILD_VCS_BRANCH", "%teamcity.build.branch%")
+        param("env.WINDOWS_SIGNING_TENANT_ID", "%shilling.windows.azure.tenant.id%")
+        param("env.WINDOWS_SIGNING_CLIENT_ID", "%shilling.windows.azure.client.id%")
+        password("env.WINDOWS_SIGNING_CLIENT_SECRET", "%shilling.windows.azure.client.secret%",
+            display = ParameterDisplay.HIDDEN)
+        param("env.WINDOWS_SIGNING_ENDPOINT", "%shilling.windows.azure.endpoint%")
+        param("env.WINDOWS_SIGNING_ACCOUNT", "%shilling.windows.azure.account%")
+        param("env.WINDOWS_SIGNING_PROFILE", "%shilling.windows.azure.profile%")
+    }
+    dependencies {
+        snapshot(WebDeploy) { onDependencyFailure = FailureAction.FAIL_TO_START }
+        artifacts(WebDeploy) {
+            buildRule = sameChain()
+            artifactRules = "web-app-dist.zip!** => web-app-dist"
+            cleanDestination = true
+        }
+    }
+    steps {
+        script {
+            name = "Build, sign, and verify Windows installer"
+            scriptContent = "SHILLING_WINDOWS_SIGNED=1 bash scripts/ci/build-desktop-windows.sh"
+        }
+    }
+    requirements { equals("teamcity.agent.jvm.os.name", "Linux") }
 })
 
 // =============================================================================
