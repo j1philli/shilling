@@ -14,6 +14,8 @@ import zipfile
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from ios_provenance import load_candidate
 from apple_store import AppleAPI, approval, promote
+from android_provenance import load_candidate as load_android_candidate
+from play_store import PlayAPI, readiness as android_readiness, promote as promote_android
 
 REPO = "j1philli/shilling"
 TARGETS = ("server", "web", "android", "ios", "linux", "windows", "macos")
@@ -93,7 +95,7 @@ def release_notes(manifest):
         lines.append("- Hosted web: https://app.shilling.finance (deployed by this release).")
     lines += ["", "Package status:"]
     caveats = {
-        "android": "Android: debug-signed APK and unsigned release AAB; no Play upload.",
+        "android": "Android: upload-signed AAB; promotes the exact internally tested bundle to Google Play production. Debug APK is for sideload testing.",
         "ios": ("iOS: promotes the tested, Apple-approved build to the App Store. The signed IPA is retained for provenance and is not directly installable from GitHub."
                 if any(name.endswith("_ios.ipa") for name in manifest.get("assets", {}))
                 else "iOS: unsigned development app archive; not installable on an iPhone. No TestFlight/App Store upload."),
@@ -132,11 +134,16 @@ def main():
     ios_candidate = None
     if "ios" in targets:
         ios_candidate = load_candidate("release-input/clients/ios", version, commit)
+    android_candidate = None
+    if "android" in targets:
+        android_candidate = load_android_candidate("release-input/clients/android", version, commit)
     manifest = {"version": version, "tag": tag, "commit": commit, "targets": targets,
                 "teamcity_build": os.environ.get("TEAMCITY_BUILD_ID"),
                 "assets": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in assets}}
     if ios_candidate:
         manifest["ios_candidate"] = ios_candidate
+    if android_candidate:
+        manifest["android_candidate"] = android_candidate
     manifest_path = output / "release-manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
     assets.append(manifest_path)
@@ -158,6 +165,16 @@ def main():
                 raise
             print(f"iOS release blocked: {error}", flush=True)
         (output / "ios-approval.json").write_text(json.dumps(ios_approval or {"ready": False}, indent=2) + "\n")
+    play_api = PlayAPI() if android_candidate else None
+    if android_candidate:
+        try:
+            android_state = android_readiness(play_api, android_candidate)
+        except ValueError as error:
+            if dry_run != "1":
+                raise
+            android_state = {"ready": False, "reason": str(error)}
+            print(f"Android release blocked: {error}", flush=True)
+        (output / "android-readiness.json").write_text(json.dumps(android_state, indent=2) + "\n")
     if "server" in targets:
         run("python3", "scripts/ci/deploy-coolify.py", "--check-only")
     if dry_run == "1":
@@ -216,6 +233,9 @@ def main():
     if ios_candidate:
         promote(apple_api, ios_candidate, ios_approval, output / "ios-deployment.json")
         run("gh", "release", "upload", tag, "release-output/ios-deployment.json", "--repo", REPO, "--clobber")
+    if android_candidate:
+        promote_android(play_api, android_candidate, output / "android-deployment.json")
+        run("gh", "release", "upload", tag, "release-output/android-deployment.json", "--repo", REPO, "--clobber")
     # Publish the release last. A failure above leaves a resumable draft.
     run("gh", "release", "edit", tag, "--repo", REPO, "--draft=false", "--latest=" + ("false" if version.startswith("0.") else "true"))
     print(f"Released {tag}: https://github.com/{REPO}/releases/tag/{tag}")
