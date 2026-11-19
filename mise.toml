@@ -150,3 +150,17 @@ fi
 [tasks.kotlin-modules]
 description = "Show Kotlin Toolchain modules"
 run = "./kotlin show modules"
+
+[tasks.build-chatgpt]
+description = "Build the shared web client and ChatGPT host adapter"
+depends = ["ensure-plugin"]
+run = ["SHILLING_DB_NAME=shilling-chatgpt SHILLING_WASM_VARIANT=Debug ./build-web.sh", "npm --prefix app/chatgpt/shilling ci", "npm --prefix app/chatgpt/shilling run build"]
+
+[tasks.chatgpt]
+description = "Serve the embedded client and navigation-only MCP entrypoints"
+depends = ["build-chatgpt"]
+run = "npm --prefix app/chatgpt/shilling start"
+
+[tasks.test-chatgpt]
+description = "Run ChatGPT MCP protocol tests"
+run = ["npm --prefix app/chatgpt/shilling ci", "npm --prefix app/chatgpt/shilling test"]

@@ -1,0 +1,18 @@
+{
+  "name": "shilling",
+  "version": "0.1.0",
+  "description": "Open the full Shilling budgeting client inside ChatGPT Work.",
+  "author": {
+    "name": "Shilling"
+  },
+  "interface": {
+    "displayName": "Shilling",
+    "shortDescription": "Your household budget in ChatGPT.",
+    "longDescription": "Open the complete Shilling client to manage accounts, schedules, transactions and receipts. Data stays in the client and syncs over WebRTC. Chat tools open screens without reading your budget.",
+    "developerName": "Shilling",
+    "category": "Finance",
+    "capabilities": [],
+    "defaultPrompt": "Open my Shilling budget."
+  },
+  "mcpServers": "./.mcp.json"
+}

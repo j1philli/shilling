@@ -29,6 +29,9 @@ fun BrowserHistoryBinding(navController: NavHostController) {
 
     LaunchedEffect(sync) {
         sync.start()
+        // Embedded hosts queue navigation until Compose has installed its graph.
+        // This event contains no application data and is ignored by other targets.
+        window.dispatchEvent(Event("shilling:navigation-ready"))
         navController.currentBackStackEntryFlow.collect { entry ->
             AppPaths.pathOf(entry)?.let(sync::onAppNavigated)
         }

@@ -73,6 +73,11 @@ The self-hosted server does not authenticate household joins; operate it only in
 
 ## Development
 
+The experimental [ChatGPT client target](app/chatgpt/shilling/README.md) embeds the
+full shared web app with sidebar and conversation-panel entrypoints. Run
+`mise run chatgpt` to build and serve it locally. Its MCP service opens screens only;
+application data remains in Store5 and syncs over WebRTC.
+
 ```sh
 mise run test                # architecture guard and JVM tests
 mise run guard-architecture  # WebRTC, signaling, and Store5 invariant checks

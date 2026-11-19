@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "shilling": {
+      "command": "node",
+      "args": [
+        "./src/server.mjs",
+        "--stdio"
+      ],
+      "cwd": "."
+    }
+  }
+}
